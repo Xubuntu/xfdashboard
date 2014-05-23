@@ -1,0 +1,31 @@
+xfdashboard
+===========
+
+Maybe a Gnome shell like dashboard for Xfce
+
+
+Requirements
+============
+
+libwnck >= 2.30
+clutter >= 1.12
+glib >= 2.30.3
+gio >= 2.30.3
+gio-unix-2.0 >= 2.30.3
+xfconf >= 4.10.0
+dbus-glib >= 0.98
+garcon >= 0.2.0
+
+... and the dependencies of these libraries of course ;)
+
+
+Homepage
+========
+
+The homepage of xfdashboard is at http://xfdashboard.froevel.de/        
+
+
+Documentation
+=============
+
+A simple quick guide with screenshots can be found at http://xfdashboard.froevel.de/doc.html
