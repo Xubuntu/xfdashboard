@@ -1,0 +1,45 @@
+Source: xfdashboard
+Section: xfce
+Priority: optional
+Maintainer: Unit 193 <unit193@ninthfloor.org>
+Build-Depends: debhelper (>= 9),
+ autotools-dev,
+ gettext,
+ intltool,
+ libclutter-1.0-dev,
+ libdbus-glib-1-dev,
+ libgarcon-1-0-dev (>= 0.2.0),
+ libglib2.0-dev,
+ libwnck-dev,
+ libxcomposite-dev,
+ libxdamage-dev,
+ libxfconf-0-dev (>= 4.10.0),
+ pkg-config
+Standards-Version: 3.9.5
+Homepage: http://xfdashboard.froevel.de/
+
+Package: xfdashboard
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Gnome shell like dashboard for Xfce
+ xfdashboard provides a GNOME shell dashboard like interface
+ for use with Xfce desktop. It can be configured to run to any
+ keyboard shortcut and when executed provides an overview of
+ applications currently open enabling the user to switch between
+ different applications. The search feature works like Xfce's appfinder
+ which makes it convenient to search for and start applications.
+
+Package: xfdashboard-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends: ${shlibs:Depends}, ${misc:Depends}, xfdashboard (= ${binary:Version})
+Description: Gnome shell like dashboard for Xfce - debugging symbols
+ xfdashboard provides a GNOME shell dashboard like interface
+ for use with Xfce desktop. It can be configured to run to any
+ keyboard shortcut and when executed provides an overview of
+ applications currently open enabling the user to switch between
+ different applications. The search feature works like Xfce's appfinder
+ which makes it convenient to search for and start applications.
+ .
+ This package contains the debugging symbols for xfdashboard.
