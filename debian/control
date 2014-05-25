@@ -17,6 +17,8 @@ Build-Depends: debhelper (>= 9),
  pkg-config
 Standards-Version: 3.9.5
 Homepage: http://xfdashboard.froevel.de/
+Vcs-Browser: https://bitbucket.org/unit193/xfdashboard
+Vcs-Git: https://unit193@bitbucket.org/unit193/xfdashboard.git
 
 Package: xfdashboard
 Architecture: any
