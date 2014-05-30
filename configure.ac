@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [1])
-m4_define([xfdashboard_version_micro], [91])
-m4_define([xfdashboard_version_build], [2e523fc])
+m4_define([xfdashboard_version_micro], [92])
+m4_define([xfdashboard_version_build], [57421ff])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -194,6 +194,16 @@ AC_SUBST([PLATFORM_LDFLAGS])
 AC_OUTPUT([
 Makefile
 data/Makefile
+data/icons/Makefile
+data/icons/16x16/Makefile
+data/icons/22x22/Makefile
+data/icons/24x24/Makefile
+data/icons/32x32/Makefile
+data/icons/48x48/Makefile
+data/icons/64x64/Makefile
+data/icons/96x96/Makefile
+data/icons/128x128/Makefile
+data/icons/256x256/Makefile
 data/themes/Makefile
 data/themes/xfdashboard/Makefile
 po/Makefile.in
