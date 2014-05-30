@@ -29,6 +29,7 @@
 
 #include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
+#include <math.h>
 
 #include "application.h"
 
@@ -38,13 +39,13 @@ G_DEFINE_TYPE(XfdashboardImageContent,
 				CLUTTER_TYPE_IMAGE)
 
 /* Local definitions */
-typedef enum
+typedef enum /*< skip,prefix=XFDASHBOARD_IMAGE_TYPE >*/
 {
-	IMAGE_TYPE_NONE=0,
-	IMAGE_TYPE_FILE,
-	IMAGE_TYPE_ICON_NAME,
-	IMAGE_TYPE_GICON,
-} ImageType;
+	XFDASHBOARD_IMAGE_TYPE_NONE=0,
+	XFDASHBOARD_IMAGE_TYPE_FILE,
+	XFDASHBOARD_IMAGE_TYPE_ICON_NAME,
+	XFDASHBOARD_IMAGE_TYPE_GICON,
+} XfdashboardImageType;
 
 /* Private structure - access only by public API if needed */
 #define XFDASHBOARD_IMAGE_CONTENT_GET_PRIVATE(obj) \
@@ -53,18 +54,19 @@ typedef enum
 struct _XfdashboardImageContentPrivate
 {
 	/* Properties related */
-	gchar			*key;
-	gchar			*iconName;
-	GIcon			*gicon;
-	guint			iconSize;
+	gchar					*key;
 
 	/* Instance related */
-	ImageType		type;
-	gboolean		isLoaded;
-	GtkIconTheme	*iconTheme;
+	XfdashboardImageType	type;
+	gboolean				isLoaded;
+	gboolean				successfulLoaded;
+	GtkIconTheme			*iconTheme;
+	gchar					*iconName;
+	GIcon					*gicon;
+	gint					iconSize;
 
-	guint			contentAttachedSignalID;
-	guint			iconThemeChangedSignalID;
+	guint					contentAttachedSignalID;
+	guint					iconThemeChangedSignalID;
 };
 
 /* Properties */
@@ -243,7 +245,8 @@ static void _xfdashboard_image_content_loading_async_callback(GObject *inSource,
 	XfdashboardImageContentPrivate		*priv=self->priv;
 	GdkPixbuf							*pixbuf;
 	GError								*error=NULL;
-	gboolean							success=TRUE;
+
+	priv->successfulLoaded=TRUE;
 
 	/* Get pixbuf loaded */
 	pixbuf=gdk_pixbuf_new_from_stream_finish(inResult, &error);
@@ -269,7 +272,7 @@ static void _xfdashboard_image_content_loading_async_callback(GObject *inSource,
 
 			/* Set failed state and empty image */
 			_xfdashboard_image_content_set_empty_image(self);
-			success=FALSE;
+			priv->successfulLoaded=FALSE;
 		}
 	}
 		else
@@ -285,14 +288,14 @@ static void _xfdashboard_image_content_loading_async_callback(GObject *inSource,
 
 			/* Set failed state and empty image */
 			_xfdashboard_image_content_set_empty_image(self);
-			success=FALSE;
+			priv->successfulLoaded=FALSE;
 		}
 
 	/* Release allocated resources */
 	if(pixbuf) g_object_unref(pixbuf);
 
 	/* Emit "loaded" signal if loading was successful ... */
-	if(success)
+	if(priv->successfulLoaded)
 	{
 		g_signal_emit(self, XfdashboardImageContentSignals[SIGNAL_LOADED], 0);
 		g_debug("Successfully loaded image for key '%s' asynchronously", priv->key ? priv->key : "<nil>");
@@ -323,7 +326,7 @@ static void _xfdashboard_image_content_load_from_file(XfdashboardImageContent *s
 	filename=NULL;
 
 	/* Check if type of image is valid and all needed parameters are set */
-	g_return_if_fail(priv->type==IMAGE_TYPE_FILE);
+	g_return_if_fail(priv->type==XFDASHBOARD_IMAGE_TYPE_FILE);
 	g_return_if_fail(priv->iconName);
 	g_return_if_fail(priv->iconSize>0);
 
@@ -459,6 +462,40 @@ static void _xfdashboard_image_content_load_from_file(XfdashboardImageContent *s
 }
 
 /* Load image from icon theme */
+static gboolean _xfdashboard_image_content_load_from_icon_name_is_supported_suffix(GdkPixbufFormat *inFormat,
+																					const gchar *inExtension)
+{
+	gchar			**extensions, **entry;
+	gboolean		isSupported;
+
+	g_return_val_if_fail(inFormat, FALSE);
+	g_return_val_if_fail(inExtension && *inExtension=='.' && *(inExtension+1), FALSE);
+
+	/* Get extensions supported by gdk-pixbuf format */
+	extensions=gdk_pixbuf_format_get_extensions(inFormat);
+
+	/* Iterate through list of extensions supported by format and check
+	 * if any of them matches given extension.
+	 */
+	isSupported=FALSE;
+	for(entry=extensions; *entry && !isSupported; entry++)
+	{
+		if(g_strcmp0(inExtension+1, *entry)==0)
+		{
+			isSupported=TRUE;
+			g_debug("Extension '%s' is supported by '%s'",
+						inExtension+1,
+						gdk_pixbuf_format_get_description(inFormat));
+		}
+	}
+
+	/* Free allocated resources */
+	g_strfreev(extensions);
+
+	/* Return status if extension is known and supported */
+	return(isSupported);
+}
+
 static void _xfdashboard_image_content_load_from_icon_name(XfdashboardImageContent *self)
 {
 	XfdashboardImageContentPrivate		*priv;
@@ -471,7 +508,7 @@ static void _xfdashboard_image_content_load_from_icon_name(XfdashboardImageConte
 	iconInfo=NULL;
 
 	/* Check if type of image is valid and all needed parameters are set */
-	g_return_if_fail(priv->type==IMAGE_TYPE_ICON_NAME);
+	g_return_if_fail(priv->type==XFDASHBOARD_IMAGE_TYPE_ICON_NAME);
 	g_return_if_fail(priv->iconName);
 	g_return_if_fail(priv->iconSize>0);
 
@@ -480,6 +517,69 @@ static void _xfdashboard_image_content_load_from_icon_name(XfdashboardImageConte
 										priv->iconName,
 										priv->iconSize,
 										GTK_ICON_LOOKUP_USE_BUILTIN);
+
+	/* If we got no icon info but a filename (icon name with suffix like
+	 * .png etc.) was given, retry without file extension/suffix.
+	 */
+	if(!iconInfo)
+	{
+		gchar							*extensionPosition;
+
+		extensionPosition=g_strrstr(priv->iconName, ".");
+		if(extensionPosition)
+		{
+			gchar						*extension;
+			GSList						*supportedFormats, *entry;
+			GdkPixbufFormat				*format;
+			gboolean					isSupported;
+
+			/* Get suffix - the file extension */
+			extension=g_utf8_casefold(extensionPosition, -1);
+			g_debug("Checking if icon filename '%s' with suffix '%s' is supported by gdk-pixbuf", priv->iconName, extensionPosition);
+
+			/* Get all formats supported by gdk-pixbuf and check if
+			 * suffix matches any of them.
+			 */
+			isSupported=FALSE;
+			supportedFormats=gdk_pixbuf_get_formats();
+			for(entry=supportedFormats; entry && !isSupported; entry=g_slist_next(entry))
+			{
+				format=(GdkPixbufFormat*)entry->data;
+
+				if(_xfdashboard_image_content_load_from_icon_name_is_supported_suffix(format, extension))
+				{
+					isSupported=TRUE;
+				}
+			}
+			g_slist_free(supportedFormats);
+
+			/* If extension is supported truncate filename by extension
+			 * and try again to retrieve icon info.
+			 */
+			if(isSupported)
+			{
+				gchar					*iconName;
+
+				/* Get icon name from icon filename without extension */
+				iconName=g_strndup(priv->iconName, extensionPosition-priv->iconName);
+
+				/* Try to get icon info for this icon name */
+				iconInfo=gtk_icon_theme_lookup_icon(priv->iconTheme,
+													iconName,
+													priv->iconSize,
+													GTK_ICON_LOOKUP_USE_BUILTIN);
+				if(!iconInfo) g_warning(_("Could not lookup icon name '%s' for icon '%s'"), iconName, priv->iconName);
+					else g_debug("Extension '%s' is supported and loaded icon name '%s' for icon '%s'", extension, iconName, priv->iconName);
+
+				/* Release allocated resources */
+				g_free(iconName);
+			}
+				else g_debug("Extension '%s' is not supported by gdk-pixbuf", extension);
+
+			/* Release allocated resources */
+			g_free(extension);
+		}
+	}
 
 	/* If we got no icon info we try to fallback icon next */
 	if(!iconInfo)
@@ -540,7 +640,7 @@ static void _xfdashboard_image_content_load_from_icon_name(XfdashboardImageConte
 			stream=G_INPUT_STREAM(g_file_read(file, NULL, &error));
 			if(!stream)
 			{
-				g_warning(_("Could not create stream for file %s of icon '%s': %s"),
+				g_warning(_("Could not create stream for icon file %s of icon '%s': %s"),
 							filename,
 							priv->iconName,
 							error ? error->message : _("Unknown error"));
@@ -571,7 +671,7 @@ static void _xfdashboard_image_content_load_from_icon_name(XfdashboardImageConte
 			g_object_unref(stream);
 			g_object_unref(file);
 
-			g_debug("Loading icon '%s' from file %s", priv->iconName, filename);
+			g_debug("Loading icon '%s' from icon file %s", priv->iconName, filename);
 		}
 
 	/* Release allocated resources */
@@ -591,7 +691,7 @@ static void _xfdashboard_image_content_load_from_gicon(XfdashboardImageContent *
 	iconInfo=NULL;
 
 	/* Check if type of image is valid and all needed parameters are set */
-	g_return_if_fail(priv->type==IMAGE_TYPE_GICON);
+	g_return_if_fail(priv->type==XFDASHBOARD_IMAGE_TYPE_GICON);
 	g_return_if_fail(priv->gicon);
 	g_return_if_fail(priv->iconSize>0);
 
@@ -719,19 +819,19 @@ static void _xfdashboard_image_content_on_icon_theme_changed(XfdashboardImageCon
 	/* Reload image */
 	switch(priv->type)
 	{
-		case IMAGE_TYPE_NONE:
+		case XFDASHBOARD_IMAGE_TYPE_NONE:
 			g_warning(_("Cannot load image '%s' without type"), priv->key);
 			break;
 
-		case IMAGE_TYPE_FILE:
+		case XFDASHBOARD_IMAGE_TYPE_FILE:
 			_xfdashboard_image_content_load_from_file(self);
 			break;
 
-		case IMAGE_TYPE_ICON_NAME:
+		case XFDASHBOARD_IMAGE_TYPE_ICON_NAME:
 			_xfdashboard_image_content_load_from_icon_name(self);
 			break;
 
-		case IMAGE_TYPE_GICON:
+		case XFDASHBOARD_IMAGE_TYPE_GICON:
 			_xfdashboard_image_content_load_from_gicon(self);
 			break;
 
@@ -755,10 +855,10 @@ static void _xfdashboard_image_content_setup_for_icon(XfdashboardImageContent *s
 	priv=self->priv;
 
 	/* Image must not be setup already */
-	g_return_if_fail(priv->type==IMAGE_TYPE_NONE);
+	g_return_if_fail(priv->type==XFDASHBOARD_IMAGE_TYPE_NONE);
 
 	/* Determine type of image to load icon from absolute path or theme or file */
-	if(g_path_is_absolute(inIconName)) priv->type=IMAGE_TYPE_FILE;
+	if(g_path_is_absolute(inIconName)) priv->type=XFDASHBOARD_IMAGE_TYPE_FILE;
 		else
 		{
 			XfdashboardTheme			*theme;
@@ -773,8 +873,8 @@ static void _xfdashboard_image_content_setup_for_icon(XfdashboardImageContent *s
 											NULL);
 
 			/* Check if image at absolute path build from theme path and relative path exists */
-			if(g_file_test(iconFilename, G_FILE_TEST_EXISTS)) priv->type=IMAGE_TYPE_FILE;
-				else priv->type=IMAGE_TYPE_ICON_NAME;
+			if(g_file_test(iconFilename, G_FILE_TEST_EXISTS)) priv->type=XFDASHBOARD_IMAGE_TYPE_FILE;
+				else priv->type=XFDASHBOARD_IMAGE_TYPE_ICON_NAME;
 
 			/* Release allocated resources */
 			g_free(iconFilename);
@@ -800,10 +900,10 @@ static void _xfdashboard_image_content_setup_for_gicon(XfdashboardImageContent *
 	priv=self->priv;
 
 	/* Image must not be setup already */
-	g_return_if_fail(priv->type==IMAGE_TYPE_NONE);
+	g_return_if_fail(priv->type==XFDASHBOARD_IMAGE_TYPE_NONE);
 
 	/* Set up image */
-	priv->type=IMAGE_TYPE_GICON;
+	priv->type=XFDASHBOARD_IMAGE_TYPE_GICON;
 	priv->gicon=G_ICON(g_object_ref(inIcon));
 	priv->iconSize=inSize;
 }
@@ -823,8 +923,24 @@ static void _xfdashboard_image_content_on_attached(ClutterContent *inContent,
 	self=XFDASHBOARD_IMAGE_CONTENT(inContent);
 	priv=self->priv;
 
-	/* Check if image was already loaded */
-	if(priv->isLoaded) return;
+	/* Check if image was already loaded then emit signal
+	 * appropiate for last load status.
+	 */
+	if(priv->isLoaded)
+	{
+		/* Emit "loaded" signal if loading was successful ... */
+		if(priv->successfulLoaded)
+		{
+			g_signal_emit(self, XfdashboardImageContentSignals[SIGNAL_LOADED], 0);
+		}
+			/* ... or emit "loading-failed" signal if loading has failed. */
+			else
+			{
+				g_signal_emit(self, XfdashboardImageContentSignals[SIGNAL_LOADING_FAILED], 0);
+			}
+
+		return;
+	}
 
 	/* Mark image loaded regardless if loading will succeed or fail */
 	priv->isLoaded=TRUE;
@@ -839,19 +955,19 @@ static void _xfdashboard_image_content_on_attached(ClutterContent *inContent,
 	/* Load icon */
 	switch(priv->type)
 	{
-		case IMAGE_TYPE_NONE:
+		case XFDASHBOARD_IMAGE_TYPE_NONE:
 			g_warning(_("Cannot load image '%s' without type"), priv->key);
 			break;
 
-		case IMAGE_TYPE_FILE:
+		case XFDASHBOARD_IMAGE_TYPE_FILE:
 			_xfdashboard_image_content_load_from_file(self);
 			break;
 
-		case IMAGE_TYPE_ICON_NAME:
+		case XFDASHBOARD_IMAGE_TYPE_ICON_NAME:
 			_xfdashboard_image_content_load_from_icon_name(self);
 			break;
 
-		case IMAGE_TYPE_GICON:
+		case XFDASHBOARD_IMAGE_TYPE_GICON:
 			_xfdashboard_image_content_load_from_gicon(self);
 			break;
 
@@ -870,7 +986,7 @@ static void _xfdashboard_image_content_dispose(GObject *inObject)
 	XfdashboardImageContentPrivate		*priv=self->priv;
 
 	/* Release allocated resources */
-	priv->type=IMAGE_TYPE_NONE;
+	priv->type=XFDASHBOARD_IMAGE_TYPE_NONE;
 
 	if(priv->contentAttachedSignalID)
 	{
@@ -987,11 +1103,12 @@ void xfdashboard_image_content_init(XfdashboardImageContent *self)
 
 	/* Set up default values */
 	priv->key=NULL;
-	priv->type=IMAGE_TYPE_NONE;
+	priv->type=XFDASHBOARD_IMAGE_TYPE_NONE;
 	priv->iconName=NULL;
 	priv->gicon=NULL;
 	priv->iconSize=0;
 	priv->isLoaded=FALSE;
+	priv->successfulLoaded=FALSE;
 	priv->iconTheme=gtk_icon_theme_get_default();
 
 	/* Connect to "attached" signal of ClutterContent to get notified
@@ -1132,4 +1249,27 @@ ClutterImage* xfdashboard_image_content_new_for_pixbuf(GdkPixbuf *inPixbuf)
 
 	/* Return ClutterImage */
 	return(CLUTTER_IMAGE(image));
+}
+
+/* Get size of image as specified when creating this object instance */
+gint xfdashboard_image_content_get_size(XfdashboardImageContent *self)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_IMAGE_CONTENT(self), 0);
+
+	return(self->priv->iconSize);
+}
+
+/* Get real size of image loaded */
+void xfdashboard_image_content_get_real_size(XfdashboardImageContent *self, gint *outWidth, gint *outHeight)
+{
+	gfloat			w, h;
+
+	g_return_if_fail(XFDASHBOARD_IS_IMAGE_CONTENT(self));
+
+	/* Get preferred size of ClutterImage as it will be the real size */
+	clutter_content_get_preferred_size(CLUTTER_CONTENT(self), &w, &h);
+
+	/* Store sizes computed */
+	if(outWidth) *outWidth=floor(w);
+	if(outHeight) *outHeight=floor(h);
 }
