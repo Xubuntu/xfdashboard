@@ -1,3 +1,11 @@
+xfdashboard (0.1.92-1) unstable; urgency=medium
+
+  * Point the Vcs-* URLs at Bitbucket.
+  * Imported Upstream version 0.1.92
+  * Drop patch bin-not-in-local.diff, fixed upstream.
+
+ -- Unit 193 <unit193@ubuntu.com>  Fri, 30 May 2014 15:15:02 -0400
+
 xfdashboard (0.1.91-1) unstable; urgency=medium
 
   * New upstream release.
