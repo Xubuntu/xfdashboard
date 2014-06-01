@@ -1,7 +1,8 @@
 Source: xfdashboard
 Section: xfce
 Priority: optional
-Maintainer: Unit 193 <unit193@ninthfloor.org>
+Maintainer: Xubuntu Developers <xubuntu-devel@lists.ubuntu.com>
+Uploader: Unit 193 <unit193@ubuntu.com>
 Build-Depends: debhelper (>= 9),
  autotools-dev,
  gettext,
