@@ -1,27 +1,5 @@
-xfdashboard (0.2.0-1) unstable; urgency=medium
-
-  * Updated long description.
-  * Imported Upstream version 0.2.0
-  * Drop patch, applied upstream.
-
- -- Unit 193 <unit193@ubuntu.com>  Mon, 09 Jun 2014 15:05:47 -0400
-
-xfdashboard (0.1.92-1) unstable; urgency=medium
-
-  * Point the Vcs-* URLs at Bitbucket.
-  * Imported Upstream version 0.1.92
-  * Drop patch bin-not-in-local.diff, fixed upstream.
-
- -- Unit 193 <unit193@ubuntu.com>  Fri, 30 May 2014 15:15:02 -0400
-
-xfdashboard (0.1.91-1) unstable; urgency=medium
-
-  * New upstream release.
-
- -- Unit 193 <unit193@ubuntu.com>  Fri, 09 May 2014 14:44:07 -0400
-
-xfdashboard (0.1.90-1) unstable; urgency=medium
+xfdashboard (0.2.0-1) utopic; urgency=medium
 
   * Initial release.
 
- -- Unit 193 <unit193@ubuntu.com>  Wed, 23 Apr 2014 15:13:59 -0400
+ -- Unit 193 <unit193@ubuntu.com>  Mon, 09 Jun 2014 15:05:47 -0400
