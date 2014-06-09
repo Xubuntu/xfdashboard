@@ -1,3 +1,11 @@
+xfdashboard (0.2.0-1) unstable; urgency=medium
+
+  * Updated long description.
+  * Imported Upstream version 0.2.0
+  * Drop patch, applied upstream.
+
+ -- Unit 193 <unit193@ubuntu.com>  Mon, 09 Jun 2014 15:05:47 -0400
+
 xfdashboard (0.1.92-1) unstable; urgency=medium
 
   * Point the Vcs-* URLs at Bitbucket.
