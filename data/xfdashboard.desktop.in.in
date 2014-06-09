@@ -2,8 +2,8 @@
 Type=Application
 _Name=Xfdashboard
 _Comment=Maybe a Gnome shell like dashboard for Xfce
-TryExec=xfdashboard
-Exec=xfdashboard
+TryExec=@bindir@/xfdashboard
+Exec=@bindir@/xfdashboard
 Icon=xfdashboard
 Categories=System;
 NotShowIn=GNOME;KDE;Unity;
