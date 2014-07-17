@@ -104,6 +104,7 @@ am_xfdashboard_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	xfdashboard-background.$(OBJEXT) xfdashboard-button.$(OBJEXT) \
 	xfdashboard-click-action.$(OBJEXT) \
 	xfdashboard-collapse-box.$(OBJEXT) \
+	xfdashboard-dynamic-table-layout.$(OBJEXT) \
 	xfdashboard-drag-action.$(OBJEXT) \
 	xfdashboard-drop-action.$(OBJEXT) \
 	xfdashboard-fill-box-layout.$(OBJEXT) \
@@ -443,6 +444,7 @@ xfdashboard_headers = \
 	collapse-box.h \
 	drag-action.h \
 	drop-action.h \
+	dynamic-table-layout.h \
 	fill-box-layout.h \
 	focusable.h \
 	focus-manager.h \
@@ -493,6 +495,7 @@ xfdashboard_SOURCES = \
 	button.c \
 	click-action.c \
 	collapse-box.c \
+	dynamic-table-layout.c \
 	drag-action.c \
 	drop-action.c \
 	fill-box-layout.c \
@@ -681,6 +684,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-collapse-box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-drag-action.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-drop-action.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-dynamic-table-layout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-enums.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-fill-box-layout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-focus-manager.Po@am__quote@
@@ -908,6 +912,20 @@ xfdashboard-collapse-box.obj: collapse-box.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='collapse-box.c' object='xfdashboard-collapse-box.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-collapse-box.obj `if test -f 'collapse-box.c'; then $(CYGPATH_W) 'collapse-box.c'; else $(CYGPATH_W) '$(srcdir)/collapse-box.c'; fi`
+
+xfdashboard-dynamic-table-layout.o: dynamic-table-layout.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-dynamic-table-layout.o -MD -MP -MF $(DEPDIR)/xfdashboard-dynamic-table-layout.Tpo -c -o xfdashboard-dynamic-table-layout.o `test -f 'dynamic-table-layout.c' || echo '$(srcdir)/'`dynamic-table-layout.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-dynamic-table-layout.Tpo $(DEPDIR)/xfdashboard-dynamic-table-layout.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='dynamic-table-layout.c' object='xfdashboard-dynamic-table-layout.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-dynamic-table-layout.o `test -f 'dynamic-table-layout.c' || echo '$(srcdir)/'`dynamic-table-layout.c
+
+xfdashboard-dynamic-table-layout.obj: dynamic-table-layout.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-dynamic-table-layout.obj -MD -MP -MF $(DEPDIR)/xfdashboard-dynamic-table-layout.Tpo -c -o xfdashboard-dynamic-table-layout.obj `if test -f 'dynamic-table-layout.c'; then $(CYGPATH_W) 'dynamic-table-layout.c'; else $(CYGPATH_W) '$(srcdir)/dynamic-table-layout.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-dynamic-table-layout.Tpo $(DEPDIR)/xfdashboard-dynamic-table-layout.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='dynamic-table-layout.c' object='xfdashboard-dynamic-table-layout.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-dynamic-table-layout.obj `if test -f 'dynamic-table-layout.c'; then $(CYGPATH_W) 'dynamic-table-layout.c'; else $(CYGPATH_W) '$(srcdir)/dynamic-table-layout.c'; fi`
 
 xfdashboard-drag-action.o: drag-action.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-drag-action.o -MD -MP -MF $(DEPDIR)/xfdashboard-drag-action.Tpo -c -o xfdashboard-drag-action.o `test -f 'drag-action.c' || echo '$(srcdir)/'`drag-action.c
