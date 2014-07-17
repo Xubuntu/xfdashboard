@@ -1,0 +1,15 @@
+Description: Add missing src/dynamic-table-layout.c to POTFILES.in
+Author: Unit 193 <unit193@ubuntu.com>
+Origin: vendor
+Last-Update: 2014-07-17
+
+--- xfdashboard-0.2.1.orig/po/POTFILES.in
++++ xfdashboard-0.2.1/po/POTFILES.in
+@@ -15,6 +15,7 @@ src/click-action.c
+ src/collapse-box.c
+ src/drag-action.c
+ src/drop-action.c
++src/dynamic-table-layout.c
+ src/enums.c
+ src/fill-box-layout.c
+ src/focusable.c
