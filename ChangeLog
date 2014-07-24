@@ -1,4 +1,45 @@
-commit 6b15d55916012a83b4ecc0055eea5744e60a4e91
+commit f3891e8347cb62d6a6059eef5634031ea821d542
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jul 22 20:04:59 2014 +0200
+
+    Update AppData
+
+commit 64528feff6f0ac0b3fc5cd52e20280c6992071af
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jul 22 19:48:24 2014 +0200
+
+    Rename local variable to a more common name and fix a comment
+
+commit e338dc8ef49e9066bb76a62c54307ab56169e587
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jul 22 19:29:30 2014 +0200
+
+    Alpha color component in @rgba() is a factor between 0.0 and 1.0 and not a common color component
+    
+    Fix alpha function parameter retrieval and calculation. It was a mistake to handle the alpha color component as a common color component which can be defined either an integer between 0 and 255 or as a percentage between 0% and 100%. The alpha color component is a factor and therefore must be a floating point number between 0.0 and 1.0.
+
+commit 544a953d3099f2a9977ca510355a18117e691690
+Merge: 9f5eaa5 137d125
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jul 20 10:14:36 2014 +0200
+
+    Merge branch 'master' of github.com:gmc-holle/xfdashboard
+
+commit 9f5eaa5cb3957bfa67d21d30ef6830f638718985
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jul 20 10:10:08 2014 +0200
+
+    Implement @-functions in CSS
+    
+    The CSS parser was extended to support calling registered built-in functions in CSS, e.g. @alpha(color, factor); Functions are called like @-constants which were already implemented previously but must provide comma-separated function arguments enclosed by parenthesis. Additionally the errors returned by CSS parser should be more descriptive. This commit closes issue #8
+
+commit 137d125cf59430ea2ebd9a4d649402fdbfc1ab8d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jul 17 12:45:30 2014 +0200
+
+    Added missing files to POTFILES.in
+
+commit 7abbe5d5ed873b84475ca15a0e952017d47161c0
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Wed Jul 16 21:08:32 2014 +0200
 
@@ -6,7 +47,7 @@ Date:   Wed Jul 16 21:08:32 2014 +0200
     
     If a registered focusable actor is going to be hidden or unrealized move focus to next focusable actor.
 
-commit efa106197145c799d366c6473cd248298e990bc6
+commit 55cb1d28ad4a0a64e3a0e03448ca8c46e24542ce
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Wed Jul 16 19:53:11 2014 +0200
 
@@ -14,7 +55,13 @@ Date:   Wed Jul 16 19:53:11 2014 +0200
     
     This addresses issue #30. It was requested to select and focus the first item in search view when a search started to visualize the first item in search item which can be selected by pressing ENTER even if search box has not the focus - the "just-type-to-search" feature ;)
 
-commit cc0cdb6f5112a2544bc03946a891bb647d739b0b
+commit 3416817ea66687bd031ebb77ef6d67923c4bea16
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jul 15 21:23:49 2014 +0200
+
+    Fix coding style
+
+commit f8c65b5f14e0a6dee66926d2e04d7ed451decdf9
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Tue Jul 15 15:28:11 2014 +0200
 
@@ -22,19 +69,93 @@ Date:   Tue Jul 15 15:28:11 2014 +0200
     
     Improve search speed by caching loaded .desktop files. Before this commit each time the result list is retrieved, each item' .desktop file was loaded, parsed and additional information retrieved. Then this result list was sorted what caused the .desktop files being loaded, parsed etc. or each item. To avoid this each .desktop loaded will be cached so it will be only loaded once. At my slowest machine this reduced the mean search time for the term 'a' from 350ms to 240ms.
 
-commit 436a6e006ba5665ae1d155afcb5219e8aacc5e2d
+commit 47fe21db246cf5b718063989880af3135bd46cc4
 Author: Stephan Haller <nomad@froevel.de>
-Date:   Tue Jul 15 21:23:49 2014 +0200
+Date:   Tue Jul 8 11:26:35 2014 +0200
 
-    Fix coding style
+    Activate first result in search view when ENTER is pressed
+    
+    This commit addresses issue #29. When search view is active, the key ENTER was released (after being pressed) and the actor which has the focus did not handle this key event and also the search box did not then select the first item is search view and activate it.
 
-commit 88c0db8c10f3a4e4ca79f44234456797282b41e2
+commit d004844939cfc4f193ecbcea2c9301e812d71b1b
 Author: Stephan Haller <nomad@froevel.de>
-Date:   Wed Jul 2 07:00:48 2014 +0200
+Date:   Sat Jul 5 11:18:24 2014 +0200
 
-    Post-release version bump to 0.2.1
+    Fix comment
 
-commit 03cead6c52d35e6ec7987865390077288dfd4da4
+commit 4921477375df38680b01a81642f3bf17f78cd28b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jul 4 15:24:19 2014 +0200
+
+    Fix syntax error
+    
+    When cleaning up code to get rid of cppcheck warnings I forget a semicolon after variable declaration which prevents the code to compile. :(
+
+commit 9aad1e7afe74bb2becd5c902fa1be493a8948597
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jul 3 21:42:03 2014 +0200
+
+    Fixed cppcheck warning
+    
+    Thanks to Xfce team to add xfdashboard to their Jenkins to find this warning :)
+
+commit 9d018e881946b2fc50d36c5ec4f6dd4da44db942
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jul 3 11:25:14 2014 +0200
+
+    Unresolvable '@' identifiers are errors
+    
+    If resolving a '@' identifier failed (NULL is returned) stop parsing and return failure result.
+
+commit 1051ea37562ed23f005646a8070dbcc1e2b14193
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jul 3 11:20:46 2014 +0200
+
+    Print warning when identifier was unresolvable
+
+commit 57a8da7531cb1daf7189b889e167794944a0417c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jul 3 11:01:32 2014 +0200
+
+    Avoid skipping any character when resolving '@' identifiers
+
+commit dfa4fdf88056f440bf0994021bb084085f83dbab
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jul 3 11:00:35 2014 +0200
+
+    More and better error message when parsing CSS file failed
+
+commit 7c0e15261fb29d05e1962d740e9b1df508470b79
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jul 1 06:44:02 2014 +0200
+
+    Fix floating point value
+    
+    Remove 'f' behind floating point value. A left-over from C code :(
+
+commit 9434d9cf73e4db21d25b659f134a70ba4a692140
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jun 28 21:50:15 2014 +0200
+
+    Simplify and make resolving '@' identifiers reusable
+    
+    Function _xfdashboard_theme_css_resolve_at_identifier will scan and resolve given value recursively now. This makes this function reusable for other scenarios.
+
+commit 4f35511951599a0a2b2f276e6425a59abfc7cb06
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jun 28 13:12:11 2014 +0200
+
+    Make use of new support for constants in CSS in default theme
+
+commit dee3dc7abc2ffbb07957d11e260bef718d4e008e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jun 28 13:11:05 2014 +0200
+
+    Support constant values in CSS
+    
+    Closes issue #7
+
+commit 83337a3df03e55e1e8c2cdcd8538f376f2626635
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Sat Jun 28 09:35:36 2014 +0200
 
@@ -42,19 +163,35 @@ Date:   Sat Jun 28 09:35:36 2014 +0200
     
     Remove unused variables from XfdashboardDynamicTableLayout to avoid compiler warnings
 
-commit ce8d291c5cb94b2f30bb765c6ab67da54755bdd4
+commit 5e12ff7ca4dc78fdff1954b7656bcb6e4249f86f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jun 28 09:10:33 2014 +0200
+
+    More code clean ups
+    
+    Remove more commented '// TODO' code blocks
+
+commit ce87601ec79af5c192404abfeea998c4667313a9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jun 28 09:08:59 2014 +0200
+
+    Clean up code
+    
+    Remove commented '// TODO' code blocks
+
+commit 959de34a58df8966d0d42ff3a3a683133d6cdb94
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Fri Jun 27 14:02:38 2014 +0200
 
     Also use new XfdashboardDynamicTableLayout in search view
 
-commit b6a780d2c700ff32cde2e589006c6cf53080b1d8
+commit 2e7c2d54d867242bc50ae03799ed9da20f17e1c3
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Fri Jun 27 14:00:24 2014 +0200
 
     Fixed wrong cast to ClutterFlowLayout but XfdashboardDynamicTableLayout is used
 
-commit f3e5ecd4d7b96efc8c619ce004cfa1b84c45120b
+commit e03ffa55ef66e105d7acbf608ab1dac391f91870
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Fri Jun 27 13:53:58 2014 +0200
 
@@ -62,13 +199,19 @@ Date:   Fri Jun 27 13:53:58 2014 +0200
     
     Allow the properties '{x,y}-expand' and '{x,y}-align' to be themable. This addresses issue #28 to avoid that a cell in XfdashboardDynamicTableLayout is always filled completely by child (and its background). To avoid this set 'x-expand' and/or 'y-expand' to 'false' - maybe also set '{x,y}-align' accordingly to position child in available allocation space (e.g. set to 'center').
 
-commit f97c495969e00cd24a518ed60178f5668b222d16
+commit 50563d36f3268a733ea377a84954b7ce6b0547a2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 27 13:49:11 2014 +0200
+
+    Clean up code
+
+commit 3624b7d57a55d641538c771d327852737e899d8d
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Fri Jun 27 13:41:11 2014 +0200
 
     Optimize allocation function in XfdashboardDynamicTableLayout
 
-commit e1577076466618f886a1e519087cc96494e21695
+commit bece35ff90ff01aa1630ad2a9d8600cfc866f88a
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Fri Jun 27 13:08:19 2014 +0200
 
@@ -76,7 +219,14 @@ Date:   Fri Jun 27 13:08:19 2014 +0200
     
     Make nice-code(tm) of XfdashboardDynamicTableLayout ;)
 
-commit ae2dc7adbe281cde67f10249cc8917786f14d69e
+commit 0aad52630b5bbe598ebf793b29c240095e5c9a9f
+Merge: 481b372 06d0b38
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 24 20:35:13 2014 +0200
+
+    Merge branch 'master' of github.com:gmc-holle/xfdashboard
+
+commit 06d0b3803630d505fea5cd8b19945f1a0a82c70f
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Tue Jun 24 10:32:21 2014 +0200
 
@@ -84,11 +234,36 @@ Date:   Tue Jun 24 10:32:21 2014 +0200
     
     XfdashboardDynamicTableLayout is a layout manager which layouts children in a dynamic table grid. Rows and columns are inserted and deleted automatically depending on the number of visible child actors. Usually it will prefer more columns over rows.
 
+commit 481b372acbb3d8e6896cae0f182c21cae389eb0d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jun 23 21:57:33 2014 +0200
+
+    Fix typo
+
+commit 2d1f94cba44317ed9780449cdeb13dd83ef0537d
+Merge: f77240d f3d0d33
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jun 7 19:39:24 2014 +0200
+
+    Merge tag '0.2.0'
+    
+    0.2.0
+    
+    Conflicts:
+    	ChangeLog
+    	configure.ac.in
+
 commit f3d0d331a32ffbdb891a83b52dae8059294df775
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Sat Jun 7 19:30:20 2014 +0200
 
     Fixed installation of AppData
+
+commit f77240d2b8ba316ae1d709d0c3feae1bdee7d14b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jun 7 19:13:21 2014 +0200
+
+    Post-stable-release version bump to 0.3.0
 
 commit 4d6b07b4bff861a3086e4eddce4ce3cd03e8629a
 Author: Stephan Haller <nomad@froevel.de>

@@ -772,7 +772,7 @@ static void _xfdashboard_button_get_preferred_height(ClutterActor *inActor,
 		naturalHeight+=spacing;
 	}
 
-	// Add padding
+	/* Add padding */
 	minHeight+=2*priv->padding;
 	naturalHeight+=2*priv->padding;
 
@@ -846,7 +846,7 @@ static void _xfdashboard_button_get_preferred_width(ClutterActor *inActor,
 		naturalWidth+=spacing;
 	}
 
-	// Add padding
+	/* Add padding */
 	minWidth+=2*priv->padding;
 	naturalWidth+=2*priv->padding;
 
@@ -1559,7 +1559,7 @@ XfdashboardStyle xfdashboard_button_get_style(XfdashboardButton *self)
 
 void xfdashboard_button_set_style(XfdashboardButton *self, const XfdashboardStyle inStyle)
 {
-	XfdashboardButtonPrivate	*priv=self->priv;
+	XfdashboardButtonPrivate	*priv;
 
 	g_return_if_fail(XFDASHBOARD_IS_BUTTON(self));
 

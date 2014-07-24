@@ -224,7 +224,7 @@ static gboolean xfdashboard_stage_event(ClutterActor *inActor, ClutterEvent *inE
 		XFDASHBOARD_IS_FOCUSABLE(priv->searchbox) &&
 		xfdashboard_focus_manager_is_registered(priv->focusManager, XFDASHBOARD_FOCUSABLE(priv->searchbox)))
 	{
-		/* Ask searchbox to handle this event if it has not the focus currently
+		/* Ask search to handle this event if it has not the focus currently
 		 * because in this case it has already handled the event and we do
 		 * not to do this twice.
 		 */
@@ -589,7 +589,7 @@ static void _xfdashboard_stage_on_window_opened(XfdashboardStage *self,
 													XfdashboardWindowTrackerWindow *inWindow,
 													gpointer inUserData)
 {
-	XfdashboardStagePrivate				*priv=self->priv;
+	XfdashboardStagePrivate				*priv;
 	XfdashboardWindowTrackerWindow		*stageWindow;
 #if !defined(CHECK_CLUTTER_VERSION) || !CLUTTER_CHECK_VERSION(1, 16, 0)
 	GdkScreen							*screen;
@@ -631,7 +631,7 @@ static void _xfdashboard_stage_on_window_opened(XfdashboardStage *self,
 /* The application will be suspended */
 static void _xfdashboard_stage_on_application_suspend(XfdashboardStage *self, gpointer inUserData)
 {
-	XfdashboardStagePrivate				*priv=self->priv;
+	XfdashboardStagePrivate				*priv;
 
 	g_return_if_fail(XFDASHBOARD_IS_STAGE(self));
 	g_return_if_fail(XFDASHBOARD_IS_APPLICATION(inUserData));
@@ -662,7 +662,7 @@ static void _xfdashboard_stage_on_application_suspend(XfdashboardStage *self, gp
 /* The application will be resumed */
 static void _xfdashboard_stage_on_application_resume(XfdashboardStage *self, gpointer inUserData)
 {
-	XfdashboardStagePrivate				*priv=self->priv;
+	XfdashboardStagePrivate				*priv;
 
 	g_return_if_fail(XFDASHBOARD_IS_STAGE(self));
 	g_return_if_fail(XFDASHBOARD_IS_APPLICATION(inUserData));
