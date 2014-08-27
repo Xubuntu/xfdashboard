@@ -576,7 +576,15 @@ gboolean xfdashboard_focus_manager_handle_key_event(XfdashboardFocusManager *sel
 	/* Synthesize event for current focused focusable actor */
 	if(priv->currentFocus)
 	{
-		return(xfdashboard_focusable_handle_key_event(priv->currentFocus, inEvent));
+		gboolean					handled;
+
+		handled=CLUTTER_EVENT_PROPAGATE;
+
+		/* Try handler function depending on key event type */
+		handled=xfdashboard_focusable_handle_key_event(priv->currentFocus, inEvent);
+
+		/* Return handling result */
+		return(handled);
 	}
 
 	/* If we get here there is no focus set */

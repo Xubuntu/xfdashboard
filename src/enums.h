@@ -60,6 +60,10 @@ GType xfdashboard_borders_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_BORDERS	(xfdashboard_borders_get_type())
 GType xfdashboard_fit_mode_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_FIT_MODE	(xfdashboard_fit_mode_get_type())
+GType xfdashboard_stage_background_image_type_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_STAGE_BACKGROUND_IMAGE_TYPE	(xfdashboard_stage_background_image_type_get_type())
+GType xfdashboard_selection_target_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_SELECTION_TARGET	(xfdashboard_selection_target_get_type())
 G_END_DECLS
 
 #endif
