@@ -291,6 +291,52 @@ GType xfdashboard_fit_mode_get_type(void)
 	return(g_define_type_id__volatile);
 }
 
+GType xfdashboard_stage_background_image_type_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GEnumValue values[]=
+		{
+			{ XFDASHBOARD_STAGE_BACKGROUND_IMAGE_TYPE_NONE, "XFDASHBOARD_STAGE_BACKGROUND_IMAGE_TYPE_NONE", "none" },
+			{ XFDASHBOARD_STAGE_BACKGROUND_IMAGE_TYPE_DESKTOP, "XFDASHBOARD_STAGE_BACKGROUND_IMAGE_TYPE_DESKTOP", "desktop" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardStageBackgroundImageType"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
+
+GType xfdashboard_selection_target_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GEnumValue values[]=
+		{
+			{ XFDASHBOARD_SELECTION_TARGET_NONE, "XFDASHBOARD_SELECTION_TARGET_NONE", "none" },
+			{ XFDASHBOARD_SELECTION_TARGET_LEFT, "XFDASHBOARD_SELECTION_TARGET_LEFT", "left" },
+			{ XFDASHBOARD_SELECTION_TARGET_RIGHT, "XFDASHBOARD_SELECTION_TARGET_RIGHT", "right" },
+			{ XFDASHBOARD_SELECTION_TARGET_UP, "XFDASHBOARD_SELECTION_TARGET_UP", "up" },
+			{ XFDASHBOARD_SELECTION_TARGET_DOWN, "XFDASHBOARD_SELECTION_TARGET_DOWN", "down" },
+			{ XFDASHBOARD_SELECTION_TARGET_FIRST, "XFDASHBOARD_SELECTION_TARGET_FIRST", "first" },
+			{ XFDASHBOARD_SELECTION_TARGET_LAST, "XFDASHBOARD_SELECTION_TARGET_LAST", "last" },
+			{ XFDASHBOARD_SELECTION_TARGET_NEXT, "XFDASHBOARD_SELECTION_TARGET_NEXT", "next" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardSelectionTarget"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
+
 
 /* Generated data ends here */
 

@@ -1,3 +1,103 @@
+commit d60f31decba96cac6218af4104268894301f2f97
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Aug 23 21:11:45 2014 +0200
+
+    Move selection if current one gets unavailable
+    
+    The new generic selection frameworks now recognizes if the current selection is getting unavailable because the current selected actor is going to be hidden or destroyed. Then it moves the selection to next available and selectable actor. Focusable actors do not need to handle destroyed actor which are selected by themselve anymore so remove this code logic (XfdashboardQuicklaunch and XfdashboardWindowsView).
+
+commit 24ee66d30823792a227dea8074056f15bfcf53d4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 21 22:00:40 2014 +0200
+
+    Simplify and generalize selection handling
+    
+    Implemented a generic and common selection handling framework in XfdashboardFocusable. This has the advantage that we do not need to shift the key focus around between nothing and search box's text-box. We can also implement more common key press/release event like HOME and END keys to select first or last selectable item at the current focussed actor. Currently the keys UP, DOWN, LEFT, RIGHT, HOME, END, ENTER are recognized by this framework. Still missing are PAGE_UP and PAGE_DOWN. The disadvantage is that "uncommon" key events like CTRL+ENTER have to be catched by signal handler connected to 'key-press-event" and 'key-release-event' at the actor in question like XfdashboardWindowsView.
+    
+    The search view is the only actor/view not implementing this framework as the decision if search view should be completely rewritten was not yet made.
+    
+    This is also preparation work for (maybe coming) plugins.
+
+commit f798b7e052194f78c949a52d0afb266da215cdf4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Aug 16 08:18:09 2014 +0200
+
+    Avoid closing windows accidently with key <Backspace>
+    
+    A window can accidently be closed when starting a search by typing and correcting more letters than entered with key <Backspace>. Because then the view switchs from search view back to windows view, sets the focus to a window in the windows and the additional <Backspace> key press will close it. Changed behaviour that the shift key has to be pressed also when using <Backspace>. <Delete> will still work as before.
+    
+    This commit addresses issue #32.
+
+commit 757eb1473e8f58f9771e78d2adee9d7c1553bdd8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 12 21:06:29 2014 +0200
+
+    Update AppData from release of version 0.2.2
+
+commit 0f9ebe1a2da45bc33c592347c9e34a942ee137a0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 12 20:35:24 2014 +0200
+
+    Split key handling function into "specialized" functions
+    
+    Split key handling function in XfdashboardFocusable into "specialized" functions for 'key-press' and 'key-release' events. This make handling repeative 'key-press' event easier and cleaner (code), e.g. for moving selection when key is pressed and hold pressed. 'key-release' is only called once when pressed key is released.
+
+commit f74c2c4c308753d28897f4f96ee0b4469f5d8332
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Aug 8 23:05:26 2014 +0200
+
+    Allow showing real desktop background in stage background window
+    
+    Introduce properties 'background-image-type' to XfdashboardStage. It defaults to 'none' but if set to 'desktop' as in default theme it will lookup the desktop image of current screen and hide all windows but show desktop background.
+
+commit e74c0bc445f3b9edb77a82abcb732a225f4066a4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 5 21:04:55 2014 +0200
+
+    Fix loading scalable images by icon name
+    
+    Load images by icon name with scaling at requested size. If file to load is a bitmap it should already be at right size but if is scalable image (svg) is was loaded as a too small bitmap and then scaled resulting in an ugly image but now should look good and "right-scaled".
+
+commit db09ea2018a3ff3635ac1731446bcec798647188
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 5 20:27:13 2014 +0200
+
+    Revert changes to _xfdashboard_image_content_setup_for_icon to allow empty icon names
+    
+    Revert changes to _xfdashboard_image_content_setup_for_icon in XfdashboardImageContent which allows to fallback to fallback icon (aka missing image) if an empty string was set, e.g. by @try_icons in CSS. Empty string will now prevent loading any image as intended. To fallback to fallback icon in @try_icon you should declare a constant like @missing-icon with either the icon name to fallback to or with @try_icons(...) function with a list of fallback icons to try. This @missing-icon can be used in CSS with "@try_icons(..., ..., ..., @missing-icon);". This variant is used in xfdashboard's default theme.
+
+commit 4b85518e8b05906877190161d0a6a390aa3f464a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Aug 1 22:50:41 2014 +0200
+
+    Fix compiler warning about removing const qualifier
+
+commit a05d1c74dd6a2291d951b949b535615bba3e8e87
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Aug 1 11:15:43 2014 +0200
+
+    Implement file @-functions in CSS
+    
+    The CSS parser was extended with a file function called @try_icons. This functions take a variable number of strings as functions arguments and lookups each one in the order they are given. The first argument which can be lookuped successfully will be returned. If no none can be lookuped an empty string will be returned which causes xfdashboard to load the fallback icon (aka missing icon). Each argument can either be an absolute path, a relative path to theme's path or a (stock) icon name. This commit closes issue #9
+
+commit cd62cdc65cc6425fa1492b0f76ff344c47fe785f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jul 23 10:34:53 2014 +0200
+
+    cogl_texture_new_from_data() is deprecated since Cogl 1.18 so move to new function cogl_texture_2d_new_from_data()
+
+commit 6109d848c827ef5827aabdcd1aa1cb4498ff7058
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jul 22 21:09:06 2014 +0200
+
+    Post-release version bump to 0.3.1
+
+commit f31c24740e94647a683836a34f3827a79b341855
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jul 22 21:08:23 2014 +0200
+
+    Bump version to 0.3.0
+
 commit f3891e8347cb62d6a6059eef5634031ea821d542
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Tue Jul 22 20:04:59 2014 +0200
