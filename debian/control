@@ -18,8 +18,8 @@ Build-Depends: debhelper (>= 9),
  pkg-config
 Standards-Version: 3.9.5
 Homepage: http://xfdashboard.froevel.de/
-Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/xfdashboard.git
-Vcs-Git: git://anonscm.debian.org/collab-maint/xfdashboard.git
+Vcs-Browser: https://bitbucket.org/xubuntu/xfdashboard/
+Vcs-Git: https://bitbucket.org/xubuntu/xfdashboard/
 
 Package: xfdashboard
 Architecture: any
