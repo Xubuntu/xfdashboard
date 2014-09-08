@@ -126,6 +126,7 @@ am_xfdashboard_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	xfdashboard-search-view.$(OBJEXT) xfdashboard-stage.$(OBJEXT) \
 	xfdashboard-stylable.$(OBJEXT) xfdashboard-text-box.$(OBJEXT) \
 	xfdashboard-theme.$(OBJEXT) xfdashboard-theme-css.$(OBJEXT) \
+	xfdashboard-theme-effects.$(OBJEXT) \
 	xfdashboard-theme-layout.$(OBJEXT) \
 	xfdashboard-toggle-button.$(OBJEXT) \
 	xfdashboard-tooltip-action.$(OBJEXT) \
@@ -466,6 +467,7 @@ xfdashboard_headers = \
 	text-box.h \
 	theme.h \
 	theme-css.h \
+	theme-effects.h \
 	theme-layout.h \
 	toggle-button.h \
 	tooltip-action.h \
@@ -520,6 +522,7 @@ xfdashboard_SOURCES = \
 	text-box.c \
 	theme.c \
 	theme-css.c \
+	theme-effects.c \
 	theme-layout.c \
 	toggle-button.c \
 	tooltip-action.c \
@@ -708,6 +711,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-stylable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-text-box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-theme-css.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-theme-effects.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-theme-layout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-theme.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-toggle-button.Po@am__quote@
@@ -1262,6 +1266,20 @@ xfdashboard-theme-css.obj: theme-css.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='theme-css.c' object='xfdashboard-theme-css.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-theme-css.obj `if test -f 'theme-css.c'; then $(CYGPATH_W) 'theme-css.c'; else $(CYGPATH_W) '$(srcdir)/theme-css.c'; fi`
+
+xfdashboard-theme-effects.o: theme-effects.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-theme-effects.o -MD -MP -MF $(DEPDIR)/xfdashboard-theme-effects.Tpo -c -o xfdashboard-theme-effects.o `test -f 'theme-effects.c' || echo '$(srcdir)/'`theme-effects.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-theme-effects.Tpo $(DEPDIR)/xfdashboard-theme-effects.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='theme-effects.c' object='xfdashboard-theme-effects.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-theme-effects.o `test -f 'theme-effects.c' || echo '$(srcdir)/'`theme-effects.c
+
+xfdashboard-theme-effects.obj: theme-effects.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-theme-effects.obj -MD -MP -MF $(DEPDIR)/xfdashboard-theme-effects.Tpo -c -o xfdashboard-theme-effects.obj `if test -f 'theme-effects.c'; then $(CYGPATH_W) 'theme-effects.c'; else $(CYGPATH_W) '$(srcdir)/theme-effects.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-theme-effects.Tpo $(DEPDIR)/xfdashboard-theme-effects.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='theme-effects.c' object='xfdashboard-theme-effects.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-theme-effects.obj `if test -f 'theme-effects.c'; then $(CYGPATH_W) 'theme-effects.c'; else $(CYGPATH_W) '$(srcdir)/theme-effects.c'; fi`
 
 xfdashboard-theme-layout.o: theme-layout.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-theme-layout.o -MD -MP -MF $(DEPDIR)/xfdashboard-theme-layout.Tpo -c -o xfdashboard-theme-layout.o `test -f 'theme-layout.c' || echo '$(srcdir)/'`theme-layout.c

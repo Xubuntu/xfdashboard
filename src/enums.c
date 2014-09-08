@@ -84,6 +84,30 @@ GType xfdashboard_theme_css_error_enum_get_type(void)
 }
 
 
+/* enumerations from "theme-effects.h" */
+#include "theme-effects.h"
+
+GType xfdashboard_theme_effects_error_enum_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GEnumValue values[]=
+		{
+			{ XFDASHBOARD_THEME_EFFECTS_ERROR_ERROR, "XFDASHBOARD_THEME_EFFECTS_ERROR_ERROR", "error" },
+			{ XFDASHBOARD_THEME_EFFECTS_ERROR_MALFORMED, "XFDASHBOARD_THEME_EFFECTS_ERROR_MALFORMED", "malformed" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeEffectsErrorEnum"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
+
+
 /* enumerations from "theme-layout.h" */
 #include "theme-layout.h"
 

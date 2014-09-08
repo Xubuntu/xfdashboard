@@ -49,6 +49,7 @@ struct _XfdashboardActorPrivate
 {
 	/* Properties related */
 	gboolean		canFocus;
+	gchar			*effects;
 
 	gchar			*styleClasses;
 	gchar			*stylePseudoClasses;
@@ -63,6 +64,7 @@ enum
 	PROP_0,
 
 	PROP_CAN_FOCUS,
+	PROP_EFFECTS,
 
 	/* Overriden properties of interface: XfdashboardStylable */
 	PROP_STYLE_CLASSES,
@@ -185,6 +187,76 @@ static void _xfdashboard_actor_on_name_changed(GObject *inObject,
 	 * might reference the old, invalid ID or the new, valid one.
 	 */
 	_xfdashboard_actor_invalidate_recursive(CLUTTER_ACTOR(self));
+}
+
+/* Update effects of actor with string of list of effect IDs */
+static void _xfdashboard_actor_update_effects(XfdashboardActor *self, const gchar *inEffects)
+{
+	XfdashboardActorPrivate		*priv;
+	XfdashboardTheme			*theme;
+	XfdashboardThemeEffects		*themeEffects;
+	gchar						**effectIDs;
+	gchar						**iter;
+	gchar						*effectsList;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(self));
+
+	priv=self->priv;
+	effectsList=NULL;
+
+	/* Get theme effect instance which is needed to create effect objects.
+	 * Also take a reference on theme effect instance as it needs to be alive
+	 * while iterating through list of effect IDs and creating these effects.
+	 */
+	theme=xfdashboard_application_get_theme();
+
+	themeEffects=xfdashboard_theme_get_effects(theme);
+	g_object_ref(themeEffects);
+
+	/* Get array of effect ID to create */
+	effectIDs=xfdashboard_split_string(inEffects, " \t\r\n");
+
+	/* Remove all effects from actor */
+	clutter_actor_clear_effects(CLUTTER_ACTOR(self));
+
+	/* Create effects by their ID, add them to actor and
+	 * build result string with new list of effect IDs
+	 */
+	iter=effectIDs;
+	while(*iter)
+	{
+		ClutterEffect			*effect;
+
+		/* Create effect and if it was created successfully
+		 * add it to actor and update final string with list
+		 * of effect IDs.
+		 */
+		effect=xfdashboard_theme_effects_create_effect(themeEffects, *iter);
+		if(effect)
+		{
+			clutter_actor_add_effect(CLUTTER_ACTOR(self), effect);
+
+			if(effectsList)
+			{
+				gchar			*tempEffectsList;
+
+				tempEffectsList=g_strconcat(effectsList, " ", *iter, NULL);
+				g_free(effectsList);
+				effectsList=tempEffectsList;
+			}
+				else effectsList=g_strdup(*iter);
+		}
+
+		/* Continue with next ID */
+		iter++;
+	}
+
+	/* Set new string with list of effects */
+	if(priv->effects) g_free(priv->effects);
+	priv->effects=g_strdup(effectsList);
+
+	/* Release allocated resources */
+	g_object_unref(themeEffects);
 }
 
 /* IMPLEMENTATION: Interface XfdashboardFocusable */
@@ -659,6 +731,55 @@ static void _xfdashboard_actor_parent_set(ClutterActor *inActor, ClutterActor *i
 	_xfdashboard_actor_invalidate_recursive(CLUTTER_ACTOR(self));
 }
 
+/* Actor is shown */
+static void _xfdashboard_actor_show(ClutterActor *inActor)
+{
+	XfdashboardActor		*self;
+	ClutterActorClass		*parentClass;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inActor));
+
+	self=XFDASHBOARD_ACTOR(inActor);
+
+	/* Call parent's virtual function */
+	parentClass=CLUTTER_ACTOR_CLASS(xfdashboard_actor_parent_class);
+	if(parentClass->show)
+	{
+		parentClass->show(inActor);
+	}
+
+	/* If actor is visible now check if pointer is inside this actor
+	 * then add pseudo-class ":hover" to it
+	 */
+	if(clutter_actor_has_pointer(inActor))
+	{
+		xfdashboard_stylable_add_pseudo_class(XFDASHBOARD_STYLABLE(self), "hover");
+	}
+}
+
+/* Actor is hidden */
+static void _xfdashboard_actor_hide(ClutterActor *inActor)
+{
+	XfdashboardActor		*self;
+	ClutterActorClass		*parentClass;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inActor));
+
+	self=XFDASHBOARD_ACTOR(inActor);
+
+	/* Call parent's virtual function */
+	parentClass=CLUTTER_ACTOR_CLASS(xfdashboard_actor_parent_class);
+	if(parentClass->hide)
+	{
+		parentClass->hide(inActor);
+	}
+
+	/* Actor is hidden now so remove pseudo-class ":hover" because pointer cannot
+	 * be in an actor hidden.
+	 */
+	xfdashboard_stylable_remove_pseudo_class(XFDASHBOARD_STYLABLE(self), "hover");
+}
+
 /* IMPLEMENTATION: GObject */
 
 /* Dispose this object */
@@ -668,6 +789,12 @@ static void _xfdashboard_actor_dispose(GObject *inObject)
 	XfdashboardActorPrivate		*priv=self->priv;
 
 	/* Release allocated variables */
+	if(priv->effects)
+	{
+		g_free(priv->effects);
+		priv->effects=NULL;
+	}
+
 	if(priv->styleClasses)
 	{
 		g_free(priv->styleClasses);
@@ -704,6 +831,10 @@ static void _xfdashboard_actor_set_property(GObject *inObject,
 			xfdashboard_actor_set_can_focus(self, g_value_get_boolean(inValue));
 			break;
 
+		case PROP_EFFECTS:
+			xfdashboard_actor_set_effects(self, g_value_get_string(inValue));
+			break;
+
 		case PROP_STYLE_CLASSES:
 			_xfdashboard_actor_stylable_set_classes(XFDASHBOARD_STYLABLE(self),
 													g_value_get_string(inValue));
@@ -732,6 +863,10 @@ static void _xfdashboard_actor_get_property(GObject *inObject,
 	{
 		case PROP_CAN_FOCUS:
 			g_value_set_boolean(outValue, priv->canFocus);
+			break;
+
+		case PROP_EFFECTS:
+			g_value_set_string(outValue, priv->effects);
 			break;
 
 		case PROP_STYLE_CLASSES:
@@ -768,6 +903,8 @@ void xfdashboard_actor_class_init(XfdashboardActorClass *klass)
 	clutterActorClass->parent_set=_xfdashboard_actor_parent_set;
 	clutterActorClass->enter_event=_xfdashboard_actor_enter_event;
 	clutterActorClass->leave_event=_xfdashboard_actor_leave_event;
+	clutterActorClass->show=_xfdashboard_actor_show;
+	clutterActorClass->hide=_xfdashboard_actor_hide;
 
 	/* Set up private structure */
 	g_type_class_add_private(klass, sizeof(XfdashboardActorPrivate));
@@ -785,10 +922,19 @@ void xfdashboard_actor_class_init(XfdashboardActorClass *klass)
 								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 	g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_CAN_FOCUS, XfdashboardActorProperties[PROP_CAN_FOCUS]);
 
+	XfdashboardActorProperties[PROP_EFFECTS]=
+		g_param_spec_string("effects",
+								_("Effects"),
+								_("List of space-separated strings with IDs of effects set at this actor"),
+								NULL,
+								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+	g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_EFFECTS, XfdashboardActorProperties[PROP_EFFECTS]);
+
 	g_object_class_override_property(gobjectClass, PROP_STYLE_CLASSES, "style-classes");
 	g_object_class_override_property(gobjectClass, PROP_STYLE_PSEUDO_CLASSES, "style-pseudo-classes");
 
 	/* Define stylable properties */
+	xfdashboard_actor_install_stylable_property_by_name(klass, "effects");
 	xfdashboard_actor_install_stylable_property_by_name(klass, "x-expand");
 	xfdashboard_actor_install_stylable_property_by_name(klass, "y-expand");
 	xfdashboard_actor_install_stylable_property_by_name(klass, "x-align");
@@ -806,6 +952,7 @@ void xfdashboard_actor_init(XfdashboardActor *self)
 
 	/* Set up default values */
 	priv->canFocus=FALSE;
+	priv->effects=NULL;
 	priv->styleClasses=NULL;
 	priv->stylePseudoClasses=NULL;
 	priv->lastThemeStyleSet=NULL;
@@ -930,6 +1077,33 @@ void xfdashboard_actor_set_can_focus(XfdashboardActor *self, gboolean inCanFous)
 
 		/* Notify about property change */
 		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardActorProperties[PROP_CAN_FOCUS]);
+	}
+}
+
+/* Get/set space-seperated list of IDs of effects used by this actor */
+const gchar* xfdashboard_actor_get_effects(XfdashboardActor *self)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_ACTOR(self), NULL);
+
+	return(self->priv->effects);
+}
+
+void xfdashboard_actor_set_effects(XfdashboardActor *self, const gchar *inEffects)
+{
+	XfdashboardActorPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(self));
+
+	priv=self->priv;
+
+	/* Set value if changed */
+	if(g_strcmp0(priv->effects, inEffects)!=0)
+	{
+		/* Set value */
+		_xfdashboard_actor_update_effects(self, inEffects);
+
+		/* Notify about property change */
+		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardActorProperties[PROP_EFFECTS]);
 	}
 }
 

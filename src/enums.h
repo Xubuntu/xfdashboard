@@ -39,6 +39,10 @@ GType xfdashboard_theme_error_enum_get_type(void) G_GNUC_CONST;
 GType xfdashboard_theme_css_error_enum_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_THEME_CSS_ERROR_ENUM	(xfdashboard_theme_css_error_enum_get_type())
 
+/* enumerations from "theme-effects.h" */
+GType xfdashboard_theme_effects_error_enum_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_THEME_EFFECTS_ERROR_ENUM	(xfdashboard_theme_effects_error_enum_get_type())
+
 /* enumerations from "theme-layout.h" */
 GType xfdashboard_theme_layout_error_enum_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_THEME_LAYOUT_ERROR_ENUM	(xfdashboard_theme_layout_error_enum_get_type())
