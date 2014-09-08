@@ -1,3 +1,71 @@
+commit 848c69cc1355e21f755981a06a21b53c6c313aa4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Sep 8 06:34:14 2014 +0200
+
+    Bump version to 0.3.2
+
+commit 764fba3e199fc1a884e8375855c25b516c067480
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Sep 7 20:29:23 2014 +0200
+
+    Implement effects into XfdashboardActor
+    
+    XfdashboardActor has a new property 'effects' which takes a space-separated list of IDs of effects to create. The IDs must be found in effects XML file specified in "Effects=..." in theme description file xfdashboard.theme. The default theme defines a 'black-white' effect which decolorizes the actor and all quicklaunch buttons will get this effect added but the list is emptied at hovered button in quicklaunch. Effects can be expensive (seen from performance point of view) so changing effects on hover is a bad idea. So the default theme is currently a bad theme but a visible example was needed :(
+    
+    This closes issue #34
+
+commit 5b83f18dff0802d7547add6ea14c684f35119db5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Sep 7 19:15:50 2014 +0200
+
+    Implement effect object creation to effect parser class
+
+commit d3959a915f2c372685effd9352897d74b8a603bd
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Sep 5 16:37:22 2014 +0200
+
+    Add ChangeLog to list of ignored files by git
+
+commit 6638a9d429de4ecd49a418edd228867633c8e87d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Sep 5 16:33:33 2014 +0200
+
+    Adding XML parser for effects to theme
+    
+    First step in closing issue #34 by implementing a XML parser to theme which can read in XML data for effects. To get an effect XML file loaded the descriptive xfdashboard.theme file needs a new entry "Effects=" with a semi-colon separated list of files to load. The new XfdashboardThemeEffects object still misses the "real" creation function and also the basic XfdashboardActor does not make any use of it yet. But this is also only step one ;)
+
+commit d6b574be472bdfc1a28cb4f33c0fd3a9a4c19d66
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 4 20:55:50 2014 +0200
+
+    Do not mark XML document tags translatable
+
+commit bfa7e16f4f653db6d7b1bd6df90137e9ce81d0f6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 28 06:43:26 2014 +0200
+
+    Fixed returning value of correct variable for outline borders
+
+commit a2aebd52d5b5d37eb26cd54db41b8ddce8135c23
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 27 20:24:02 2014 +0200
+
+    Add/remove pseudo-class ':hover' when actor changes visibility
+    
+    If actor is shown check if pointer is inside this actor and add pseudo-class ':hover' to it. If actor is hidden remove pseudo-class ':hover' regardless if pointer is inside this actor or not. This should fix issue #31
+
+commit de2dfcc78b4fe8253511255844e4efca791859bf
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 26 18:04:26 2014 +0200
+
+    Post-release version bump to 0.3.2
+
+commit 819a3883490da6feff749d383bbf2ece7d9da3b2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 26 18:03:27 2014 +0200
+
+    Bump version to 0.3.1
+
 commit d60f31decba96cac6218af4104268894301f2f97
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Sat Aug 23 21:11:45 2014 +0200
