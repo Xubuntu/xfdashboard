@@ -1,3 +1,9 @@
+xfdashboard (0.3.2-0ubuntu1) utopic; urgency=medium
+
+  * Imported Upstream version 0.3.2
+
+ -- Unit 193 <unit193@ubuntu.com>  Mon, 08 Sep 2014 08:13:54 -0400
+
 xfdashboard (0.3.1-0ubuntu1) utopic; urgency=medium
 
   * Imported Upstream version 0.3.1.
