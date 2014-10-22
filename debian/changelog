@@ -1,3 +1,10 @@
+xfdashboard (0.3.3-0ubuntu1) utopic; urgency=medium
+
+  * Imported Upstream version 0.3.3
+  * Update Standards-Version to 3.9.6 (No changes)
+
+ -- Unit 193 <unit193@ubuntu.com>  Wed, 22 Oct 2014 16:44:16 -0400
+
 xfdashboard (0.3.2-0ubuntu1) utopic; urgency=medium
 
   * Imported Upstream version 0.3.2
