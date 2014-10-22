@@ -104,6 +104,7 @@ am_xfdashboard_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	xfdashboard-background.$(OBJEXT) xfdashboard-button.$(OBJEXT) \
 	xfdashboard-click-action.$(OBJEXT) \
 	xfdashboard-collapse-box.$(OBJEXT) \
+	xfdashboard-css-selector.$(OBJEXT) \
 	xfdashboard-dynamic-table-layout.$(OBJEXT) \
 	xfdashboard-drag-action.$(OBJEXT) \
 	xfdashboard-drop-action.$(OBJEXT) \
@@ -418,7 +419,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-DG_LOG_DOMAIN=\"xfdashboard\" \
 	-DPACKAGE_DATADIR=\"$(datadir)\" \
@@ -443,6 +444,7 @@ xfdashboard_headers = \
 	button.h \
 	click-action.h \
 	collapse-box.h \
+	css-selector.h \
 	drag-action.h \
 	drop-action.h \
 	dynamic-table-layout.h \
@@ -497,6 +499,7 @@ xfdashboard_SOURCES = \
 	button.c \
 	click-action.c \
 	collapse-box.c \
+	css-selector.c \
 	dynamic-table-layout.c \
 	drag-action.c \
 	drop-action.c \
@@ -685,6 +688,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-button.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-click-action.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-collapse-box.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-css-selector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-drag-action.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-drop-action.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-dynamic-table-layout.Po@am__quote@
@@ -916,6 +920,20 @@ xfdashboard-collapse-box.obj: collapse-box.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='collapse-box.c' object='xfdashboard-collapse-box.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-collapse-box.obj `if test -f 'collapse-box.c'; then $(CYGPATH_W) 'collapse-box.c'; else $(CYGPATH_W) '$(srcdir)/collapse-box.c'; fi`
+
+xfdashboard-css-selector.o: css-selector.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-css-selector.o -MD -MP -MF $(DEPDIR)/xfdashboard-css-selector.Tpo -c -o xfdashboard-css-selector.o `test -f 'css-selector.c' || echo '$(srcdir)/'`css-selector.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-css-selector.Tpo $(DEPDIR)/xfdashboard-css-selector.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='css-selector.c' object='xfdashboard-css-selector.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-css-selector.o `test -f 'css-selector.c' || echo '$(srcdir)/'`css-selector.c
+
+xfdashboard-css-selector.obj: css-selector.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-css-selector.obj -MD -MP -MF $(DEPDIR)/xfdashboard-css-selector.Tpo -c -o xfdashboard-css-selector.obj `if test -f 'css-selector.c'; then $(CYGPATH_W) 'css-selector.c'; else $(CYGPATH_W) '$(srcdir)/css-selector.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-css-selector.Tpo $(DEPDIR)/xfdashboard-css-selector.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='css-selector.c' object='xfdashboard-css-selector.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-css-selector.obj `if test -f 'css-selector.c'; then $(CYGPATH_W) 'css-selector.c'; else $(CYGPATH_W) '$(srcdir)/css-selector.c'; fi`
 
 xfdashboard-dynamic-table-layout.o: dynamic-table-layout.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-dynamic-table-layout.o -MD -MP -MF $(DEPDIR)/xfdashboard-dynamic-table-layout.Tpo -c -o xfdashboard-dynamic-table-layout.o `test -f 'dynamic-table-layout.c' || echo '$(srcdir)/'`dynamic-table-layout.c

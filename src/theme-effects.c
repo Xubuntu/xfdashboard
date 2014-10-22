@@ -31,7 +31,7 @@
 #include <glib.h>
 #include <gio/gio.h>
 
-#include "layoutable.h"
+#include "utils.h"
 
 /* Define this class in GObject system */
 G_DEFINE_TYPE(XfdashboardThemeEffects,
@@ -349,7 +349,7 @@ static void _xfdashboard_theme_effects_object_data_free(XfdashboardThemeEffectsP
 #ifdef DEBUG
 	if(inData->refCount>1)
 	{
-		g_critical("Freeing effect object parser data at %p with a reference counter of %d greater than one",
+		g_critical(_("Freeing effect object parser data at %p with a reference counter of %d greater than one"),
 					inData,
 					inData->refCount);
 	}
@@ -854,6 +854,31 @@ static void _xfdashboard_theme_effects_parse_effects_start(GMarkupParseContext *
 		}
 
 		/* Check tag's attributes */
+		if(strlen(objectData->id)==0)
+		{
+			_xfdashboard_theme_effects_parse_set_error(data,
+														inContext,
+														outError,
+														XFDASHBOARD_THEME_EFFECTS_ERROR_MALFORMED,
+														_("Empty ID at tag '%s'"),
+														inElementName);
+			_xfdashboard_theme_effects_object_data_unref(objectData);
+			return;
+		}
+
+		if(!xfdashboard_is_valid_id(objectData->id))
+		{
+			_xfdashboard_theme_effects_parse_set_error(data,
+														inContext,
+														outError,
+														XFDASHBOARD_THEME_EFFECTS_ERROR_MALFORMED,
+														_("Invalid ID '%s' at tag '%s'"),
+														objectData->id,
+														inElementName);
+			_xfdashboard_theme_effects_object_data_unref(objectData);
+			return;
+		}
+
 		if(_xfdashboard_theme_effects_has_id(data->self, data, objectData->id))
 		{
 			_xfdashboard_theme_effects_parse_set_error(data,
@@ -1234,6 +1259,9 @@ ClutterEffect* xfdashboard_theme_effects_create_effect(XfdashboardThemeEffects *
 			effect=_xfdashboard_theme_effects_create_object(objectData);
 			return(effect);
 		}
+
+		/* Continue with next effect */
+		entry=g_slist_next(entry);
 	}
 
 	/* If we get here we did not find an object with requested ID */

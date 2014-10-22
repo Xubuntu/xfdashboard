@@ -1,3 +1,168 @@
+commit 9808bcc1fc43b5842ef23d660b4734865e1c6acf
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Oct 19 10:42:13 2014 +0200
+
+    Show more warnings if any step failed when workaround is turned on
+
+commit 9df4f2d88897d7a61d6846507eba35d8deedc3a3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Oct 19 10:19:47 2014 +0200
+
+    Debug messages are not translatable
+
+commit c33d92ed5cf45f93b2f6e9d5188ff893cde61426
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Oct 19 09:43:53 2014 +0200
+
+    Make workaround for unmapped windows configurable
+    
+    Workaround for unmapped windows is turned off by but can be enabled by setting "/enable-unmapped-window-workaround" to true in xfconf. If turned on while xfdashboard is running it will only apply to new minimized windows found.
+
+commit a49e6976bef1a6d1c1ec0d7bed6dcf2fc22ca109
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Oct 18 23:51:57 2014 +0200
+
+    Remove conditional #if
+
+commit a31b20bcdaa6f7722257f26499e5769c6d351a1f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Oct 18 23:04:35 2014 +0200
+
+    First version of workaround getting image of minimited windows.
+    
+    The workaround is as follows:
+    * Set up signal handlers to get notified about changes of window
+    * Unminimize window
+    * If window is visible it will be activated by design (we shoud reactivate last active window - but this is _NOT_ implemented now!)
+    * Minimize window again
+    * Stop watching for changes of window by disconnecting signal handlers
+    
+    Please notice: The daemon mode of xfdashboard is _NOT_ tested now!
+
+commit f8a1848052b07c1a6ce612cc5e9fd42c79817ee6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 17 06:42:14 2014 +0200
+
+    Simplify code for skipping non-stylable ancestors
+
+commit e93dea0b93be091c58621abe554368520cc65d9b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 17 06:39:38 2014 +0200
+
+    Also skip non-stylable ancestors before checking for a match
+
+commit c8fee1ef21db83c0c5ec906f7ac48bd85efae738
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 17 06:38:10 2014 +0200
+
+    Fix infinite loop when skipping non-stylable ancestors
+
+commit f12b95ae540d28e1410493d686b5b4597cdae495
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Oct 16 20:07:21 2014 +0200
+
+    Skip non-stylable actor while looking up matching ancestors
+    
+    When looking up matching ancestor for a CSS selector skip actors not implementing the XfdashboardStylable interface, like ClutterActor etc.
+
+commit e86003f2ef887e65c0c3f885693db2121d44b866
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 14 21:39:51 2014 +0200
+
+    Split CSS selection creation string into without and with priority
+    
+    If function without priority is used, assume lowest priority.
+
+commit dc7c722a610676863503d805956052e66be50401
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 14 21:29:00 2014 +0200
+
+    Mark missing strings translatable
+
+commit f792317cefb271241be10cbaf4fcd5c4c72958b0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 14 21:25:40 2014 +0200
+
+    Implement function to convert CSS selector to string
+    
+    Also fixes a ("small") bug in parser to recognize parent (">") and descendant (missing ">").
+
+commit 9d06e4e5d5e086592389cfafd31d225ec45fdc86
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 14 20:11:39 2014 +0200
+
+    Merge parent and ancestor selector in one single selector
+    
+    ... because parent and ancestor selector can never be defined at once.
+
+commit c8a3e3e1546a0775e2f9febd429d7dd29a917b3b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 14 19:59:27 2014 +0200
+
+    Fix compile errors
+    
+    I should try to compile the code before committing it :(
+
+commit 0a6ec73ede26b34211059fbca9fe9f37151089ee
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Oct 13 22:38:18 2014 +0200
+
+    Check CSS selector against stylable actors
+    
+    Revert matching and scoring function of new CSS selector back to check it against a stylable actor an not against another CSS selector. Checking two selectors against each other does not make sense. CSS selectors select actors in the widget tree and not other selectors ;)
+
+commit 0e4017e6bfab7cf129eaeedb1d950098f7ecae17
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Oct 12 19:53:25 2014 +0200
+
+    Update POTFILES
+
+commit 00238da94ad1ed1c2ffaed9b3303d4cc6b47cb08
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Oct 12 19:51:49 2014 +0200
+
+    Macro "INCLUDES" in Makefile.am is deprecated and "AM_CPPFLAGS" should be used instead
+
+commit bb633df89fb073b0bc9c4a72fc8638b983f3ff6d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Oct 12 19:49:29 2014 +0200
+
+    Remove code left over from debugging long time ago
+
+commit edd3567086163cec7bf48a7b9f2fefdcfec4307e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Oct 12 19:46:15 2014 +0200
+
+    Split simple CSS selector out into a new class but it is not used in any code.
+
+commit 70d3de3bd36a57395be23180a60f63e54cf7b135
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Sep 12 19:10:43 2014 +0200
+
+    Set background to red (warning) if moving a favourite to trash
+
+commit aed5921ba8877654cb3349e9167433264c550802
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Sep 12 18:40:17 2014 +0200
+
+    Fix looking up ID in list of effects
+    
+    The iterator to lookup effect by ID was not moved to next entry if the first one in list did not match resulting in an infinite loop always checking the first effect in list against requested ID.
+
+commit 765bbb1cd120f8b5fa69ed97b0ff89502395b178
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Sep 12 18:37:47 2014 +0200
+
+    Check for valid ID names in XML files
+    
+    Check that each ID in any XML file matches the requirements as described at the documentation about layout and effects. Each ID has to match the following requirements: It has to begin either with one or multiple '_' (underscore) following by a character of ASCII character set  or it has to begin with a character of ASCII character set directly. Each following character in string can either be a digit, a character of ASCII character set or any of the following symbols: '_' (underscore) or '-' (minus).
+
+commit 4e03f96e79f063f7256f54c40bc4b1ba506203ff
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Sep 8 06:36:13 2014 +0200
+
+    Post-release version bump to 0.3.3
+
 commit 848c69cc1355e21f755981a06a21b53c6c313aa4
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Mon Sep 8 06:34:14 2014 +0200

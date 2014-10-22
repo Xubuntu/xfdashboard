@@ -36,6 +36,11 @@
 	</provides>
 
 	<releases>
+		<release version="0.3.3" timestamp="1413740495">
+			<description>
+				<p>This unstable development introduces a workaround to get window content of minimized windows to display them in windows view.</p>
+			</description>
+		</release>
 		<release version="0.3.2" timestamp="1410150601">
 			<description>
 				<p>This unstable development introduces effects.</p>
