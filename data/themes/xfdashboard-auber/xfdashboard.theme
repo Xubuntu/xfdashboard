@@ -1,0 +1,6 @@
+[Xfdashboard Theme]
+Name=xfdashboard-auber
+Comment=Aubergine theme for xfdashboard
+Style=xfdashboard-auber.css
+Layout=xfdashboard.xml
+Effects=effects.xml

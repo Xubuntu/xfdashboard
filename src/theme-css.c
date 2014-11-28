@@ -37,6 +37,7 @@
 #include <gtk/gtk.h>
 
 #include "stylable.h"
+#include "css-selector.h"
 
 /* Define this class in GObject system */
 G_DEFINE_TYPE(XfdashboardThemeCSS,
@@ -57,6 +58,8 @@ struct _XfdashboardThemeCSSPrivate
 	GSList		*names;
 
 	GHashTable	*registeredFunctions;
+
+	gint		offsetLine;
 };
 
 /* Properties */
@@ -72,21 +75,19 @@ enum
 static GParamSpec* XfdashboardThemeCSSProperties[PROP_LAST]={ 0, };
 
 /* IMPLEMENTATION: Private variables and methods */
+typedef enum /*< skip,prefix=XFDASHBOARD_THEME_CSS_SELECTOR_TYPE >*/
+{
+	XFDASHBOARD_THEME_CSS_SELECTOR_TYPE_NONE=0,
+	XFDASHBOARD_THEME_CSS_SELECTOR_TYPE_SELECTOR,
+	XFDASHBOARD_THEME_CSS_SELECTOR_TYPE_CONSTANT
+} XfdashboardThemeCSSSelectorType;
+
 typedef struct _XfdashboardThemeCSSSelector			XfdashboardThemeCSSSelector;
 struct _XfdashboardThemeCSSSelector
 {
-	gchar							*type;
-	gchar							*id;
-	gchar							*class;
-	gchar							*pseudoClass;
-	XfdashboardThemeCSSSelector		*parent;
-	XfdashboardThemeCSSSelector		*ancestor;
+	XfdashboardThemeCSSSelectorType	type;
+	XfdashboardCssSelector			*selector;
 	GHashTable						*style;
-
-	const gchar						*name;
-	gint							priority;
-	guint							line;
-	guint							position;
 };
 
 typedef struct _XfdashboardThemeCSSSelectorMatch	XfdashboardThemeCSSSelectorMatch;
@@ -226,31 +227,20 @@ static void _xfdashboard_theme_css_selector_free(XfdashboardThemeCSSSelector *in
 	g_return_if_fail(inSelector);
 
 	/* Free allocated resources */
-	if(inSelector->type) g_free(inSelector->type);
-	if(inSelector->id) g_free(inSelector->id);
-	if(inSelector->class) g_free(inSelector->class);
-	if(inSelector->pseudoClass) g_free(inSelector->pseudoClass);
-
-	/* Destroy parent selector */
-	if(inSelector->parent) _xfdashboard_theme_css_selector_free(inSelector->parent);
+	if(inSelector->selector) g_object_unref(inSelector->selector);
+	if(inSelector->style) g_hash_table_unref(inSelector->style);
 
 	/* Free selector itself */
 	g_slice_free(XfdashboardThemeCSSSelector, inSelector);
 }
 
 /* Create selector */
-static XfdashboardThemeCSSSelector* _xfdashboard_theme_css_selector_new(const gchar *inName,
-																			gint inPriority,
-																			guint inLine,
-																			guint inPosition)
+static XfdashboardThemeCSSSelector* _xfdashboard_theme_css_selector_new(const gchar *inName)
 {
 	XfdashboardThemeCSSSelector		*selector;
 
 	selector=g_slice_new0(XfdashboardThemeCSSSelector);
-	selector->name=inName;
-	selector->priority=inPriority;
-	selector->line=inLine;
-	selector->position=inPosition;
+	selector->type=XFDASHBOARD_THEME_CSS_SELECTOR_TYPE_NONE;
   
 	return(selector);
 }
@@ -1277,7 +1267,7 @@ static gchar* _xfdashboard_theme_css_parse_at_identifier(XfdashboardThemeCSS *se
 	}
 
 	/* Identifier is a constant so lookup constant by iterating through all
-	 * '@constants' selectors backwards and use first value found. We iterate
+	 * constants selectors backwards and use first value found. We iterate
 	 * through these selectors backwards (first in selectors of current file/scope
 	 * then all previous ones) to let last definition win.
 	 */
@@ -1285,8 +1275,8 @@ static gchar* _xfdashboard_theme_css_parse_at_identifier(XfdashboardThemeCSS *se
 	{
 		selector=(XfdashboardThemeCSSSelector*)iter->data;
 
-		/* Handle only '@constants' selectors */
-		if(g_strcmp0(selector->id, "@constants")==0)
+		/* Handle only constants selectors */
+		if(selector->type==XFDASHBOARD_THEME_CSS_SELECTOR_TYPE_CONSTANT)
 		{
 			if(g_hash_table_lookup_extended(selector->style, identifier, NULL, &value))
 			{
@@ -1303,8 +1293,8 @@ static gchar* _xfdashboard_theme_css_parse_at_identifier(XfdashboardThemeCSS *se
 	{
 		selector=(XfdashboardThemeCSSSelector*)iter->data;
 
-		/* Handle only '@constants' selectors */
-		if(g_strcmp0(selector->id, "@constants")==0)
+		/* Handle only constants selectors */
+		if(selector->type==XFDASHBOARD_THEME_CSS_SELECTOR_TYPE_CONSTANT)
 		{
 			if(g_hash_table_lookup_extended(selector->style, identifier, NULL, &value))
 			{
@@ -1703,165 +1693,289 @@ static GTokenType _xfdashboard_theme_css_parse_css_styles(XfdashboardThemeCSS *s
 	return(G_TOKEN_NONE);
 }
 
-static GTokenType _xfdashboard_theme_css_parse_css_simple_selector(XfdashboardThemeCSS *self,
-																	GScanner *inScanner,
-																	XfdashboardThemeCSSSelector *ioSelector)
+static GTokenType _xfdashboard_theme_css_command_import(XfdashboardThemeCSS *self,
+														GScanner *inScanner,
+														GList **ioSelectors)
 {
-	GTokenType		token;
+	XfdashboardThemeCSSPrivate	*priv;
+	GTokenType					token;
+	GScannerConfig				*scannerConfig;
+	GScannerConfig				*oldScannerConfig;
+	gchar						*filename;
+	GError						*error;
+	gint						oldLineOffset;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_THEME_CSS(self), G_TOKEN_ERROR);
 	g_return_val_if_fail(inScanner, G_TOKEN_ERROR);
-	g_return_val_if_fail(ioSelector, G_TOKEN_ERROR);
+	g_return_val_if_fail(ioSelectors, G_TOKEN_ERROR);
 
-	/* Parse type of selector. It is optional as '*' can be used as wildcard */
-	token=g_scanner_peek_next_token(inScanner);
-	switch((guint)token)
+	priv=self->priv;
+	filename=NULL;
+	error=NULL;
+
+	/* Set parser option to parse property value and parse them */
+	scannerConfig=(GScannerConfig*)g_memdup(inScanner->config, sizeof(GScannerConfig));
+	scannerConfig->scan_identifier_1char=1;
+	scannerConfig->char_2_token=FALSE;
+	scannerConfig->scan_string_sq=TRUE;
+	scannerConfig->scan_string_dq=TRUE;
+
+	oldScannerConfig=inScanner->config;
+	inScanner->config=scannerConfig;
+
+	/* Syntax is: @import(filename)
+	 * Expect '(' as next character in stream.
+	 */
+	token=g_scanner_get_next_token(inScanner);
+	if(token!=G_TOKEN_CHAR ||
+		inScanner->value.v_char!='(')
 	{
-		case '*':
-			g_scanner_get_next_token(inScanner);
-			ioSelector->type=g_strdup("*");
+		/* Restore old parser options */
+		inScanner->config=oldScannerConfig;
+		g_free(scannerConfig);
 
-			/* Check if next token follows directly after this identifier.
-			 * It is determine by checking if scanner needs to move more than
-			 * one (the next) character. If there is a gap then either a new
-			 * selector follows or it is a new typeless selector.
-			 */
-			token=g_scanner_peek_next_token(inScanner);
-			if(inScanner->next_line==g_scanner_cur_line(inScanner) &&
-				(inScanner->next_position-g_scanner_cur_position(inScanner))>1)
-			{
-				return(G_TOKEN_NONE);
-			}
-			break;
-
-		case G_TOKEN_IDENTIFIER:
-			g_scanner_get_next_token(inScanner);
-			ioSelector->type=g_strdup(inScanner->value.v_identifier);
-
-			/* Check if next token follows directly after this identifier.
-			 * It is determine by checking if scanner needs to move more than
-			 * one (the next) character. If there is a gap then either a new
-			 * selector follows or it is a new typeless selector.
-			 */
-			token=g_scanner_peek_next_token(inScanner);
-			if(inScanner->next_line==g_scanner_cur_line(inScanner) &&
-				(inScanner->next_position-g_scanner_cur_position(inScanner))>1)
-			{
-				return(G_TOKEN_NONE);
-			}
-			break;
-
-		default:
-			break;
+		/* Show parser error message */
+		g_scanner_unexp_token(inScanner,
+								G_TOKEN_LEFT_PAREN,
+								NULL,
+								NULL,
+								NULL,
+								_("Missing '(' after @import keyword."),
+								TRUE);
+		return(G_TOKEN_LEFT_PAREN);
 	}
 
-	/* Here we look for '#', '.' or ':' and return if we find anything else */
-	token=g_scanner_peek_next_token(inScanner);
-	while(token!=G_TOKEN_NONE)
+	/* Expect only identifiers, characters and strings and concetenate
+	 * them to a filename. But stop at closing ')' character.
+	 */
+	token=g_scanner_get_next_token(inScanner);
+	while((token==G_TOKEN_CHAR && inScanner->value.v_char!=')') ||
+			token==G_TOKEN_IDENTIFIER ||
+			token==G_TOKEN_STRING)
 	{
-		switch((guint)token)
+		switch(token)
 		{
-			/* Parse ID (widget name) */
-			case '#':
-				g_scanner_get_next_token(inScanner);
-				token=g_scanner_get_next_token(inScanner);
-				if(token!=G_TOKEN_IDENTIFIER)
-				{
-					g_scanner_unexp_token(inScanner,
-											G_TOKEN_IDENTIFIER,
-											NULL,
-											NULL,
-											NULL,
-											_("Invalid name identifier"),
-											TRUE);
-					return(G_TOKEN_IDENTIFIER);
-				}
-
-				ioSelector->id=g_strdup(inScanner->value.v_identifier);
+			case G_TOKEN_CHAR:
+				filename=_xfdashboard_theme_css_append_char(filename, inScanner->value.v_char);
 				break;
 
-			/* Parse class */
-			case '.':
-				g_scanner_get_next_token(inScanner);
-				token=g_scanner_get_next_token(inScanner);
-				if(token!=G_TOKEN_IDENTIFIER)
-				{
-					g_scanner_unexp_token(inScanner,
-											G_TOKEN_IDENTIFIER,
-											NULL,
-											NULL,
-											NULL,
-											_("Invalid class identifier"),
-											TRUE);
-					return(G_TOKEN_IDENTIFIER);
-				}
-
-				ioSelector->class=g_strdup(inScanner->value.v_identifier);
+			case G_TOKEN_STRING:
+				filename=_xfdashboard_theme_css_append_string(filename, inScanner->value.v_string);
 				break;
 
-			/* Parse pseudo-class */
-			case ':':
-				g_scanner_get_next_token(inScanner);
-				token=g_scanner_get_next_token(inScanner);
-				if(token!=G_TOKEN_IDENTIFIER)
-				{
-					g_scanner_unexp_token(inScanner,
-											G_TOKEN_IDENTIFIER,
-											NULL,
-											NULL,
-											NULL,
-											_("Invalid pseudo-class identifier"),
-											TRUE);
-					return(G_TOKEN_IDENTIFIER);
-				}
-
-				if(ioSelector->pseudoClass)
-				{
-					/* Remember old pseudo-class as it can only be freed afterwards */
-					gchar		*oldPseudoClass=ioSelector->pseudoClass;
-
-					/* Create new pseudo-class */
-					ioSelector->pseudoClass=g_strconcat(ioSelector->pseudoClass,
-															":",
-															inScanner->value.v_identifier,
-															NULL);
-
-					/* Now free old pseudo-class */
-					g_free(oldPseudoClass);
-				}
-					else
-					{
-						ioSelector->pseudoClass=g_strdup(inScanner->value.v_identifier);
-					}
-
+			case G_TOKEN_IDENTIFIER:
+				filename=_xfdashboard_theme_css_append_string(filename, inScanner->value.v_identifier);
 				break;
 
 			default:
-				return(G_TOKEN_NONE);
+				/* Restore old parser options */
+				inScanner->config=oldScannerConfig;
+				g_free(scannerConfig);
+
+				/* Release allocated resources */
+				if(filename) g_free(filename);
+
+				/* Show parser error message */
+				g_scanner_unexp_token(inScanner,
+										G_TOKEN_ERROR,
+										NULL,
+										NULL,
+										NULL,
+										_("Unexpected token in filename to import"),
+										TRUE);
+				return(token);
 		}
 
-		/* Get next token */
-		token=g_scanner_peek_next_token(inScanner);
+		token=g_scanner_get_next_token(inScanner);
 	}
 
-	/* Successfully parsed */
+	if(!filename)
+	{
+		/* Restore old parser options */
+		inScanner->config=oldScannerConfig;
+		g_free(scannerConfig);
+
+		/* Show parser error message */
+		g_scanner_unexp_token(inScanner,
+								G_TOKEN_ERROR,
+								NULL,
+								NULL,
+								NULL,
+								_("Missing filename to import"),
+								TRUE);
+		return(G_TOKEN_ERROR);
+	}
+
+	/* Expect closing ')' as next character in stream */
+	if(token!=G_TOKEN_CHAR ||
+		inScanner->value.v_char!=')')
+	{
+		/* Restore old parser options */
+		inScanner->config=oldScannerConfig;
+		g_free(scannerConfig);
+
+		/* Release allocated resources */
+		if(filename) g_free(filename);
+
+		/* Show parser error message */
+		g_scanner_unexp_token(inScanner,
+								G_TOKEN_RIGHT_PAREN,
+								NULL,
+								NULL,
+								NULL,
+								_("Missing closing ')' at @import keyword."),
+								TRUE);
+		return(G_TOKEN_RIGHT_PAREN);
+	}
+
+	/* Import and parse CSS file */
+	if(!g_path_is_absolute(filename))
+	{
+		gchar					*tempFilename;
+		gchar					*cssPath;
+		gboolean				foundFile;
+
+		foundFile=FALSE;
+
+		/* Path to file is relative so check if a file, relative to
+		 * path of CSS file currently parsed, exists.
+		 */
+		if(inScanner->input_fd>0 &&
+			inScanner->input_name)
+		{
+			cssPath=g_path_get_dirname(inScanner->input_name);
+
+			tempFilename=g_build_filename(cssPath, filename, NULL);
+			if(g_file_test(tempFilename, G_FILE_TEST_EXISTS))
+			{
+				g_debug("Resolved relative path '%s' to import to '%s' which is relative to current css file '%s'.",
+							filename,
+							tempFilename,
+							inScanner->input_name);
+
+				g_free(filename);
+				filename=g_strdup(tempFilename);
+				foundFile=TRUE;
+			}
+
+			g_free(cssPath);
+			g_free(tempFilename);
+		}
+
+		/* If current CSS being parsed is not a file or the relative path
+		 * to current CSS file to import does not exist, assume it is a
+		 * relative path to theme.
+		 */
+		if(!foundFile)
+		{
+			tempFilename=g_build_filename(priv->themePath, filename, NULL);
+
+			g_debug("Resolved relative path '%s' to import to '%s' which is relative to theme path '%s'.",
+						filename,
+						tempFilename,
+						priv->themePath);
+
+			g_free(filename);
+			filename=g_strdup(tempFilename);
+			g_free(tempFilename);
+		}
+	}
+
+	oldLineOffset=priv->offsetLine;
+	priv->offsetLine+=g_scanner_cur_line(inScanner);
+	if(!xfdashboard_theme_css_add_file(self, filename, GPOINTER_TO_INT(inScanner->user_data), &error))
+	{
+		gchar					*errorMessage;
+
+		/* Build error message */
+		errorMessage=g_strdup_printf(_("Failed to import CSS file '%s': %s"),
+										filename,
+										error && error->message ? error->message : _("Unknown error"));
+
+		/* Show parser error message */
+		g_scanner_unexp_token(inScanner,
+								G_TOKEN_ERROR,
+								NULL,
+								NULL,
+								NULL,
+								errorMessage,
+								TRUE);
+
+		/* Restore old parser options */
+		inScanner->config=oldScannerConfig;
+		g_free(scannerConfig);
+
+		/* Release allocated resources */
+		if(error) g_error_free(error);
+		if(errorMessage) g_free(errorMessage);
+		if(filename) g_free(filename);
+
+		/* Correct line offset */
+		priv->offsetLine-=oldLineOffset;
+
+		/* Return error result */
+		return(G_TOKEN_ERROR);
+	}
+
+	g_debug("Imported CSS file '%s'", filename);
+
+	/* Correct line offset */
+	priv->offsetLine-=oldLineOffset;
+
+	/* Restore old parser options */
+	inScanner->config=oldScannerConfig;
+	g_free(scannerConfig);
+
+	/* Release allocated resources */
+	if(error) g_error_free(error);
+	if(filename) g_free(filename);
+
+	/* Import was successful so return success value */
 	return(G_TOKEN_NONE);
+}
+
+static gboolean _xfdashboard_theme_css_parse_css_ruleset_finish(XfdashboardCssSelector *inSelector,
+																GScanner *inScanner,
+																GTokenType inPeekNextToken,
+																gpointer inUserData)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_CSS_SELECTOR(inSelector), XFDASHBOARD_CSS_SELECTOR_PARSE_FINISH_BAD_STATE);
+	g_return_val_if_fail(inScanner, XFDASHBOARD_CSS_SELECTOR_PARSE_FINISH_BAD_STATE);
+	g_return_val_if_fail(XFDASHBOARD_IS_THEME_CSS(inUserData), XFDASHBOARD_CSS_SELECTOR_PARSE_FINISH_BAD_STATE);
+
+	/* Scanner is in good state if current token in stream is a comma
+	 * or a left curly bracket.
+	 */
+	if(inPeekNextToken=='{') return(XFDASHBOARD_CSS_SELECTOR_PARSE_FINISH_OK);
+
+	if(inPeekNextToken==',')
+	{
+		/* Eat comma from stream to adjust cursor to next token */
+		g_scanner_get_next_token(inScanner);
+
+		return(XFDASHBOARD_CSS_SELECTOR_PARSE_FINISH_OK);
+	}
+
+	/* If we get here scanner is in bad state now */
+	return(XFDASHBOARD_CSS_SELECTOR_PARSE_FINISH_BAD_STATE);
 }
 
 static GTokenType _xfdashboard_theme_css_parse_css_ruleset(XfdashboardThemeCSS *self,
 															GScanner *inScanner,
 															GList **ioSelectors)
 {
+	XfdashboardThemeCSSPrivate		*priv;
 	GTokenType						token;
-	XfdashboardThemeCSSSelector		*selector, *parent;
+	XfdashboardThemeCSSSelector		*selector;
 	gboolean						hasAtSelector;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_THEME_CSS(self), G_TOKEN_ERROR);
 	g_return_val_if_fail(inScanner, G_TOKEN_ERROR);
 	g_return_val_if_fail(ioSelectors, G_TOKEN_ERROR);
 
+	priv=self->priv;
+
 	/* Parse comma-seperated selectors until a left curly bracket is found */
-	parent=NULL;
 	selector=NULL;
 	hasAtSelector=FALSE;
 
@@ -1891,75 +2005,9 @@ static GTokenType _xfdashboard_theme_css_parse_css_ruleset(XfdashboardThemeCSS *
 			case '#':
 			case '.':
 			case ':':
-				/* Set last selector as parent if available */
-				if(selector) parent=selector;
-					else parent=NULL;
-
-				/* Check if there was a previous selector and if so, the new one
-				 * should use the previous selector to match an ancestor
-				 */
-				selector=_xfdashboard_theme_css_selector_new(inScanner->input_name,
-																GPOINTER_TO_INT(inScanner->user_data),
-																g_scanner_cur_line(inScanner),
-																g_scanner_cur_position(inScanner));
-				*ioSelectors=g_list_prepend(*ioSelectors, selector);
-
-				/* If parent available remove it from list of selectors and
-				 * link it to the new selector
-				 */
-				if(parent)
-				{
-					*ioSelectors=g_list_remove(*ioSelectors, parent);
-					selector->ancestor=parent;
-				}
-
-				/* Parse selector */
-				token=_xfdashboard_theme_css_parse_css_simple_selector(self, inScanner, selector);
-				if(token!=G_TOKEN_NONE) return(token);
-				break;
-
-			case '>':
-				g_scanner_get_next_token(inScanner);
-
-				/* Set last selector as parent */
-				if(!selector)
-				{
-					g_scanner_unexp_token(inScanner,
-											G_TOKEN_IDENTIFIER,
-											NULL,
-											NULL,
-											NULL,
-											_("No parent when parsing '>'"),
-											TRUE);
-					return(token);
-				}
-				parent=selector;
-
-				/* Create new selector */
-				selector=_xfdashboard_theme_css_selector_new(inScanner->input_name,
-																GPOINTER_TO_INT(inScanner->user_data),
-																g_scanner_cur_line(inScanner),
-																g_scanner_cur_position(inScanner));
-				*ioSelectors=g_list_prepend(*ioSelectors, selector);
-
-				/* Remove parent from list of selectors and
-				 * link it to the new selector
-				 */
-				selector->parent=parent;
-				*ioSelectors=g_list_remove(*ioSelectors, parent);
-
-				/* Parse selector */
-				token=_xfdashboard_theme_css_parse_css_simple_selector(self, inScanner, selector);
-				if(token!=G_TOKEN_NONE) return(token);
-				break;
-
 			case ',':
-				g_scanner_get_next_token(inScanner);
-
-				/* A selector must have been defined before other one can follow
-				 * comma-separated.
-				 */
-				if(g_list_length(*ioSelectors)==0)
+				/* A selector must have been defined before other one can follow comma-separated */
+				if(token==',' && g_list_length(*ioSelectors)==0)
 				{
 					g_scanner_unexp_token(inScanner,
 											G_TOKEN_IDENTIFIER,
@@ -1971,16 +2019,21 @@ static GTokenType _xfdashboard_theme_css_parse_css_ruleset(XfdashboardThemeCSS *
 					return(token);
 				}
 
-				/* Create new selector */
-				selector=_xfdashboard_theme_css_selector_new(inScanner->input_name,
-																GPOINTER_TO_INT(inScanner->user_data),
-																g_scanner_cur_line(inScanner),
-																g_scanner_cur_position(inScanner));
+				/* Create new selector and add it to list of read-in selectors */
+				selector=_xfdashboard_theme_css_selector_new(inScanner->input_name);
 				*ioSelectors=g_list_prepend(*ioSelectors, selector);
 
 				/* Parse selector */
-				token=_xfdashboard_theme_css_parse_css_simple_selector(self, inScanner, selector);
-				if(token!=G_TOKEN_NONE) return(token);
+				selector->selector=xfdashboard_css_selector_new_from_scanner_with_priority(inScanner,
+																							GPOINTER_TO_INT(inScanner->user_data),
+																							(XfdashboardCssSelectorParseFinishCallback)_xfdashboard_theme_css_parse_css_ruleset_finish,
+																							self);
+				if(!selector->selector) return(G_TOKEN_ERROR);
+
+				xfdashboard_css_selector_adjust_to_offset(selector->selector, priv->offsetLine, 0);
+
+				/* If we get here selector could be parse so set type */
+				selector->type=XFDASHBOARD_THEME_CSS_SELECTOR_TYPE_SELECTOR;
 				break;
 
 			case '@':
@@ -2000,42 +2053,77 @@ static GTokenType _xfdashboard_theme_css_parse_css_ruleset(XfdashboardThemeCSS *
 					return(token);
 				}
 
-				/* Check if '@'-identifier matches any expected one */
-				if(g_strcmp0(inScanner->value.v_identifier, "constants"))
+				/* Handle '@constants'-identifier */
+				if(g_strcmp0(inScanner->value.v_identifier, "constants")==0)
 				{
-					gchar		*message;
+					/* Create selector for constant @-identifier */
+					selector=_xfdashboard_theme_css_selector_new(inScanner->input_name);
+					selector->type=XFDASHBOARD_THEME_CSS_SELECTOR_TYPE_CONSTANT;
 
-					/* Build warning message */
-					message=g_strdup_printf(_("Skipping block of unknown identifier '@%s'"),
-											inScanner->value.v_identifier);
+					/* Add it to list of read-in selectors */
+					*ioSelectors=g_list_prepend(*ioSelectors, selector);
 
-					/* Set warning */
+					/* Set flag that an '@'-selector was parsed */
+					hasAtSelector=TRUE;
+				}
+					/* Handle '@import'-identifier */
+					else if(g_strcmp0(inScanner->value.v_identifier, "import")==0)
+					{
+						token=_xfdashboard_theme_css_command_import(self,
+																	inScanner,
+																	ioSelectors);
+						if(token!=G_TOKEN_NONE) return(token);
+					}
+					/* If we get here the '@'-identifier is unknown and could not be handled, skip it */
+					else
+					{
+						gchar		*message;
+
+						/* Build warning message */
+						message=g_strdup_printf(_("Skipping block of unknown identifier '@%s'"),
+												inScanner->value.v_identifier);
+
+						/* Set warning */
+						g_scanner_unexp_token(inScanner,
+												G_TOKEN_IDENTIFIER,
+												_("'@' identifier"),
+												NULL,
+												NULL,
+												message,
+												FALSE);
+
+						/* Release allocated resources */
+						g_free(message);
+
+						/* As this is just a warning return G_TOKEN_NONE to continue
+						 * parsing CSS. Otherwise parses would stop with error.
+						 */
+						return(G_TOKEN_NONE);
+					}
+
+				break;
+
+			case G_TOKEN_EOF:
+				/* If any selector was parsed then a css block must follow.
+				 * Reaching end of file now is an error ...
+				 */
+				if(g_list_length(*ioSelectors)!=0 || selector)
+				{
+					g_scanner_get_next_token(inScanner);
 					g_scanner_unexp_token(inScanner,
-											G_TOKEN_IDENTIFIER,
-											_("'@' identifier"),
+											G_TOKEN_ERROR,
 											NULL,
 											NULL,
-											message,
-											FALSE);
-
-					/* Release allocated resources */
-					g_free(message);
-
-					/* As this is just a warning return G_TOKEN_NONE to continue
-					 * parsing CSS. Otherwise parses would stop with error.
-					 */
-					return(G_TOKEN_NONE);
+											NULL,
+											_("Unhandled selector"),
+											TRUE);
+					return(G_TOKEN_LEFT_CURLY);
 				}
 
-				/* Create selector for @-identifier */
-				hasAtSelector=TRUE;
-				selector=_xfdashboard_theme_css_selector_new(inScanner->input_name,
-																GPOINTER_TO_INT(inScanner->user_data),
-																g_scanner_cur_line(inScanner),
-																g_scanner_cur_position(inScanner));
-				selector->id=g_strdup_printf("@%s", inScanner->value.v_identifier);
-				*ioSelectors=g_list_prepend(*ioSelectors, selector);
-				break;
+				/* ... otherwise it is ok so return G_TOKEN_EOF for
+				 * success result and to stop further parses.
+				 */
+				return(G_TOKEN_EOF);
 
 			default:
 				g_scanner_get_next_token(inScanner);
@@ -2094,7 +2182,7 @@ static GTokenType _xfdashboard_theme_css_parse_css_block(XfdashboardThemeCSS *se
 	for(iter=selectors; iter; iter=g_list_next(iter))
 	{
 		selector=(XfdashboardThemeCSSSelector*)iter->data;
-		if(selector->id && *(selector->id)=='@')
+		if(selector->type==XFDASHBOARD_THEME_CSS_SELECTOR_TYPE_CONSTANT)
 		{
 			g_assert(g_list_length(selectors)==1);
 			doResolveAt=FALSE;
@@ -2117,7 +2205,7 @@ static GTokenType _xfdashboard_theme_css_parse_css_block(XfdashboardThemeCSS *se
 		g_list_foreach(selectors, (GFunc)_xfdashboard_theme_css_selector_free, NULL);
 		g_list_free(selectors);
 
-		g_hash_table_destroy(styles);
+		g_hash_table_unref(styles);
 
 		return(token);
 	}
@@ -2126,7 +2214,7 @@ static GTokenType _xfdashboard_theme_css_parse_css_block(XfdashboardThemeCSS *se
 	for(iter=selectors; iter; iter=g_list_next(iter))
 	{
 		selector=(XfdashboardThemeCSSSelector*)iter->data;
-		selector->style=styles;
+		selector->style=g_hash_table_ref(styles);
 	}
 
 	/* Store selectors and styles */
@@ -2140,6 +2228,8 @@ static gboolean _xfdashboard_theme_css_parse_css(XfdashboardThemeCSS *self,
 													GInputStream *inStream,
 													const gchar *inName,
 													gint inPriority,
+													GList **outSelectors,
+													GList **outStyles,
 													GError **outError)
 {
 	XfdashboardThemeCSSPrivate		*priv;
@@ -2152,6 +2242,8 @@ static gboolean _xfdashboard_theme_css_parse_css(XfdashboardThemeCSS *self,
 	g_return_val_if_fail(XFDASHBOARD_IS_THEME_CSS(self), FALSE);
 	g_return_val_if_fail(G_IS_INPUT_STREAM(inStream), FALSE);
 	g_return_val_if_fail(outError==NULL || *outError==NULL, FALSE);
+	g_return_val_if_fail(outSelectors && *outSelectors==NULL, FALSE);
+	g_return_val_if_fail(outStyles && *outStyles==NULL, FALSE);
 
 	priv=self->priv;
 	success=TRUE;
@@ -2237,23 +2329,17 @@ static gboolean _xfdashboard_theme_css_parse_css(XfdashboardThemeCSS *self,
 		g_list_free(selectors);
 		selectors=NULL;
 
-		g_list_foreach(styles, (GFunc)g_hash_table_destroy, NULL);
+		g_list_foreach(styles, (GFunc)g_hash_table_unref, NULL);
 		g_list_free(styles);
 		styles=NULL;
 	}
 
-	/* Store selectors and styles */
-	if(selectors)
-	{
-		priv->selectors=g_list_concat(priv->selectors, selectors);
-		g_debug("Successfully parsed '%s' and added %d selectors - total %d selectors", inName, g_list_length(selectors), g_list_length(priv->selectors));
-	}
+	/* Add lines parsed in scanner to line offset */
+	priv->offsetLine+=g_scanner_cur_line(scanner)+1;
 
-	if(styles)
-	{
-		priv->styles=g_list_concat(priv->styles, styles);
-		g_debug("Successfully parsed '%s' and added %d styles - total %d style", inName, g_list_length(styles), g_list_length(priv->styles));
-	}
+	/* Return selectors and styles */
+	if(outSelectors) *outSelectors=selectors;
+	if(outStyles) *outStyles=styles;
 
 	/* Destroy scanner */
 	g_scanner_destroy(scanner);
@@ -2262,274 +2348,41 @@ static gboolean _xfdashboard_theme_css_parse_css(XfdashboardThemeCSS *self,
 	return(success);
 }
 
-/* Check if haystack contains needle.
- * The haystack is a string representing a list which entries is seperated
- * by a seperator character. This function looks up the haystack if it
- * contains an entry matching the needle and returns TRUE in this case.
- * Otherwise FALSE is returned. A needle length of -1 signals that needle
- * is a NULL-terminated string and length should be determine automatically.
- */
-static gboolean _xfdashboard_theme_css_list_contains(const gchar *inNeedle,
-														gint inNeedleLength,
-														const gchar *inHaystack,
-														gchar inSeperator)
-{
-	const gchar		*start;
-
-	g_return_val_if_fail(inNeedle && *inNeedle!=0, FALSE);
-	g_return_val_if_fail(inNeedleLength>0 || inNeedleLength==-1, FALSE);
-	g_return_val_if_fail(inHaystack && *inHaystack!=0, FALSE);
-	g_return_val_if_fail(inSeperator, FALSE);
-
-	/* If given length of needle is negative it is a NULL-terminated string */
-	if(inNeedleLength<0) inNeedleLength=strlen(inNeedle);
-
-	/* Lookup needle in haystack */
-	for(start=inHaystack; start; start=strchr(start, inSeperator))
-	{
-		gint		length;
-		gchar		*nextEntry;
-
-		/* Move to character after separator */
-		if(start[0]==inSeperator) start++;
-
-		/* Find end of this haystack entry */
-		nextEntry=strchr(start, inSeperator);
-		if(!nextEntry) length=strlen(start);
-			else length=nextEntry-start;
-
-		/* If enrty in haystack is not of same length as needle,
-		 * then it is not a match
-		 */
-		if(length!=inNeedleLength) continue;
-
-		if(!strncmp(inNeedle, start, inNeedleLength)) return(TRUE);
-	}
-
-	/* Needle was not found */
-	return(FALSE);
-}
-
-/* Score given selector againt stylable node */
-static gint _xfdashboard_themes_css_score_node_matching_selector(XfdashboardThemeCSSSelector *inSelector,
-																	XfdashboardStylable *inStylable)
-{
-	gint					score;
-	gint					a, b, c;
-	const gchar				*type="*";
-	const gchar				*classes;
-	const gchar				*pseudoClasses;
-	const gchar				*id;
-	XfdashboardStylable		*parent;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_STYLABLE(inStylable), -1);
-
-	/* For information about how the scoring is done, see documentation
-	 * "Cascading Style Sheets, level 1" of W3C, section "3.2 Cascading order"
-	 * URL: http://www.w3.org/TR/2008/REC-CSS1-20080411/#cascading-order
-	 *
-	 * 1. Find all declarations that apply to the element/property in question.
-	 *    Declarations apply if the selector matches the element in question.
-	 *    If no declarations apply, the inherited value is used. If there is
-	 *    no inherited value (this is the case for the 'HTML' element and
-	 *    for properties that do not inherit), the initial value is used.
-	 * 2. Sort the declarations by explicit weight: declarations marked
-	 *    '!important' carry more weight than unmarked (normal) declarations.
-	 * 3. Sort by origin: the author's style sheets override the reader's
-	 *    style sheet which override the UA's default values. An imported
-	 *    style sheet has the same origin as the style sheet from which it
-	 *    is imported.
-	 * 4. Sort by specificity of selector: more specific selectors will
-	 *    override more general ones. To find the specificity, count the
-	 *    number of ID attributes in the selector (a), the number of CLASS
-	 *    attributes in the selector (b), and the number of tag names in
-	 *    the selector (c). Concatenating the three numbers (in a number
-	 *    system with a large base) gives the specificity.
-	 *    Pseudo-elements and pseudo-classes are counted as normal elements
-	 *    and classes, respectively.
-	 * 5. Sort by order specified: if two rules have the same weight, the
-	 *    latter specified wins. Rules in imported style sheets are considered
-	 *    to be before any rules in the style sheet itself.
-	 *
-	 * NOTE: Keyword '!important' is not supported.
-	 */
-	a=b=c=0;
-
-	/* Get properties for given stylable */
-	id=xfdashboard_stylable_get_name(XFDASHBOARD_STYLABLE(inStylable));
-	classes=xfdashboard_stylable_get_classes(XFDASHBOARD_STYLABLE(inStylable));
-	pseudoClasses=xfdashboard_stylable_get_pseudo_classes(XFDASHBOARD_STYLABLE(inStylable));
-
-	/* Check and score type of selectors but ignore NULL or universal selectors */
-	if(inSelector->type && inSelector->type[0]!='*')
-	{
-		GType				typeID;
-		gint				matched;
-		gint				depth;
-
-		typeID=G_OBJECT_CLASS_TYPE(G_OBJECT_GET_CLASS(inStylable));
-		type=g_type_name(typeID);
-		matched=FALSE;
-
-		depth=10;
-		while(type)
-		{
-			if(!strcmp(inSelector->type, type))
-			{
-				matched=depth;
-				break;
-			}
-				else
-				{
-					typeID=g_type_parent(typeID);
-					type=g_type_name(typeID);
-					if(depth>1) depth--;
-				}
-		}
-
-		if(!matched) return(-1);
-
-		/* Score type of selector */
-		c+=depth;
-	}
-
-	/* Check and score ID */
-	if(inSelector->id)
-	{
-		/* If node has no ID return immediately */
-		if(!id || strcmp(inSelector->id, id)) return(-1);
-
-		/* Score ID */
-		a+=10;
-	}
-
-	/* Check and score pseudo classes */
-	if(inSelector->pseudoClass)
-	{
-		gchar				*needle;
-		gint				numberMatches;
-
-		/* If node has no pseudo class return immediately */
-		if(!pseudoClasses) return(-1);
-
-		/* Check that each pseudo-class from the selector appears in the
-		 * pseudo-classes from the node, i.e. the selector pseudo-class list
-		 * is a subset of the node's pseudo-class list
-		 */
-		numberMatches=0;
-		for(needle=inSelector->pseudoClass; needle; needle=strchr(needle, ':'))
-		{
-			gint			needleLength;
-			gchar			*nextNeedle;
-
-			/* Move pointer of needle beyond pseudo-class seperator ':' */
-			if(needle[0]==':') needle++;
-
-			/* Get length of needle */
-			nextNeedle=strchr(needle, ':');
-			if(nextNeedle) needleLength=nextNeedle-needle;
-				else needleLength=strlen(needle);
-
-			/* If pseudo-class from the selector does not appear in the
-			 * list of pseudo-classes from the node, then this is not a
-			 * match
-			 */
-			if(!_xfdashboard_theme_css_list_contains(needle, needleLength, pseudoClasses, ':')) return(-1);
-			numberMatches++;
-		}
-
-		/* Score matching pseudo-class */
-		b=b+(10*numberMatches);
-	}
-
-	/* Check and score class */
-	if(inSelector->class)
-	{
-		/* If node has no class return immediately */
-		if(!classes) return(-1);
-
-		/* Return also if class in selector does not match any node class */
-		if(!_xfdashboard_theme_css_list_contains(inSelector->class, strlen(inSelector->class), classes, '.')) return(-1);
-
-		/* Score matching class */
-		b=b+10;
-	}
-
-	/* Check and score parent */
-	parent=xfdashboard_stylable_get_parent(inStylable);
-	if(parent && !XFDASHBOARD_IS_STYLABLE(parent)) parent=NULL;
-
-	if(inSelector->parent)
-	{
-		gint					numberMatches;
-
-		/* If node has no parent, no parent can match ;) so return immediately */
-		if(!parent) return(-1);
-
-		/* Check if there are matching parents. If not return immediately. */
-		numberMatches=_xfdashboard_themes_css_score_node_matching_selector(inSelector->parent, parent);
-		if(numberMatches<0) return(-1);
-
-		/* Score matching parents */
-		c+=numberMatches;
-	}
-
-	/* Check and score ancestor */
-	if(inSelector->ancestor)
-	{
-		gint					numberMatches;
-		XfdashboardStylable		*stylableParent, *ancestor;
-
-		/* If node has no parents, no ancestor can match so return immediately */
-		if(!parent) return(-1);
-
-		/* Iterate through ancestors and check and score them */
-		ancestor=parent;
-		while(ancestor)
-		{
-			/* Get number of matches for ancestor and if at least one matches,
-			 * stop search and score
-			 */
-			numberMatches=_xfdashboard_themes_css_score_node_matching_selector(inSelector->ancestor, ancestor);
-			if(numberMatches>=0)
-			{
-				c+=numberMatches;
-				break;
-			}
-
-			/* Get next ancestor to check */
-			stylableParent=xfdashboard_stylable_get_parent(ancestor);
-			if(stylableParent && !XFDASHBOARD_IS_STYLABLE(stylableParent)) stylableParent=NULL;
-
-			ancestor=stylableParent;
-			if(!ancestor || !XFDASHBOARD_IS_STYLABLE(ancestor)) return(-1);
-		}
-	}
-
-	/* Calculate final score */
-	score=(a*10000)+(b*100)+c;
-	return(score);
-}
-
 /* Callback for sorting selector matches by score */
 static gint _xfdashboard_theme_css_sort_by_score(XfdashboardThemeCSSSelectorMatch *inLeft,
 													XfdashboardThemeCSSSelectorMatch *inRight)
 {
-	gint	priority;
-	guint	line;
-	guint	position;
-	gint	score;
+	gint							priority;
+	guint							line;
+	guint							position;
+	gint							score;
+	XfdashboardCssSelectorRule		*leftRule;
+	XfdashboardCssSelectorRule		*rightRule;
+
+	g_assert(inLeft);
+	g_assert(inRight);
 
 	score=inLeft->score-inRight->score;
 	if(score!=0) return(score);
 
-	priority=inLeft->selector->priority-inRight->selector->priority;
+	/* Get CSS selector rule to compare them */
+	g_assert(inLeft->selector && inLeft->selector->selector);
+	g_assert(inRight->selector && inRight->selector->selector);
+
+	leftRule=xfdashboard_css_selector_get_rule(inLeft->selector->selector);
+	rightRule=xfdashboard_css_selector_get_rule(inRight->selector->selector);
+
+	/* Compar CSS selector rules */
+	priority=xfdashboard_css_selector_rule_get_priority(leftRule);
+	priority-=xfdashboard_css_selector_rule_get_priority(rightRule);
 	if(priority!=0) return(priority);
 
-	line=inLeft->selector->line-inRight->selector->line;
+	line=xfdashboard_css_selector_rule_get_line(leftRule);
+	line-=xfdashboard_css_selector_rule_get_line(rightRule);
 	if(line!=0) return(line);
 
-	position=inLeft->selector->position-inRight->selector->position;
+	position=xfdashboard_css_selector_rule_get_position(leftRule);
+	position-=xfdashboard_css_selector_rule_get_position(rightRule);
 	if(position!=0) return(position);
 
 	return(0);
@@ -2540,7 +2393,7 @@ static gint _xfdashboard_theme_css_sort_by_score(XfdashboardThemeCSSSelectorMatc
 /* Dispose this object */
 static void _xfdashboard_theme_css_dispose(GObject *inObject)
 {
-	XfdashboardThemeCSS			*self=XFDASHBOARD_THEME_CSS(inObject);
+	XfdashboardThemeCSS				*self=XFDASHBOARD_THEME_CSS(inObject);
 	XfdashboardThemeCSSPrivate		*priv=self->priv;
 
 	/* Release allocated resources */
@@ -2559,7 +2412,7 @@ static void _xfdashboard_theme_css_dispose(GObject *inObject)
 
 	if(priv->styles)
 	{
-		g_list_foreach(priv->styles, (GFunc)g_hash_table_destroy, NULL);
+		g_list_foreach(priv->styles, (GFunc)g_hash_table_unref, NULL);
 		g_list_free(priv->styles);
 		priv->styles=NULL;
 	}
@@ -2573,7 +2426,7 @@ static void _xfdashboard_theme_css_dispose(GObject *inObject)
 
 	if(priv->registeredFunctions)
 	{
-		g_hash_table_destroy(priv->registeredFunctions);
+		g_hash_table_unref(priv->registeredFunctions);
 		priv->registeredFunctions=NULL;
 	}
 
@@ -2649,6 +2502,7 @@ void xfdashboard_theme_css_init(XfdashboardThemeCSS *self)
 	priv->styles=NULL;
 	priv->names=NULL;
 	priv->registeredFunctions=NULL;
+	priv->offsetLine=0;
 
 	/* Register CSS functions */
 #define REGISTER_CSS_FUNC(name, callback) \
@@ -2695,12 +2549,16 @@ gboolean xfdashboard_theme_css_add_file(XfdashboardThemeCSS *self,
 	GFile							*file;
 	GFileInputStream				*stream;
 	GError							*error;
+	GList							*selectors;
+	GList							*styles;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_THEME_CSS(self), FALSE);
 	g_return_val_if_fail(inPath!=NULL && *inPath!=0, FALSE);
 	g_return_val_if_fail(outError==NULL || *outError==NULL, FALSE);
 
 	priv=self->priv;
+	selectors=NULL;
+	styles=NULL;
 
 	/* Load and parse CSS file */
 	file=g_file_new_for_path(inPath);
@@ -2723,7 +2581,13 @@ gboolean xfdashboard_theme_css_add_file(XfdashboardThemeCSS *self,
 		return(FALSE);
 	}
 
-	_xfdashboard_theme_css_parse_css(self, G_INPUT_STREAM(stream), inPath, inPriority, &error);
+	_xfdashboard_theme_css_parse_css(self,
+										G_INPUT_STREAM(stream),
+										inPath,
+										inPriority,
+										&selectors,
+										&styles,
+										&error);
 	if(error)
 	{
 		g_propagate_error(outError, error);
@@ -2731,9 +2595,29 @@ gboolean xfdashboard_theme_css_add_file(XfdashboardThemeCSS *self,
 	}
 
 	/* If we get here adding, loading and parsing CSS file was successful
-	 * so add filename to list of loaded name and return TRUE
+	 * so add filename to list of loaded sources, add selectors and styles
+	 * to list of selectors and styles in this theme and return TRUE
 	 */
 	priv->names=g_slist_prepend(priv->names, strdup(inPath));
+
+	if(selectors)
+	{
+		priv->selectors=g_list_concat(priv->selectors, selectors);
+		g_debug("Successfully parsed '%s' and added %d selectors - total %d selectors",
+					inPath,
+					g_list_length(selectors),
+					g_list_length(priv->selectors));
+	}
+
+	if(styles)
+	{
+		priv->styles=g_list_concat(priv->styles, styles);
+		g_debug("Successfully parsed '%s' and added %d styles - total %d styles",
+					inPath,
+					g_list_length(styles),
+					g_list_length(priv->styles));
+	}
+
 	return(TRUE);
 }
 
@@ -2783,14 +2667,19 @@ GHashTable* xfdashboard_theme_css_get_properties(XfdashboardThemeCSS *self,
 	for(entry=priv->selectors; entry; entry=g_list_next(entry))
 	{
 		gint							score;
+		XfdashboardThemeCSSSelector		*selector;
 
-		score=_xfdashboard_themes_css_score_node_matching_selector(entry->data, inStylable);
-		if(score>=0)
+		selector=(XfdashboardThemeCSSSelector*)entry->data;
+		if(selector->type==XFDASHBOARD_THEME_CSS_SELECTOR_TYPE_SELECTOR)
 		{
-			match=g_slice_new(XfdashboardThemeCSSSelectorMatch);
-			match->selector=entry->data;
-			match->score=score;
-			matches=g_list_prepend(matches, match);
+			score=xfdashboard_css_selector_score_matching_stylable_node(selector->selector, inStylable);
+			if(score>=0)
+			{
+				match=g_slice_new(XfdashboardThemeCSSSelectorMatch);
+				match->selector=entry->data;
+				match->score=score;
+				matches=g_list_prepend(matches, match);
+			}
 		}
 	}
 
@@ -2808,10 +2697,10 @@ GHashTable* xfdashboard_theme_css_get_properties(XfdashboardThemeCSS *self,
 		XfdashboardThemeCSSTableCopyData	copyData;
 
 		/* Get selector */
-		match=entry->data;
+		match=(XfdashboardThemeCSSSelectorMatch*)entry->data;
 
 		/* Copy selector properties to result set */
-		copyData.name=match->selector->name;
+		copyData.name=xfdashboard_css_selector_rule_get_source(xfdashboard_css_selector_get_rule(match->selector->selector));
 		copyData.table=result;
 
 		g_hash_table_foreach(match->selector->style,

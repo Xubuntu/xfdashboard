@@ -80,6 +80,9 @@ struct _XfdashboardCssSelectorRule
 	gint							priority;
 	guint							line;
 	guint							position;
+
+	guint							origLine;
+	guint							origPosition;
 };
 
 /* Create rule */
@@ -93,9 +96,9 @@ static XfdashboardCssSelectorRule* _xfdashboard_css_selector_rule_new(const gcha
 	rule=g_slice_new0(XfdashboardCssSelectorRule);
 	rule->source=g_strdup(inSource);
 	rule->priority=inPriority;
-	rule->line=inLine;
-	rule->position=inPosition;
-  
+	rule->origLine=rule->line=inLine;
+	rule->origPosition=rule->position=inPosition;
+
 	return(rule);
 }
 
@@ -290,7 +293,7 @@ static gint _xfdashboard_css_selector_score_matching_node(XfdashboardCssSelector
 		if(!nodeTypeID) return(-1);
 
 		/* Check if type of this rule matches type of other rule */
-		if(!g_type_is_a(ruleTypeID, nodeTypeID)) return(-1);
+		if(!g_type_is_a(nodeTypeID, ruleTypeID)) return(-1);
 
 		/* Determine depth difference between both types
 		 * which is the score of this test with a maximum of 99
@@ -801,9 +804,9 @@ static void _xfdashboard_css_selector_dispose(GObject *inObject)
 
 /* Set/get properties */
 static void _xfdashboard_css_selector_set_property(GObject *inObject,
-												guint inPropID,
-												const GValue *inValue,
-												GParamSpec *inSpec)
+													guint inPropID,
+													const GValue *inValue,
+													GParamSpec *inSpec)
 {
 	XfdashboardCssSelector		*self=XFDASHBOARD_CSS_SELECTOR(inObject);
 
@@ -820,9 +823,9 @@ static void _xfdashboard_css_selector_set_property(GObject *inObject,
 }
 
 static void _xfdashboard_css_selector_get_property(GObject *inObject,
-												guint inPropID,
-												GValue *outValue,
-												GParamSpec *inSpec)
+													guint inPropID,
+													GValue *outValue,
+													GParamSpec *inSpec)
 {
 	XfdashboardCssSelector		*self=XFDASHBOARD_CSS_SELECTOR(inObject);
 
@@ -948,12 +951,17 @@ XfdashboardCssSelector* xfdashboard_css_selector_new_from_string_with_priority(c
  * a comma-separated list of CSS selectos) and to unref the returned selector
  * if scanner points to an invalid token.
  */
-XfdashboardCssSelector* xfdashboard_css_selector_new_from_scanner(GScanner *ioScanner)
+XfdashboardCssSelector* xfdashboard_css_selector_new_from_scanner(GScanner *ioScanner,
+																	XfdashboardCssSelectorParseFinishCallback inFinishCallback,
+																	gpointer inUserData)
 {
-	return(xfdashboard_css_selector_new_from_scanner_with_priority(ioScanner, G_MININT));
+	return(xfdashboard_css_selector_new_from_scanner_with_priority(ioScanner, G_MININT, inFinishCallback, inUserData));
 }
 
-XfdashboardCssSelector* xfdashboard_css_selector_new_from_scanner_with_priority(GScanner *ioScanner, gint inPriority)
+XfdashboardCssSelector* xfdashboard_css_selector_new_from_scanner_with_priority(GScanner *ioScanner,
+																				gint inPriority,
+																				XfdashboardCssSelectorParseFinishCallback inFinishCallback,
+																				gpointer inUserData)
 {
 	GObject				*selector;
 
@@ -974,7 +982,30 @@ XfdashboardCssSelector* xfdashboard_css_selector_new_from_scanner_with_priority(
 	if(!_xfdashboard_css_selector_parse(XFDASHBOARD_CSS_SELECTOR(selector), ioScanner))
 	{
 		g_object_unref(selector);
-		selector=NULL;
+		return(NULL);
+	}
+
+	/* If a callback is given to call after parsing finished so call it now
+	 * to determine if scanner is still in good state. If it is in bad state
+	 * then return NULL.
+	 */
+	if(inFinishCallback)
+	{
+		gboolean		goodState;
+
+		goodState=(inFinishCallback)(XFDASHBOARD_CSS_SELECTOR(selector), ioScanner, g_scanner_peek_next_token(ioScanner), inUserData);
+		if(!goodState)
+		{
+			g_scanner_unexp_token(ioScanner,
+									G_TOKEN_ERROR,
+									NULL,
+									NULL,
+									NULL,
+									_("Unexpected state of CSS scanner."),
+									TRUE);
+			g_object_unref(selector);
+			return(NULL);
+		}
 	}
 
 	/* Return created selector which may be NULL in case of error */
@@ -1014,6 +1045,28 @@ gint xfdashboard_css_selector_score_matching_stylable_node(XfdashboardCssSelecto
 
 	/* Check and score rules */
 	return(_xfdashboard_css_selector_score_matching_node(self->priv->rule, inStylable));
+}
+
+/* Adjust source line and position of this selector to an offset */
+void xfdashboard_css_selector_adjust_to_offset(XfdashboardCssSelector *self, gint inLine, gint inPosition)
+{
+	XfdashboardCssSelectorPrivate	*priv;
+	gint							newLine;
+	gint							newPosition;
+
+	g_return_if_fail(XFDASHBOARD_IS_CSS_SELECTOR(self));
+
+	priv=self->priv;
+
+	/* Adjust to offset */
+	if(priv->rule)
+	{
+		newLine=inLine+priv->rule->origLine;
+		priv->rule->line=MAX(0, newLine);
+
+		newPosition=inPosition+priv->rule->origPosition;
+		priv->rule->position=MAX(0, newPosition);
+	}
 }
 
 /* Get rule parsed */

@@ -1,3 +1,216 @@
+commit b7e61496c56c9f76ef62d4796a2f6d5b9abb6804
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Nov 26 07:07:58 2014 +0100
+
+    Add new theme 'xfdashboard-wine' by lacios
+
+commit 4c30b8acabf6aaedd475b1a30b8159d40e461d0d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Nov 26 07:05:46 2014 +0100
+
+    Add new theme 'xfdashboard-mint' by lacios
+
+commit ddf37149c2aebc089ba2ad0f9a6dbf71a5343547
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Nov 26 07:03:16 2014 +0100
+
+    Add new theme 'xfdashboard-blue' by lacios
+
+commit 321701ee075c1d5132d489c07bd646b87fde9fde
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Nov 26 06:58:59 2014 +0100
+
+    Add theme 'xfdashboard-auber' by lacios
+
+commit 4996781acd27cd6c4829e3fd56f69273f07af566
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Nov 26 06:51:27 2014 +0100
+
+    Update theme 'xfdashboard-dark'
+
+commit 89493215fadf3ce6f9345e0dc02b501361f54963
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Nov 23 10:26:07 2014 +0100
+
+    Added new theme 'xfdashboard-moranga' by lacios
+
+commit aae88e3df3a18be676c3934fe90dbedd8e8fa403
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 21 19:37:00 2014 +0100
+
+    Fix compiler warnings about const qualifier
+
+commit 16a77fb64d31b74c02000549b06fc643fd7cba08
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 21 19:33:05 2014 +0100
+
+    Follow suggestion to rename new theme to "xfdashboard-dark"
+    
+    See issue #58
+
+commit 70f46760df1cfc4e8e38d6b7f607034737956d2c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 21 19:25:16 2014 +0100
+
+    Fix build error
+    
+    Missed to add path to Makefile of new theme to configure.ac.in
+
+commit 25362e2da581fcfb1c9214bbc2114adba877f77e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 21 05:57:52 2014 +0100
+
+    Add new theme 'dark' by lacios
+    
+    Request at issue #55
+
+commit 4b8a9f5d9852eeab48f97a7e2316171e24fe2134
+Merge: af51f54 f773b50
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 21 05:44:11 2014 +0100
+
+    Merge branch 'master' of github.com:gmc-holle/xfdashboard
+
+commit af51f54dc1c4b419ae455dd579951d106a0bd22f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 21 05:43:01 2014 +0100
+
+    Correct searching application case-insensitive
+    
+    Should fix issue #56
+
+commit f773b50cd76427f9d9fa0076706ac9f150aa67ea
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Nov 17 14:26:20 2014 +0100
+
+    Fixing returning a value in void function
+
+commit 6d67e2c9291d3c34f562848636e13ec0132e28b7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Nov 16 19:14:50 2014 +0100
+
+    More fixes for global line offset when importing external CSS files
+
+commit 9287ae10e28404d2c04949dd765f09cd8919aa91
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Nov 16 16:49:26 2014 +0100
+
+    Forget to adjust global line offset before parsing CSS file going to be imported
+
+commit d9375a17b3a3545679529c5eaba1169597fed095
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Nov 16 16:38:39 2014 +0100
+
+    Adjust line of selector's source to a global line offset
+    
+    This is needed because an imported CSS file via @import(...) will start at line 1 although it is included virtually into the current CSS file at the line where @import is issued. So the imported CSS file and all following lines in the current CSS file need to be adjusted. That is what the global line offset is for. This corrects sorting matching selectors when priority is equal and the line in file where the matching selector is checked (see _xfdashboard_theme_css_sort_by_score).
+
+commit ba5c16287dfc65437281d80fae15ffc9b6f19f95
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Nov 16 13:26:50 2014 +0100
+
+    Implement '@import' function in CSS
+    
+    The @import function allows to import other CSS styles from other files. The syntax is: @import(filename). The filename can be an absolute or relative path. The filename should be quoted with either by single or double quotation marks but it must not. Relative paths will be looked up first relative to the path of current CSS file being parsed. If no such file exists the relative path will be used relative the theme's path.
+    
+    This commit addresses issue #52
+
+commit ccffb76c194847a39129169fac3a83f30238906e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Nov 13 18:07:32 2014 +0100
+
+    Remove "'%'-style pattern rules are a GNU make extension" warnings
+
+commit afd11f6685f2f38bdac11f67f55e290f3556949b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Nov 13 17:53:17 2014 +0100
+
+    Replace deprecated AC_PROG_INTLTOOL with IT_PROG_INTLTOOL
+    
+    See https://bugzilla.xfce.org/show_bug.cgi?id=8930 for details.
+
+commit 3ca2a014971ce1296c1efd1f8324d39477d9689c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Nov 12 21:03:23 2014 +0100
+
+    Skip finding window frame on CSD-enabled windows
+    
+    If "include-window-frame" is set to true for XfdashboardWindowContent in CSS check if window is client side decorated and if it has no decorations. If so skip finding window frame and behave like we did not found it.
+    
+    This addresses issue #48.
+
+commit 5e2135c2e2eea979a917e022fbd218d28a5355aa
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 7 20:01:44 2014 +0100
+
+    Set default theme at first launch
+    
+    This commit addresses issue #51. It sets the '/theme' property in Xfconf for xfdashboard at first launch to let the user see this property and that it can be modified.
+
+commit 8d34d1c56ce871961ea330df3db821c7261698ff
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 7 19:34:26 2014 +0100
+
+    Revalidate views when created
+    
+    Invalidate views when created to force a revalidation of their styles to get properties set even if view actor is not mapped. This addresses issue #46
+
+commit 5243f8988dcf05cb9c42c818222d5ee22f1fa120
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Nov 5 22:48:01 2014 +0100
+
+    Fix typo
+
+commit 6a680c43562aea658fbc1a6c552eeac17f8fc9a0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Nov 5 22:41:21 2014 +0100
+
+    Allow theme to design how to draw window icon in window content when window is unmapped (window content is unavaiable)
+    
+    Add themable properties to XfdashboardLiveWindows which control how the window icon is drawn in window content when window is unmapped due to window manager limitations, e.g. window is minized or window is not at active workspace when using xfwm4. The properties are prefixed with "unmapped-window-icon-".
+
+commit b26edd5054185d3f4b0cd35ba67b14b16a5c70bb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 31 20:54:51 2014 +0100
+
+    Avoid unnecessary and scary critical warning if background X Window ID could not be "translated" to a Wnck window object.
+
+commit 65c470124b83b0cdc9429af603cdbbe9c9d5f8c0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Oct 27 19:40:16 2014 +0100
+
+    Fix checking for same type or derived from type in new css selector class
+
+commit e3fcc5e30901d59f5d6c7705155e0566e24ca6a0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Oct 27 19:04:27 2014 +0100
+
+    Try not to eat up CPU
+    
+    If a new window is created an instance of XfdashboardWindowContent is created and xfdashboard_window_content_set_window is called once for this new window. This function sets up the window content object to retrieve live updates. But it also sets up for live updates if xfdashboard is running in daemon mode and it is not active at this time. The result is that the window content texture is updated in background all the time until xfdashboard gets active and is suspended again then the window content's suspend function is called which stops listening for live update until xfdashboard is resumed.
+    
+    This CPU usage is unneccessary so call window content's suspend function immediately in xfdashboard_window_content_set_window after it has been set up for live update to reduce CPU usage again.
+    
+    I hope this fixes issue #44
+
+commit e25f4895c9c9339e9ea2d0a49f445f3661e7fa7e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 21 22:16:10 2014 +0200
+
+    Make use of new css selector framework in theme's CSS parser
+
+commit d39ff8ac3fc26885679ec00b1fd5005be7de02d8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Oct 19 19:46:39 2014 +0200
+
+    Post-release version bump to 0.3.4
+
+commit 2cd1b9f39700a8f21a44a0d5688b1e16cbc37f32
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Oct 19 19:45:20 2014 +0200
+
+    Bump version to 0.3.3
+
 commit 9808bcc1fc43b5842ef23d660b4734865e1c6acf
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Sun Oct 19 10:42:13 2014 +0200

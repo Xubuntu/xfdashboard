@@ -1,0 +1,6 @@
+[Xfdashboard Theme]
+Name=xfdashboard-wine
+Comment=Red wine theme for xfdashboard
+Style=xfdashboard-wine.css
+Layout=xfdashboard.xml
+Effects=effects.xml
