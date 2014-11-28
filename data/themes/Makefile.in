@@ -373,7 +373,13 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = \
-	xfdashboard
+	xfdashboard \
+	xfdashboard-auber \
+	xfdashboard-blue \
+	xfdashboard-dark \
+	xfdashboard-mint \
+	xfdashboard-moranga \
+	xfdashboard-wine
 
 all: all-recursive
 

@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [3])
-m4_define([xfdashboard_version_micro], [3])
-m4_define([xfdashboard_version_build], [9808bcc])
+m4_define([xfdashboard_version_micro], [4])
+m4_define([xfdashboard_version_build], [b7e6149])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -30,6 +30,7 @@ m4_define([xfconf_minimum_version], [4.10.0])
 m4_define([dbus_glib_minimum_version], [0.98])
 m4_define([intltool_minimum_version], [0.31])
 m4_define([xcomposite_minimum_version], [0.2])
+m4_define([intltool_minimum_version], [0.35])
 
 dnl *******************************************
 dnl *** Debugging support for GIT snapshots ***
@@ -65,7 +66,7 @@ AC_PROG_CC()
 AM_PROG_CC_C_O()
 AC_PROG_LD()
 AC_PROG_INSTALL()
-AC_PROG_INTLTOOL()
+IT_PROG_INTLTOOL([intltool_minimum_version], [no-xml])
 AC_CHECK_PROGS([PERL], [perl5 perl])
 m4_ifdef([AC_PROG_SED], [AC_PROG_SED], [AC_CHECK_PROG(SED, sed, sed)])
 XDT_PROG_PKG_CONFIG()
@@ -207,6 +208,12 @@ data/icons/128x128/Makefile
 data/icons/256x256/Makefile
 data/themes/Makefile
 data/themes/xfdashboard/Makefile
+data/themes/xfdashboard-auber/Makefile
+data/themes/xfdashboard-blue/Makefile
+data/themes/xfdashboard-dark/Makefile
+data/themes/xfdashboard-mint/Makefile
+data/themes/xfdashboard-moranga/Makefile
+data/themes/xfdashboard-wine/Makefile
 po/Makefile.in
 src/Makefile
 ])
