@@ -24,7 +24,7 @@ Vcs-Git: https://bitbucket.org/xubuntu/xfdashboard/
 Package: xfdashboard
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Gnome shell like dashboard for Xfce
+Description: GNOME shell like dashboard for Xfce
  xfdashboard provides an overview of applications currently open enabling the
  user to switch between different applications. The search feature works like
  Xfce's appfinder which makes it convenient to search for and start
@@ -35,7 +35,7 @@ Architecture: any
 Section: debug
 Priority: extra
 Depends: ${shlibs:Depends}, ${misc:Depends}, xfdashboard (= ${binary:Version})
-Description: Gnome shell like dashboard for Xfce - debugging symbols
+Description: GNOME shell like dashboard for Xfce - debugging symbols
  xfdashboard provides an overview of applications currently open enabling the
  user to switch between different applications. The search feature works like
  Xfce's appfinder which makes it convenient to search for and start
