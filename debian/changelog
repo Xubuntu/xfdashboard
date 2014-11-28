@@ -1,3 +1,11 @@
+xfdashboard (0.3.4-0ubuntu1) vivid; urgency=medium
+
+  * Imported Upstream version 0.3.4
+  * d/rules: Enable all hardening rules.
+  * d/control: Update description: Gnome => GNOME.
+
+ -- Unit 193 <unit193@ubuntu.com>  Fri, 28 Nov 2014 04:46:44 -0500
+
 xfdashboard (0.3.3-0ubuntu1) utopic; urgency=medium
 
   * Imported Upstream version 0.3.3
