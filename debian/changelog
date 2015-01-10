@@ -1,3 +1,10 @@
+xfdashboard (0.3.5-0ubuntu1) vivid; urgency=medium
+
+  * Imported Upstream version 0.3.5
+  * d/copyright: Update copyright years.
+
+ -- Unit 193 <unit193@ubuntu.com>  Sat, 10 Jan 2015 16:33:59 -0500
+
 xfdashboard (0.3.4-0ubuntu1) vivid; urgency=medium
 
   * Imported Upstream version 0.3.4
