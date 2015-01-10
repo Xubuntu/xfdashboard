@@ -1,7 +1,7 @@
 /*
  * quicklaunch: Quicklaunch box
  * 
- * Copyright 2012-2014 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 
 #include "background.h"
 #include "toggle-button.h"
+#include "focusable.h"
 
 G_BEGIN_DECLS
 
@@ -61,6 +62,33 @@ struct _XfdashboardQuicklaunchClass
 	/* Virtual functions */
 	void (*favourite_added)(XfdashboardQuicklaunch *self, GAppInfo *inAppInfo);
 	void (*favourite_removed)(XfdashboardQuicklaunch *self, GAppInfo *inAppInfo);
+
+	/* Binding actions */
+	gboolean (*selection_add_favourite)(XfdashboardQuicklaunch *self,
+											XfdashboardFocusable *inSource,
+											const gchar *inAction,
+											ClutterEvent *inEvent);
+	gboolean (*selection_remove_favourite)(XfdashboardQuicklaunch *self,
+											XfdashboardFocusable *inSource,
+											const gchar *inAction,
+											ClutterEvent *inEvent);
+
+	gboolean (*favourite_reorder_left)(XfdashboardQuicklaunch *self,
+											XfdashboardFocusable *inSource,
+											const gchar *inAction,
+											ClutterEvent *inEvent);
+	gboolean (*favourite_reorder_right)(XfdashboardQuicklaunch *self,
+											XfdashboardFocusable *inSource,
+											const gchar *inAction,
+											ClutterEvent *inEvent);
+	gboolean (*favourite_reorder_up)(XfdashboardQuicklaunch *self,
+											XfdashboardFocusable *inSource,
+											const gchar *inAction,
+											ClutterEvent *inEvent);
+	gboolean (*favourite_reorder_down)(XfdashboardQuicklaunch *self,
+											XfdashboardFocusable *inSource,
+											const gchar *inAction,
+											ClutterEvent *inEvent);
 };
 
 /* Public API */

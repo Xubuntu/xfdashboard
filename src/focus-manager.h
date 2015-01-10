@@ -2,7 +2,7 @@
  * focus-manager: Single-instance managing focusable actors
  *                for keyboard navigation
  * 
- * Copyright 2012-2014 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ G_BEGIN_DECLS
 #define XFDASHBOARD_IS_FOCUS_MANAGER(obj)			(G_TYPE_CHECK_INSTANCE_TYPE((obj), XFDASHBOARD_TYPE_FOCUS_MANAGER))
 #define XFDASHBOARD_FOCUS_MANAGER_CLASS(klass)		(G_TYPE_CHECK_CLASS_CAST((klass), XFDASHBOARD_TYPE_FOCUS_MANAGER, XfdashboardFocusManagerClass))
 #define XFDASHBOARD_IS_FOCUS_MANAGER_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE((klass), XFDASHBOARD_TYPE_FOCUS_MANAGER))
-#define XFDASHBOARD_FOCUS_MANAGER_GET_CLASS(obj)		(G_TYPE_INSTANCE_GET_CLASS((obj), XFDASHBOARD_TYPE_FOCUS_MANAGER, XfdashboardFocusManagerClass))
+#define XFDASHBOARD_FOCUS_MANAGER_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS((obj), XFDASHBOARD_TYPE_FOCUS_MANAGER, XfdashboardFocusManagerClass))
 
 typedef struct _XfdashboardFocusManager				XfdashboardFocusManager;
 typedef struct _XfdashboardFocusManagerClass		XfdashboardFocusManagerClass;
@@ -65,6 +65,16 @@ struct _XfdashboardFocusManagerClass
 	void (*changed)(XfdashboardFocusManager *self,
 						XfdashboardFocusable *oldActor,
 						XfdashboardFocusable *newActor);
+
+	/* Binding actions */
+	gboolean (*focus_move_next)(XfdashboardFocusManager *self,
+									XfdashboardFocusable *inSource,
+									const gchar *inAction,
+									ClutterEvent *inEvent);
+	gboolean (*focus_move_previous)(XfdashboardFocusManager *self,
+									XfdashboardFocusable *inSource,
+									const gchar *inAction,
+									ClutterEvent *inEvent);
 };
 
 /* Public API */
@@ -73,6 +83,7 @@ GType xfdashboard_focus_manager_get_type(void) G_GNUC_CONST;
 XfdashboardFocusManager* xfdashboard_focus_manager_get_default(void);
 
 void xfdashboard_focus_manager_register(XfdashboardFocusManager *self, XfdashboardFocusable *inFocusable);
+void xfdashboard_focus_manager_register_after(XfdashboardFocusManager *self, XfdashboardFocusable *inFocusable, XfdashboardFocusable *inAfterFocusable);
 void xfdashboard_focus_manager_unregister(XfdashboardFocusManager *self, XfdashboardFocusable *inFocusable);
 GList* xfdashboard_focus_manager_get_registered(XfdashboardFocusManager *self);
 gboolean xfdashboard_focus_manager_is_registered(XfdashboardFocusManager *self, XfdashboardFocusable *inFocusable);
@@ -86,7 +97,7 @@ XfdashboardFocusable* xfdashboard_focus_manager_get_next_focusable(XfdashboardFo
 XfdashboardFocusable* xfdashboard_focus_manager_get_previous_focusable(XfdashboardFocusManager *self,
 																		XfdashboardFocusable *inBeginFocusable);
 
-gboolean xfdashboard_focus_manager_handle_key_event(XfdashboardFocusManager *self, const ClutterEvent *inEvent);
+gboolean xfdashboard_focus_manager_handle_key_event(XfdashboardFocusManager *self, const ClutterEvent *inEvent, XfdashboardFocusable *inFocusable);
 
 G_END_DECLS
 

@@ -24,6 +24,8 @@ xfdashboard_headers = \
 	applications-search-provider.h \
 	applications-view.h \
 	background.h \
+	binding.h \
+	bindings-pool.h \
 	button.h \
 	click-action.h \
 	collapse-box.h \
@@ -35,7 +37,6 @@ xfdashboard_headers = \
 	focusable.h \
 	focus-manager.h \
 	image-content.h \
-	layoutable.h \
 	live-window.h \
 	live-workspace.h \
 	outline-effect.h \
@@ -48,6 +49,7 @@ xfdashboard_headers = \
 	search-result-set.h \
 	search-view.h \
 	stage.h \
+	stage-interface.h \
 	stylable.h \
 	text-box.h \
 	theme.h \
@@ -79,6 +81,8 @@ xfdashboard_SOURCES = \
 	applications-search-provider.c \
 	applications-view.c \
 	background.c \
+	binding.c \
+	bindings-pool.c \
 	button.c \
 	click-action.c \
 	collapse-box.c \
@@ -90,7 +94,6 @@ xfdashboard_SOURCES = \
 	focusable.c \
 	focus-manager.c \
 	image-content.c \
-	layoutable.c \
 	live-window.c \
 	live-workspace.c \
 	main.c \
@@ -104,6 +107,7 @@ xfdashboard_SOURCES = \
 	search-result-set.c \
 	search-view.c \
 	stage.c \
+	stage-interface.c \
 	stylable.c \
 	text-box.c \
 	theme.c \

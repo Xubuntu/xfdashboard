@@ -1,7 +1,7 @@
 /*
  * search-view: A view showing applications matching search criterias
  * 
- * Copyright 2012-2014 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -989,7 +989,7 @@ static void xfdashboard_search_view_init(XfdashboardSearchView *self)
 	{
 		GType					providerType;
 
-		providerType=(GType)LISTITEM_TO_GTYPE(entry->data);
+		providerType=(GType)GPOINTER_TO_GTYPE(entry->data);
 		_xfdashboard_search_view_on_search_provider_registered(self, providerType, priv->searchManager);
 	}
 	g_list_free(providers);

@@ -1,3 +1,242 @@
+commit 0b4a8534e325037851b050fb6a03cfd34a062718
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 10 12:44:00 2015 +0100
+
+    Allow <Alt> modifier to be used in bindings and correct delimiters to +, - and white-spaces when parsing key-code of a binding.
+
+commit b753c9943968a25d724a8e6b178f8c07acd01f8d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 8 19:58:45 2015 +0100
+
+    Allow scroll events in windows view to change active workspace
+    
+    Like XfdashboardWorkspaceSelector the windows view should change active workspace on scroll event, e.g. mouse-wheel up or down. But it should be configurable so a new xfconf property "/components/windows-view/scroll-event-changes-workspace" was introduced which is a boolean value to indicate if it should change active workspace on scroll events (value is TRUE) or not (value is FALSE)..
+    
+    This fixes issue #41
+
+commit 37a72c90cc64f4b32498105c5eeab49c28976b1d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 8 11:17:22 2015 +0100
+
+    Remove button-related parts from bindings because they are not implementable the way I would like.
+
+commit dd7ea019fc0dd9fb5587560c6eaaa219c94da672
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 7 21:06:24 2015 +0100
+
+    Check for action signal in bindings
+    
+    Check at least if binding would call an action signal even in non-debug builds to prevent that user configures a "normal" signal as action in his bindings.
+
+commit 95357acb8b7a19f5a8cc9700d1550c5d8962deea
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 7 20:36:50 2015 +0100
+
+    Implement key-bindable window activation shortcuts
+    
+    This fixes issue #35
+
+commit 06f8ea55fa991c7bf6f2f30e88127999a54c7aa3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 5 21:45:29 2015 +0100
+
+    Add more bindable actions
+    
+    Views can now be activated and focused (at once - simultaneously) but only if attribute "allow-unfocusable-targets" is set to true or 1 in bindings configuration file.
+    
+    If attribute "allow-unfocusable-targets" is set to true or 1 it indicates that also unfocusable actor should be included when resolving targets. It should be used with caution because it needs the action function to set focusable state of actor to be true.
+
+commit 9e6ec0b5037952d8df61197cb1d6b0abca7a124a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 5 11:30:34 2015 +0100
+
+    Clean up code, add comments and correct binding actions in XfdashboardWindowsView
+
+commit 9a7ff91ba5e63ca75d0e1e61ea532aeba5c8e2f4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 5 10:16:10 2015 +0100
+
+    Change some default key-bindings
+
+commit be2392775d4dae8eb8c0d2066efb50f698f44741
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 5 10:04:49 2015 +0100
+
+    Add more bindable actions to quicklaunch
+    
+    This time these are actions to reorder the current selected favourite to any direction (depending on orientation of quicklaunch).
+
+commit 028c0cb3b7f811e24f75165b56e80d793f2dd65e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 5 08:33:25 2015 +0100
+
+    Fix memory corruption when releasing lower-case coverted strings in applications search provider.
+    
+    Funny it works with a single search term at all because the string list was not NULL termination by code. This is fixed with this commit and should now work with any number of search terms.
+    
+    This commit addresses issue #61
+
+commit 1fdf4e2304ba7aa033e0be350b5a0568424acdbf
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 5 08:29:35 2015 +0100
+
+    Avoid adding duplicate items to quicklaunch
+
+commit 6c60cdcc5ad50a65fbd4e139067ea22f5667877d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 3 22:51:52 2015 +0100
+
+    Add more bindable actions (at XfdashboardQuicklaunch)
+
+commit 6b12b0fff0442a77a995b50726a89a317e2744c4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 3 20:43:08 2015 +0100
+
+    Set comment to mark object functions used for binding actions
+
+commit f529a3567e5121c24e187d48eb63c3f54d6e81d6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 3 20:15:05 2015 +0100
+
+    Update action signals to new binding signature
+
+commit 46ed2ee20e7e23cd897339393f8d130d9453398f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 3 18:16:49 2015 +0100
+
+    Remove unneeded variables and code paths
+
+commit 9072edf84eacf2ea5783e967862beb30466def53
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 3 18:15:44 2015 +0100
+
+    Split building target list into seperate function and add more debug tests for bindable actions
+
+commit 7fc8a9712cc740e1afd6ca618f5faeab6e6ca3ba
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 1 18:44:29 2015 +0100
+
+    Move focus keyboard shortcut to bindings configuration file and focus manager.
+
+commit 2fe843a217636689606f32aade66d829afc259cd
+Merge: 97230cf 9b11c78
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 1 16:24:02 2015 +0100
+
+    Merge branch 'master' of github.com:gmc-holle/xfdashboard
+
+commit 97230cfcb51e08020f43b82d494610e2e789edc7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 1 16:23:25 2015 +0100
+
+    Happy new year :)
+    
+    Updating to new year 2015
+
+commit 9b11c7800bcc721fa0cd5f0360233ba2781aa61c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Dec 30 14:34:03 2014 +0100
+
+    This is a debug message and not a normal message
+
+commit 5f57182753fc11ebb0060293b362735101f5bfcd
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Dec 30 09:00:26 2014 +0100
+
+    Move action of binding from hash-table in bindings pool to a value in binding
+
+commit dc928bda97b07a338da09db14731a7dc57e6bf5b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Dec 29 21:10:12 2014 +0100
+
+    Prevent focusing unfocusable actors and also refocus viewpad if it any of its views had the focus and the active view changed
+
+commit 6f9f9e28848a62ec90de01a91c74a2071ec1ffbb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Dec 29 14:49:23 2014 +0100
+
+    Revert deactivation of desktop image in default theme
+
+commit b8d6d0c764f1973a11947703675b9e5f6d754db5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Dec 29 14:46:40 2014 +0100
+
+    Split bindings into two seperate classes: bindings pool and binding
+    
+    By splitting XfdashboardBindings into two seperate classes XfdashboardBinding (a keyboard or pointer binding) and XfdashboardBindingsPool (a collection of bindings with actions associated) the code should be easier to read, to maintain and to extent.
+
+commit 6d59cd3bc14e5529359cfb6bab8fbe5ba3b210fd
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Dec 26 10:33:07 2014 +0100
+
+    Implement key-bindings configuration
+    
+    Implemented a new configuration option. The application uses now a dynamic keyboard binding configuration instead of hard-coded key bindings like key 'Left' for select the item left of the currently selected item in a focusable actor. The configuration file is a XML file describing type of binding (although only key bindings are supported yet), the keycode and modifiers for the binding and the source and the action signal to perform when this key combination (of keycode and modifiers) are pressed or released at the actor specified.
+    
+    The application lookups up first a user-defined keyboard binding configuration file at 'xfdashboard/bindings.xml' the user's configuration folder which is ${HOME}/.config/xfdashboard/bindings.xml usually. If the file is not found at this path it looks up a system-wide keyboard configuration file which is a default one installed by xfdashboard, usually at /usr/share/xfdashboard/bindings.xml. The application will quit with error if none was found.
+    
+    This commit is the first part for the issues #35 and #41
+
+commit b0eb03f263484a1f2e3cca57c0602e51760a5902
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Dec 13 09:42:14 2014 +0100
+
+    Fix use of an maybe uninitialized variable in XfdashboardFocusable
+
+commit 248d16dead550bbe59bd1a6ec015a8b81beede2f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Dec 12 20:07:52 2014 +0100
+
+    Fix critical warning when focused selection get unavailable
+
+commit 7dfda0676c04a30de1fd66f9faf1d86530a35074
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Dec 3 22:08:55 2014 +0100
+
+    Apply new theme while running application
+    
+    This commit addresses and should fix issue #59. Rewrote XfdashboardApplication and XfdashboardStage to reload theme when xfconf property 'theme-name' changes. This introduces XfdashboardStageInterface as top-level actor for a stage (screen).
+    
+    Sadly this also breaks current theme API. All references in CSS and XML files to class XfdashboardStage have to be replaced to XfdashboardStageInterface. The new actor XfdashboardStageInterface shares the same stylable properties as XfdashboardStage and all changes to XfdashboardStageInterface will be applied to XfdashboardStage on-the-fly. So XfdashboardStageInterface is a one-to-one in-place replacement for XfdashboardStage.
+    
+    It is not the nicest solution as I wanted it to be but it could also be a preparation work for multi-monitor support (issue #14).
+
+commit b80c3ef93082cfb78ffef6e8b8a5032074f97694
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Dec 1 06:29:44 2014 +0100
+
+    Fix compiler warning about trailing spaces after backslash in Makefile.am
+
+commit 726d61db8680a5f8118ddad239e4ec51b8c02b43
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Nov 29 11:41:49 2014 +0100
+
+    Override local command-line handling in GApplication of Glib 2.40 or higher to get old behaviour of older Glib versions.
+    
+    Fixes issue #38
+
+commit 6ea7408ab8953a23928392ae146d3ee378fd23ba
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Nov 27 20:43:53 2014 +0100
+
+    Ensure right size of window actor and window content
+    
+    XfdashboardLiveWindow determines its size from XfdashboardWindowContent which either returns the size of the corresponding window if fallback is used or size of window content texture if fallback is not used. If application is suspended (and also all XfdashboardWindowContent objects) and it resumes the texture still returns the old size even if the window was resized in the meantime. This fix ensures that XfdashboardWindowContent returns window's real size if fallback is used (like before) or if it is suspended (that's new) otherwise it returns the size of window content texture (like before).
+    
+    This fix addresses issue #54
+
+commit a45efbb3a480dc2caea5c45b7e005e87ccf93fd7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Nov 27 06:44:33 2014 +0100
+
+    Post-release version bump to 0.3.5
+
+commit f6125cedaa3223cc4cbf3d28983129b6b7202925
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Nov 27 06:43:31 2014 +0100
+
+    Bump version to 0.3.4
+
 commit b7e61496c56c9f76ef62d4796a2f6d5b9abb6804
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Wed Nov 26 07:07:58 2014 +0100

@@ -2,7 +2,7 @@
  * application-button: A button representing an application
  *                     (either by menu item or desktop file)
  * 
- * Copyright 2012-2014 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -686,7 +686,7 @@ GAppInfo* xfdashboard_application_button_get_app_info(XfdashboardApplicationButt
 
 		case XFDASHBOARD_APPLICATION_BUTTON_TYPE_MENU_ITEM:
 		case XFDASHBOARD_APPLICATION_BUTTON_TYPE_DESKTOP_FILE:
-			appInfo=G_APP_INFO(g_object_ref(priv->appInfo));
+			if(priv->appInfo) appInfo=G_APP_INFO(g_object_ref(priv->appInfo));
 			break;
 
 		default:

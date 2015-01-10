@@ -6,7 +6,7 @@ dnl
 dnl
 dnl xfdashboard - Maybe a Gnome shell like dashboard for Xfce
 dnl
-dnl Copyright (c) 2012-2014 Stephan Haller <nomad@froevel.de>
+dnl Copyright (c) 2012-2015 Stephan Haller <nomad@froevel.de>
 dnl
 
 dnl ***************************
@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [3])
-m4_define([xfdashboard_version_micro], [4])
-m4_define([xfdashboard_version_build], [b7e6149])
+m4_define([xfdashboard_version_micro], [5])
+m4_define([xfdashboard_version_build], [0b4a853])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -40,7 +40,7 @@ m4_define([xfdashboard_debug_default], [ifelse(xfdashboard_version_tag(), [git],
 dnl ***************************
 dnl *** Initialize autoconf ***
 dnl ***************************
-AC_COPYRIGHT([Copyright (c) 2012-2014 Stephan Haller <nomad@froevel.de>])
+AC_COPYRIGHT([Copyright (c) 2012-2015 Stephan Haller <nomad@froevel.de>])
 AC_INIT([xfdashboard], [xfdashboard_version], [https://github.com/gmc-holle/xfdashboard], [xfdashboard])
 AC_PREREQ([2.50])
 AC_REVISION([xfdashboard_version_build])
@@ -196,6 +196,7 @@ AC_OUTPUT([
 Makefile
 data/Makefile
 data/appdata/Makefile
+data/data/Makefile
 data/icons/Makefile
 data/icons/16x16/Makefile
 data/icons/22x22/Makefile

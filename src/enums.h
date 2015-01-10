@@ -4,7 +4,7 @@
 /*
  * enums: Definitions of enumerations and flags used in GObject objects
  * 
- * Copyrigt 2012-2014 Stephan Haller <nomad@froevel.de>
+ * Copyrigt 2012-2015 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,14 @@
 #include <glib-object.h>
 
 G_BEGIN_DECLS
+
+/* enumerations from "binding.h" */
+GType xfdashboard_binding_flags_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_BINDING_FLAGS	(xfdashboard_binding_flags_get_type())
+
+/* enumerations from "bindings-pool.h" */
+GType xfdashboard_bindings_pool_error_enum_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_BINDINGS_POOL_ERROR_ENUM	(xfdashboard_bindings_pool_error_enum_get_type())
 
 /* enumerations from "theme.h" */
 GType xfdashboard_theme_error_enum_get_type(void) G_GNUC_CONST;

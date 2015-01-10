@@ -70,6 +70,14 @@ extern void _xfdashboard_marshal_VOID__OBJECT_OBJECT_OBJECT (GClosure     *closu
                                                              gpointer      invocation_hint,
                                                              gpointer      marshal_data);
 
+/* BOOLEAN:OBJECT,STRING,OBJECT (marshal.list:9) */
+extern void _xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT (GClosure     *closure,
+                                                                GValue       *return_value,
+                                                                guint         n_param_values,
+                                                                const GValue *param_values,
+                                                                gpointer      invocation_hint,
+                                                                gpointer      marshal_data);
+
 G_END_DECLS
 
 #endif /* ___xfdashboard_marshal_MARSHAL_H__ */
