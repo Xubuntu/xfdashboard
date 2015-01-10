@@ -101,7 +101,9 @@ am_xfdashboard_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	xfdashboard-applications-menu-model.$(OBJEXT) \
 	xfdashboard-applications-search-provider.$(OBJEXT) \
 	xfdashboard-applications-view.$(OBJEXT) \
-	xfdashboard-background.$(OBJEXT) xfdashboard-button.$(OBJEXT) \
+	xfdashboard-background.$(OBJEXT) xfdashboard-binding.$(OBJEXT) \
+	xfdashboard-bindings-pool.$(OBJEXT) \
+	xfdashboard-button.$(OBJEXT) \
 	xfdashboard-click-action.$(OBJEXT) \
 	xfdashboard-collapse-box.$(OBJEXT) \
 	xfdashboard-css-selector.$(OBJEXT) \
@@ -112,7 +114,6 @@ am_xfdashboard_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	xfdashboard-focusable.$(OBJEXT) \
 	xfdashboard-focus-manager.$(OBJEXT) \
 	xfdashboard-image-content.$(OBJEXT) \
-	xfdashboard-layoutable.$(OBJEXT) \
 	xfdashboard-live-window.$(OBJEXT) \
 	xfdashboard-live-workspace.$(OBJEXT) \
 	xfdashboard-main.$(OBJEXT) \
@@ -125,6 +126,7 @@ am_xfdashboard_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	xfdashboard-search-result-container.$(OBJEXT) \
 	xfdashboard-search-result-set.$(OBJEXT) \
 	xfdashboard-search-view.$(OBJEXT) xfdashboard-stage.$(OBJEXT) \
+	xfdashboard-stage-interface.$(OBJEXT) \
 	xfdashboard-stylable.$(OBJEXT) xfdashboard-text-box.$(OBJEXT) \
 	xfdashboard-theme.$(OBJEXT) xfdashboard-theme-css.$(OBJEXT) \
 	xfdashboard-theme-effects.$(OBJEXT) \
@@ -441,6 +443,8 @@ xfdashboard_headers = \
 	applications-search-provider.h \
 	applications-view.h \
 	background.h \
+	binding.h \
+	bindings-pool.h \
 	button.h \
 	click-action.h \
 	collapse-box.h \
@@ -452,7 +456,6 @@ xfdashboard_headers = \
 	focusable.h \
 	focus-manager.h \
 	image-content.h \
-	layoutable.h \
 	live-window.h \
 	live-workspace.h \
 	outline-effect.h \
@@ -465,6 +468,7 @@ xfdashboard_headers = \
 	search-result-set.h \
 	search-view.h \
 	stage.h \
+	stage-interface.h \
 	stylable.h \
 	text-box.h \
 	theme.h \
@@ -496,6 +500,8 @@ xfdashboard_SOURCES = \
 	applications-search-provider.c \
 	applications-view.c \
 	background.c \
+	binding.c \
+	bindings-pool.c \
 	button.c \
 	click-action.c \
 	collapse-box.c \
@@ -507,7 +513,6 @@ xfdashboard_SOURCES = \
 	focusable.c \
 	focus-manager.c \
 	image-content.c \
-	layoutable.c \
 	live-window.c \
 	live-workspace.c \
 	main.c \
@@ -521,6 +526,7 @@ xfdashboard_SOURCES = \
 	search-result-set.c \
 	search-view.c \
 	stage.c \
+	stage-interface.c \
 	stylable.c \
 	text-box.c \
 	theme.c \
@@ -685,6 +691,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-applications-search-provider.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-applications-view.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-background.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-binding.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-bindings-pool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-button.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-click-action.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-collapse-box.Po@am__quote@
@@ -697,7 +705,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-focus-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-focusable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-image-content.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-layoutable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-live-window.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-live-workspace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-main.Po@am__quote@
@@ -711,6 +718,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-search-result-container.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-search-result-set.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-search-view.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-stage-interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-stage.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-stylable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-text-box.Po@am__quote@
@@ -879,6 +887,34 @@ xfdashboard-background.obj: background.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-background.obj `if test -f 'background.c'; then $(CYGPATH_W) 'background.c'; else $(CYGPATH_W) '$(srcdir)/background.c'; fi`
 
+xfdashboard-binding.o: binding.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-binding.o -MD -MP -MF $(DEPDIR)/xfdashboard-binding.Tpo -c -o xfdashboard-binding.o `test -f 'binding.c' || echo '$(srcdir)/'`binding.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-binding.Tpo $(DEPDIR)/xfdashboard-binding.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='binding.c' object='xfdashboard-binding.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-binding.o `test -f 'binding.c' || echo '$(srcdir)/'`binding.c
+
+xfdashboard-binding.obj: binding.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-binding.obj -MD -MP -MF $(DEPDIR)/xfdashboard-binding.Tpo -c -o xfdashboard-binding.obj `if test -f 'binding.c'; then $(CYGPATH_W) 'binding.c'; else $(CYGPATH_W) '$(srcdir)/binding.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-binding.Tpo $(DEPDIR)/xfdashboard-binding.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='binding.c' object='xfdashboard-binding.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-binding.obj `if test -f 'binding.c'; then $(CYGPATH_W) 'binding.c'; else $(CYGPATH_W) '$(srcdir)/binding.c'; fi`
+
+xfdashboard-bindings-pool.o: bindings-pool.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-bindings-pool.o -MD -MP -MF $(DEPDIR)/xfdashboard-bindings-pool.Tpo -c -o xfdashboard-bindings-pool.o `test -f 'bindings-pool.c' || echo '$(srcdir)/'`bindings-pool.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-bindings-pool.Tpo $(DEPDIR)/xfdashboard-bindings-pool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='bindings-pool.c' object='xfdashboard-bindings-pool.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-bindings-pool.o `test -f 'bindings-pool.c' || echo '$(srcdir)/'`bindings-pool.c
+
+xfdashboard-bindings-pool.obj: bindings-pool.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-bindings-pool.obj -MD -MP -MF $(DEPDIR)/xfdashboard-bindings-pool.Tpo -c -o xfdashboard-bindings-pool.obj `if test -f 'bindings-pool.c'; then $(CYGPATH_W) 'bindings-pool.c'; else $(CYGPATH_W) '$(srcdir)/bindings-pool.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-bindings-pool.Tpo $(DEPDIR)/xfdashboard-bindings-pool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='bindings-pool.c' object='xfdashboard-bindings-pool.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-bindings-pool.obj `if test -f 'bindings-pool.c'; then $(CYGPATH_W) 'bindings-pool.c'; else $(CYGPATH_W) '$(srcdir)/bindings-pool.c'; fi`
+
 xfdashboard-button.o: button.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-button.o -MD -MP -MF $(DEPDIR)/xfdashboard-button.Tpo -c -o xfdashboard-button.o `test -f 'button.c' || echo '$(srcdir)/'`button.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-button.Tpo $(DEPDIR)/xfdashboard-button.Po
@@ -1032,20 +1068,6 @@ xfdashboard-image-content.obj: image-content.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='image-content.c' object='xfdashboard-image-content.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-image-content.obj `if test -f 'image-content.c'; then $(CYGPATH_W) 'image-content.c'; else $(CYGPATH_W) '$(srcdir)/image-content.c'; fi`
-
-xfdashboard-layoutable.o: layoutable.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-layoutable.o -MD -MP -MF $(DEPDIR)/xfdashboard-layoutable.Tpo -c -o xfdashboard-layoutable.o `test -f 'layoutable.c' || echo '$(srcdir)/'`layoutable.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-layoutable.Tpo $(DEPDIR)/xfdashboard-layoutable.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='layoutable.c' object='xfdashboard-layoutable.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-layoutable.o `test -f 'layoutable.c' || echo '$(srcdir)/'`layoutable.c
-
-xfdashboard-layoutable.obj: layoutable.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-layoutable.obj -MD -MP -MF $(DEPDIR)/xfdashboard-layoutable.Tpo -c -o xfdashboard-layoutable.obj `if test -f 'layoutable.c'; then $(CYGPATH_W) 'layoutable.c'; else $(CYGPATH_W) '$(srcdir)/layoutable.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-layoutable.Tpo $(DEPDIR)/xfdashboard-layoutable.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='layoutable.c' object='xfdashboard-layoutable.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-layoutable.obj `if test -f 'layoutable.c'; then $(CYGPATH_W) 'layoutable.c'; else $(CYGPATH_W) '$(srcdir)/layoutable.c'; fi`
 
 xfdashboard-live-window.o: live-window.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-live-window.o -MD -MP -MF $(DEPDIR)/xfdashboard-live-window.Tpo -c -o xfdashboard-live-window.o `test -f 'live-window.c' || echo '$(srcdir)/'`live-window.c
@@ -1228,6 +1250,20 @@ xfdashboard-stage.obj: stage.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stage.c' object='xfdashboard-stage.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-stage.obj `if test -f 'stage.c'; then $(CYGPATH_W) 'stage.c'; else $(CYGPATH_W) '$(srcdir)/stage.c'; fi`
+
+xfdashboard-stage-interface.o: stage-interface.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-stage-interface.o -MD -MP -MF $(DEPDIR)/xfdashboard-stage-interface.Tpo -c -o xfdashboard-stage-interface.o `test -f 'stage-interface.c' || echo '$(srcdir)/'`stage-interface.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-stage-interface.Tpo $(DEPDIR)/xfdashboard-stage-interface.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stage-interface.c' object='xfdashboard-stage-interface.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-stage-interface.o `test -f 'stage-interface.c' || echo '$(srcdir)/'`stage-interface.c
+
+xfdashboard-stage-interface.obj: stage-interface.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-stage-interface.obj -MD -MP -MF $(DEPDIR)/xfdashboard-stage-interface.Tpo -c -o xfdashboard-stage-interface.obj `if test -f 'stage-interface.c'; then $(CYGPATH_W) 'stage-interface.c'; else $(CYGPATH_W) '$(srcdir)/stage-interface.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-stage-interface.Tpo $(DEPDIR)/xfdashboard-stage-interface.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stage-interface.c' object='xfdashboard-stage-interface.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-stage-interface.obj `if test -f 'stage-interface.c'; then $(CYGPATH_W) 'stage-interface.c'; else $(CYGPATH_W) '$(srcdir)/stage-interface.c'; fi`
 
 xfdashboard-stylable.o: stylable.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-stylable.o -MD -MP -MF $(DEPDIR)/xfdashboard-stylable.Tpo -c -o xfdashboard-stylable.o `test -f 'stylable.c' || echo '$(srcdir)/'`stylable.c

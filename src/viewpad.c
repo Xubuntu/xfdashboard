@@ -1,7 +1,7 @@
 /*
  * viewpad: A viewpad managing views
  * 
- * Copyright 2012-2014 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,6 +69,8 @@ struct _XfdashboardViewpadPrivate
 	ClutterActor			*vScrollbar;
 
 	guint					scrollbarUpdateID;
+
+	gboolean				doRegisterFocusableViews;
 };
 
 /* Properties */
@@ -232,6 +234,7 @@ static void _xfdashboard_viewpad_activate_view(XfdashboardViewpad *self, Xfdashb
 	g_return_if_fail(inView==NULL || XFDASHBOARD_IS_VIEW(inView));
 
 	priv=self->priv;
+	hasFocus=FALSE;
 
 	/* Only set value if it changes */
 	if(inView==priv->activeView) return;
@@ -254,16 +257,16 @@ static void _xfdashboard_viewpad_activate_view(XfdashboardViewpad *self, Xfdashb
 
 	/* Determine if this viewpad has the focus because we have to move focus in this case */
 	focusManager=xfdashboard_focus_manager_get_default();
-	hasFocus=xfdashboard_focus_manager_has_focus(focusManager, XFDASHBOARD_FOCUSABLE(self));
 
 	/* Deactivate current view */
 	if(priv->activeView)
 	{
-		/* Unset focus at current active view if this viewpad has the focus */
+		/* Unset focus at current active view if this view has the focus */
+		hasFocus=xfdashboard_focus_manager_has_focus(focusManager, XFDASHBOARD_FOCUSABLE(priv->activeView));
 		if(hasFocus)
 		{
 			xfdashboard_focusable_unset_focus(XFDASHBOARD_FOCUSABLE(priv->activeView));
-			g_debug("Viewpad has focus so unset focus from view '%s'", xfdashboard_view_get_name(priv->activeView));
+			g_debug("Unset focus from view '%s' because it is the active view at viewpad", xfdashboard_view_get_name(priv->activeView));
 		}
 
 		/* Hide current view and emit signal before and after deactivation */
@@ -314,8 +317,8 @@ static void _xfdashboard_viewpad_activate_view(XfdashboardViewpad *self, Xfdashb
 		/* Set focus to new active view if this viewpad has the focus */
 		if(hasFocus)
 		{
-			xfdashboard_focusable_set_focus(XFDASHBOARD_FOCUSABLE(priv->activeView));
-			g_debug("Viewpad has focus so set focus to view '%s'", xfdashboard_view_get_name(priv->activeView));
+			xfdashboard_focus_manager_set_focus(focusManager, XFDASHBOARD_FOCUSABLE(priv->activeView));
+			g_debug("The previous active view at viewpad had focus so set focus to new active view '%s'", xfdashboard_view_get_name(priv->activeView));
 		}
 	}
 
@@ -620,6 +623,19 @@ static void _xfdashboard_viewpad_add_view(XfdashboardViewpad *self, GType inView
 	{
 		_xfdashboard_viewpad_activate_view(self, XFDASHBOARD_VIEW(view));
 	}
+
+	/* If newly added view is focusable register it to focus manager */
+	if(priv->doRegisterFocusableViews &&
+		XFDASHBOARD_IS_FOCUSABLE(view))
+	{
+		XfdashboardFocusManager	*focusManager;
+
+		focusManager=xfdashboard_focus_manager_get_default();
+		xfdashboard_focus_manager_register_after(focusManager,
+													XFDASHBOARD_FOCUSABLE(view),
+													XFDASHBOARD_FOCUSABLE(self));
+		g_object_unref(focusManager);
+	}
 }
 
 /* Called when a new view type was registered */
@@ -894,77 +910,6 @@ static void _xfdashboard_viewpad_allocate(ClutterActor *self,
 	}
 }
 
-/* A key was pressed */
-static gboolean _xfdashboard_viewpad_key_press_event(ClutterActor *inActor,
-														ClutterKeyEvent *inEvent)
-{
-	XfdashboardViewpad			*self;
-	XfdashboardViewpadPrivate	*priv;
-	gboolean					handledEvent;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_VIEWPAD(inActor), CLUTTER_EVENT_PROPAGATE);
-
-	self=XFDASHBOARD_VIEWPAD(inActor);
-	priv=self->priv;
-
-	/* Set handled key eventto CLUTTER_EVENT_PROPAGATE. It might be set to
-	 * CLUTTER_EVENT_STOP if current active view is focusable and it handled
-	 * the key event by its virtual function.
-	 */
-	handledEvent=CLUTTER_EVENT_PROPAGATE;
-
-	/* Viewpad is just a proxy for the current active view.
-	 * So check if current active view is focusable and call its
-	 * virtual function.
-	 */
-	if(priv->activeView &&
-		CLUTTER_IS_ACTOR(priv->activeView))
-	{
-		handledEvent=clutter_actor_event(CLUTTER_ACTOR(priv->activeView),
-											(ClutterEvent*)inEvent,
-											FALSE);
-	}
-
-	/* Return focusable state */
-	return(handledEvent);
-}
-
-/* A key was released */
-static gboolean _xfdashboard_viewpad_key_release_event(ClutterActor *inActor,
-														ClutterKeyEvent *inEvent)
-{
-	XfdashboardViewpad			*self;
-	XfdashboardViewpadPrivate	*priv;
-	gboolean					handledEvent;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_VIEWPAD(inActor), CLUTTER_EVENT_PROPAGATE);
-
-	self=XFDASHBOARD_VIEWPAD(inActor);
-	priv=self->priv;
-
-	/* Set handled key eventto CLUTTER_EVENT_PROPAGATE. It might be set to
-	 * CLUTTER_EVENT_STOP if current active view is focusable and it handled
-	 * the key event by its virtual function.
-	 */
-	handledEvent=CLUTTER_EVENT_PROPAGATE;
-
-	/* Viewpad is just a proxy for the current active view.
-	 * So check if current active view is focusable and call its
-	 * virtual function.
-	 */
-	if(priv->activeView &&
-		CLUTTER_IS_ACTOR(priv->activeView))
-	{
-		handledEvent=clutter_actor_event(CLUTTER_ACTOR(priv->activeView),
-											(ClutterEvent*)inEvent,
-											FALSE);
-	}
-
-	/* Return focusable state */
-	return(handledEvent);
-}
-
-
 /* IMPLEMENTATION: Interface XfdashboardFocusable */
 
 /* Determine if actor can get the focus */
@@ -972,7 +917,6 @@ static gboolean _xfdashboard_viewpad_focusable_can_focus(XfdashboardFocusable *i
 {
 	XfdashboardViewpad			*self;
 	XfdashboardViewpadPrivate	*priv;
-	gboolean					canFocus;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(inFocusable), FALSE);
 	g_return_val_if_fail(XFDASHBOARD_IS_VIEWPAD(inFocusable), FALSE);
@@ -980,251 +924,51 @@ static gboolean _xfdashboard_viewpad_focusable_can_focus(XfdashboardFocusable *i
 	self=XFDASHBOARD_VIEWPAD(inFocusable);
 	priv=self->priv;
 
-	/* Set current focusable result to FALSE (not focusable). It will be set
-	 * to TRUE automatically if current active view is focusable and its
-	 * virtual function will also return TRUE.
+	/* If it is the first time this viewpad is checked if it is focusable register
+	 * all registered and focusable views at focus manager and set flag that newly
+	 * added views should be registered to focus manager also because now the insert
+	 * position at focus manager for this viewpad is known and we can keep the focus
+	 * order for the views.
+	 * We determine if this is the first time this viewpad is check for its focusability
+	 * by checking if the "do-register-view" flag is still not set.
 	 */
-	canFocus=FALSE;
-
-	/* Viewpad is just a proxy for the current active view.
-	 * So check if current active view is focusable and call its
-	 * virtual function.
-	 */
-	if(priv->activeView &&
-		XFDASHBOARD_IS_FOCUSABLE(priv->activeView))
+	if(!priv->doRegisterFocusableViews)
 	{
-		canFocus=xfdashboard_focusable_can_focus(XFDASHBOARD_FOCUSABLE(priv->activeView));
-	}
+		XfdashboardFocusManager		*focusManager;
+		ClutterActorIter			iter;
+		ClutterActor				*child;
 
-	/* Return focusable state */
-	return(canFocus);
-}
+		/* Get focus manager */
+		focusManager=xfdashboard_focus_manager_get_default();
 
-/* Set focus to actor */
-static void _xfdashboard_viewpad_focusable_set_focus(XfdashboardFocusable *inFocusable)
-{
-	XfdashboardViewpad				*self;
-	XfdashboardViewpadPrivate		*priv;
-	XfdashboardFocusableInterface	*selfIface;
-	XfdashboardFocusableInterface	*parentIface;
-
-	g_return_if_fail(XFDASHBOARD_IS_FOCUSABLE(inFocusable));
-	g_return_if_fail(XFDASHBOARD_IS_VIEWPAD(inFocusable));
-
-	self=XFDASHBOARD_VIEWPAD(inFocusable);
-	priv=self->priv;
-
-	/* Viewpad is just a proxy for the current active view.
-	 * So check if current active view is focusable and call its
-	 * virtual function.
-	 */
-	if(priv->activeView &&
-		XFDASHBOARD_IS_FOCUSABLE(priv->activeView))
-	{
-		/* Call virtual function of view to set focus */
-		xfdashboard_focusable_set_focus(XFDASHBOARD_FOCUSABLE(priv->activeView));
-
-		/* Call parent class interface function of this actor */
-		selfIface=XFDASHBOARD_FOCUSABLE_GET_IFACE(inFocusable);
-		parentIface=g_type_interface_peek_parent(selfIface);
-
-		if(parentIface && parentIface->set_focus)
+		/* Iterate through children of this viewpad and register each focusable view found */
+		clutter_actor_iter_init(&iter, CLUTTER_ACTOR(self));
+		while(clutter_actor_iter_next(&iter, &child))
 		{
-			parentIface->set_focus(inFocusable);
+			/* Check if child is a view otherwise continue iterating */
+			if(XFDASHBOARD_IS_VIEW(child)!=TRUE) continue;
+
+			/* If view is focusable register it to focus manager */
+			if(XFDASHBOARD_IS_FOCUSABLE(child))
+			{
+				xfdashboard_focus_manager_register_after(focusManager,
+															XFDASHBOARD_FOCUSABLE(child),
+															XFDASHBOARD_FOCUSABLE(self));
+			}
 		}
-	}
-}
 
-/* Unset focus from actor */
-static void _xfdashboard_viewpad_focusable_unset_focus(XfdashboardFocusable *inFocusable)
-{
-	XfdashboardViewpad				*self;
-	XfdashboardViewpadPrivate		*priv;
-	XfdashboardFocusableInterface	*selfIface;
-	XfdashboardFocusableInterface	*parentIface;
+		/* Release allocated resources */
+		if(focusManager) g_object_unref(focusManager);
 
-	g_return_if_fail(XFDASHBOARD_IS_FOCUSABLE(inFocusable));
-	g_return_if_fail(XFDASHBOARD_IS_VIEWPAD(inFocusable));
-
-	self=XFDASHBOARD_VIEWPAD(inFocusable);
-	priv=self->priv;
-
-	/* Viewpad is just a proxy for the current active view.
-	 * So check if current active view is focusable and call its
-	 * virtual function.
-	 */
-	if(priv->activeView &&
-		XFDASHBOARD_IS_FOCUSABLE(priv->activeView))
-	{
-		/* Call virtual function of view to unset focus */
-		xfdashboard_focusable_unset_focus(XFDASHBOARD_FOCUSABLE(priv->activeView));
-
-		/* Call parent class interface function of this actor */
-		selfIface=XFDASHBOARD_FOCUSABLE_GET_IFACE(inFocusable);
-		parentIface=g_type_interface_peek_parent(selfIface);
-
-		if(parentIface && parentIface->unset_focus)
-		{
-			parentIface->unset_focus(inFocusable);
-		}
-	}
-}
-
-/* Determine if this actor supports selection */
-static gboolean _xfdashboard_viewpad_focusable_supports_selection(XfdashboardFocusable *inFocusable)
-{
-	XfdashboardViewpad			*self;
-	XfdashboardViewpadPrivate	*priv;
-	gboolean					supportsSelection;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(inFocusable), FALSE);
-	g_return_val_if_fail(XFDASHBOARD_IS_VIEWPAD(inFocusable), FALSE);
-
-	self=XFDASHBOARD_VIEWPAD(inFocusable);
-	priv=self->priv;
-
-	/* Set current state to FALSE (does not support selection). It will be
-	 * set to TRUE automatically if current active view supports selection
-	 * and its virtual function will also return TRUE.
-	 */
-	supportsSelection=FALSE;
-
-	/* Viewpad is just a proxy for the current active view.
-	 * So check if current active view is focusable and call its
-	 * virtual function.
-	 */
-	if(priv->activeView &&
-		XFDASHBOARD_IS_FOCUSABLE(priv->activeView))
-	{
-		supportsSelection=xfdashboard_focusable_supports_selection(XFDASHBOARD_FOCUSABLE(priv->activeView));
+		/* Set flag that from now on each newly added view should be added to focus manager */
+		priv->doRegisterFocusableViews=TRUE;
 	}
 
-	/* Return state for selection support */
-	return(supportsSelection);
-}
-
-/* Get current selection */
-static ClutterActor* _xfdashboard_viewpad_focusable_get_selection(XfdashboardFocusable *inFocusable)
-{
-	XfdashboardViewpad			*self;
-	XfdashboardViewpadPrivate	*priv;
-	ClutterActor				*selection;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(inFocusable), NULL);
-	g_return_val_if_fail(XFDASHBOARD_IS_VIEWPAD(inFocusable), NULL);
-
-	self=XFDASHBOARD_VIEWPAD(inFocusable);
-	priv=self->priv;
-	selection=NULL;
-
-	/* Viewpad is just a proxy for the current active view.
-	 * So check if current active view is focusable and call its
-	 * virtual function.
+	/* This viewpad cannot be focused. It is only registered at focus manager as
+	 * a placeholder to register focusable views just after this viewpad to keep
+	 * order of focusable actors.
 	 */
-	if(priv->activeView &&
-		XFDASHBOARD_IS_FOCUSABLE(priv->activeView))
-	{
-		selection=xfdashboard_focusable_get_selection(XFDASHBOARD_FOCUSABLE(priv->activeView));
-	}
-
-	/* Return current selection */
-	return(selection);
-}
-
-/* Set new selection */
-static gboolean _xfdashboard_viewpad_focusable_set_selection(XfdashboardFocusable *inFocusable,
-																ClutterActor *inSelection)
-{
-	XfdashboardViewpad			*self;
-	XfdashboardViewpadPrivate	*priv;
-	gboolean					success;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(inFocusable), FALSE);
-	g_return_val_if_fail(XFDASHBOARD_IS_VIEWPAD(inFocusable), FALSE);
-	g_return_val_if_fail(!inSelection || CLUTTER_IS_ACTOR(inSelection), FALSE);
-
-	self=XFDASHBOARD_VIEWPAD(inFocusable);
-	priv=self->priv;
-	success=FALSE;
-
-	/* Viewpad is just a proxy for the current active view.
-	 * So check if current active view is focusable and call its
-	 * virtual function.
-	 */
-	if(priv->activeView &&
-		XFDASHBOARD_IS_FOCUSABLE(priv->activeView))
-	{
-		success=xfdashboard_focusable_set_selection(XFDASHBOARD_FOCUSABLE(priv->activeView),
-													inSelection);
-	}
-
-	/* Return success result for setting new selection */
-	return(success);
-}
-
-/* Find requested selection target depending of current selection */
-static ClutterActor* _xfdashboard_viewpad_focusable_find_selection(XfdashboardFocusable *inFocusable,
-																	ClutterActor *inSelection,
-																	XfdashboardSelectionTarget inDirection)
-{
-	XfdashboardViewpad			*self;
-	XfdashboardViewpadPrivate	*priv;
-	ClutterActor				*selection;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(inFocusable), NULL);
-	g_return_val_if_fail(XFDASHBOARD_IS_VIEWPAD(inFocusable), NULL);
-	g_return_val_if_fail(!inSelection || CLUTTER_IS_ACTOR(inSelection), NULL);
-	g_return_val_if_fail(inDirection<=XFDASHBOARD_SELECTION_TARGET_NEXT, NULL);
-
-	self=XFDASHBOARD_VIEWPAD(inFocusable);
-	priv=self->priv;
-	selection=NULL;
-
-	/* Viewpad is just a proxy for the current active view.
-	 * So check if current active view is focusable and call its
-	 * virtual function.
-	 */
-	if(priv->activeView &&
-		XFDASHBOARD_IS_FOCUSABLE(priv->activeView))
-	{
-		selection=xfdashboard_focusable_find_selection(XFDASHBOARD_FOCUSABLE(priv->activeView),
-														inSelection,
-														inDirection);
-	}
-
-	/* Return success result for setting new selection */
-	return(selection);
-}
-
-/* Activate selection */
-static gboolean _xfdashboard_viewpad_focusable_activate_selection(XfdashboardFocusable *inFocusable,
-																	ClutterActor *inSelection)
-{
-	XfdashboardViewpad			*self;
-	XfdashboardViewpadPrivate	*priv;
-	gboolean					success;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(inFocusable), FALSE);
-	g_return_val_if_fail(XFDASHBOARD_IS_VIEWPAD(inFocusable), FALSE);
-	g_return_val_if_fail(CLUTTER_IS_ACTOR(inSelection), FALSE);
-
-	self=XFDASHBOARD_VIEWPAD(inFocusable);
-	priv=self->priv;
-	success=FALSE;
-
-	/* Viewpad is just a proxy for the current active view.
-	 * So check if current active view is focusable and call its
-	 * virtual function.
-	 */
-	if(priv->activeView &&
-		XFDASHBOARD_IS_FOCUSABLE(priv->activeView))
-	{
-		success=xfdashboard_focusable_activate_selection(XFDASHBOARD_FOCUSABLE(priv->activeView),
-															inSelection);
-	}
-
-	/* Return success result for setting new selection */
-	return(success);
+	return(FALSE);
 }
 
 /* Interface initialization
@@ -1233,14 +977,6 @@ static gboolean _xfdashboard_viewpad_focusable_activate_selection(XfdashboardFoc
 void _xfdashboard_viewpad_focusable_iface_init(XfdashboardFocusableInterface *iface)
 {
 	iface->can_focus=_xfdashboard_viewpad_focusable_can_focus;
-	iface->set_focus=_xfdashboard_viewpad_focusable_set_focus;
-	iface->unset_focus=_xfdashboard_viewpad_focusable_unset_focus;
-
-	iface->supports_selection=_xfdashboard_viewpad_focusable_supports_selection;
-	iface->get_selection=_xfdashboard_viewpad_focusable_get_selection;
-	iface->set_selection=_xfdashboard_viewpad_focusable_set_selection;
-	iface->find_selection=_xfdashboard_viewpad_focusable_find_selection;
-	iface->activate_selection=_xfdashboard_viewpad_focusable_activate_selection;
 }
 
 /* IMPLEMENTATION: GObject */
@@ -1250,6 +986,9 @@ static void _xfdashboard_viewpad_dispose(GObject *inObject)
 {
 	XfdashboardViewpad			*self=XFDASHBOARD_VIEWPAD(inObject);
 	XfdashboardViewpadPrivate	*priv=self->priv;
+
+	/* Prevent further registers of views */
+	priv->doRegisterFocusableViews=FALSE;
 
 	/* Deactivate current view */
 	if(priv->activeView) _xfdashboard_viewpad_activate_view(self, NULL);
@@ -1352,8 +1091,6 @@ static void xfdashboard_viewpad_class_init(XfdashboardViewpadClass *klass)
 	clutterActorClass->get_preferred_width=_xfdashboard_viewpad_get_preferred_width;
 	clutterActorClass->get_preferred_height=_xfdashboard_viewpad_get_preferred_height;
 	clutterActorClass->allocate=_xfdashboard_viewpad_allocate;
-	clutterActorClass->key_press_event=_xfdashboard_viewpad_key_press_event;
-	clutterActorClass->key_release_event=_xfdashboard_viewpad_key_release_event;
 
 	/* Set up private structure */
 	g_type_class_add_private(klass, sizeof(XfdashboardViewpadPrivate));
@@ -1504,6 +1241,7 @@ static void xfdashboard_viewpad_init(XfdashboardViewpad *self)
 	priv->vScrollbarVisible=FALSE;
 	priv->vScrollbarPolicy=XFDASHBOARD_POLICY_AUTOMATIC;
 	priv->scrollbarUpdateID=0;
+	priv->doRegisterFocusableViews=FALSE;
 
 	/* Set up this actor */
 	clutter_actor_set_reactive(CLUTTER_ACTOR(self), TRUE);
@@ -1526,7 +1264,7 @@ static void xfdashboard_viewpad_init(XfdashboardViewpad *self)
 	{
 		GType					viewType;
 
-		viewType=(GType)LISTITEM_TO_GTYPE(viewEntry->data);
+		viewType=(GType)GPOINTER_TO_GTYPE(viewEntry->data);
 		_xfdashboard_viewpad_add_view(self, viewType);
 	}
 	g_list_free(views);
@@ -1597,6 +1335,32 @@ GList* xfdashboard_viewpad_get_views(XfdashboardViewpad *self)
 	list=g_list_reverse(list);
 
 	return(list);
+}
+
+/* Determine if viewpad contains requested view */
+gboolean xfdashboard_viewpad_has_view(XfdashboardViewpad *self, XfdashboardView *inView)
+{
+	ClutterActorIter			iter;
+	ClutterActor				*child;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_VIEWPAD(self), FALSE);
+	g_return_val_if_fail(XFDASHBOARD_IS_VIEW(inView), FALSE);
+
+	/* Iterate through children and check if child is requested view */
+	clutter_actor_iter_init(&iter, CLUTTER_ACTOR(self));
+	while(clutter_actor_iter_next(&iter, &child))
+	{
+		if(XFDASHBOARD_IS_VIEW(child) &&
+			XFDASHBOARD_VIEW(child)==inView)
+		{
+			return(TRUE);
+		}
+	}
+
+	/* If we get here the requested view could not be found
+	 * so return FALSE.
+	 */
+	return(FALSE);
 }
 
 /* Find view by type */

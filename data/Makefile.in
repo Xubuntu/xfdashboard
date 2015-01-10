@@ -405,8 +405,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = \
 	appdata \
-	themes	\
-	icons
+	data \
+	icons \
+	themes
 
 desktopdir = $(datadir)/applications
 desktop_in_files = xfdashboard.desktop.in

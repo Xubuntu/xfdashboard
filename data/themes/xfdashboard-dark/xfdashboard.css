@@ -12,7 +12,7 @@
 }
 
 /* Stage */
-XfdashboardStage
+XfdashboardStageInterface
 {
 	background-color: #000000d0;
 	background-image-type: desktop;
@@ -139,6 +139,16 @@ XfdashboardLiveWindow .close-button
 {
 	icon-name: @close-icon;
 	button-style: icon;
+	background-type: fill rounded-corners;
+	corner-radius: 4.0;
+}
+
+XfdashboardLiveWindow .window-number
+{
+	button-style: text;
+	text-justify: center;
+	font: bold;
+	color: white;
 	background-type: fill rounded-corners;
 	corner-radius: 4.0;
 }

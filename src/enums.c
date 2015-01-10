@@ -4,7 +4,7 @@
 /*
  * enums: Definitions of enumerations and flags used in GObject objects
  * 
- * Copyrigt 2012-2014 Stephan Haller <nomad@froevel.de>
+ * Copyrigt 2012-2015 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,55 @@
 #endif /* HAVE_CONFIG_H */
 
 #include "enums.h"
+
+
+/* enumerations from "binding.h" */
+#include "binding.h"
+
+GType xfdashboard_binding_flags_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GFlagsValue values[]=
+		{
+			{ XFDASHBOARD_BINDING_FLAGS_NONE, "XFDASHBOARD_BINDING_FLAGS_NONE", "none" },
+			{ XFDASHBOARD_BINDING_FLAGS_ALLOW_UNFOCUSABLE_TARGET, "XFDASHBOARD_BINDING_FLAGS_ALLOW_UNFOCUSABLE_TARGET", "allow-unfocusable-target" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardBindingFlags"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
+
+
+/* enumerations from "bindings-pool.h" */
+#include "bindings-pool.h"
+
+GType xfdashboard_bindings_pool_error_enum_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GEnumValue values[]=
+		{
+			{ XFDASHBOARD_BINDINGS_POOL_ERROR_FILE_NOT_FOUND, "XFDASHBOARD_BINDINGS_POOL_ERROR_FILE_NOT_FOUND", "file-not-found" },
+			{ XFDASHBOARD_BINDINGS_POOL_ERROR_PARSER_INTERNAL_ERROR, "XFDASHBOARD_BINDINGS_POOL_ERROR_PARSER_INTERNAL_ERROR", "parser-internal-error" },
+			{ XFDASHBOARD_BINDINGS_POOL_ERROR_MALFORMED, "XFDASHBOARD_BINDINGS_POOL_ERROR_MALFORMED", "malformed" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardBindingsPoolErrorEnum"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
 
 
 /* enumerations from "theme.h" */

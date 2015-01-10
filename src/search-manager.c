@@ -2,7 +2,7 @@
  * search-manager: Single-instance managing search providers and
  *                 handles search requests
  * 
- * Copyright 2012-2014 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ static void _xfdashboard_search_manager_dispose_unregister_search_provider(gpoin
 {
 	g_return_if_fail(XFDASHBOARD_IS_SEARCH_MANAGER(inUserData));
 
-	xfdashboard_search_manager_unregister(XFDASHBOARD_SEARCH_MANAGER(inUserData), LISTITEM_TO_GTYPE(inData));
+	xfdashboard_search_manager_unregister(XFDASHBOARD_SEARCH_MANAGER(inUserData), GPOINTER_TO_GTYPE(inData));
 }
 
 static void _xfdashboard_search_manager_dispose(GObject *inObject)
@@ -184,10 +184,10 @@ void xfdashboard_search_manager_register(XfdashboardSearchManager *self, GType i
 	}
 
 	/* Register type if not already registered */
-	if(g_list_find(priv->registeredProviders, GTYPE_TO_LISTITEM(inProviderType))==NULL)
+	if(g_list_find(priv->registeredProviders, GTYPE_TO_POINTER(inProviderType))==NULL)
 	{
 		g_debug("Registering search provider %s", g_type_name(inProviderType));
-		priv->registeredProviders=g_list_append(priv->registeredProviders, GTYPE_TO_LISTITEM(inProviderType));
+		priv->registeredProviders=g_list_append(priv->registeredProviders, GTYPE_TO_POINTER(inProviderType));
 		g_signal_emit(self, XfdashboardSearchManagerSignals[SIGNAL_REGISTERED], 0, inProviderType);
 	}
 }
@@ -212,10 +212,10 @@ void xfdashboard_search_manager_unregister(XfdashboardSearchManager *self, GType
 	}
 
 	/* Unregister type if registered */
-	if(g_list_find(priv->registeredProviders, GTYPE_TO_LISTITEM(inProviderType))!=NULL)
+	if(g_list_find(priv->registeredProviders, GTYPE_TO_POINTER(inProviderType))!=NULL)
 	{
 		g_debug("Unregistering search provider %s", g_type_name(inProviderType));
-		priv->registeredProviders=g_list_remove(priv->registeredProviders, GTYPE_TO_LISTITEM(inProviderType));
+		priv->registeredProviders=g_list_remove(priv->registeredProviders, GTYPE_TO_POINTER(inProviderType));
 		g_signal_emit(self, XfdashboardSearchManagerSignals[SIGNAL_UNREGISTERED], 0, inProviderType);
 	}
 }

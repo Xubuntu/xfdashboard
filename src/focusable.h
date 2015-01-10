@@ -3,7 +3,7 @@
  *            managed by focus manager for keyboard navigation and
  *            selection handling
  * 
- * Copyright 2012-2014 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +57,36 @@ struct _XfdashboardFocusableInterface
 	gboolean (*set_selection)(XfdashboardFocusable *self, ClutterActor *inSelection);
 	ClutterActor* (*find_selection)(XfdashboardFocusable *self, ClutterActor *inSelection, XfdashboardSelectionTarget inDirection);
 	gboolean (*activate_selection)(XfdashboardFocusable *self, ClutterActor *inSelection);
+
+	/* Binding actions */
+	gboolean (*selection_move_left)(XfdashboardFocusable *self,
+										XfdashboardFocusable *inSource,
+										const gchar *inAction,
+										ClutterEvent *inEvent);
+	gboolean (*selection_move_right)(XfdashboardFocusable *self,
+										XfdashboardFocusable *inSource,
+										const gchar *inAction,
+										ClutterEvent *inEvent);
+	gboolean (*selection_move_up)(XfdashboardFocusable *self,
+										XfdashboardFocusable *inSource,
+										const gchar *inAction,
+										ClutterEvent *inEvent);
+	gboolean (*selection_move_down)(XfdashboardFocusable *self,
+										XfdashboardFocusable *inSource,
+										const gchar *inAction,
+										ClutterEvent *inEvent);
+	gboolean (*selection_move_first)(XfdashboardFocusable *self,
+										XfdashboardFocusable *inSource,
+										const gchar *inAction,
+										ClutterEvent *inEvent);
+	gboolean (*selection_move_last)(XfdashboardFocusable *self,
+										XfdashboardFocusable *inSource,
+										const gchar *inAction,
+										ClutterEvent *inEvent);
+	gboolean (*selection_activate)(XfdashboardFocusable *self,
+										XfdashboardFocusable *inSource,
+										const gchar *inAction,
+										ClutterEvent *inEvent);
 };
 
 /* Public API */
@@ -65,8 +95,6 @@ GType xfdashboard_focusable_get_type(void) G_GNUC_CONST;
 gboolean xfdashboard_focusable_can_focus(XfdashboardFocusable *self);
 void xfdashboard_focusable_set_focus(XfdashboardFocusable *self);
 void xfdashboard_focusable_unset_focus(XfdashboardFocusable *self);
-
-gboolean xfdashboard_focusable_handle_key_event(XfdashboardFocusable *self, const ClutterEvent *inEvent);
 
 gboolean xfdashboard_focusable_supports_selection(XfdashboardFocusable *self);
 ClutterActor* xfdashboard_focusable_get_selection(XfdashboardFocusable *self);
