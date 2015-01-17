@@ -1,3 +1,107 @@
+commit e7fd394e0e929c7daa48b053829cd916f3c201d4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 22:38:59 2015 +0100
+
+    Update AppData
+
+commit 896648557d545eb355df159f7003f4e0d5775004
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 22:30:12 2015 +0100
+
+    Fix memory corruption by freeing theme key-file twice
+    
+    This commit addresses issue #62
+
+commit cac05bc38f845114021baf5f54046d92c5073c8a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 19:32:12 2015 +0100
+
+    Post-release version bump to 0.3.7
+
+commit 24f230f8ff9cc545934c426ef68cfbea8054f9c7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 19:31:23 2015 +0100
+
+    Bump version to 0.3.6
+
+commit 22c0a80dc495dcd9fd2b45bb55d14332fb55abe0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 19:30:37 2015 +0100
+
+    Update Appdata
+
+commit 9c4177e72512511f32629c31681f557d5c966ddb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 19:29:17 2015 +0100
+
+    Fixed years in copyright message
+
+commit bbd27d24023d88ffc4592dc331d80198cb97d7bc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 19:24:54 2015 +0100
+
+    Add new dependency to GTK+ version 3.2 or higher to README
+
+commit af0bd7b589dd6bc22af9c7bc731a9159f54669c1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 19:23:57 2015 +0100
+
+    Rename folder "src" to "xfdashboard" for better difference between application and settings sources
+
+commit 2b49886759f02107dcee63e980d00e6c649ca9c0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 19:15:05 2015 +0100
+
+    Remove unneeded and recreated immediate theme index files
+
+commit 1f138b1a18e6a79b2e4eeee694257b099d98a67b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 19:14:38 2015 +0100
+
+    Update POTFILES
+
+commit a50a1bdbf63f3d103595e9a92282cc36310e2394
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 19:07:13 2015 +0100
+
+    Remove empty and unused screenshot file in theme "xfdashboard-blue"
+
+commit 36d80a8a036b1312f55adf0409bda64c5f387685
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 19:06:38 2015 +0100
+
+    Fix typo in theme index file's description
+
+commit adedb59f11351786bc90d5f0d24983484b4b5a74
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 19:05:52 2015 +0100
+
+    Handle relative and absolute paths to screenshot in theme index file
+
+commit 03e16a5e99affbfe0bd0ca9226ed004bde03b216
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 18:51:13 2015 +0100
+
+    Implement settings application
+    
+    Added a new binary "xfdashboard-settings" to simplify modifying xfdashboard's setting via GUI. It will also add itself to Xfce's settings manager.
+    
+    This commit also fixes a small typo in theme "xfdashboard-moranga" and add new fields "Author", "Version" and "Screenshot" to theme index file "xfdashboard.theme".
+    
+    This fixes issue #60
+
+commit 788f9dcfde341df52ffa8d8dc54a2607ea05cef5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 10 12:49:51 2015 +0100
+
+    Post-release version bump to 0.3.6
+
+commit 1a3920cd3083a3828aa49f645c96c9a34f56abab
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 10 12:48:58 2015 +0100
+
+    Bump version to 0.3.5
+
 commit 0b4a8534e325037851b050fb6a03cfd34a062718
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Sat Jan 10 12:44:00 2015 +0100

@@ -2,20 +2,21 @@
 
 ACLOCAL_AMFLAGS=-I m4
 
-EXTRA_DIST =								\
-	intltool-extract.in						\
-	intltool-merge.in						\
+EXTRA_DIST = \
+	intltool-extract.in \
+	intltool-merge.in \
 	intltool-update.in
 
-DISTCLEANFILES =							\
-	intltool-extract						\
-	intltool-merge							\
+DISTCLEANFILES = \
+	intltool-extract \
+	intltool-merge \
 	intltool-update
 
-SUBDIRS = 								\
-	data								\
-	po 								\
-	src
+SUBDIRS = \
+	data \
+	po \
+	settings \
+	xfdashboard
 
 distclean-local:
 	rm -rf *.cache

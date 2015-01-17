@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [3])
-m4_define([xfdashboard_version_micro], [5])
-m4_define([xfdashboard_version_build], [0b4a853])
+m4_define([xfdashboard_version_micro], [7])
+m4_define([xfdashboard_version_build], [e7fd394])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -31,6 +31,8 @@ m4_define([dbus_glib_minimum_version], [0.98])
 m4_define([intltool_minimum_version], [0.31])
 m4_define([xcomposite_minimum_version], [0.2])
 m4_define([intltool_minimum_version], [0.35])
+m4_define([gtk_minimum_version], [3.2])
+m4_define([libxfce4util_minimum_version],[4.10.0])
 
 dnl *******************************************
 dnl *** Debugging support for GIT snapshots ***
@@ -151,10 +153,12 @@ dnl ***********************************
 XDT_CHECK_PACKAGE([LIBWNCK], [libwnck-1.0], [wnck_minimum_version])
 XDT_CHECK_PACKAGE([CLUTTER], [clutter-1.0], [clutter_minimum_version])
 XDT_CHECK_PACKAGE([CLUTTER_COGL], [clutter-cogl-1.0], [clutter_minimum_version])
+XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [gtk_minimum_version])
 XDT_CHECK_PACKAGE([GIO], [gio-2.0], [gio_minimum_version])
 XDT_CHECK_PACKAGE([GIO_UNIX], [gio-unix-2.0], [gio_minimum_version])
 XDT_CHECK_PACKAGE([GARCON], [garcon-1], [garcon_minimum_version])
 XDT_CHECK_PACKAGE([LIBXFCONF], [libxfconf-0], [xfconf_minimum_version])
+XDT_CHECK_PACKAGE([LIBXFCE4UTIL], [libxfce4util-1.0],[libxfce4util_minimum_version])
 XDT_CHECK_PACKAGE([DBUS_GLIB], [dbus-glib-1], [dbus_glib_minimum_version], [
 	XDT_PROG_PKG_CONFIG()
 
@@ -216,7 +220,8 @@ data/themes/xfdashboard-mint/Makefile
 data/themes/xfdashboard-moranga/Makefile
 data/themes/xfdashboard-wine/Makefile
 po/Makefile.in
-src/Makefile
+settings/Makefile
+xfdashboard/Makefile
 ])
 
 dnl ***************************
@@ -229,6 +234,7 @@ echo "Library versions used:"
 echo "  libwnck:    $LIBWNCK_VERSION"
 echo "  clutter:    $CLUTTER_VERSION"
 echo "  cogl:       $CLUTTER_COGL_VERSION"
+echo "  gtk+:       $GTK_VERSION"
 echo "  gio:        $GIO_VERSION"
 echo "  gio-unix:   $GIO_UNIX_VERSION"
 echo "  garcon:     $GARCON_VERSION"
