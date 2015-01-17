@@ -79,7 +79,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = xfdashboard$(EXEEXT)
-subdir = src
+subdir = xfdashboard
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -276,6 +276,10 @@ GLIB_MKENUMS = @GLIB_MKENUMS@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
+GTK_CFLAGS = @GTK_CFLAGS@
+GTK_LIBS = @GTK_LIBS@
+GTK_REQUIRED_VERSION = @GTK_REQUIRED_VERSION@
+GTK_VERSION = @GTK_VERSION@
 HAVE_XCOMPOSITE = @HAVE_XCOMPOSITE@
 HAVE_XDAMAGE = @HAVE_XDAMAGE@
 INSTALL = @INSTALL@
@@ -305,6 +309,10 @@ LIBWNCK_VERSION = @LIBWNCK_VERSION@
 LIBX11_CFLAGS = @LIBX11_CFLAGS@
 LIBX11_LDFLAGS = @LIBX11_LDFLAGS@
 LIBX11_LIBS = @LIBX11_LIBS@
+LIBXFCE4UTIL_CFLAGS = @LIBXFCE4UTIL_CFLAGS@
+LIBXFCE4UTIL_LIBS = @LIBXFCE4UTIL_LIBS@
+LIBXFCE4UTIL_REQUIRED_VERSION = @LIBXFCE4UTIL_REQUIRED_VERSION@
+LIBXFCE4UTIL_VERSION = @LIBXFCE4UTIL_VERSION@
 LIBXFCONF_CFLAGS = @LIBXFCONF_CFLAGS@
 LIBXFCONF_LIBS = @LIBXFCONF_LIBS@
 LIBXFCONF_REQUIRED_VERSION = @LIBXFCONF_REQUIRED_VERSION@
@@ -603,9 +611,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu xfdashboard/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu src/Makefile
+	  $(AUTOMAKE) --gnu xfdashboard/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

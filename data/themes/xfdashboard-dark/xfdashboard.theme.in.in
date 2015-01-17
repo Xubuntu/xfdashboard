@@ -4,3 +4,6 @@ _Comment=Dark theme for xfdashboard
 Style=xfdashboard-dark.css
 Layout=xfdashboard.xml
 Effects=effects.xml
+Author=lacios
+Version=@PACKAGE_VERSION@
+Screenshot=screenshot-xfdashboard-dark.png

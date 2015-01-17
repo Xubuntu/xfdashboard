@@ -197,6 +197,10 @@ GLIB_MKENUMS = @GLIB_MKENUMS@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
+GTK_CFLAGS = @GTK_CFLAGS@
+GTK_LIBS = @GTK_LIBS@
+GTK_REQUIRED_VERSION = @GTK_REQUIRED_VERSION@
+GTK_VERSION = @GTK_VERSION@
 HAVE_XCOMPOSITE = @HAVE_XCOMPOSITE@
 HAVE_XDAMAGE = @HAVE_XDAMAGE@
 INSTALL = @INSTALL@
@@ -226,6 +230,10 @@ LIBWNCK_VERSION = @LIBWNCK_VERSION@
 LIBX11_CFLAGS = @LIBX11_CFLAGS@
 LIBX11_LDFLAGS = @LIBX11_LDFLAGS@
 LIBX11_LIBS = @LIBX11_LIBS@
+LIBXFCE4UTIL_CFLAGS = @LIBXFCE4UTIL_CFLAGS@
+LIBXFCE4UTIL_LIBS = @LIBXFCE4UTIL_LIBS@
+LIBXFCE4UTIL_REQUIRED_VERSION = @LIBXFCE4UTIL_REQUIRED_VERSION@
+LIBXFCE4UTIL_VERSION = @LIBXFCE4UTIL_VERSION@
 LIBXFCONF_CFLAGS = @LIBXFCONF_CFLAGS@
 LIBXFCONF_LIBS = @LIBXFCONF_LIBS@
 LIBXFCONF_REQUIRED_VERSION = @LIBXFCONF_REQUIRED_VERSION@
@@ -353,11 +361,16 @@ theme_DATA = \
 	xfdashboard.xml \
 	effects.xml
 
+CLEANFILES = \
+	$(theme_in_files) \
+	$(theme_in_files:.theme.in=.theme)
+
 EXTRA_DIST = \
-	$(theme_DATA) \
-	xfdashboard.theme.in
+	$(theme_in_files:.theme.in=.theme.in.in) \
+	$(theme_DATA)
 
 DISTCLEANFILES = \
+	$(theme_in_files) \
 	$(theme_in_files:.theme.in=.theme)
 
 all: all-am
@@ -486,6 +499,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -575,6 +589,11 @@ uninstall-am: uninstall-themeDATA
 	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
 	ps ps-am tags-am uninstall uninstall-am uninstall-themeDATA
 
+
+# Substitute bindir so it works when built in a non-system prefix
+xfdashboard.theme.in:xfdashboard.theme.in.in
+	$(AM_V_GEN) sed -e "s|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|" \
+	    $< > $@ || rm $@
 
 @INTLTOOL_THEME_RULE@
 

@@ -143,8 +143,8 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 am__installdirs = "$(DESTDIR)$(autostartdir)" \
-	"$(DESTDIR)$(desktopdir)"
-DATA = $(autostart_DATA) $(desktop_DATA)
+	"$(DESTDIR)$(desktopdir)" "$(DESTDIR)$(settingsdir)"
+DATA = $(autostart_DATA) $(desktop_DATA) $(settings_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -258,6 +258,10 @@ GLIB_MKENUMS = @GLIB_MKENUMS@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
+GTK_CFLAGS = @GTK_CFLAGS@
+GTK_LIBS = @GTK_LIBS@
+GTK_REQUIRED_VERSION = @GTK_REQUIRED_VERSION@
+GTK_VERSION = @GTK_VERSION@
 HAVE_XCOMPOSITE = @HAVE_XCOMPOSITE@
 HAVE_XDAMAGE = @HAVE_XDAMAGE@
 INSTALL = @INSTALL@
@@ -287,6 +291,10 @@ LIBWNCK_VERSION = @LIBWNCK_VERSION@
 LIBX11_CFLAGS = @LIBX11_CFLAGS@
 LIBX11_LDFLAGS = @LIBX11_LDFLAGS@
 LIBX11_LIBS = @LIBX11_LIBS@
+LIBXFCE4UTIL_CFLAGS = @LIBXFCE4UTIL_CFLAGS@
+LIBXFCE4UTIL_LIBS = @LIBXFCE4UTIL_LIBS@
+LIBXFCE4UTIL_REQUIRED_VERSION = @LIBXFCE4UTIL_REQUIRED_VERSION@
+LIBXFCE4UTIL_VERSION = @LIBXFCE4UTIL_VERSION@
 LIBXFCONF_CFLAGS = @LIBXFCONF_CFLAGS@
 LIBXFCONF_LIBS = @LIBXFCONF_LIBS@
 LIBXFCONF_REQUIRED_VERSION = @LIBXFCONF_REQUIRED_VERSION@
@@ -415,15 +423,21 @@ desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 autostartdir = $(sysconfdir)/xdg/autostart
 autostart_in_files = xfdashboard-autostart.desktop.in
 autostart_DATA = $(autostart_in_files:.desktop.in=.desktop)
+settingsdir = $(datadir)/applications
+settings_in_files = xfdashboard-settings.desktop.in
+settings_DATA = $(settings_in_files:.desktop.in=.desktop)
 EXTRA_DIST = \
 	$(desktop_in_files:.desktop.in=.desktop.in.in) \
-	$(autostart_in_files:.desktop.in=.desktop.in.in)
+	$(autostart_in_files:.desktop.in=.desktop.in.in) \
+	$(settings_in_files:.desktop.in=.desktop.in.in)
 
 CLEANFILES = \
 	$(desktop_in_files) \
 	$(desktop_DATA) \
 	$(autostart_in_files) \
-	$(autostart_DATA)
+	$(autostart_DATA) \
+	$(settings_in_files) \
+	$(settings_DATA)
 
 all: all-recursive
 
@@ -506,6 +520,27 @@ uninstall-desktopDATA:
 	@list='$(desktop_DATA)'; test -n "$(desktopdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(desktopdir)'; $(am__uninstall_files_from_dir)
+install-settingsDATA: $(settings_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(settings_DATA)'; test -n "$(settingsdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(settingsdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(settingsdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(settingsdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(settingsdir)" || exit $$?; \
+	done
+
+uninstall-settingsDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(settings_DATA)'; test -n "$(settingsdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(settingsdir)'; $(am__uninstall_files_from_dir)
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run 'make' without going through this Makefile.
@@ -666,7 +701,7 @@ check: check-recursive
 all-am: Makefile $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(autostartdir)" "$(DESTDIR)$(desktopdir)"; do \
+	for dir in "$(DESTDIR)$(autostartdir)" "$(DESTDIR)$(desktopdir)" "$(DESTDIR)$(settingsdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -720,7 +755,8 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-autostartDATA install-desktopDATA
+install-data-am: install-autostartDATA install-desktopDATA \
+	install-settingsDATA
 
 install-dvi: install-dvi-recursive
 
@@ -764,7 +800,8 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-autostartDATA uninstall-desktopDATA
+uninstall-am: uninstall-autostartDATA uninstall-desktopDATA \
+	uninstall-settingsDATA
 
 .MAKE: $(am__recursive_targets) install-am install-strip
 
@@ -776,12 +813,13 @@ uninstall-am: uninstall-autostartDATA uninstall-desktopDATA
 	install-data-am install-desktopDATA install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
 	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-autostartDATA \
-	uninstall-desktopDATA
+	install-pdf-am install-ps install-ps-am install-settingsDATA \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
+	ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-autostartDATA uninstall-desktopDATA \
+	uninstall-settingsDATA
 
 
 # Substitute bindir so it works when built in a non-system prefix
@@ -791,6 +829,11 @@ xfdashboard.desktop.in:xfdashboard.desktop.in.in
 	    $< > $@ || rm $@
 
 xfdashboard-autostart.desktop.in:xfdashboard-autostart.desktop.in.in
+	$(AM_V_GEN) sed -e "s|@bindir[@]|$(bindir)|" \
+	    -e "s|@VERSION[@]|$(VERSION)|" \
+	    $< > $@ || rm $@
+
+xfdashboard-settings.desktop.in:xfdashboard-settings.desktop.in.in
 	$(AM_V_GEN) sed -e "s|@bindir[@]|$(bindir)|" \
 	    -e "s|@VERSION[@]|$(VERSION)|" \
 	    $< > $@ || rm $@
