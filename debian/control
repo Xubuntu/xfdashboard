@@ -14,6 +14,7 @@ Build-Depends: debhelper (>= 9),
  libwnck-dev,
  libxcomposite-dev,
  libxdamage-dev,
+ libxfce4util-dev,
  libxfconf-0-dev (>= 4.10.0),
  pkg-config
 Standards-Version: 3.9.6
