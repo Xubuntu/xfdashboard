@@ -113,6 +113,7 @@ am_xfdashboard_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	xfdashboard-fill-box-layout.$(OBJEXT) \
 	xfdashboard-focusable.$(OBJEXT) \
 	xfdashboard-focus-manager.$(OBJEXT) \
+	xfdashboard-hotkey.$(OBJEXT) \
 	xfdashboard-image-content.$(OBJEXT) \
 	xfdashboard-live-window.$(OBJEXT) \
 	xfdashboard-live-workspace.$(OBJEXT) \
@@ -463,6 +464,7 @@ xfdashboard_headers = \
 	fill-box-layout.h \
 	focusable.h \
 	focus-manager.h \
+	hotkey.h \
 	image-content.h \
 	live-window.h \
 	live-workspace.h \
@@ -520,6 +522,7 @@ xfdashboard_SOURCES = \
 	fill-box-layout.c \
 	focusable.c \
 	focus-manager.c \
+	hotkey.c \
 	image-content.c \
 	live-window.c \
 	live-workspace.c \
@@ -712,6 +715,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-fill-box-layout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-focus-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-focusable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-hotkey.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-image-content.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-live-window.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-live-workspace.Po@am__quote@
@@ -1062,6 +1066,20 @@ xfdashboard-focus-manager.obj: focus-manager.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='focus-manager.c' object='xfdashboard-focus-manager.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-focus-manager.obj `if test -f 'focus-manager.c'; then $(CYGPATH_W) 'focus-manager.c'; else $(CYGPATH_W) '$(srcdir)/focus-manager.c'; fi`
+
+xfdashboard-hotkey.o: hotkey.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-hotkey.o -MD -MP -MF $(DEPDIR)/xfdashboard-hotkey.Tpo -c -o xfdashboard-hotkey.o `test -f 'hotkey.c' || echo '$(srcdir)/'`hotkey.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-hotkey.Tpo $(DEPDIR)/xfdashboard-hotkey.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='hotkey.c' object='xfdashboard-hotkey.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-hotkey.o `test -f 'hotkey.c' || echo '$(srcdir)/'`hotkey.c
+
+xfdashboard-hotkey.obj: hotkey.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-hotkey.obj -MD -MP -MF $(DEPDIR)/xfdashboard-hotkey.Tpo -c -o xfdashboard-hotkey.obj `if test -f 'hotkey.c'; then $(CYGPATH_W) 'hotkey.c'; else $(CYGPATH_W) '$(srcdir)/hotkey.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-hotkey.Tpo $(DEPDIR)/xfdashboard-hotkey.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='hotkey.c' object='xfdashboard-hotkey.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-hotkey.obj `if test -f 'hotkey.c'; then $(CYGPATH_W) 'hotkey.c'; else $(CYGPATH_W) '$(srcdir)/hotkey.c'; fi`
 
 xfdashboard-image-content.o: image-content.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-image-content.o -MD -MP -MF $(DEPDIR)/xfdashboard-image-content.Tpo -c -o xfdashboard-image-content.o `test -f 'image-content.c' || echo '$(srcdir)/'`image-content.c

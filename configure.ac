@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [3])
-m4_define([xfdashboard_version_micro], [7])
-m4_define([xfdashboard_version_build], [e7fd394])
+m4_define([xfdashboard_version_micro], [8])
+m4_define([xfdashboard_version_build], [edc0ba4])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 

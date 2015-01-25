@@ -90,8 +90,7 @@
 /* Define if XDamage extension is available */
 #undef HAVE_XDAMAGE
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
 /* Define to 1 if your C compiler doesn't accept -c and -o together. */

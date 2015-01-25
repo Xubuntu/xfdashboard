@@ -1,3 +1,133 @@
+commit edc0ba4cb8a1cf7cbcf361baec02f928fc128b2d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jan 23 13:45:49 2015 +0100
+
+    Allow hotkey only in daemon mode.
+
+commit 95a96fd8029adbf132d867c6f31c5931c9c4d20f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jan 23 13:44:01 2015 +0100
+
+    Add setting for hotkey to xfdashboard-settings application
+    
+    Also rename setting from "/hotkey-enabled" to "/enable-hotkey".
+
+commit 42c29ecb88ec66ade97bd6a73f06735425f8237f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jan 23 13:29:48 2015 +0100
+
+    Add hotkey tracker
+    
+    The hotkey tracker will watch all key events globally and toggle application state when hotkey was recognized. Toggling means suspending application if is currently active or resuming application if not. Currently the hotkey is haard-coded to left Super key and right Super key.
+    
+    Reacting to hotkey presses is disabled by default. It has to be enabled by setting Xfconf's property "/hotkey-enabled" to boolean TRUE.
+    
+    The hotkey tracker is only usable in daemon mode but works also when running standalone. In the last case it will quit xfdashboard if hotkey is pressed but it cannot activate xfdashboard (because therefore it needs to be running in daemon mode otherwise the needed code is not running ;) )
+
+commit 3ff36d596c33147a50657cd0d939efd2de5abfbe
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 22 12:16:11 2015 +0100
+
+    Add "--restart" option to command-line to restart application
+    
+    This option can used to restart daemon after an update - for example. But "--daemon" must be given also, otherwise a stand-alone version would be started.
+    
+    I know it was done a little bit complicated but I think it handles nearly all kinds of restart possibilities.
+
+commit b8e46797bd88107b0700fc878490dcf5b72abbbe
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 21 16:12:11 2015 +0100
+
+    Remove local path information from UI file
+
+commit f36e16a1d625593e483ad506d36b22b1ffb889db
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 21 15:48:42 2015 +0100
+
+    Allow icon of search provider in search view result container to be themable
+    
+    This is achieved by adding two items.
+    
+    The first one is a themable property named "icon" in XfdashboardSearchResultContainer which expects a string with a themed icon name or a filename of the icon to display.
+    
+    The second one is a CSS class which will be added to XfdashboardSearchResultContainer. The CSS class name is build with a prefix "search-provider-" followed by the search provider's object name (like XfdashboardApplicationsSearchProvider for the applications search provider) - so the complete CSS class name would be ".search-provider-XfdashboardApplicationsSearchProvider" (for use in CSS) in this case.
+    
+    This commit addresses issue #46
+
+commit f8f3beb39e53842a70f66108a0c8169bb184bda7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 20 08:55:26 2015 +0100
+
+    Add selection handling for Page_Up, Page_Down, Page_Left and Page_Right to XfdashboardApplicationsView in icon mode
+
+commit 45af51f7796324efeb3ddacb947d77cc7ad45339
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 20 08:25:06 2015 +0100
+
+    Add selection handling for Page_Up, Page_Down, Page_Left and Page_Right to XfdashboardApplicationsView in list mode
+
+commit 641a63b615d937ad6d136313ea9468487fb29c37
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 19 21:55:47 2015 +0100
+
+    Adjust XfdashboardApplicationsView to new coding style for selection framework
+
+commit f21a2dc711106449d999bf447437a412ac579d6f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 19 21:52:00 2015 +0100
+
+    Correct function's name at XfdashboardApplicationsView
+
+commit c519e5fa98df2f277c5f29187bbcd9e0d7e4165b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 19 21:49:55 2015 +0100
+
+    Add selection handling for Page_Up, Page_Down, Page_Left and Page_Right to XfdashboardWorkspaceSelector
+
+commit 794761f031b6f404cc32e6ead1d97a61225cfc62
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 19 21:45:45 2015 +0100
+
+    Add selection handling for Page_Up, Page_Down, Page_Left and Page_Right to windows view
+
+commit ca3cc74c2baacae1cb738b29e0757338ffaabb6d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 19 21:26:32 2015 +0100
+
+    Add selection handling for Page_Up, Page_Down, Page_Left and Page_right
+    
+    First add it for XfdashboardQuicklaunch. It is the easiest one ;)
+
+commit b09d161ef2c3889edbfe6413b1bb18b2fc5629ac
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 19 20:28:06 2015 +0100
+
+    Add backup file of glade to git's ignore list
+
+commit 09f263256fbbd259ad328a0b22f3a7c9fbfbbffc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 19 20:27:33 2015 +0100
+
+    Add tooltips to settings dialog
+
+commit 64c3963944d66337d95ab8db4ec830077f602cb8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 22:53:43 2015 +0100
+
+    Install "windows-view.png" again for default theme "xfdashboard"
+
+commit 2feae85eb2bc775384cafedb5dbbd00b1f84848a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 22:40:36 2015 +0100
+
+    Post-release version bump to 0.3.8
+
+commit 65d4ee8c0041875fecc1e088da0ba8c7a598f9f9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 17 22:39:44 2015 +0100
+
+    Bump version to 0.3.7
+
 commit e7fd394e0e929c7daa48b053829cd916f3c201d4
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Sat Jan 17 22:38:59 2015 +0100

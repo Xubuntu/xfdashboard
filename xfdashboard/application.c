@@ -45,6 +45,7 @@
 #include "theme.h"
 #include "focus-manager.h"
 #include "bindings-pool.h"
+#include "hotkey.h"
 
 /* Define this class in GObject system */
 G_DEFINE_TYPE(XfdashboardApplication,
@@ -75,6 +76,13 @@ struct _XfdashboardApplicationPrivate
 	gulong						xfconfThemeChangedSignalID;
 
 	XfdashboardBindingsPool		*bindings;
+
+	XfdashboardHotkey			*hotkeyTracker;
+
+#if !GLIB_CHECK_VERSION(2, 32, 0)
+	GSimpleActionGroup			*actions;
+#endif
+
 };
 
 /* Properties */
@@ -111,9 +119,14 @@ static guint XfdashboardApplicationSignals[SIGNAL_LAST]={ 0, };
 
 #define THEME_NAME_XFCONF_PROP				"/theme"
 #define DEFAULT_THEME_NAME					"xfdashboard"
+#define ENABLE_HOTKEY_XFCONF_PROP			"/enable-hotkey"
+#define DEFAULT_ENABLE_HOTKEY				FALSE
 
 /* Single instance of application */
 static XfdashboardApplication*		application=NULL;
+
+/* Forward declarations */
+static void _xfdashboard_application_activate(GApplication *inApplication);
 
 /* Quit application depending on daemon mode and force parameter */
 static void _xfdashboard_application_quit(XfdashboardApplication *self, gboolean inForceQuit)
@@ -129,6 +142,13 @@ static void _xfdashboard_application_quit(XfdashboardApplication *self, gboolean
 
 	/* Check if we should really quit this instance */
 	if(inForceQuit==TRUE || priv->isDaemon==FALSE) shouldQuit=TRUE;
+
+	/* Do nothing if application is already quitting. This can happen if
+	 * application is running in daemon mode (primary instance) and another
+	 * instance was called with "quit" or "restart" parameter which would
+	 * cause this function to be called twice.
+	 */
+	if(priv->isQuitting) return;
 
 	/* If application is not in daemon mode or if forced is set to TRUE
 	 * destroy all stage windows ...
@@ -177,6 +197,29 @@ static gboolean _xfdashboard_application_on_delete_stage(XfdashboardApplication 
 
 	/* Prevent the default handler being called */
 	return(CLUTTER_EVENT_STOP);
+}
+
+/* Hotkey was activated */
+static void _xfdashboard_application_on_hotkey_activate(XfdashboardApplication *self, gpointer inUserData)
+{
+	XfdashboardApplicationPrivate	*priv;
+	gboolean						isEnabled;
+
+	g_return_if_fail(XFDASHBOARD_IS_APPLICATION(self));
+
+	priv=self->priv;
+
+	/* Check if hotkey is enabled in settings and application is running in daemon
+	 * mode, otherwise return immediately.
+	 */
+	isEnabled=xfconf_channel_get_bool(priv->xfconfChannel,
+										ENABLE_HOTKEY_XFCONF_PROP,
+										DEFAULT_ENABLE_HOTKEY);
+	if(!isEnabled || !priv->isDaemon) return;
+
+	/* Toggle between suspend and resume of application */
+	if(priv->isSuspended) _xfdashboard_application_activate(G_APPLICATION(self));
+		else _xfdashboard_application_quit(self, FALSE);
 }
 
 /* Set theme name and reload theme */
@@ -297,7 +340,7 @@ static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication 
 		if(error!=NULL) g_error_free(error);
 		return(FALSE);
 	}
-	
+
 	/* Set up and load theme */
 	priv->xfconfThemeChangedSignalID=xfconf_g_property_bind(priv->xfconfChannel,
 															THEME_NAME_XFCONF_PROP,
@@ -346,6 +389,12 @@ static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication 
 	 * application is running.
 	 */
 	priv->focusManager=xfdashboard_focus_manager_get_default();
+
+	/* Create single-instance of hotkey tracker to keep it alive hiwle
+	 * application is running.
+	 */
+	priv->hotkeyTracker=xfdashboard_hotkey_get_default();
+	g_signal_connect_swapped(priv->hotkeyTracker, "activate", G_CALLBACK(_xfdashboard_application_on_hotkey_activate), self);
 
 	/* Create primary stage on first monitor.
 	 * TODO: Create stage for each monitor connected
@@ -404,11 +453,13 @@ static int _xfdashboard_application_command_line(GApplication *inApplication, GA
 	GError							*error;
 	gboolean						optionDaemonize;
 	gboolean						optionQuit;
+	gboolean						optionRestart;
 	gboolean						optionToggle;
 	GOptionEntry					XfdashboardApplicationOptions[]=
 									{
 										{ "daemonize", 'd', 0, G_OPTION_ARG_NONE, &optionDaemonize, N_("Fork to background"), NULL },
-										{ "quit", 'q', 0, G_OPTION_ARG_NONE, &optionQuit, N_("Quit existing instance"), NULL },
+										{ "quit", 'q', 0, G_OPTION_ARG_NONE, &optionQuit, N_("Quit running instance"), NULL },
+										{ "restart", 'r', 0, G_OPTION_ARG_NONE, &optionRestart, N_("Restart running instance"), NULL },
 										{ "toggle", 't', 0, G_OPTION_ARG_NONE, &optionToggle, N_("Toggles suspend/resume state if running instance was started in daemon mode otherwise it quits running non-daemon instance"), NULL },
 										{ NULL }
 									};
@@ -422,6 +473,7 @@ static int _xfdashboard_application_command_line(GApplication *inApplication, GA
 	/* Set up options */
 	optionDaemonize=FALSE;
 	optionQuit=FALSE;
+	optionRestart=FALSE;
 	optionToggle=FALSE;
 
 	context=g_option_context_new(N_("- A Gnome Shell like dashboard for Xfce4"));
@@ -449,6 +501,16 @@ static int _xfdashboard_application_command_line(GApplication *inApplication, GA
 		g_print(N_("%s\n"), (error && error->message) ? error->message : _("unknown error"));
 		if(error) g_error_free(error);
 		return(XFDASHBOARD_APPLICATION_ERROR_FAILED);
+	}
+
+	/* Handle options: restart
+	 * - Only handle option if application was inited already
+	 */
+	if(priv->inited && optionRestart)
+	{
+		/* Return state to restart this applicationa */
+		g_debug("Received request to restart application!");
+		return(XFDASHBOARD_APPLICATION_ERROR_RESTART);
 	}
 
 	/* Handle options: quit */
@@ -545,6 +607,16 @@ static void _xfdashboard_application_dispose(GObject *inObject)
 	g_signal_emit(self, XfdashboardApplicationSignals[SIGNAL_SHUTDOWN_FINAL], 0);
 
 	/* Release allocated resources */
+#if !GLIB_CHECK_VERSION(2, 32, 0)
+	if(priv->actions)
+	{
+		g_application_set_action_group(G_APPLICATION(self), NULL);
+
+		g_object_unref(priv->actions);
+		priv->actions=NULL;
+	}
+#endif
+
 	if(priv->xfconfThemeChangedSignalID)
 	{
 		xfconf_g_property_unbind(priv->xfconfThemeChangedSignalID);
@@ -584,6 +656,12 @@ static void _xfdashboard_application_dispose(GObject *inObject)
 	{
 		g_object_unref(priv->bindings);
 		priv->bindings=NULL;
+	}
+
+	if(priv->hotkeyTracker)
+	{
+		g_object_unref(priv->hotkeyTracker);
+		priv->hotkeyTracker=NULL;
 	}
 
 	/* Shutdown xfconf */
@@ -758,6 +836,7 @@ static void xfdashboard_application_class_init(XfdashboardApplicationClass *klas
 static void xfdashboard_application_init(XfdashboardApplication *self)
 {
 	XfdashboardApplicationPrivate	*priv;
+	GSimpleAction					*action;
 
 	priv=self->priv=XFDASHBOARD_APPLICATION_GET_PRIVATE(self);
 
@@ -773,6 +852,28 @@ static void xfdashboard_application_init(XfdashboardApplication *self)
 	priv->theme=NULL;
 	priv->xfconfThemeChangedSignalID=0L;
 	priv->isQuitting=FALSE;
+	priv->hotkeyTracker=NULL;
+#if !GLIB_CHECK_VERSION(2, 32, 0)
+	priv->actions=NULL;
+#endif
+
+	/* Add callable DBUS actions for this application */
+#if !GLIB_CHECK_VERSION(2, 32, 0)
+	priv->actions=g_simple_action_group_new();
+#endif
+
+	action=g_simple_action_new("Quit", NULL);
+	g_signal_connect(action, "activate", G_CALLBACK(xfdashboard_application_quit_forced), NULL);
+#if GLIB_CHECK_VERSION(2, 32, 0)
+	g_action_map_add_action(G_ACTION_MAP(self), G_ACTION(action));
+#else
+	g_simple_action_group_insert(priv->actions, action);
+#endif
+	g_object_unref(action);
+
+#if !GLIB_CHECK_VERSION(2, 32, 0)
+	g_application_set_action_group(G_APPLICATION(self), G_ACTION_GROUP(priv->actions));
+#endif
 }
 
 /* IMPLEMENTATION: Public API */
@@ -828,6 +929,17 @@ void xfdashboard_application_quit_forced(void)
 {
 	if(G_LIKELY(application!=NULL))
 	{
+		/* Quit also any other running instance */
+		if(g_application_get_is_remote(G_APPLICATION(application))==TRUE)
+		{
+#if !GLIB_CHECK_VERSION(2,32,0)
+			g_action_group_activate_action(G_ACTION_GROUP(application->priv->actions, "Quit", NULL);
+#else
+			g_action_group_activate_action(G_ACTION_GROUP(application), "Quit", NULL);
+#endif
+	}
+
+		/* Quit this instance */
 		_xfdashboard_application_quit(application, TRUE);
 	}
 		else clutter_main_quit();
