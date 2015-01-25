@@ -36,6 +36,11 @@
 	</provides>
 
 	<releases>
+		<release version="0.3.8" timestamp="1422107912">
+			<description>
+				<p>This unstable development implements a hotkey (Super key aka Windows key) to call xfdashboard in daemon mode and adds more bindable keys.</p>
+			</description>
+		</release>
 		<release version="0.3.7" timestamp="1421530687">
 			<description>
 				<p>This unstable development fixes a bug which rendered the new settings application completely unusable.</p>
