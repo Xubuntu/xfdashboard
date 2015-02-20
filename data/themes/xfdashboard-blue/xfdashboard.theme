@@ -1,8 +1,10 @@
 [Xfdashboard Theme]
 Name=xfdashboard-blue
+Name[es]=Tablero Xf azul
+Name[sr]=Полетник плави
 Comment=Blue theme for xfdashboard
 Style=xfdashboard-blue.css
 Layout=xfdashboard.xml
 Effects=effects.xml
 Author=lacios
-Version=0.3.8git.65d4ee8
+Version=0.3.9git.56dd487

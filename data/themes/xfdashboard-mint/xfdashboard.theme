@@ -1,9 +1,11 @@
 [Xfdashboard Theme]
 Name=xfdashboard-mint
 Comment=Fresh-green flavored theme for xfdashboard
+Comment[es]=Tema color verde para el Tablero Xf
+Comment[sr]=Свежа зелена тема полетника
 Style=xfdashboard-mint.css
 Layout=xfdashboard.xml
 Effects=effects.xml
 Author=lacios
-Version=0.3.8git.65d4ee8
+Version=0.3.9git.56dd487
 Screenshot=screenshot-xfdashboard-mint.png

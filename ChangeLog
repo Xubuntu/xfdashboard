@@ -1,3 +1,227 @@
+commit 459e468f5e9c5aa7a711a2c006534f743f5ba04e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Feb 20 19:19:25 2015 +0100
+
+    Update POTFILES
+
+commit e85cb06d6b87caab12f95fe47afc899c88a6f342
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Feb 20 19:18:12 2015 +0100
+
+    Update AppData
+
+commit cc7d4d18f9499d4700a4644821e3bcf8ed8e5225
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 18 20:36:34 2015 +0100
+
+    Rewrote XfdashboardSearchView to make use of selection and key-binding/key-navigation framework
+    
+    This commit addresses issue #63
+
+commit 56dd487217ea10204d9099472b925b43436f18d3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 16 17:16:46 2015 +0100
+
+    Fixed activating "folder" items in application view and ensure item is visible in view when it is set as current selection not when looking it.
+
+commit 0938454c93a8d4862fbd8c7b1fff437ccb527f2a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 14 21:53:12 2015 +0100
+
+    Again correct warning messages when setting selection failed
+
+commit 1ef88fb3951d7de9803b73ab5407825df6d5b059
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 14 21:47:47 2015 +0100
+
+    Correct warning messages when setting selection failed
+
+commit 68e3a90563b4fbbc9a8204c5724a97cc955cae0f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 14 19:48:10 2015 +0100
+
+    Return FALSE if requested actor cannot be selected in XfdashboardWindowsView
+
+commit 512b4faad9adee6a4b551dc0a24cd5a8cc6e33b2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 14 19:46:35 2015 +0100
+
+    Return FALSE if requested actor cannot be selected in XfdashboardApplicationsView
+
+commit 08d9915ccb77a18bba5f154503f394b1b16ca885
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 14 00:13:07 2015 +0100
+
+    Correct return value for failed checks
+
+commit dfcaae3f4d325782bcdeb6ed7241a97ec819d123
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 9 21:35:33 2015 +0100
+
+    I18n: Added translations es (6%), he (2%), it_IT (1%)
+
+commit 9992d343cc50d251ef73300ed50a0a5ee1da5979
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 9 20:39:13 2015 +0100
+
+    Remove unused code
+    
+    xfdashboard_garcon_menu_item_get_app_info() is not used anymore. It was replace this class XfdashboardDesktopAppInfo.
+
+commit 4998c7c5366f0832274df28ce6c5576c64efab3a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 9 20:29:57 2015 +0100
+
+    I18n: Updated translation sr (99%)
+
+commit 77a56baa00b4bb27a3953aae53c7067f6e812db7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 9 20:20:44 2015 +0100
+
+    Replace old application menu and desktop app info usage with new classes XfdashboardDesktopAppInfo and XfdashboardApplicationDatabase
+    
+    This commit addresses issue #67
+
+commit 955ca7d493ca617bd56425d890ac22be48b787b2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 9 20:18:26 2015 +0100
+
+    Create global single instance of XfdashboardApplicationDatabase in application object
+    
+    This commit addresses issue #67
+
+commit 6b683efc53d44400586223cb84a55bd15d0991e8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 9 20:17:05 2015 +0100
+
+    Add XfdashboardDesktopAppInfo and XfdashboardApplicationDatabase to build system
+
+commit 11b92fee69bac744671f86b78afa82b9e2447299
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 9 20:11:32 2015 +0100
+
+    Implementing XfdashboardApplicationDatabase
+    
+    XfdashboardApplicationDatabase is a new class combining all sources for applications. It wraps the GarconMenu instance for the root menu which contains all sub-menus and menu item. It also provides a cache for all installed applications via their desktop files whereby user overridden desktop files have higher priority than system-wide installed desktop files. Also file monitors for each directory will be created to keep track of modifications to either the desktop files or directories. It can see when a new user created desktop file overrides a system-wide desktop file and vice versa - keeping track of them in a cache accessible via the desktop ID. Modifications, overrides or restored (means user-defined desktop file is deleted and system-wide desktop file is the one again) will emit the "change" signal on XfdashboardDesktopAppInfo instances to notify any actor, connected to this signal, that the appearance should be checked and adjusted to the modified file.
+    
+    This commit addresses issue #67
+
+commit 180b7b90df14eeb6eb6ea47c85ef8828f0db3d72
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 9 20:04:46 2015 +0100
+
+    Impleting XfdashboardDesktopAppInfo
+    
+    XfdashboardDesktopAppInfo is a new class wrapping a GarconMenuItem and a string for the desktop ID and it also implements the GAppInfo interface. So it can be used - more or less - as a drop-in replacement for GDesktopAppInfo. Each function of GAppInfo interface is implemented except for function regarding to mime type associations. This class wraps GarconMenuItem to gain all it's advantages over GDesktopAppInfo, e.g. supporting desktop file of type "Link" to start a web-browser with the url specified in desktop file. It also forwards the "changed" signal of GarconMenuItem (if it did set up a file monitor for it) to notify about changes to the menu item and the desktop file. So an actor could adjust its appearing to the changes made.
+    
+    This class also has an advance lookup function for desktop IDs containing dashes. It should find a desktop file for nearly any possible combination of a dash being a directory separator or being part of the file/directory name.
+    
+    This commit addresses isse #67
+
+commit 78ea1a3842aed322a7cd33a3d698ac7a60e6afc6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 7 22:38:39 2015 +0100
+
+    Convert to plain C comments ('//' is a C++ comment)
+
+commit 9a87b0b9cf5ab5d275cfb0c3bbe09fe61e26273d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 7 14:45:47 2015 +0100
+
+    Implement "activating" signal at XfdashboardTooltipAction
+    
+    An object can connect to this new signal "activating" at XfdashboardTooltipAction to get a last chance to update tooltip text before it is displayed.
+
+commit 03550169af6be42b79639c70808171df76e9655d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 7 13:07:08 2015 +0100
+
+    I18n: Add translation sr (89%)
+
+commit 0fbe083d5195b1f665388675beecd009d1b81845
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 2 20:59:07 2015 +0100
+
+    Add "GenericName" to menu-related desktop files
+
+commit 0a823d0fece81620d0698a7192ee1cc0808d43f9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 28 20:58:01 2015 +0100
+
+    Raise minimum version of Glib and GIO to 2.32
+    
+    Using macros like G_SOURCE_* too often but they were introduced with version 2.32 of Glib so raise minimum version to version 2.32. Also include checking for GLib in configure.ac.in and include CFLAGS and LIBS of GLib in Makefile.am although GIO should pull them in. This should harden the build system again build errors and mistakes.
+
+commit a3bda601dd91a59c5c4999fc5bcd354455a1b118
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 28 20:40:15 2015 +0100
+
+    Fix build system
+    
+    Respect configure options --[enable/disable]-xcomposite and --[enable/disable]-xdamage by checking if X11 extensions exist _AND_ set variables for Makefile to include necessary include paths and needed libs depending on the configure option.
+    
+    Before I just checked the existence of required packages but nothing more. This means that enabling any of both extension was requested at 'configure' but clutter was not compiled with this extension the build must fail because the required header files and libraries were not be include because I did not add them in Makefile explicitly. I was relying on Clutter to be built with this extension and pulling them in.
+
+commit 734b73ef6ea8ef706dad3a851217f7f070777a59
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 28 20:30:35 2015 +0100
+
+    Remove hotkey feature as no working and/or usable solution was found
+    
+    See issue #69 for little more details
+
+commit 3292cc3b16ed0ebcf48abd3486904d12808aaaef
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 28 17:21:24 2015 +0100
+
+    Rewrote hotkey tracker class
+    
+    The old implementation lost the focus after a longer run (after 5 up to 15 minutes after start-up). So try another implementation using the X11 extension Xtst. This implementation is based on the ideas of ksuperkey/xcape and x11grabbr.
+    
+    Hopefully this solves issue #69
+
+commit 69a11001b7b6c2490aed805885414174356dc2cd
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 27 16:09:55 2015 +0100
+
+    Hotkey tracker could loose new focus and will never be able to "reconnect" to focus events to restore tracking capabilitites. Once the new focus is lost the hotkey will not function anymore. Therefore also reset focus when the active window changes to re-setup event notifications.
+
+commit 959b4589858c520ba63486fdb9d090f436dfb2a3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 25 18:01:56 2015 +0100
+
+    Removing double declaration of required version intltool (the latter is the right one)
+
+commit cc938cbc6ab1e177d2ce2eedaa2da9110b9c256d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 24 16:53:50 2015 +0100
+
+    Fix wrong type in GParamSpec for property 'fit-mode' at object class XfdashboardView
+
+commit b4a64c4ac2ec113110a02018dd7603f67549f3b3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 24 16:51:08 2015 +0100
+
+    Fix using deprecated function gtk_widget_reparent() when using GTK+ 3.14+
+
+commit 2a3854804388617f4f934443109ac146153735de
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 24 16:35:43 2015 +0100
+
+    Fix compiler warnings and errors
+
+commit 7bf7d59b0dc91357352fafb6006d263b64530119
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 24 15:04:31 2015 +0100
+
+    Post-release version bump to 0.3.9
+
+commit 0805e7fa63137c1de572a27f9a64c314de1cff2d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 24 15:03:01 2015 +0100
+
+    Bump version to 0.3.8
+
 commit edc0ba4cb8a1cf7cbcf361baec02f928fc128b2d
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Fri Jan 23 13:45:49 2015 +0100
