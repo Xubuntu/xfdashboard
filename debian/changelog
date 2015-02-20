@@ -1,3 +1,9 @@
+xfdashboard (0.3.9-0ubuntu1) vivid; urgency=medium
+
+  * Imported Upstream version 0.3.9.
+
+ -- Unit 193 <unit193@ubuntu.com>  Fri, 20 Feb 2015 15:25:51 -0500
+
 xfdashboard (0.3.8-0ubuntu1) vivid; urgency=medium
 
   * Imported Upstream version 0.3.8.
