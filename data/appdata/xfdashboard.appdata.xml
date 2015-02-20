@@ -5,10 +5,17 @@
 	<project_license>GPL-2.0+</project_license>
 	<name>xfdashboard</name>
 	<summary>Maybe a Gnome shell like dashboard for Xfce</summary>
+	<summary xml:lang="es">Tal vez un intérprete de órdenes a modo de panel para Xfce</summary>
+	<summary xml:lang="he">אולי לוח מחוונים דומה Gnome עבור Xfce</summary>
+	<summary xml:lang="sr">Полетник Иксфце-а који подсећа на Гномову шкољку</summary>
 
 	<description>
 		<p>Xfdashboard provides a GNOME shell dashboard like interface for use with Xfce desktop.</p>
+		<p xml:lang="es">El TableroXf provee un Intérprete de panel como el de GNOME para usarse en el entorno de escritorio Xfce.</p>
+		<p xml:lang="sr">Иксфполетник је сучеље попут Гномове шкољке за употребу на радној површи ИксФЦЕ-а.</p>
 		<p>It can be configured to run to any keyboard shortcut and when executed provides an overview of applications currently open enabling the user to switch between different applications. The search feature works like Xfce's app finder which makes it convenient to search for and start applications.</p>
+		<p xml:lang="es">Puede ser configurado para funcionar con cualquier combinación de teclas y cuando se ejecuta proporciona una visión general de las aplicaciones que estén abiertas permitendo al usuario cambiar entre diferentes aplicaciones. La función de búsqueda funciona como el buscador de aplicaciones de Xfce que hace que sea conveniente para buscar e iniciar aplicaciones.</p>
+		<p xml:lang="sr">Може се подесити да се покреће на било коју пречицу дугмади, и када се изврши даје преглед тренутно отворених програма, омогућујући кориснику да прелази са једног програма на други. Претрага ради попут претраживача програма за ИксФЦЕ што чини полетника згодним за претрагу и покретање програма.</p>
 	</description>
 
 	<screenshots>
@@ -17,10 +24,14 @@
 		</screenshot>
 		<screenshot>
 			<caption>Browsing applications</caption>
+			<caption xml:lang="es">Navegar por las aplicaciones</caption>
+			<caption xml:lang="sr">Преглед програма</caption>
 			<image>http://xfdashboard.froevel.de/images/applications-view.png</image>
 		</screenshot>
 		<screenshot>
 			<caption>Searching applications</caption>
+			<caption xml:lang="es">Buscar aplicaciones</caption>
+			<caption xml:lang="sr">Претрага програма</caption>
 			<image>http://xfdashboard.froevel.de/images/search-view.png</image>
 		</screenshot>
 	</screenshots>
@@ -36,9 +47,14 @@
 	</provides>
 
 	<releases>
-		<release version="0.3.8" timestamp="1422107912">
+		<release version="0.3.9" timestamp="1424455951">
 			<description>
-				<p>This unstable development implements a hotkey (Super key aka Windows key) to call xfdashboard in daemon mode and adds more bindable keys.</p>
+				<p>This unstable development introduces an application database and monitoring of installed and uninstalled applications. It also includes bug-fixes and other smaller improvements.</p>
+			</description>
+		</release>
+		<release version="0.3.8" timestamp="1422108114">
+			<description>
+				<p>This unstable development introduces a hotkey tracker to allow starting xfdashboard with a single press of &lt;Super&gt; key.</p>
 			</description>
 		</release>
 		<release version="0.3.7" timestamp="1421530687">
@@ -54,51 +70,65 @@
 		<release version="0.3.5" timestamp="1420890300">
 			<description>
 				<p>This unstable development introduces configurable key-bindings, allows changing themes at runtime and includes lots of smaller bug-fixes.</p>
+				<p xml:lang="es">Este versión de desarrollo introduce atajos de teclado modificables que permite cambiar de temas en tiempo de ejecución e incluye un montón de pequeñas correcciones de errores.</p>
+				<p xml:lang="sr">Ово је нестабилно развојно издање које уводи подесиве пречице, омогућава измену тема у раду и исправа много ситних буба.</p>
 			</description>
 		</release>
 		<release version="0.3.4" timestamp="1417066424">
 			<description>
 				<p>This unstable development introduces additional themes, fixes handling of client-side decorated windows (CSD) and adds a new CSS command @import() to include external CSS resources in themes.</p>
+				<p xml:lang="es">Este versión de desarrollo introduce temas adicionales, arreglos en el manejo de decoración de ventanas del lado del cliente (CSD) y añade una nueva orden CSS @import() para incluir recursos CSS externos en temas.</p>
+				<p xml:lang="sr">Ово нестабилно развојно издање представља додатне теме, исправља руковање украсима прозора клијента (ЦСД) и додаје нову наредбу ЦСС-а @import() да би укључила спољне изворе ЦСС-а у темама.</p>
 			</description>
 		</release>
 		<release version="0.3.3" timestamp="1413740495">
 			<description>
 				<p>This unstable development introduces a workaround to get window content of minimized windows to display them in windows view.</p>
+				<p xml:lang="sr">Непостојано развојно издање укључује покушај да се приказује и садржај умањених прозора.</p>
 			</description>
 		</release>
 		<release version="0.3.2" timestamp="1410150601">
 			<description>
 				<p>This unstable development introduces effects.</p>
+				<p xml:lang="es">Esta versión de desarrollo introduce efectos.</p>
+				<p xml:lang="sr">Ово је непостојано развојно издање које први пут садржи дејства површи.</p>
 			</description>
 		</release>
 		<release version="0.3.1" timestamp="1409068837">
 			<description>
 				<p>This unstable development fixes a problem closing windows accidently by pressing the key 'backspace' to refine search more often than characters entered. It also includes new image-loading functions to CSS. It also introduces a new generic selection framework for focusable actors.</p>
+				<p xml:lang="sr">Ово је нестабилно издање у коме је решено случајно затварање прозора на притисак дугмета „бриши уназад“, ради обогаћивања уноса претраге на више од унесених знакова. Такође, укључује нове радње учитавања слика у ЦСС. Доноси нови родни оквир жижним чиниоцима.</p>
 			</description>
 		</release>
 		<release version="0.2.3" timestamp="1409068569">
 			<description>
 				<p>This release fixes a problem closing windows accidently by pressing the key 'backspace' to refine search more often than characters entered.</p>
+				<p xml:lang="sr">У овом издању у коме је решено случајно затварање прозора на притисак дугмета „бриши уназад“</p>
 			</description>
 		</release>
 		<release version="0.2.2" timestamp="1407869332">
 			<description>
 				<p>This release fixes a problem when loading scalable images by icon name.</p>
+				<p xml:lang="sr">Ово издање решава погрешно учитавање слика променљиве величине према именима иконице.</p>
 			</description>
 		</release>
 		<release version="0.3.0" timestamp="1406052137">
 			<description>
 				<p>This unstable development release fixes problems with icon mode in theming and allows to launch the first item by pressing ENTER in search view when a search was started by just typing. It also includes an improved CSS parsing allowing the usage of constant values and functions in theme's CSS file.</p>
+				<p xml:lang="sr">Ово нестабилно развојно издање решава грешке у раду са иконицама при темирању и омогућава покретање прве ставке пристиском на „Унеси“ при прегледу претраге, када претрага започиње куцањем. Укључује и побољшано рашчлањивање ЦСС-а, што омогућава употребу сталних вредности и радњи у датотеци теме ЦСС-а.</p>
 			</description>
 		</release>
 		<release version="0.2.1" timestamp="1405537974">
 			<description>
 				<p>This release fixes problems with icon mode in theming and allows to launch the first item by pressing ENTER in search view when a search was started by just typing.</p>
+				<p xml:lang="sr">Ово издање решава грешке у раду са иконицама при темирању и омогућава покретање прве ставке пристиском на „Унеси“ при прегледу претраге, када претрага започиње куцањем.</p>
 			</description>
 		</release>
 		<release version="0.2.0" timestamp="1402160953">
 			<description>
 				<p>Initial release.</p>
+				<p xml:lang="es">Primera versión.</p>
+				<p xml:lang="sr">Прво издање</p>
 			</description>
 		</release>
 	</releases>

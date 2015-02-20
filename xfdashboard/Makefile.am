@@ -20,6 +20,7 @@ xfdashboard_headers = \
 	actor.h \
 	application.h \
 	application-button.h \
+	application-database.h \
 	applications-menu-model.h \
 	applications-search-provider.h \
 	applications-view.h \
@@ -30,13 +31,13 @@ xfdashboard_headers = \
 	click-action.h \
 	collapse-box.h \
 	css-selector.h \
+	desktop-app-info.h \
 	drag-action.h \
 	drop-action.h \
 	dynamic-table-layout.h \
 	fill-box-layout.h \
 	focusable.h \
 	focus-manager.h \
-	hotkey.h \
 	image-content.h \
 	live-window.h \
 	live-workspace.h \
@@ -78,6 +79,7 @@ xfdashboard_SOURCES = \
 	actor.c \
 	application.c \
 	application-button.c \
+	application-database.c \
 	applications-menu-model.c \
 	applications-search-provider.c \
 	applications-view.c \
@@ -88,13 +90,13 @@ xfdashboard_SOURCES = \
 	click-action.c \
 	collapse-box.c \
 	css-selector.c \
-	dynamic-table-layout.c \
+	desktop-app-info.c \
 	drag-action.c \
 	drop-action.c \
+	dynamic-table-layout.c \
 	fill-box-layout.c \
 	focusable.c \
 	focus-manager.c \
-	hotkey.c \
 	image-content.c \
 	live-window.c \
 	live-workspace.c \
@@ -134,6 +136,7 @@ xfdashboard_CFLAGS = \
 	$(LIBWNCK_CFLAGS) \
 	$(CLUTTER_CFLAGS) \
 	$(CLUTTER_COGL_CFLAGS) \
+	$(GLIB_CFLAGS) \
 	$(GIO_CFLAGS) \
 	$(GIO_UNIX_CFLAGS) \
 	$(GARCON_CFLAGS) \
@@ -150,12 +153,29 @@ xfdashboard_LDADD = \
 	$(LIBWNCK_LIBS) \
 	$(CLUTTER_LIBS) \
 	$(CLUTTER_COGL_LIBS) \
+	$(GLIB_LIBS) \
 	$(GIO_LIBS) \
 	$(GIO_UNIX_LIBS) \
 	$(GARCON_LIBS) \
 	$(LIBXFCONF_LIBS) \
 	$(DBUS_GLIB_LIBS) \
 	-lm
+
+if XFDASHBOARD_BUILD_WITH_XCOMPOSITE
+xfdashboard_CFLAGS += \
+	$(XCOMPOSITE_CFLAGS)
+
+xfdashboard_LDADD += \
+	$(XCOMPOSITE_LIBS)
+endif
+
+if XFDASHBOARD_BUILD_WITH_XDAMAGE
+xfdashboard_CFLAGS += \
+	$(XDAMAGE_CFLAGS)
+
+xfdashboard_LDADD += \
+	$(XDAMAGE_LIBS)
+endif
 
 if MAINTAINER_MODE
 

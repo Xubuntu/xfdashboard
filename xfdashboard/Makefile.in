@@ -79,6 +79,18 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = xfdashboard$(EXEEXT)
+@XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@am__append_1 = \
+@XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@	$(XCOMPOSITE_CFLAGS)
+
+@XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@am__append_2 = \
+@XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@	$(XCOMPOSITE_LIBS)
+
+@XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@am__append_3 = \
+@XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@	$(XDAMAGE_CFLAGS)
+
+@XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@am__append_4 = \
+@XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@	$(XDAMAGE_LIBS)
+
 subdir = xfdashboard
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
@@ -98,6 +110,7 @@ am__objects_2 =
 am_xfdashboard_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	xfdashboard-actor.$(OBJEXT) xfdashboard-application.$(OBJEXT) \
 	xfdashboard-application-button.$(OBJEXT) \
+	xfdashboard-application-database.$(OBJEXT) \
 	xfdashboard-applications-menu-model.$(OBJEXT) \
 	xfdashboard-applications-search-provider.$(OBJEXT) \
 	xfdashboard-applications-view.$(OBJEXT) \
@@ -107,13 +120,13 @@ am_xfdashboard_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	xfdashboard-click-action.$(OBJEXT) \
 	xfdashboard-collapse-box.$(OBJEXT) \
 	xfdashboard-css-selector.$(OBJEXT) \
-	xfdashboard-dynamic-table-layout.$(OBJEXT) \
+	xfdashboard-desktop-app-info.$(OBJEXT) \
 	xfdashboard-drag-action.$(OBJEXT) \
 	xfdashboard-drop-action.$(OBJEXT) \
+	xfdashboard-dynamic-table-layout.$(OBJEXT) \
 	xfdashboard-fill-box-layout.$(OBJEXT) \
 	xfdashboard-focusable.$(OBJEXT) \
 	xfdashboard-focus-manager.$(OBJEXT) \
-	xfdashboard-hotkey.$(OBJEXT) \
 	xfdashboard-image-content.$(OBJEXT) \
 	xfdashboard-live-window.$(OBJEXT) \
 	xfdashboard-live-workspace.$(OBJEXT) \
@@ -146,10 +159,16 @@ am_xfdashboard_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	xfdashboard-workspace-selector.$(OBJEXT)
 xfdashboard_OBJECTS = $(am_xfdashboard_OBJECTS)
 am__DEPENDENCIES_1 =
+@XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@am__DEPENDENCIES_2 =  \
+@XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@	$(am__DEPENDENCIES_1)
+@XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@am__DEPENDENCIES_3 =  \
+@XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@	$(am__DEPENDENCIES_1)
 xfdashboard_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -272,8 +291,12 @@ GIO_UNIX_LIBS = @GIO_UNIX_LIBS@
 GIO_UNIX_REQUIRED_VERSION = @GIO_UNIX_REQUIRED_VERSION@
 GIO_UNIX_VERSION = @GIO_UNIX_VERSION@
 GIO_VERSION = @GIO_VERSION@
+GLIB_CFLAGS = @GLIB_CFLAGS@
 GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
+GLIB_LIBS = @GLIB_LIBS@
 GLIB_MKENUMS = @GLIB_MKENUMS@
+GLIB_REQUIRED_VERSION = @GLIB_REQUIRED_VERSION@
+GLIB_VERSION = @GLIB_VERSION@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
@@ -448,6 +471,7 @@ xfdashboard_headers = \
 	actor.h \
 	application.h \
 	application-button.h \
+	application-database.h \
 	applications-menu-model.h \
 	applications-search-provider.h \
 	applications-view.h \
@@ -458,13 +482,13 @@ xfdashboard_headers = \
 	click-action.h \
 	collapse-box.h \
 	css-selector.h \
+	desktop-app-info.h \
 	drag-action.h \
 	drop-action.h \
 	dynamic-table-layout.h \
 	fill-box-layout.h \
 	focusable.h \
 	focus-manager.h \
-	hotkey.h \
 	image-content.h \
 	live-window.h \
 	live-workspace.h \
@@ -506,6 +530,7 @@ xfdashboard_SOURCES = \
 	actor.c \
 	application.c \
 	application-button.c \
+	application-database.c \
 	applications-menu-model.c \
 	applications-search-provider.c \
 	applications-view.c \
@@ -516,13 +541,13 @@ xfdashboard_SOURCES = \
 	click-action.c \
 	collapse-box.c \
 	css-selector.c \
-	dynamic-table-layout.c \
+	desktop-app-info.c \
 	drag-action.c \
 	drop-action.c \
+	dynamic-table-layout.c \
 	fill-box-layout.c \
 	focusable.c \
 	focus-manager.c \
-	hotkey.c \
 	image-content.c \
 	live-window.c \
 	live-workspace.c \
@@ -558,33 +583,20 @@ xfdashboard_SOURCES = \
 	windows-view.c \
 	workspace-selector.c
 
-xfdashboard_CFLAGS = \
-	$(LIBWNCK_CFLAGS) \
-	$(CLUTTER_CFLAGS) \
-	$(CLUTTER_COGL_CFLAGS) \
-	$(GIO_CFLAGS) \
-	$(GIO_UNIX_CFLAGS) \
-	$(GARCON_CFLAGS) \
-	$(LIBXFCONF_CFLAGS) \
-	$(DBUS_GLIB_CFLAGS) \
-	$(PLATFORM_CFLAGS)
-
+xfdashboard_CFLAGS = $(LIBWNCK_CFLAGS) $(CLUTTER_CFLAGS) \
+	$(CLUTTER_COGL_CFLAGS) $(GLIB_CFLAGS) $(GIO_CFLAGS) \
+	$(GIO_UNIX_CFLAGS) $(GARCON_CFLAGS) $(LIBXFCONF_CFLAGS) \
+	$(DBUS_GLIB_CFLAGS) $(PLATFORM_CFLAGS) $(am__append_1) \
+	$(am__append_3)
 xfdashboard_LDFLAGS = \
 	-export-dynamic \
 	-no-undefined \
 	$(PLATFORM_LDFLAGS)
 
-xfdashboard_LDADD = \
-	$(LIBWNCK_LIBS) \
-	$(CLUTTER_LIBS) \
-	$(CLUTTER_COGL_LIBS) \
-	$(GIO_LIBS) \
-	$(GIO_UNIX_LIBS) \
-	$(GARCON_LIBS) \
-	$(LIBXFCONF_LIBS) \
-	$(DBUS_GLIB_LIBS) \
-	-lm
-
+xfdashboard_LDADD = $(LIBWNCK_LIBS) $(CLUTTER_LIBS) \
+	$(CLUTTER_COGL_LIBS) $(GLIB_LIBS) $(GIO_LIBS) $(GIO_UNIX_LIBS) \
+	$(GARCON_LIBS) $(LIBXFCONF_LIBS) $(DBUS_GLIB_LIBS) -lm \
+	$(am__append_2) $(am__append_4)
 @MAINTAINER_MODE_TRUE@CLEANFILES = \
 @MAINTAINER_MODE_TRUE@	xgen-xmc \
 @MAINTAINER_MODE_TRUE@	xgen-xmh
@@ -697,6 +709,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-actor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-application-button.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-application-database.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-application.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-applications-menu-model.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-applications-search-provider.Po@am__quote@
@@ -708,6 +721,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-click-action.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-collapse-box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-css-selector.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-desktop-app-info.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-drag-action.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-drop-action.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-dynamic-table-layout.Po@am__quote@
@@ -715,7 +729,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-fill-box-layout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-focus-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-focusable.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-hotkey.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-image-content.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-live-window.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-live-workspace.Po@am__quote@
@@ -842,6 +855,20 @@ xfdashboard-application-button.obj: application-button.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='application-button.c' object='xfdashboard-application-button.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-application-button.obj `if test -f 'application-button.c'; then $(CYGPATH_W) 'application-button.c'; else $(CYGPATH_W) '$(srcdir)/application-button.c'; fi`
+
+xfdashboard-application-database.o: application-database.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-application-database.o -MD -MP -MF $(DEPDIR)/xfdashboard-application-database.Tpo -c -o xfdashboard-application-database.o `test -f 'application-database.c' || echo '$(srcdir)/'`application-database.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-application-database.Tpo $(DEPDIR)/xfdashboard-application-database.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='application-database.c' object='xfdashboard-application-database.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-application-database.o `test -f 'application-database.c' || echo '$(srcdir)/'`application-database.c
+
+xfdashboard-application-database.obj: application-database.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-application-database.obj -MD -MP -MF $(DEPDIR)/xfdashboard-application-database.Tpo -c -o xfdashboard-application-database.obj `if test -f 'application-database.c'; then $(CYGPATH_W) 'application-database.c'; else $(CYGPATH_W) '$(srcdir)/application-database.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-application-database.Tpo $(DEPDIR)/xfdashboard-application-database.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='application-database.c' object='xfdashboard-application-database.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-application-database.obj `if test -f 'application-database.c'; then $(CYGPATH_W) 'application-database.c'; else $(CYGPATH_W) '$(srcdir)/application-database.c'; fi`
 
 xfdashboard-applications-menu-model.o: applications-menu-model.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-applications-menu-model.o -MD -MP -MF $(DEPDIR)/xfdashboard-applications-menu-model.Tpo -c -o xfdashboard-applications-menu-model.o `test -f 'applications-menu-model.c' || echo '$(srcdir)/'`applications-menu-model.c
@@ -983,19 +1010,19 @@ xfdashboard-css-selector.obj: css-selector.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-css-selector.obj `if test -f 'css-selector.c'; then $(CYGPATH_W) 'css-selector.c'; else $(CYGPATH_W) '$(srcdir)/css-selector.c'; fi`
 
-xfdashboard-dynamic-table-layout.o: dynamic-table-layout.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-dynamic-table-layout.o -MD -MP -MF $(DEPDIR)/xfdashboard-dynamic-table-layout.Tpo -c -o xfdashboard-dynamic-table-layout.o `test -f 'dynamic-table-layout.c' || echo '$(srcdir)/'`dynamic-table-layout.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-dynamic-table-layout.Tpo $(DEPDIR)/xfdashboard-dynamic-table-layout.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='dynamic-table-layout.c' object='xfdashboard-dynamic-table-layout.o' libtool=no @AMDEPBACKSLASH@
+xfdashboard-desktop-app-info.o: desktop-app-info.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-desktop-app-info.o -MD -MP -MF $(DEPDIR)/xfdashboard-desktop-app-info.Tpo -c -o xfdashboard-desktop-app-info.o `test -f 'desktop-app-info.c' || echo '$(srcdir)/'`desktop-app-info.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-desktop-app-info.Tpo $(DEPDIR)/xfdashboard-desktop-app-info.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='desktop-app-info.c' object='xfdashboard-desktop-app-info.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-dynamic-table-layout.o `test -f 'dynamic-table-layout.c' || echo '$(srcdir)/'`dynamic-table-layout.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-desktop-app-info.o `test -f 'desktop-app-info.c' || echo '$(srcdir)/'`desktop-app-info.c
 
-xfdashboard-dynamic-table-layout.obj: dynamic-table-layout.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-dynamic-table-layout.obj -MD -MP -MF $(DEPDIR)/xfdashboard-dynamic-table-layout.Tpo -c -o xfdashboard-dynamic-table-layout.obj `if test -f 'dynamic-table-layout.c'; then $(CYGPATH_W) 'dynamic-table-layout.c'; else $(CYGPATH_W) '$(srcdir)/dynamic-table-layout.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-dynamic-table-layout.Tpo $(DEPDIR)/xfdashboard-dynamic-table-layout.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='dynamic-table-layout.c' object='xfdashboard-dynamic-table-layout.obj' libtool=no @AMDEPBACKSLASH@
+xfdashboard-desktop-app-info.obj: desktop-app-info.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-desktop-app-info.obj -MD -MP -MF $(DEPDIR)/xfdashboard-desktop-app-info.Tpo -c -o xfdashboard-desktop-app-info.obj `if test -f 'desktop-app-info.c'; then $(CYGPATH_W) 'desktop-app-info.c'; else $(CYGPATH_W) '$(srcdir)/desktop-app-info.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-desktop-app-info.Tpo $(DEPDIR)/xfdashboard-desktop-app-info.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='desktop-app-info.c' object='xfdashboard-desktop-app-info.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-dynamic-table-layout.obj `if test -f 'dynamic-table-layout.c'; then $(CYGPATH_W) 'dynamic-table-layout.c'; else $(CYGPATH_W) '$(srcdir)/dynamic-table-layout.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-desktop-app-info.obj `if test -f 'desktop-app-info.c'; then $(CYGPATH_W) 'desktop-app-info.c'; else $(CYGPATH_W) '$(srcdir)/desktop-app-info.c'; fi`
 
 xfdashboard-drag-action.o: drag-action.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-drag-action.o -MD -MP -MF $(DEPDIR)/xfdashboard-drag-action.Tpo -c -o xfdashboard-drag-action.o `test -f 'drag-action.c' || echo '$(srcdir)/'`drag-action.c
@@ -1024,6 +1051,20 @@ xfdashboard-drop-action.obj: drop-action.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='drop-action.c' object='xfdashboard-drop-action.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-drop-action.obj `if test -f 'drop-action.c'; then $(CYGPATH_W) 'drop-action.c'; else $(CYGPATH_W) '$(srcdir)/drop-action.c'; fi`
+
+xfdashboard-dynamic-table-layout.o: dynamic-table-layout.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-dynamic-table-layout.o -MD -MP -MF $(DEPDIR)/xfdashboard-dynamic-table-layout.Tpo -c -o xfdashboard-dynamic-table-layout.o `test -f 'dynamic-table-layout.c' || echo '$(srcdir)/'`dynamic-table-layout.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-dynamic-table-layout.Tpo $(DEPDIR)/xfdashboard-dynamic-table-layout.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='dynamic-table-layout.c' object='xfdashboard-dynamic-table-layout.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-dynamic-table-layout.o `test -f 'dynamic-table-layout.c' || echo '$(srcdir)/'`dynamic-table-layout.c
+
+xfdashboard-dynamic-table-layout.obj: dynamic-table-layout.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-dynamic-table-layout.obj -MD -MP -MF $(DEPDIR)/xfdashboard-dynamic-table-layout.Tpo -c -o xfdashboard-dynamic-table-layout.obj `if test -f 'dynamic-table-layout.c'; then $(CYGPATH_W) 'dynamic-table-layout.c'; else $(CYGPATH_W) '$(srcdir)/dynamic-table-layout.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-dynamic-table-layout.Tpo $(DEPDIR)/xfdashboard-dynamic-table-layout.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='dynamic-table-layout.c' object='xfdashboard-dynamic-table-layout.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-dynamic-table-layout.obj `if test -f 'dynamic-table-layout.c'; then $(CYGPATH_W) 'dynamic-table-layout.c'; else $(CYGPATH_W) '$(srcdir)/dynamic-table-layout.c'; fi`
 
 xfdashboard-fill-box-layout.o: fill-box-layout.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-fill-box-layout.o -MD -MP -MF $(DEPDIR)/xfdashboard-fill-box-layout.Tpo -c -o xfdashboard-fill-box-layout.o `test -f 'fill-box-layout.c' || echo '$(srcdir)/'`fill-box-layout.c
@@ -1066,20 +1107,6 @@ xfdashboard-focus-manager.obj: focus-manager.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='focus-manager.c' object='xfdashboard-focus-manager.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-focus-manager.obj `if test -f 'focus-manager.c'; then $(CYGPATH_W) 'focus-manager.c'; else $(CYGPATH_W) '$(srcdir)/focus-manager.c'; fi`
-
-xfdashboard-hotkey.o: hotkey.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-hotkey.o -MD -MP -MF $(DEPDIR)/xfdashboard-hotkey.Tpo -c -o xfdashboard-hotkey.o `test -f 'hotkey.c' || echo '$(srcdir)/'`hotkey.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-hotkey.Tpo $(DEPDIR)/xfdashboard-hotkey.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='hotkey.c' object='xfdashboard-hotkey.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-hotkey.o `test -f 'hotkey.c' || echo '$(srcdir)/'`hotkey.c
-
-xfdashboard-hotkey.obj: hotkey.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-hotkey.obj -MD -MP -MF $(DEPDIR)/xfdashboard-hotkey.Tpo -c -o xfdashboard-hotkey.obj `if test -f 'hotkey.c'; then $(CYGPATH_W) 'hotkey.c'; else $(CYGPATH_W) '$(srcdir)/hotkey.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-hotkey.Tpo $(DEPDIR)/xfdashboard-hotkey.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='hotkey.c' object='xfdashboard-hotkey.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-hotkey.obj `if test -f 'hotkey.c'; then $(CYGPATH_W) 'hotkey.c'; else $(CYGPATH_W) '$(srcdir)/hotkey.c'; fi`
 
 xfdashboard-image-content.o: image-content.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-image-content.o -MD -MP -MF $(DEPDIR)/xfdashboard-image-content.Tpo -c -o xfdashboard-image-content.o `test -f 'image-content.c' || echo '$(srcdir)/'`image-content.c

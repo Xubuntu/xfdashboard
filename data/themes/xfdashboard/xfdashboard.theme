@@ -1,9 +1,12 @@
 [Xfdashboard Theme]
 Name=xfdashboard
 Comment=Default theme for xfdashboard
+Comment[es]=Tema predeterminado para el Tablero Xf
+Comment[he]=ערכת נושא ברירת מחדל עבור xfdashboard
+Comment[sr]=Подразумевана тема полетника
 Style=xfdashboard.css
 Layout=xfdashboard.xml
 Effects=effects.xml
 Author=Stephan Haller
-Version=0.3.8git.65d4ee8
+Version=0.3.9git.56dd487
 Screenshot=screenshot-xfdashboard.png

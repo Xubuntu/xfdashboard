@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [3])
-m4_define([xfdashboard_version_micro], [8])
-m4_define([xfdashboard_version_build], [edc0ba4])
+m4_define([xfdashboard_version_micro], [9])
+m4_define([xfdashboard_version_build], [459e468])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -24,11 +24,11 @@ dnl *** Minimum package version needed ***
 dnl **************************************
 m4_define([wnck_minimum_version], [2.30])
 m4_define([clutter_minimum_version], [1.12.0])
-m4_define([gio_minimum_version], [2.30.2])
+m4_define([glib_minimum_version], [2.32])
+m4_define([gio_minimum_version], [2.32])
 m4_define([garcon_minimum_version], [0.2.0])
 m4_define([xfconf_minimum_version], [4.10.0])
 m4_define([dbus_glib_minimum_version], [0.98])
-m4_define([intltool_minimum_version], [0.31])
 m4_define([xcomposite_minimum_version], [0.2])
 m4_define([intltool_minimum_version], [0.35])
 m4_define([gtk_minimum_version], [3.2])
@@ -104,7 +104,7 @@ AC_CHECK_FUNCS([bind_textdomain_codeset])
 dnl ******************************
 dnl *** Check for i18n support ***
 dnl ******************************
-XDT_I18N([])
+XDT_I18N([es he it_IT sr ])
 
 dnl *******************************
 dnl *** Check for X11 installed ***
@@ -121,6 +121,11 @@ AC_ARG_ENABLE([xcomposite],
 	[enabled_x11_extension_composite="$enableval"],
 	[enabled_x11_extension_composite=yes]
 )
+
+AC_MSG_CHECKING([whether to build with X11 extension XComposite])
+AM_CONDITIONAL([XFDASHBOARD_BUILD_WITH_XCOMPOSITE], [test x"$enabled_x11_extension_composite" = x"yes"])
+AC_MSG_RESULT([$enabled_x11_extension_composite])
+
 if test "x$enabled_x11_extension_composite" = xyes; then
 	if $PKG_CONFIG --print-errors --exists xcomposite 2>&1; then
 		PKG_CHECK_MODULES(XCOMPOSITE, xcomposite >= [xcomposite_minimum_version])
@@ -139,6 +144,11 @@ AC_ARG_ENABLE([xdamage],
 	[enabled_x11_extension_damage="$enableval"],
 	[enabled_x11_extension_damage=yes]
 )
+
+AC_MSG_CHECKING([whether to build with X11 extension XDamage])
+AM_CONDITIONAL([XFDASHBOARD_BUILD_WITH_XDAMAGE], [test x"$enabled_x11_extension_damage" = x"yes"])
+AC_MSG_RESULT([$enabled_x11_extension_damage])
+
 if test "x$enabled_x11_extension_damage" = xyes; then
 	if $PKG_CONFIG --print-errors --exists xdamage 2>&1; then
 		PKG_CHECK_MODULES(XDAMAGE, xdamage)
@@ -154,6 +164,7 @@ XDT_CHECK_PACKAGE([LIBWNCK], [libwnck-1.0], [wnck_minimum_version])
 XDT_CHECK_PACKAGE([CLUTTER], [clutter-1.0], [clutter_minimum_version])
 XDT_CHECK_PACKAGE([CLUTTER_COGL], [clutter-cogl-1.0], [clutter_minimum_version])
 XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [gtk_minimum_version])
+XDT_CHECK_PACKAGE([GLIB], [glib-2.0], [glib_minimum_version])
 XDT_CHECK_PACKAGE([GIO], [gio-2.0], [gio_minimum_version])
 XDT_CHECK_PACKAGE([GIO_UNIX], [gio-unix-2.0], [gio_minimum_version])
 XDT_CHECK_PACKAGE([GARCON], [garcon-1], [garcon_minimum_version])
@@ -235,6 +246,7 @@ echo "  libwnck:    $LIBWNCK_VERSION"
 echo "  clutter:    $CLUTTER_VERSION"
 echo "  cogl:       $CLUTTER_COGL_VERSION"
 echo "  gtk+:       $GTK_VERSION"
+echo "  glib:       $GLIB_VERSION"
 echo "  gio:        $GIO_VERSION"
 echo "  gio-unix:   $GIO_UNIX_VERSION"
 echo "  garcon:     $GARCON_VERSION"
