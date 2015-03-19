@@ -140,7 +140,7 @@ static void _xfdashboard_application_button_update_icon(XfdashboardApplicationBu
 		}
 	}
 
-	if(!iconName) iconName=GTK_STOCK_MISSING_IMAGE;
+	if(!iconName) iconName="gtk-missing-image";
 
 	/* Set up button and release allocated resources */
 	if(iconName) xfdashboard_button_set_icon(XFDASHBOARD_BUTTON(self), iconName);
@@ -151,8 +151,6 @@ static void _xfdashboard_application_button_on_app_info_changed(XfdashboardAppli
 																	gpointer inUserData)
 {
 	g_return_if_fail(XFDASHBOARD_IS_APPLICATION_BUTTON(self));
-
-g_message("%s: application-button=%p changed", __func__, self);
 
 	_xfdashboard_application_button_update_text(self);
 	_xfdashboard_application_button_update_icon(self);
@@ -604,7 +602,7 @@ gboolean xfdashboard_application_button_execute(XfdashboardApplicationButton *se
 	if(!priv->appInfo)
 	{
 		xfdashboard_notify(CLUTTER_ACTOR(self),
-							GTK_STOCK_DIALOG_ERROR,
+							"gtk-dialog-error",
 							_("Launching application '%s' failed: %s"),
 							xfdashboard_application_button_get_display_name(self),
 							_("No information available for application"));

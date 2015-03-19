@@ -96,7 +96,7 @@ static guint XfdashboardImageContentSignals[SIGNAL_LAST]={ 0, };
 static GHashTable*	_xfdashboard_image_content_cache=NULL;
 static guint		_xfdashboard_image_content_cache_shutdownSignalID=0;
 
-#define XFDASHBOARD_IMAGE_CONTENT_FALLBACK_ICON_NAME		GTK_STOCK_MISSING_IMAGE
+#define XFDASHBOARD_IMAGE_CONTENT_FALLBACK_ICON_NAME		"gtk-missing-image"
 
 /* Get image from cache if available */
 static ClutterImage* _xfdashboard_image_content_get_cached_image(const gchar *inKey)
@@ -402,7 +402,7 @@ static void _xfdashboard_image_content_load_from_file(XfdashboardImageContent *s
 		}
 
 		/* Release allocated resources */
-		gtk_icon_info_free(iconInfo);
+		g_object_unref(iconInfo);
 	}
 		/* ... otherwise set up to load icon async */
 		else filename=lookupFilename;
@@ -677,7 +677,7 @@ static void _xfdashboard_image_content_load_from_icon_name(XfdashboardImageConte
 		}
 
 	/* Release allocated resources */
-	gtk_icon_info_free(iconInfo);
+	g_object_unref(iconInfo);
 }
 
 /* Load image from GIcon */
@@ -798,7 +798,7 @@ static void _xfdashboard_image_content_load_from_gicon(XfdashboardImageContent *
 		}
 
 	/* Release allocated resources */
-	gtk_icon_info_free(iconInfo);
+	g_object_unref(iconInfo);
 }
 
 /* Icon theme has changed */

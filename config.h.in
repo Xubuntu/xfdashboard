@@ -90,6 +90,9 @@
 /* Define if XDamage extension is available */
 #undef HAVE_XDAMAGE
 
+/* Define if Xinerama extension is available */
+#undef HAVE_XINERAMA
+
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 

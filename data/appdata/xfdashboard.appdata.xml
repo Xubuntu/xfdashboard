@@ -12,10 +12,10 @@
 	<description>
 		<p>Xfdashboard provides a GNOME shell dashboard like interface for use with Xfce desktop.</p>
 		<p xml:lang="es">El TableroXf provee un Intérprete de panel como el de GNOME para usarse en el entorno de escritorio Xfce.</p>
-		<p xml:lang="sr">Иксфполетник је сучеље попут Гномове шкољке за употребу на радној површи ИксФЦЕ-а.</p>
+		<p xml:lang="sr">Полетник Иксфце-а је сучеље попут Гномове шкољке за употребу на радној површи Иксфце-а.</p>
 		<p>It can be configured to run to any keyboard shortcut and when executed provides an overview of applications currently open enabling the user to switch between different applications. The search feature works like Xfce's app finder which makes it convenient to search for and start applications.</p>
 		<p xml:lang="es">Puede ser configurado para funcionar con cualquier combinación de teclas y cuando se ejecuta proporciona una visión general de las aplicaciones que estén abiertas permitendo al usuario cambiar entre diferentes aplicaciones. La función de búsqueda funciona como el buscador de aplicaciones de Xfce que hace que sea conveniente para buscar e iniciar aplicaciones.</p>
-		<p xml:lang="sr">Може се подесити да се покреће на било коју пречицу дугмади, и када се изврши даје преглед тренутно отворених програма, омогућујући кориснику да прелази са једног програма на други. Претрага ради попут претраживача програма за ИксФЦЕ што чини полетника згодним за претрагу и покретање програма.</p>
+		<p xml:lang="sr">Може се подесити да се покреће на било коју пречицу дугмади, и када се изврши даје преглед тренутно отворених програма, омогућујући кориснику да прелази са једног програма на други. Претрага ради попут претраживача програма за Иксфце што чини полетника згодним за претрагу и покретање програма.</p>
 	</description>
 
 	<screenshots>
@@ -47,24 +47,33 @@
 	</provides>
 
 	<releases>
+		<release version="0.3.90" timestamp="1426700895">
+			<description>
+				<p>This unstable development introduces support for multiple monitors and also bug-fixes and other smaller improvements.</p>
+			</description>
+		</release>
 		<release version="0.3.9" timestamp="1424455951">
 			<description>
 				<p>This unstable development introduces an application database and monitoring of installed and uninstalled applications. It also includes bug-fixes and other smaller improvements.</p>
+				<p xml:lang="sr">Ово нестабилно развојно издање добија могућност складиштења и надгледања података о уграђеним и уклоњеним програмима. Такође, има и исправке грешака, као и друга побољшања.</p>
 			</description>
 		</release>
 		<release version="0.3.8" timestamp="1422108114">
 			<description>
 				<p>This unstable development introduces a hotkey tracker to allow starting xfdashboard with a single press of &lt;Super&gt; key.</p>
+				<p xml:lang="sr">Ово нестабилно развојно издање доноси пратиоца пречица ради покретања полетника једним притиском дугмета &lt;Супер&gt;</p>
 			</description>
 		</release>
 		<release version="0.3.7" timestamp="1421530687">
 			<description>
 				<p>This unstable development fixes a bug which rendered the new settings application completely unusable.</p>
+				<p xml:lang="sr">Ово нестабилно развојно издање исправља бубу која приказује нови програм поставки потпуно неупотребљиво.</p>
 			</description>
 		</release>
 		<release version="0.3.6" timestamp="1421519406">
 			<description>
 				<p>This unstable development introduces a settings application.</p>
+				<p xml:lang="sr">Ово нестабилно развојно издање доноси програм поставки полетника.</p>
 			</description>
 		</release>
 		<release version="0.3.5" timestamp="1420890300">

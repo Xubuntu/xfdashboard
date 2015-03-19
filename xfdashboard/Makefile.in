@@ -91,6 +91,12 @@ bin_PROGRAMS = xfdashboard$(EXEEXT)
 @XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@am__append_4 = \
 @XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@	$(XDAMAGE_LIBS)
 
+@XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@am__append_5 = \
+@XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@	$(XINERAMA_CFLAGS)
+
+@XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@am__append_6 = \
+@XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@	$(XINERAMA_LIBS)
+
 subdir = xfdashboard
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
@@ -153,6 +159,7 @@ am_xfdashboard_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	xfdashboard-viewpad.$(OBJEXT) \
 	xfdashboard-window-content.$(OBJEXT) \
 	xfdashboard-window-tracker.$(OBJEXT) \
+	xfdashboard-window-tracker-monitor.$(OBJEXT) \
 	xfdashboard-window-tracker-window.$(OBJEXT) \
 	xfdashboard-window-tracker-workspace.$(OBJEXT) \
 	xfdashboard-windows-view.$(OBJEXT) \
@@ -163,12 +170,14 @@ am__DEPENDENCIES_1 =
 @XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@	$(am__DEPENDENCIES_1)
 @XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@am__DEPENDENCIES_3 =  \
 @XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@	$(am__DEPENDENCIES_1)
+@XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@am__DEPENDENCIES_4 =  \
+@XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@	$(am__DEPENDENCIES_1)
 xfdashboard_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -306,6 +315,7 @@ GTK_REQUIRED_VERSION = @GTK_REQUIRED_VERSION@
 GTK_VERSION = @GTK_VERSION@
 HAVE_XCOMPOSITE = @HAVE_XCOMPOSITE@
 HAVE_XDAMAGE = @HAVE_XDAMAGE@
+HAVE_XINERAMA = @HAVE_XINERAMA@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -323,6 +333,7 @@ INTLTOOL__v_MERGE_ = @INTLTOOL__v_MERGE_@
 INTLTOOL__v_MERGE_0 = @INTLTOOL__v_MERGE_0@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -394,6 +405,8 @@ XFDASHBOARD_VERSION_MICRO = @XFDASHBOARD_VERSION_MICRO@
 XFDASHBOARD_VERSION_MINOR = @XFDASHBOARD_VERSION_MINOR@
 XGETTEXT = @XGETTEXT@
 XGETTEXT_ARGS = @XGETTEXT_ARGS@
+XINERAMA_CFLAGS = @XINERAMA_CFLAGS@
+XINERAMA_LIBS = @XINERAMA_LIBS@
 XMKMF = @XMKMF@
 X_CFLAGS = @X_CFLAGS@
 X_EXTRA_LIBS = @X_EXTRA_LIBS@
@@ -519,6 +532,7 @@ xfdashboard_headers = \
 	viewpad.h \
 	window-content.h \
 	window-tracker.h \
+	window-tracker-monitor.h \
 	window-tracker-window.h \
 	window-tracker-workspace.h \
 	windows-view.h \
@@ -578,6 +592,7 @@ xfdashboard_SOURCES = \
 	viewpad.c \
 	window-content.c \
 	window-tracker.c \
+	window-tracker-monitor.c \
 	window-tracker-window.c \
 	window-tracker-workspace.c \
 	windows-view.c \
@@ -587,7 +602,7 @@ xfdashboard_CFLAGS = $(LIBWNCK_CFLAGS) $(CLUTTER_CFLAGS) \
 	$(CLUTTER_COGL_CFLAGS) $(GLIB_CFLAGS) $(GIO_CFLAGS) \
 	$(GIO_UNIX_CFLAGS) $(GARCON_CFLAGS) $(LIBXFCONF_CFLAGS) \
 	$(DBUS_GLIB_CFLAGS) $(PLATFORM_CFLAGS) $(am__append_1) \
-	$(am__append_3)
+	$(am__append_3) $(am__append_5)
 xfdashboard_LDFLAGS = \
 	-export-dynamic \
 	-no-undefined \
@@ -596,7 +611,7 @@ xfdashboard_LDFLAGS = \
 xfdashboard_LDADD = $(LIBWNCK_LIBS) $(CLUTTER_LIBS) \
 	$(CLUTTER_COGL_LIBS) $(GLIB_LIBS) $(GIO_LIBS) $(GIO_UNIX_LIBS) \
 	$(GARCON_LIBS) $(LIBXFCONF_LIBS) $(DBUS_GLIB_LIBS) -lm \
-	$(am__append_2) $(am__append_4)
+	$(am__append_2) $(am__append_4) $(am__append_6)
 @MAINTAINER_MODE_TRUE@CLEANFILES = \
 @MAINTAINER_MODE_TRUE@	xgen-xmc \
 @MAINTAINER_MODE_TRUE@	xgen-xmh
@@ -759,6 +774,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-view.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-viewpad.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-window-content.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-window-tracker-monitor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-window-tracker-window.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-window-tracker-workspace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-window-tracker.Po@am__quote@
@@ -1527,6 +1543,20 @@ xfdashboard-window-tracker.obj: window-tracker.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='window-tracker.c' object='xfdashboard-window-tracker.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-window-tracker.obj `if test -f 'window-tracker.c'; then $(CYGPATH_W) 'window-tracker.c'; else $(CYGPATH_W) '$(srcdir)/window-tracker.c'; fi`
+
+xfdashboard-window-tracker-monitor.o: window-tracker-monitor.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-window-tracker-monitor.o -MD -MP -MF $(DEPDIR)/xfdashboard-window-tracker-monitor.Tpo -c -o xfdashboard-window-tracker-monitor.o `test -f 'window-tracker-monitor.c' || echo '$(srcdir)/'`window-tracker-monitor.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-window-tracker-monitor.Tpo $(DEPDIR)/xfdashboard-window-tracker-monitor.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='window-tracker-monitor.c' object='xfdashboard-window-tracker-monitor.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-window-tracker-monitor.o `test -f 'window-tracker-monitor.c' || echo '$(srcdir)/'`window-tracker-monitor.c
+
+xfdashboard-window-tracker-monitor.obj: window-tracker-monitor.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-window-tracker-monitor.obj -MD -MP -MF $(DEPDIR)/xfdashboard-window-tracker-monitor.Tpo -c -o xfdashboard-window-tracker-monitor.obj `if test -f 'window-tracker-monitor.c'; then $(CYGPATH_W) 'window-tracker-monitor.c'; else $(CYGPATH_W) '$(srcdir)/window-tracker-monitor.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-window-tracker-monitor.Tpo $(DEPDIR)/xfdashboard-window-tracker-monitor.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='window-tracker-monitor.c' object='xfdashboard-window-tracker-monitor.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-window-tracker-monitor.obj `if test -f 'window-tracker-monitor.c'; then $(CYGPATH_W) 'window-tracker-monitor.c'; else $(CYGPATH_W) '$(srcdir)/window-tracker-monitor.c'; fi`
 
 xfdashboard-window-tracker-window.o: window-tracker-window.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-window-tracker-window.o -MD -MP -MF $(DEPDIR)/xfdashboard-window-tracker-window.Tpo -c -o xfdashboard-window-tracker-window.o `test -f 'window-tracker-window.c' || echo '$(srcdir)/'`window-tracker-window.c
