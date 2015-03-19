@@ -187,9 +187,16 @@ int main(int argc, char **argv)
 	GError						*error=NULL;
 	gint						status;
 
-#if !defined(GLIB_CHECK_VERSION) || !GLIB_CHECK_VERSION(2, 36, 0)
+#if !GLIB_CHECK_VERSION(2, 36, 0)
 	/* Initialize GObject type system */
 	g_type_init();
+#endif
+
+#if CLUTTER_CHECK_VERSION(1, 16, 0)
+	/* Enforce X11 backend in Clutter. This function must be called before any
+	 * other Clutter API function.
+	 */
+	clutter_set_windowing_backend("x11");
 #endif
 
 	/* Check for running instance (keep only one instance) */
@@ -272,6 +279,9 @@ int main(int argc, char **argv)
 		g_object_unref(app);
 		return(status);
 	}
+
+	/* Notify that application has started and main loop will be entered */
+	gdk_notify_startup_complete();
 
 	/* Start main loop */
 	clutter_main();

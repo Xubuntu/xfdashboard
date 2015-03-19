@@ -133,7 +133,7 @@ GAppLaunchContext* xfdashboard_create_app_context(XfdashboardWindowTrackerWorksp
 	 * explicitly to launch the application on current workspace even if user changes
 	 * workspace in the time between launching application and showing first window.
 	 */
-	context=gdk_app_launch_context_new();
+	context=gdk_display_get_app_launch_context(gdk_display_get_default());
 	if(event) gdk_app_launch_context_set_timestamp(context, clutter_event_get_time(event));
 	gdk_app_launch_context_set_desktop(context, xfdashboard_window_tracker_workspace_get_number(inWorkspace));
 
@@ -524,4 +524,37 @@ gchar* xfdashboard_get_enum_value_name(GType inEnumClass, gint inValue)
 
 	/* Return name */
 	return(valueName);
+}
+
+/* Dump actors */
+static void _xfdashboard_dump_actor_internal(ClutterActor *inActor, gint inLevel)
+{
+	ClutterActorIter	iter;
+	ClutterActor		*child;
+	gint				i;
+
+	g_return_if_fail(CLUTTER_IS_ACTOR(inActor));
+	g_return_if_fail(inLevel>=0);
+
+	clutter_actor_iter_init(&iter, CLUTTER_ACTOR(inActor));
+	while(clutter_actor_iter_next(&iter, &child))
+	{
+		for(i=0; i<inLevel; i++) g_print("  ");
+		g_print("+- %s@%p - name: %s - geometry: %.2f,%.2f [%.2fx%.2f], mapped: %s, visible: %s, children: %d\n",
+					G_OBJECT_TYPE_NAME(child), child,
+					clutter_actor_get_name(child),
+					clutter_actor_get_x(child),
+					clutter_actor_get_y(child),
+					clutter_actor_get_width(child),
+					clutter_actor_get_height(child),
+					CLUTTER_ACTOR_IS_MAPPED(child) ? "yes" : "no",
+					CLUTTER_ACTOR_IS_VISIBLE(child) ? "yes" : "no",
+					clutter_actor_get_n_children(child));
+		if(clutter_actor_get_n_children(child)>0) _xfdashboard_dump_actor_internal(child, inLevel+1);
+	}
+}
+
+void xfdashboard_dump_actor(ClutterActor *inActor)
+{
+	_xfdashboard_dump_actor_internal(inActor, 0);
 }

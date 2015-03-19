@@ -14,15 +14,15 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [3])
-m4_define([xfdashboard_version_micro], [9])
-m4_define([xfdashboard_version_build], [459e468])
+m4_define([xfdashboard_version_micro], [90])
+m4_define([xfdashboard_version_build], [d21545a])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
 dnl **************************************
 dnl *** Minimum package version needed ***
 dnl **************************************
-m4_define([wnck_minimum_version], [2.30])
+m4_define([wnck_minimum_version], [3.0])
 m4_define([clutter_minimum_version], [1.12.0])
 m4_define([glib_minimum_version], [2.32])
 m4_define([gio_minimum_version], [2.32])
@@ -101,6 +101,12 @@ AC_CHECK_HEADERS([stdlib.h unistd.h locale.h stdio.h errno.h time.h string.h \
                   libintl.h])
 AC_CHECK_FUNCS([bind_textdomain_codeset])
 
+dnl **********************
+dnl *** Check for libm ***
+dnl **********************
+AC_CHECK_LIBM
+AC_SUBST(LIBM)
+
 dnl ******************************
 dnl *** Check for i18n support ***
 dnl ******************************
@@ -157,10 +163,33 @@ if test "x$enabled_x11_extension_damage" = xyes; then
 fi
 AC_SUBST(HAVE_XDAMAGE)
 
+dnl *****************************************
+dnl *** Check for X11 extension: Xinerama ***
+dnl *****************************************
+HAVE_XINERAMA=""
+AC_ARG_ENABLE([xinerama],
+	[AS_HELP_STRING([--disable-xinerama],
+		[disable use of X11 extension Xinerama @<:@default=enabled@:>@])],
+	[enabled_x11_extension_xinerama="$enableval"],
+	[enabled_x11_extension_xinerama=yes]
+)
+
+AC_MSG_CHECKING([whether to build with X11 extension Xinerama])
+AM_CONDITIONAL([XFDASHBOARD_BUILD_WITH_XINERAMA], [test x"$enabled_x11_extension_xinerama" = x"yes"])
+AC_MSG_RESULT([$enabled_x11_extension_xinerama])
+
+if test "x$enabled_x11_extension_xinerama" = xyes; then
+	if $PKG_CONFIG --print-errors --exists xinerama 2>&1; then
+		PKG_CHECK_MODULES(XINERAMA, xinerama)
+		AC_DEFINE([HAVE_XINERAMA], [1], [Define if Xinerama extension is available])
+	fi
+fi
+AC_SUBST(HAVE_XINERAMA)
+
 dnl ***********************************
 dnl *** Check for required packages ***
 dnl ***********************************
-XDT_CHECK_PACKAGE([LIBWNCK], [libwnck-1.0], [wnck_minimum_version])
+XDT_CHECK_PACKAGE([LIBWNCK], [libwnck-3.0], [wnck_minimum_version])
 XDT_CHECK_PACKAGE([CLUTTER], [clutter-1.0], [clutter_minimum_version])
 XDT_CHECK_PACKAGE([CLUTTER_COGL], [clutter-cogl-1.0], [clutter_minimum_version])
 XDT_CHECK_PACKAGE([GTK], [gtk+-3.0], [gtk_minimum_version])
@@ -260,4 +289,5 @@ echo
 echo "Features enabled:"
 echo "  XComposite:  $enabled_x11_extension_composite"
 echo "  XDamage:     $enabled_x11_extension_damage"
+echo "  Xinerama:    $enabled_x11_extension_xinerama"
 echo

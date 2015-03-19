@@ -11016,9 +11016,7 @@ m4_ifndef([_LT_PROG_F77],		[AC_DEFUN([_LT_PROG_F77])])
 m4_ifndef([_LT_PROG_FC],		[AC_DEFUN([_LT_PROG_FC])])
 m4_ifndef([_LT_PROG_CXX],		[AC_DEFUN([_LT_PROG_CXX])])
 
-dnl $Id$
-dnl
-dnl Copyright (c) 2002-2006
+dnl Copyright (c) 2002-2015
 dnl         The Xfce development team. All rights reserved.
 dnl
 dnl Written for Xfce by Benedikt Meurer <benny@xfce.org>.
@@ -11046,7 +11044,7 @@ dnl
 
 
 dnl We need recent a autoconf version
-AC_PREREQ([2.53])
+AC_PREREQ([2.60])
 
 
 
@@ -11356,9 +11354,7 @@ AC_DEFUN([XDT_CHECK_LIBXPM_REQUIRE],
 ])
 
 
-dnl $Id$
-dnl
-dnl Copyright (c) 2002-2006
+dnl Copyright (c) 2002-2015
 dnl         The Xfce development team. All rights reserved.
 dnl
 dnl Written for Xfce by Benedikt Meurer <benny@xfce.org>.
@@ -11386,7 +11382,7 @@ dnl
 
 
 dnl We need recent a autoconf version
-AC_PREREQ([2.53])
+AC_PREREQ([2.60])
 
 
 dnl XDT_SUPPORTED_FLAGS(VAR, FLAGS)
@@ -11400,7 +11396,7 @@ AC_DEFUN([XDT_SUPPORTED_FLAGS],
     AC_MSG_CHECKING([if $CC supports $flag])
     saved_CFLAGS="$CFLAGS"
     CFLAGS="$CFLAGS $flag"
-    AC_COMPILE_IFELSE([ ], [flag_supported=yes], [flag_supported=no])
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE([ ])], [flag_supported=yes], [flag_supported=no])
     CFLAGS="$saved_CFLAGS"
     AC_MSG_RESULT([$flag_supported])
 
@@ -11434,10 +11430,10 @@ AC_HELP_STRING([--disable-debug], [Include no debugging support]),
                               -Wdeclaration-after-statement \
                               -Wmissing-declarations \
                               -Wmissing-noreturn -Wshadow -Wpointer-arith \
-                              -Wcast-align -Wformat-security \
+                              -Wcast-align -Wformat -Wformat-security -Wformat-y2k \
                               -Winit-self -Wmissing-include-dirs -Wundef \
-                              -Wmissing-format-attribute -Wnested-externs"
-    CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
+                              -Wnested-externs"
+    CPPFLAGS="$CPPFLAGS"
 
     if test x`uname` = x"Linux"; then
       xdt_cv_additional_CFLAGS="$xdt_cv_additional_CFLAGS -fstack-protector"
@@ -11504,7 +11500,7 @@ AC_DEFUN([XDT_FEATURE_VISIBILITY],
     saved_CFLAGS="$CFLAGS"
     CFLAGS="$CFLAGS $xdt_vis_test_cflags"
     AC_MSG_CHECKING([whether $CC supports the GNUC visibility attribute])
-    AC_COMPILE_IFELSE(AC_LANG_SOURCE(
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE(
     [
       void test_default (void);
       void test_hidden (void);
@@ -11517,7 +11513,7 @@ AC_DEFUN([XDT_FEATURE_VISIBILITY],
         test_hidden ();
         return 0;
       }
-    ]),
+    ])],
     [
       have_gnuc_visibility=yes
       AC_MSG_RESULT([yes])
@@ -11578,9 +11574,7 @@ AC_DEFUN([XDT_FEATURE_LINKER_OPTS],
   fi
 ])
 
-dnl $Id$
-dnl
-dnl Copyright (c) 2002-2006
+dnl Copyright (c) 2002-2015
 dnl         The Xfce development team. All rights reserved.
 dnl
 dnl Written for Xfce by Benedikt Meurer <benny@xfce.org>.

@@ -78,6 +78,14 @@ extern void _xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT (GClosure     *cl
                                                                 gpointer      invocation_hint,
                                                                 gpointer      marshal_data);
 
+/* VOID:INT,INT (marshal.list:10) */
+extern void _xfdashboard_marshal_VOID__INT_INT (GClosure     *closure,
+                                                GValue       *return_value,
+                                                guint         n_param_values,
+                                                const GValue *param_values,
+                                                gpointer      invocation_hint,
+                                                gpointer      marshal_data);
+
 G_END_DECLS
 
 #endif /* ___xfdashboard_marshal_MARSHAL_H__ */

@@ -1,3 +1,185 @@
+commit d21545ab378e67646bb3843df4ca0fbe447e9bbd
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 18 08:48:57 2015 +0100
+
+    Fix alpha factor of tooltip and notification in themes
+
+commit 154feca37af952d29624effc144848b5e673a99b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 17 13:51:25 2015 +0100
+
+    Update README
+
+commit 11f9a64333eb7958f2535c53ad5d27934211cab4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 17 13:48:29 2015 +0100
+
+    Rewrite old messages for debugging at XfdashboardWindowContent to real debug messages
+
+commit 36a8e9e00ff4b30d8e85ccb67e68f2c0e6711fd9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 17 13:44:22 2015 +0100
+
+    Remove old messages for debugging from XfdashboardApplicationButton
+
+commit 28971f3cb8de43691d3a518c7ad801dc54e106e7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 17 13:40:52 2015 +0100
+
+    Implement support for multiple monitors
+    
+    This commit add so-called multi-monitor support to xfdashboard and addresses issue #14
+
+commit 96096107f912757aa7163a070aa23bad2911804b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Mar 14 09:31:54 2015 +0100
+
+    Fix trying to handle event for NULL focusable actors
+
+commit 546344d2007fae20cd02012238888ddf3dffba5f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Mar 14 08:13:18 2015 +0100
+
+    Always check if window is on workspace in windows view
+    
+    Previously it was check if a workspace is set at windows view and if it was then it was check if windows is on workspace. If a workspace was not set it was assumed that window is visible. This resulted in creating a window actor for each window at start-up which. After start-up a workspace was set which caused all window actor to be destroyed and for all windows which are now on the workspace set were recreated. This delayed start-up because lots of window actor had to be created twice.
+    
+    Now we assume a window to be hidden if a workspace is not set because if windows view don't know the workspace no window could match it. This reduces start-up time a lot because no window actor is created twice but only once and creating window textures is a time consuming task.
+
+commit 239cf6de61ad468c6c47befc34b3dbd7765412fb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Mar 13 05:53:28 2015 +0100
+
+    Fix missed to release reference to desktop image window content
+    
+    This missed release prevented the window tracker cache to be clean at shutdown and also prevented the window tracker to be disposed because the missed window content reference had still a reference to window tracker
+
+commit 111d0e09172ab9549fbf316ce875a1dfd8c27226
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 12 07:01:34 2015 +0100
+
+    Notify startup-notification that application has started and will be entering main loop
+
+commit 965b6f01210c3c97fe5c02f3e77b7d45e481e75d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Mar 9 06:18:08 2015 +0100
+
+    Enforce X11 backend in Clutter
+    
+    Beginning with Clutter 1.21 the default backend changes to GDK. It is not X11 anymore in our case. But this application relies heavily on old default backend. So a hacky workaround is to enforce X11 backend again. This commit addresses issue #73
+
+commit 05b6dd9bf84f93d03a72a28eda948185b027d169
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 4 06:56:36 2015 +0100
+
+    Fix warning about deprecated function gdk_app_launch_context_new()
+    
+    Replaced with gdk_display_get_app_launch_context()
+
+commit 04443aec382ea25bda1d5e90e0f7bae88a6e83cb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 4 06:49:07 2015 +0100
+
+    Fix warning about deprecated function gtk_icon_info_free()
+    
+    Replaced with g_object_unref
+
+commit a02726ab398e8d415dbab1ab41156889d012bb18
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 4 06:48:08 2015 +0100
+
+    Fix deprecation warning about gtk stock icons
+
+commit dbe60c8fb66a33864f4dff20bfdf32f6f5bfd126
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 4 06:33:42 2015 +0100
+
+    Replace dependency on libwnck-1.0 (minimum version 2.30) with libwnck-3.0 (minimum version 3.0)
+    
+    We depend on GTK+3 (version 3.2 or higher) in settings application and for some GTK+ functions in xfdashboard but we also depend on libwnck for window handling. Using libwnck-1.0 triggers to include GDK2 from GTK+2 resulting in a mix of GTK+ 2 and 3 what is really bad although it seems to work pretty well. In order to not mix both major GTK+ and to depend only on one GTK+ version the minimum version of libwnck had to raised up to 3.0 and since then we had to depend on libwnck-3.0 instead of libwnck-1.0.
+
+commit 6a4e11538f678c1eb04728a7f594542b7c74e407
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Mar 2 22:32:42 2015 +0100
+
+    I18n: Updated translations es (5%), he (1%), it_IT (1%), sr (99%)
+
+commit 0d8a98709a44bb4a3796a157f01930e6a4f3b0c6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Mar 2 22:27:57 2015 +0100
+
+    Check for libm
+    
+    Do not assume that libm must be added to *_LDADD with "-lm" but check if it is needed
+
+commit 10b517b249463d0c49481e81551533f2e43a42c3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Feb 27 10:23:10 2015 +0100
+
+    Minimum version of Glib was raised to 2.32 so remove code branches to handle Glib versions prior to 2.32
+
+commit 93da03ecf0b90ee5dd864c9d314cd36b85bbb42e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 23 23:01:20 2015 +0100
+
+    Do not include applications in applications view or search view if it should be hidden or not displayed
+
+commit 1d4e8893f4b0eea18989c416a23f73c179803b0e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 21 13:43:41 2015 +0100
+
+    Remove unused variable for removed hotkey option
+
+commit 9efcfe6352f97a6f0273c8e15d8fea8d659d4b1c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 21 13:42:59 2015 +0100
+
+    Add option "show-all-apps" of XfdashboardApplicationsView to settings application
+
+commit 1dc6d8b4b838860a857a29cb8a50aefb0773d2a1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 21 13:37:41 2015 +0100
+
+    Unbind xfconf properties bindings at XfdashboardWindowsView
+
+commit 77970918af597f8b846d5d1f5375e075698d0b94
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 21 13:35:25 2015 +0100
+
+    Unbind xfconf properties bindings at XfdashboardQuicklaunch
+
+commit c1084f65d1873de2fd51d7f3bce1183fde089519
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 21 13:32:52 2015 +0100
+
+    Unify variable naming for xfconf property bindings
+
+commit dc92d4c7c9c6315cd357d8042441ec3f3a136792
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 21 13:24:55 2015 +0100
+
+    Make visibility of "All applications" menu in XfdashboardApplicationsView configurable
+    
+    Visibility of "All applications" menu can be controlled via boolean property "/components/applications-view/show-all-apps" in channel "xfdashboard" at Xfconf.
+
+commit d253b056b47e96d4f61b8e7cd20449631e719b2c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 21 10:40:21 2015 +0100
+
+    Add an "All applications" menu in XfdashboardApplicationsView which currently disabled
+
+commit 9ba55f2ca62ee2779a4b561eb2a5f55c84a00186
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Feb 20 19:21:36 2015 +0100
+
+    Post-release version bump to 0.3.10
+
+commit d2b4396c601c435213bbb45f5308cd04b36138e1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Feb 20 19:20:29 2015 +0100
+
+    Bump version to 0.3.9
+
 commit 459e468f5e9c5aa7a711a2c006534f743f5ba04e
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Fri Feb 20 19:19:25 2015 +0100
