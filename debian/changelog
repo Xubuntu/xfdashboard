@@ -1,3 +1,10 @@
+xfdashboard (0.3.90-0ubuntu1) vivid; urgency=medium
+
+  * Imported Upstream version 0.3.90.
+  * d/control: Changed upstream build-dep: libwnck-dev => libwnck-3-dev
+
+ -- Unit 193 <unit193@ubuntu.com>  Thu, 19 Mar 2015 00:05:22 -0400
+
 xfdashboard (0.3.9-0ubuntu1) vivid; urgency=medium
 
   * Imported Upstream version 0.3.9.
