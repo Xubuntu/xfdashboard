@@ -1,3 +1,107 @@
+commit 926c66befe12c7eae8c067d398b159a808f2e302
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Mar 27 16:24:05 2015 +0100
+
+    Oops ... forgot to initialize gettext for localization in application
+
+commit bd1052506d554ba82d62f737654117736b966cdb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Mar 27 16:22:29 2015 +0100
+
+    Fixed typo
+
+commit b30515c066520ee866e699b1362547af9fa4b549
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Mar 27 13:26:38 2015 +0100
+
+    Do not use functions deprecated since GTK+ 3.14
+
+commit db267872590396f6bd6be1af9a79ca954ba9f9bb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Mar 27 12:17:21 2015 +0100
+
+    Make use of new XfdashboardBoxLayout also at default theme
+
+commit 3faad112c957bf31056443d737d961611b4f4a39
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Mar 27 12:13:43 2015 +0100
+
+    Make use of new XfdashboardBoxLayout at all other themes
+
+commit acad499c17ad3d1baf3b987ef37e5dbb67344ffa
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Mar 27 12:02:01 2015 +0100
+
+    Implement a box layout manager XfdashboardBoxLayout derived from ClutterBoxLayout which uses all functions of derived class but disregards text direction settings. It forces always left-to-right text direction when layouting children horizontal.
+    
+    This fixes issue #66 at GitHub.
+
+commit 1fc0b25a6a52b13457dbfcf3944f5bd20b78354a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Mar 27 11:31:50 2015 +0100
+
+    Fix coding style (indention)
+
+commit 257d622a6648067821a2d5a868991be0fb81354b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 26 18:45:30 2015 +0100
+
+    Change URLs to Xfce's goodies wiki at AppData
+
+commit 2a6ebeb7854adf3024e31f9d11b4080490114b35
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 26 18:33:13 2015 +0100
+
+    Correct library names in optional dependencies
+
+commit ed51fd4d9953ba33488238e629aebff57fb70b7b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 26 18:31:56 2015 +0100
+
+    Change URLs to Xfce's goodies wiki
+
+commit df84b178931b49f2f53d76bde95a979d3879cfb6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 25 08:54:38 2015 +0100
+
+    Revert "Add module.xml with description for Xfce git"
+    
+    This reverts commit 291be5b72d3791b60325c25e5e63bd9a934bff03.
+    
+    Not needed for Xfce git. It's done in different way
+
+commit 291be5b72d3791b60325c25e5e63bd9a934bff03
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 24 10:17:26 2015 +0100
+
+    Add module.xml with description for Xfce git
+
+commit 8c5f8785c04f3725434a339615a4b2803e470315
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Mar 23 07:27:23 2015 +0100
+
+    Do not throw error message (but a warning message) if neither the requested icon nor the fallback icon can be loaded even if xfdashboard will look more ugly than usual ;)
+    
+    That should fix some crashes seen at systems running Fedora.
+
+commit 4e9c0bca3bf0f832d5b5090869ea3b5d383cd5a0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Mar 22 07:09:30 2015 +0100
+
+    Remove redirecting XfdashboardStageInterface to offscreen because it doesn't respect clipping anymore as it is used by XfdashboardViewpad.
+
+commit ce371332171b2114b0588551742803af8a1608e1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 18 18:51:47 2015 +0100
+
+    Post-release version bump to 0.3.91
+
+commit a0d2f3cc59da6190ff696012ec836fe8df2eccfb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 18 18:50:44 2015 +0100
+
+    Bump version to 0.3.90
+
 commit d21545ab378e67646bb3843df4ca0fbe447e9bbd
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Wed Mar 18 08:48:57 2015 +0100

@@ -20,21 +20,22 @@
 
 	<screenshots>
 		<screenshot type="default">
-			<image>http://xfdashboard.froevel.de/images/starting-up.png</image>
+			<image>http://goodies.xfce.org/_media/projects/applications/xfdashboard/starting-up.png</image>
 		</screenshot>
 		<screenshot>
 			<_caption>Browsing applications</_caption>
-			<image>http://xfdashboard.froevel.de/images/applications-view.png</image>
+			<image>http://goodies.xfce.org/_media/projects/applications/xfdashboard/applications-view.png</image>
 		</screenshot>
 		<screenshot>
 			<_caption>Searching applications</_caption>
-			<image>http://xfdashboard.froevel.de/images/search-view.png</image>
+			<image>http://goodies.xfce.org/_media/projects/applications/xfdashboard/search-view.png</image>
 		</screenshot>
 	</screenshots>
 
-	<url type="homepage">http://xfdashboard.froevel.de/</url>
+	<url type="homepage">http://goodies.xfce.org/projects/applications/xfdashboard/start/</url>
+	<url type="bugtracker">https://bugzilla.xfce.org</url>
 	<url type="bugtracker">https://github.com/gmc-holle/xfdashboard/issues</url>
-	<url type="help">http://xfdashboard.froevel.de/doc.html</url>
+	<url type="help">http://goodies.xfce.org/projects/applications/xfdashboard/manual</url>
 
 	<updatecontact>nomad@froevel.de</updatecontact>
 
@@ -43,6 +44,15 @@
 	</provides>
 
 	<releases>
+		<release version="0.3.91" timestamp="1427561560">
+			<description>
+				<_p>This unstable development introduces a new box layout
+				fixing layout of children when using right-to-left language.
+				Also support for localization was fixed and other smaller
+				bug-fixes and improvements.
+				</_p>
+			</description>
+		</release>
 		<release version="0.3.90" timestamp="1426700895">
 			<description>
 				<_p>This unstable development introduces support for multiple
