@@ -22,21 +22,21 @@ gtk+ >= 3.2
 
 The following libraries are optional:
 
-xcomposite >= 0.2 (for live windows)
-xdamage (for live windows)
-xinerama (for multi-monitor support)
+libXcomposite >= 0.2 (for live windows)
+libXdamage (for live windows)
+libXinerama (for multi-monitor support)
 
 
 Homepage
 ========
 
-The homepage of xfdashboard is at http://xfdashboard.froevel.de/        
+The homepage of xfdashboard is at http://goodies.xfce.org/projects/applications/xfdashboard/start
 
 
 Documentation
 =============
 
-A simple quick guide with screenshots can be found at http://xfdashboard.froevel.de/doc.html
+A simple quick guide with screenshots can be found at http://goodies.xfce.org/projects/applications/xfdashboard/manual
 
 Documentation about theming xfdashboard can be found at http://xfdashboard.froevel.de/theming.html
 

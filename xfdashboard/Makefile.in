@@ -122,7 +122,7 @@ am_xfdashboard_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	xfdashboard-applications-view.$(OBJEXT) \
 	xfdashboard-background.$(OBJEXT) xfdashboard-binding.$(OBJEXT) \
 	xfdashboard-bindings-pool.$(OBJEXT) \
-	xfdashboard-button.$(OBJEXT) \
+	xfdashboard-box-layout.$(OBJEXT) xfdashboard-button.$(OBJEXT) \
 	xfdashboard-click-action.$(OBJEXT) \
 	xfdashboard-collapse-box.$(OBJEXT) \
 	xfdashboard-css-selector.$(OBJEXT) \
@@ -176,8 +176,9 @@ xfdashboard_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -491,6 +492,7 @@ xfdashboard_headers = \
 	background.h \
 	binding.h \
 	bindings-pool.h \
+	box-layout.h \
 	button.h \
 	click-action.h \
 	collapse-box.h \
@@ -551,6 +553,7 @@ xfdashboard_SOURCES = \
 	background.c \
 	binding.c \
 	bindings-pool.c \
+	box-layout.c \
 	button.c \
 	click-action.c \
 	collapse-box.c \
@@ -601,8 +604,8 @@ xfdashboard_SOURCES = \
 xfdashboard_CFLAGS = $(LIBWNCK_CFLAGS) $(CLUTTER_CFLAGS) \
 	$(CLUTTER_COGL_CFLAGS) $(GLIB_CFLAGS) $(GIO_CFLAGS) \
 	$(GIO_UNIX_CFLAGS) $(GARCON_CFLAGS) $(LIBXFCONF_CFLAGS) \
-	$(DBUS_GLIB_CFLAGS) $(PLATFORM_CFLAGS) $(am__append_1) \
-	$(am__append_3) $(am__append_5)
+	$(LIBXFCE4UTIL_CFLAGS) $(DBUS_GLIB_CFLAGS) $(PLATFORM_CFLAGS) \
+	$(am__append_1) $(am__append_3) $(am__append_5)
 xfdashboard_LDFLAGS = \
 	-export-dynamic \
 	-no-undefined \
@@ -610,8 +613,9 @@ xfdashboard_LDFLAGS = \
 
 xfdashboard_LDADD = $(LIBWNCK_LIBS) $(CLUTTER_LIBS) \
 	$(CLUTTER_COGL_LIBS) $(GLIB_LIBS) $(GIO_LIBS) $(GIO_UNIX_LIBS) \
-	$(GARCON_LIBS) $(LIBXFCONF_LIBS) $(DBUS_GLIB_LIBS) -lm \
-	$(am__append_2) $(am__append_4) $(am__append_6)
+	$(GARCON_LIBS) $(LIBXFCONF_LIBS) $(LIBXFCE4UTIL_LIBS) \
+	$(DBUS_GLIB_LIBS) -lm $(am__append_2) $(am__append_4) \
+	$(am__append_6)
 @MAINTAINER_MODE_TRUE@CLEANFILES = \
 @MAINTAINER_MODE_TRUE@	xgen-xmc \
 @MAINTAINER_MODE_TRUE@	xgen-xmh
@@ -732,6 +736,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-background.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-binding.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-bindings-pool.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-box-layout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-button.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-click-action.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard-collapse-box.Po@am__quote@
@@ -969,6 +974,20 @@ xfdashboard-bindings-pool.obj: bindings-pool.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='bindings-pool.c' object='xfdashboard-bindings-pool.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-bindings-pool.obj `if test -f 'bindings-pool.c'; then $(CYGPATH_W) 'bindings-pool.c'; else $(CYGPATH_W) '$(srcdir)/bindings-pool.c'; fi`
+
+xfdashboard-box-layout.o: box-layout.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-box-layout.o -MD -MP -MF $(DEPDIR)/xfdashboard-box-layout.Tpo -c -o xfdashboard-box-layout.o `test -f 'box-layout.c' || echo '$(srcdir)/'`box-layout.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-box-layout.Tpo $(DEPDIR)/xfdashboard-box-layout.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='box-layout.c' object='xfdashboard-box-layout.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-box-layout.o `test -f 'box-layout.c' || echo '$(srcdir)/'`box-layout.c
+
+xfdashboard-box-layout.obj: box-layout.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-box-layout.obj -MD -MP -MF $(DEPDIR)/xfdashboard-box-layout.Tpo -c -o xfdashboard-box-layout.obj `if test -f 'box-layout.c'; then $(CYGPATH_W) 'box-layout.c'; else $(CYGPATH_W) '$(srcdir)/box-layout.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard-box-layout.Tpo $(DEPDIR)/xfdashboard-box-layout.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='box-layout.c' object='xfdashboard-box-layout.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -c -o xfdashboard-box-layout.obj `if test -f 'box-layout.c'; then $(CYGPATH_W) 'box-layout.c'; else $(CYGPATH_W) '$(srcdir)/box-layout.c'; fi`
 
 xfdashboard-button.o: button.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_CFLAGS) $(CFLAGS) -MT xfdashboard-button.o -MD -MP -MF $(DEPDIR)/xfdashboard-button.Tpo -c -o xfdashboard-button.o `test -f 'button.c' || echo '$(srcdir)/'`button.c

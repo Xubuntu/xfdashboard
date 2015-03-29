@@ -27,6 +27,7 @@ xfdashboard_headers = \
 	background.h \
 	binding.h \
 	bindings-pool.h \
+	box-layout.h \
 	button.h \
 	click-action.h \
 	collapse-box.h \
@@ -87,6 +88,7 @@ xfdashboard_SOURCES = \
 	background.c \
 	binding.c \
 	bindings-pool.c \
+	box-layout.c \
 	button.c \
 	click-action.c \
 	collapse-box.c \
@@ -143,6 +145,7 @@ xfdashboard_CFLAGS = \
 	$(GIO_UNIX_CFLAGS) \
 	$(GARCON_CFLAGS) \
 	$(LIBXFCONF_CFLAGS) \
+	$(LIBXFCE4UTIL_CFLAGS) \
 	$(DBUS_GLIB_CFLAGS) \
 	$(PLATFORM_CFLAGS)
 
@@ -160,6 +163,7 @@ xfdashboard_LDADD = \
 	$(GIO_UNIX_LIBS) \
 	$(GARCON_LIBS) \
 	$(LIBXFCONF_LIBS) \
+	$(LIBXFCE4UTIL_LIBS) \
 	$(DBUS_GLIB_LIBS) \
 	-lm
 
