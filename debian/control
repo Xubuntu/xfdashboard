@@ -18,7 +18,7 @@ Build-Depends: debhelper (>= 9),
  libxfconf-0-dev (>= 4.10.0),
  pkg-config
 Standards-Version: 3.9.6
-Homepage: http://xfdashboard.froevel.de/
+Homepage: http://goodies.xfce.org/projects/applications/xfdashboard/start
 Vcs-Browser: https://bitbucket.org/xubuntu/xfdashboard/
 Vcs-Git: https://bitbucket.org/xubuntu/xfdashboard/
 
