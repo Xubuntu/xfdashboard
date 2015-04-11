@@ -1,3 +1,55 @@
+commit 960dff6a33ba4f17f5df8d9159b341bd8aaf0415
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Apr 9 06:32:12 2015 +0200
+
+    Field "TryExec" should only contain the path to the executable to test if it exists and is executable but not any arguments which should be passed to the executable.
+    
+    Fixes GH issue #76
+
+commit 27c5092fe85d9e7a9a95b6661e05f94f0f9c24f6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Apr 8 06:59:42 2015 +0200
+
+    Updated translations
+
+commit 527e2ae7d9067e5770f0575ef59aa2a56a60c03d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Apr 3 13:27:20 2015 +0200
+
+    Revert "Fixed more typos"
+    
+    This reverts commit fd33327fc91e914b9dbf7e562508884e490f7ad9.
+
+commit fd33327fc91e914b9dbf7e562508884e490f7ad9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Apr 3 13:11:50 2015 +0200
+
+    Fixed more typos
+
+commit 66e37f843bcb7bd29e6118f6a42d0edbe1d7a438
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Mar 30 08:02:46 2015 +0200
+
+    Fix typo
+
+commit 803241c4e9673e4fe74b203e553aa9b974e26efe
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Mar 29 12:59:45 2015 +0200
+
+    Fix compiler warning about non-void functions returning no value
+
+commit 493380a7158bb4661b9338ecc6aa7bc0a434056b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Mar 28 18:00:39 2015 +0100
+
+    Post-release version bump to 0.3.92
+
+commit 138bf084597e8cb1c6d817ad5af1c00390da0f96
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Mar 28 17:53:28 2015 +0100
+
+    Bump version to 0.3.91
+
 commit 926c66befe12c7eae8c067d398b159a808f2e302
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Fri Mar 27 16:24:05 2015 +0100

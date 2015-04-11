@@ -48,14 +48,21 @@
 	</provides>
 
 	<releases>
+		<release version="0.4.0" timestamp="1428778076">
+			<description>
+				<p>This stable version introduces lots of new features. like multi-monitor support, configurable key bindings and a settings dialog. It also contains a lot of other larger and smaller improvements.</p>
+			</description>
+		</release>
 		<release version="0.3.91" timestamp="1427561560">
 			<description>
 				<p>This unstable development introduces a new box layout fixing layout of children when using right-to-left language. Also support for localization was fixed and other smaller bug-fixes and improvements.</p>
+				<p xml:lang="sr">Ово нестабилно развојно издање представља нови кутијасти распоред који исправља распоред порода при коришћењу писама које се читају са десна на лево. Такође, садржи исправљену подршку за преводе и још неке ситне бубе и побољшања.</p>
 			</description>
 		</release>
 		<release version="0.3.90" timestamp="1426700895">
 			<description>
 				<p>This unstable development introduces support for multiple monitors and also bug-fixes and other smaller improvements.</p>
+				<p xml:lang="sr">Ово нестабилно развојно издање представља подршку за више екрана и исправке грешака, као и још ситних побољшања.</p>
 			</description>
 		</release>
 		<release version="0.3.9" timestamp="1424455951">
