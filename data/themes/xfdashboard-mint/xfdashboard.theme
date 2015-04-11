@@ -8,5 +8,5 @@ Style=xfdashboard-mint.css
 Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Author=lacios
-Version=0.3.91git.926c66b
+Version=0.3.92git.960dff6
 Screenshot=screenshot-xfdashboard-mint.png
