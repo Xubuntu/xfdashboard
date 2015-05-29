@@ -1,3 +1,215 @@
+commit f2c6c4d8cf08a7621f7f75d0d7971a2fd7c47538
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 20:32:44 2015 +0200
+
+    Free interfaces list at XfdashboardStage
+
+commit 712b9eba7cbfc2801c4d284d429233acc5b00206
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 20:22:04 2015 +0200
+
+    Free GFile object at XfdashboardThemeCss
+
+commit 12546ce2c6090c2270f6b302224e372e9c1d134e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 20:06:18 2015 +0200
+
+    Free markup context and also list itself at XfdashboardThemeEffects
+
+commit d998915e0dfde6bc475984b15e002b8988233806
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 20:04:06 2015 +0200
+
+    Free markup context at XfdashboardBindingsPool
+
+commit 174905ba10e38fa85334a3e42c0f59c9d528b7bb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:56:40 2015 +0200
+
+    Free property 'background-color' in XfdashboardStageInterface when object instance is disposed
+
+commit 544ec3ad32fb0db4a91f26874544648e87d078d1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:54:46 2015 +0200
+
+    Free theme name when disposing object instance XfdashboardApplication
+
+commit a59674806904c1794b5d349a883cec2707c9a417
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:51:33 2015 +0200
+
+    Free ClutterColor when object instance XfdashboardWindowContent is disposed
+
+commit 9d540a9ad0f3f723481b9dd0f67cd1f83954cdac
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:49:25 2015 +0200
+
+    Free also list itself when object instance XfdashboardThemeLayout is disposed
+
+commit 8a5dfbde6a0b86105080a02dfb96f87ba77ec3e3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:48:15 2015 +0200
+
+    Free also list itself when object instance XfdashboardThemeEffects is disposed
+
+commit 12c550deaaa37224c7721716df3619fde5cdc02b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:44:16 2015 +0200
+
+    Free ClutterColor in function _xfdashboard_theme_css_function_alpha at XfdashboardThemeCSS
+
+commit 6961c6d7557dc1406c63d5e30af5420156d36615
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:35:36 2015 +0200
+
+    Free allocation box for window number in allocation function of XfdashboardLiveWindow
+
+commit 67f6331f37a57b60f53fe2b43db96eed766124f2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:32:32 2015 +0200
+
+    Free icon name after setting button icon at XfdashboardApplicationButton
+
+commit ff26e5870f0ceaa9417eafb981c455b3e82ba217
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:28:50 2015 +0200
+
+    Free effect list after duplication at XfdashboardActor
+
+commit 7ab3d757d3b37a21df91182b32dc8fcae16c2e9d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:58:49 2015 +0200
+
+    Fix typo
+
+commit 18e43f24f33905736dd2b7e5d6bf505265d75921
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:26:15 2015 +0200
+
+    Release allocated resources at fill data structure of object XfdashboardApplicationsMenuModel
+
+commit 2a123473c0220a92a462d9df8d270eb0500db5f3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:25:02 2015 +0200
+
+    Free IDs in splitted effect list at XfdashboardActor
+
+commit 55fe657eb1087a208df9b924d5289f51a76cfcf4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:17:46 2015 +0200
+
+    Free property 'favourites' at XfdashboardQuicklaunch when object instance is disposed
+
+commit 5fbe6add9dade0246d35c8e721a2cd564c2a85ac
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 29 13:44:31 2015 +0200
+
+    Turn warning into a message as Fedora tends to turn it into a fatal warning and crashes :( And this message is likely to be printed.
+
+commit 2cd41a86fe730462a978284305f52eb2f9bf6c40
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed May 20 06:33:06 2015 +0200
+
+    Updated translations (es, he, it_IT, sr) and added new translation (fr)
+
+commit 5861e5ac68db73f5c63b0a8574b4d578eb676b55
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu May 28 08:15:07 2015 +0200
+
+    Only resize stage to screen size and listen for further screen size changes to resize stage if compiled against Clutter prior to version 0.17.2 because from this version on Clutter seems to handle resizes of stage window in X11 correctly by itself.
+
+commit 08685e959ce253f61a7e37ad7d60fccf93b7c17e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue May 26 18:37:00 2015 +0200
+
+    Reimplement old hack to resize stage to screen size but this time also listen for screen size changes.
+    
+    Hopefully fixes problems reported at issue GH #95
+
+commit bafc9d54a9669e950e3fb58dee9eb8c3dc13c2ba
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 1 15:01:30 2015 +0200
+
+    Try not to eat up CPU ... again!
+    
+    Do not emit 'window-geometry-changed' signals when application was suspended because there will be no visual changes. It is unneccessary to handle this signal.
+    
+    Instead disconnect signal handler to 'geometry-changed' from windows at window tracker if the application is suspended and reconnect them if application resumes. Because we track the window's last position and size we emit a 'window-geometry-changed' for each window at application resume when it has been moved or resized in the meantime.
+    
+    This should lower CPU usage while application is suspended and a window is moved or resized.
+    
+    This commit addresses issue GH #44
+
+commit d0153ec3a008f8a63861e9e8d52140ad17e60377
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 1 14:29:01 2015 +0200
+
+    Implement signal to notify if a window has moved to another monitor
+    
+    Implement a new signal 'window-monitor-changed' at window tracker to signal that a window has moved from one monitor to another. This is done by tracking the last position and size to determine the old monitor where this window was placed. If the new position and size of this window is at another monitor this new signal is emitted.
+    
+    This signal is used by the windows view to determine if the moved window has to stay in this view or if another window view instance has to create an actor for this window and to handle it.
+    
+    This new signal is only useful in multi-monitor setups.
+    
+    This commit addresses issue GH #88
+
+commit 858df6b86b41bfe16f96c465833104113acb1acc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Apr 27 06:43:08 2015 +0200
+
+    Check for NULL pointer in _xfdashboard_window_content_get_window_frame_xid() because gdk_x11_window_foreign_new_for_display() could return NULL for destroyed windows.
+    
+    Hopefully fixes issue GH #83
+
+commit dd16a7eb2f0a0705836f522ad1a2ef8c7a4507b9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Apr 22 20:59:21 2015 +0200
+
+    Replace property 'unmapped-window-icon-gravity' with 'unmapped-window-icon-anchor-point' at all themes
+
+commit e6bf8e3dc7890313d3f59766c3dac73be3c3a295
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Apr 22 20:55:11 2015 +0200
+
+    Mark property 'gravity' deprecated and introduce new property 'anchor-point' at XfdashboardEmblemEffect
+    
+    Gravity does not describe well what this property is used for. So rename gravity to anchor point and replace all occurences with new definition and type.
+    
+    This deprecates property 'gravity' and a warning is printed each time this property is set to a new value.
+
+commit bddb21395febb3f5d5067f3bb1c14e0892f4b7be
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Apr 20 20:31:19 2015 +0200
+
+    Fix typo in XfdashboardWindowContent
+
+commit a07d874288677f645d6353ae2de638aab8ae99ef
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Apr 14 12:51:53 2015 +0200
+
+    Fix that translatable strings will be extracted from UI file also
+    
+    They were missing so far - means: not extracted.
+
+commit 8ab67cb29183ef9147e111c81c1407638a6dc014
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Apr 15 13:30:35 2015 +0200
+
+    Allow settings application to be shown in other desktop environments than Xfce (GH #78)
+
+commit e518791c9c8e600ba0de3eecf22faeb54731b2f1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Apr 11 20:53:16 2015 +0200
+
+    Post-release version bump to 0.4.1
+
+commit b32320b680e44fbeaba7b5c6f74d148be12f09b3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Apr 11 20:49:01 2015 +0200
+
+    Bump version to 0.4.0
+
 commit 960dff6a33ba4f17f5df8d9159b341bd8aaf0415
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Thu Apr 9 06:32:12 2015 +0200

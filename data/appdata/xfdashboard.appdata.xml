@@ -6,15 +6,18 @@
 	<name>xfdashboard</name>
 	<summary>Maybe a Gnome shell like dashboard for Xfce</summary>
 	<summary xml:lang="es">Tal vez un intérprete de órdenes a modo de panel para Xfce</summary>
+	<summary xml:lang="fr">Peut-être un shell GNOME comme un tableau de bord pour Xfce</summary>
 	<summary xml:lang="he">אולי לוח מחוונים דומה Gnome עבור Xfce</summary>
 	<summary xml:lang="sr">Полетник Иксфце-а који подсећа на Гномову шкољку</summary>
 
 	<description>
 		<p>Xfdashboard provides a GNOME shell dashboard like interface for use with Xfce desktop.</p>
 		<p xml:lang="es">El TableroXf provee un Intérprete de panel como el de GNOME para usarse en el entorno de escritorio Xfce.</p>
+		<p xml:lang="fr">Xfdashboard fournit un tableau de bord shell GNOME comme interface pour une utilisation avec le bureau Xfce.</p>
 		<p xml:lang="sr">Полетник Иксфце-а је сучеље попут Гномове шкољке за употребу на радној површи Иксфце-а.</p>
 		<p>It can be configured to run to any keyboard shortcut and when executed provides an overview of applications currently open enabling the user to switch between different applications. The search feature works like Xfce's app finder which makes it convenient to search for and start applications.</p>
 		<p xml:lang="es">Puede ser configurado para funcionar con cualquier combinación de teclas y cuando se ejecuta proporciona una visión general de las aplicaciones que estén abiertas permitendo al usuario cambiar entre diferentes aplicaciones. La función de búsqueda funciona como el buscador de aplicaciones de Xfce que hace que sea conveniente para buscar e iniciar aplicaciones.</p>
+		<p xml:lang="fr">Il peut être configuré pour fonctionner avec n'importe quel raccourci clavier et lorsqu'il est exécuté donne un aperçu des applications actuellement ouvertes permettant à l'utilisateur de basculer entre différentes applications. La fonction de recherche fonctionne comme l'application Finder de Xfce qui le rend pratique pour rechercher et démarrer des applications.</p>
 		<p xml:lang="sr">Може се подесити да се покреће на било коју пречицу дугмади, и када се изврши даје преглед тренутно отворених програма, омогућујући кориснику да прелази са једног програма на други. Претрага ради попут претраживача програма за Иксфце што чини полетника згодним за претрагу и покретање програма.</p>
 	</description>
 
@@ -25,12 +28,14 @@
 		<screenshot>
 			<caption>Browsing applications</caption>
 			<caption xml:lang="es">Navegar por las aplicaciones</caption>
+			<caption xml:lang="fr">Applications de navigation</caption>
 			<caption xml:lang="sr">Преглед програма</caption>
 			<image>http://goodies.xfce.org/_media/projects/applications/xfdashboard/applications-view.png</image>
 		</screenshot>
 		<screenshot>
 			<caption>Searching applications</caption>
 			<caption xml:lang="es">Buscar aplicaciones</caption>
+			<caption xml:lang="fr">Applications de recherche</caption>
 			<caption xml:lang="sr">Претрага програма</caption>
 			<image>http://goodies.xfce.org/_media/projects/applications/xfdashboard/search-view.png</image>
 		</screenshot>
@@ -48,44 +53,57 @@
 	</provides>
 
 	<releases>
+		<release version="0.4.1" timestamp="1432920422">
+			<description>
+				<p>This release hopefully fixes problems with the stage as it size might not reflect the screen size preventing dragging windows over the whole screen. It also includes lots of smaller bug-fixes.</p>
+			</description>
+		</release>
 		<release version="0.4.0" timestamp="1428778076">
 			<description>
 				<p>This stable version introduces lots of new features. like multi-monitor support, configurable key bindings and a settings dialog. It also contains a lot of other larger and smaller improvements.</p>
+				<p xml:lang="fr">Cette version stable introduit beaucoup de nouvelles fonctionnalités. comme le support multi-moniteur, les raccourcis clavier configurables et une boîte de dialogue de paramètres. Il contient aussi beaucoup d'autres améliorations plus grandes et plus petites.</p>
+				<p xml:lang="sr">Ово стабилно издање претставља много нових могућности, нпр. подршку за више екрана, подешавање пречица и прозор поставки. Садржи доста малих и великих побољшања.</p>
 			</description>
 		</release>
 		<release version="0.3.91" timestamp="1427561560">
 			<description>
 				<p>This unstable development introduces a new box layout fixing layout of children when using right-to-left language. Also support for localization was fixed and other smaller bug-fixes and improvements.</p>
+				<p xml:lang="fr">Cette évolution instable introduit une nouvelle boîte disposition fixant la disposition des enfants lors de l'utilisation de langue de droite à gauche. Également un support pour la localisation a été fixé et d'autres corrections de bogues et améliorations mineures.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање представља нови кутијасти распоред који исправља распоред порода при коришћењу писама које се читају са десна на лево. Такође, садржи исправљену подршку за преводе и још неке ситне бубе и побољшања.</p>
 			</description>
 		</release>
 		<release version="0.3.90" timestamp="1426700895">
 			<description>
 				<p>This unstable development introduces support for multiple monitors and also bug-fixes and other smaller improvements.</p>
+				<p xml:lang="fr">Cette évolution instable introduit le support de plusieurs écrans et aussi des corrections de bogues et d'autres petites améliorations.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање представља подршку за више екрана и исправке грешака, као и још ситних побољшања.</p>
 			</description>
 		</release>
 		<release version="0.3.9" timestamp="1424455951">
 			<description>
 				<p>This unstable development introduces an application database and monitoring of installed and uninstalled applications. It also includes bug-fixes and other smaller improvements.</p>
+				<p xml:lang="fr">Cette évolution instable introduit une base de données application et le suivi des applications installées et désinstallées. Il comprend également des corrections de bogues et d'autres petites améliorations.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање добија могућност складиштења и надгледања података о уграђеним и уклоњеним програмима. Такође, има и исправке грешака, као и друга побољшања.</p>
 			</description>
 		</release>
 		<release version="0.3.8" timestamp="1422108114">
 			<description>
 				<p>This unstable development introduces a hotkey tracker to allow starting xfdashboard with a single press of &lt;Super&gt; key.</p>
+				<p xml:lang="fr">Cette évolution instable introduit un tracker de raccourci pour permettre à partir xfdashboard avec une simple pression sur le touches &lt;Super&gt;.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање доноси пратиоца пречица ради покретања полетника једним притиском дугмета &lt;Супер&gt;</p>
 			</description>
 		</release>
 		<release version="0.3.7" timestamp="1421530687">
 			<description>
 				<p>This unstable development fixes a bug which rendered the new settings application completely unusable.</p>
+				<p xml:lang="fr">Cette évolution instable corrige un bogue qui rendait les nouveaux paramètres application complètement inutilisable.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање исправља бубу која приказује нови програм поставки потпуно неупотребљиво.</p>
 			</description>
 		</release>
 		<release version="0.3.6" timestamp="1421519406">
 			<description>
 				<p>This unstable development introduces a settings application.</p>
+				<p xml:lang="fr">Cette évolution instable introduit une application paramètres.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање доноси програм поставки полетника.</p>
 			</description>
 		</release>
@@ -93,6 +111,7 @@
 			<description>
 				<p>This unstable development introduces configurable key-bindings, allows changing themes at runtime and includes lots of smaller bug-fixes.</p>
 				<p xml:lang="es">Este versión de desarrollo introduce atajos de teclado modificables que permite cambiar de temas en tiempo de ejecución e incluye un montón de pequeñas correcciones de errores.</p>
+				<p xml:lang="fr">Cette évolution instable introduit des raccourcis clavier configurables, permet des thèmes changeants à l'exécution et comprend beaucoup de petites corrections de bugs.</p>
 				<p xml:lang="sr">Ово је нестабилно развојно издање које уводи подесиве пречице, омогућава измену тема у раду и исправа много ситних буба.</p>
 			</description>
 		</release>
@@ -100,12 +119,14 @@
 			<description>
 				<p>This unstable development introduces additional themes, fixes handling of client-side decorated windows (CSD) and adds a new CSS command @import() to include external CSS resources in themes.</p>
 				<p xml:lang="es">Este versión de desarrollo introduce temas adicionales, arreglos en el manejo de decoración de ventanas del lado del cliente (CSD) y añade una nueva orden CSS @import() para incluir recursos CSS externos en temas.</p>
+				<p xml:lang="fr">Cette évolution instable introduit des thèmes supplémentaires, correctifs manipulation de fenêtres décorées côté client (CDD) et ajoute une nouvelle commande de CSSimport () pour inclure les ressources CSS externes dans les thèmes.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање представља додатне теме, исправља руковање украсима прозора клијента (ЦСД) и додаје нову наредбу ЦСС-а @import() да би укључила спољне изворе ЦСС-а у темама.</p>
 			</description>
 		</release>
 		<release version="0.3.3" timestamp="1413740495">
 			<description>
 				<p>This unstable development introduces a workaround to get window content of minimized windows to display them in windows view.</p>
+				<p xml:lang="fr">Cette évolution instable introduit une solution de contournement pour obtenir le contenu de la fenêtre des fenêtres réduites pour les afficher dans les fenêtres de vue.</p>
 				<p xml:lang="sr">Непостојано развојно издање укључује покушај да се приказује и садржај умањених прозора.</p>
 			</description>
 		</release>
@@ -113,36 +134,42 @@
 			<description>
 				<p>This unstable development introduces effects.</p>
 				<p xml:lang="es">Esta versión de desarrollo introduce efectos.</p>
+				<p xml:lang="fr">Cette évolution instable introduit des effets.</p>
 				<p xml:lang="sr">Ово је непостојано развојно издање које први пут садржи дејства површи.</p>
 			</description>
 		</release>
 		<release version="0.3.1" timestamp="1409068837">
 			<description>
 				<p>This unstable development fixes a problem closing windows accidently by pressing the key 'backspace' to refine search more often than characters entered. It also includes new image-loading functions to CSS. It also introduces a new generic selection framework for focusable actors.</p>
+				<p xml:lang="fr">Cette évolution instable corrige un problème de fermeture des fenêtres accidentellement en appuyant sur la touche «backspace 'pour affiner votre recherche plus souvent que les caractères saisis. Il comprend également de nouvelles fonctions image chargement à CSS. Il introduit également un nouveau cadre de sélection générique pour les acteurs pouvant être activés.</p>
 				<p xml:lang="sr">Ово је нестабилно издање у коме је решено случајно затварање прозора на притисак дугмета „бриши уназад“, ради обогаћивања уноса претраге на више од унесених знакова. Такође, укључује нове радње учитавања слика у ЦСС. Доноси нови родни оквир жижним чиниоцима.</p>
 			</description>
 		</release>
 		<release version="0.2.3" timestamp="1409068569">
 			<description>
 				<p>This release fixes a problem closing windows accidently by pressing the key 'backspace' to refine search more often than characters entered.</p>
+				<p xml:lang="fr">Cette version corrige un problème de fermeture des fenêtres accidentellement en appuyant sur la touche «backspace 'pour affiner votre recherche plus souvent que les caractères saisis.</p>
 				<p xml:lang="sr">У овом издању у коме је решено случајно затварање прозора на притисак дугмета „бриши уназад“</p>
 			</description>
 		</release>
 		<release version="0.2.2" timestamp="1407869332">
 			<description>
 				<p>This release fixes a problem when loading scalable images by icon name.</p>
+				<p xml:lang="fr">Cette version corrige un problème lors du chargement des images évolutives par nom de l'icône.</p>
 				<p xml:lang="sr">Ово издање решава погрешно учитавање слика променљиве величине према именима иконице.</p>
 			</description>
 		</release>
 		<release version="0.3.0" timestamp="1406052137">
 			<description>
 				<p>This unstable development release fixes problems with icon mode in theming and allows to launch the first item by pressing ENTER in search view when a search was started by just typing. It also includes an improved CSS parsing allowing the usage of constant values and functions in theme's CSS file.</p>
+				<p xml:lang="fr">Cette version de développement instable corrige des problèmes avec le mode de l'icône dans la thématisation et permet de lancer le premier élément en appuyant sur ENTER dans la perspective de recherche lors d'une recherche a été lancé en tapant simplement. Il comprend également une analyse de CSS amélioré permettant l'utilisation de valeurs et de fonctions constantes dans le fichier CSS de thème.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање решава грешке у раду са иконицама при темирању и омогућава покретање прве ставке пристиском на „Унеси“ при прегледу претраге, када претрага започиње куцањем. Укључује и побољшано рашчлањивање ЦСС-а, што омогућава употребу сталних вредности и радњи у датотеци теме ЦСС-а.</p>
 			</description>
 		</release>
 		<release version="0.2.1" timestamp="1405537974">
 			<description>
 				<p>This release fixes problems with icon mode in theming and allows to launch the first item by pressing ENTER in search view when a search was started by just typing.</p>
+				<p xml:lang="fr">Cette version corrige des problèmes avec le mode de l'icône dans la thématisation et permet de lancer le premier élément en appuyant sur ENTER dans la perspective de recherche lors d'une recherche a été lancé en tapant simplement.</p>
 				<p xml:lang="sr">Ово издање решава грешке у раду са иконицама при темирању и омогућава покретање прве ставке пристиском на „Унеси“ при прегледу претраге, када претрага започиње куцањем.</p>
 			</description>
 		</release>
@@ -150,6 +177,7 @@
 			<description>
 				<p>Initial release.</p>
 				<p xml:lang="es">Primera versión.</p>
+				<p xml:lang="fr">Première publication.</p>
 				<p xml:lang="sr">Прво издање</p>
 			</description>
 		</release>

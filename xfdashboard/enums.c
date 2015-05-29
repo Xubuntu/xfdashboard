@@ -414,6 +414,34 @@ GType xfdashboard_selection_target_get_type(void)
 	return(g_define_type_id__volatile);
 }
 
+GType xfdashboard_anchor_point_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GEnumValue values[]=
+		{
+			{ XFDASHBOARD_ANCHOR_POINT_NONE, "XFDASHBOARD_ANCHOR_POINT_NONE", "none" },
+			{ XFDASHBOARD_ANCHOR_POINT_NORTH_WEST, "XFDASHBOARD_ANCHOR_POINT_NORTH_WEST", "north-west" },
+			{ XFDASHBOARD_ANCHOR_POINT_NORTH, "XFDASHBOARD_ANCHOR_POINT_NORTH", "north" },
+			{ XFDASHBOARD_ANCHOR_POINT_NORTH_EAST, "XFDASHBOARD_ANCHOR_POINT_NORTH_EAST", "north-east" },
+			{ XFDASHBOARD_ANCHOR_POINT_EAST, "XFDASHBOARD_ANCHOR_POINT_EAST", "east" },
+			{ XFDASHBOARD_ANCHOR_POINT_SOUTH_EAST, "XFDASHBOARD_ANCHOR_POINT_SOUTH_EAST", "south-east" },
+			{ XFDASHBOARD_ANCHOR_POINT_SOUTH, "XFDASHBOARD_ANCHOR_POINT_SOUTH", "south" },
+			{ XFDASHBOARD_ANCHOR_POINT_SOUTH_WEST, "XFDASHBOARD_ANCHOR_POINT_SOUTH_WEST", "south-west" },
+			{ XFDASHBOARD_ANCHOR_POINT_WEST, "XFDASHBOARD_ANCHOR_POINT_WEST", "west" },
+			{ XFDASHBOARD_ANCHOR_POINT_CENTER, "XFDASHBOARD_ANCHOR_POINT_CENTER", "center" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardAnchorPoint"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
+
 
 /* Generated data ends here */
 

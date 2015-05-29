@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [4])
-m4_define([xfdashboard_version_micro], [0])
-m4_define([xfdashboard_version_build], [960dff6])
+m4_define([xfdashboard_version_micro], [1])
+m4_define([xfdashboard_version_build], [f2c6c4d])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -110,7 +110,7 @@ AC_SUBST(LIBM)
 dnl ******************************
 dnl *** Check for i18n support ***
 dnl ******************************
-XDT_I18N([es he it_IT sr ])
+XDT_I18N([es fr he it_IT sr ])
 
 dnl *******************************
 dnl *** Check for X11 installed ***
