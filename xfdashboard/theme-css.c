@@ -591,6 +591,9 @@ static gboolean _xfdashboard_theme_css_function_alpha(XfdashboardThemeCSS *self,
 	g_value_init(outResult, CLUTTER_TYPE_COLOR);
 	clutter_value_set_color(outResult, &result);
 
+	/* Release allocated resources */
+	clutter_color_free(color);
+
 	return(TRUE);
 }
 
@@ -2578,6 +2581,10 @@ gboolean xfdashboard_theme_css_add_file(XfdashboardThemeCSS *self,
 	if(error)
 	{
 		g_propagate_error(outError, error);
+
+		/* Release allocated resources */
+		g_object_unref(file);
+
 		return(FALSE);
 	}
 
@@ -2591,6 +2598,10 @@ gboolean xfdashboard_theme_css_add_file(XfdashboardThemeCSS *self,
 	if(error)
 	{
 		g_propagate_error(outError, error);
+
+		/* Release allocated resources */
+		g_object_unref(file);
+
 		return(FALSE);
 	}
 
@@ -2617,6 +2628,9 @@ gboolean xfdashboard_theme_css_add_file(XfdashboardThemeCSS *self,
 					g_list_length(styles),
 					g_list_length(priv->styles));
 	}
+
+	/* Release allocated resources */
+	g_object_unref(file);
 
 	return(TRUE);
 }

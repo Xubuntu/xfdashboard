@@ -819,6 +819,11 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 					g_critical(_("Could not build interface '%s' from theme '%s'"),
 								XFDASHBOARD_THEME_LAYOUT_PRIMARY,
 								xfdashboard_theme_get_theme_name(inTheme));
+
+					/* Release allocated resources */
+					g_list_foreach(interfaces, (GFunc)g_object_unref, NULL);
+					g_list_free(interfaces);
+
 					return;
 				}
 
@@ -828,6 +833,11 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 								XFDASHBOARD_THEME_LAYOUT_PRIMARY,
 								xfdashboard_theme_get_theme_name(inTheme),
 								g_type_name(XFDASHBOARD_TYPE_STAGE_INTERFACE));
+
+					/* Release allocated resources */
+					g_list_foreach(interfaces, (GFunc)g_object_unref, NULL);
+					g_list_free(interfaces);
+
 					return;
 				}
 			}
@@ -848,6 +858,11 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 									XFDASHBOARD_THEME_LAYOUT_SECONDARY,
 									xfdashboard_theme_get_theme_name(inTheme),
 									g_type_name(XFDASHBOARD_TYPE_STAGE_INTERFACE));
+
+						/* Release allocated resources */
+						g_list_foreach(interfaces, (GFunc)g_object_unref, NULL);
+						g_list_free(interfaces);
+
 						return;
 					}
 				}
@@ -1081,6 +1096,9 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 		}
 	}
 
+	/* Release allocated resources */
+	g_list_free(interfaces);
+
 	/* Set focus */
 	_xfdashboard_stage_set_focus(self);
 }
@@ -1246,6 +1264,37 @@ static void _xfdashboard_stage_on_monitor_removed(XfdashboardStage *self,
 		}
 	}
 }
+
+#if !CLUTTER_CHECK_VERSION(0, 17, 2)
+/* Screen size has changed */
+static void _xfdashboard_stage_on_screen_size_changed(XfdashboardStage *self,
+														gint inWidth,
+														gint inHeight,
+														gpointer inUserData)
+{
+	gfloat				stageWidth, stageHeight;
+
+	g_return_if_fail(XFDASHBOARD_IS_STAGE(self));
+	g_return_if_fail(inWidth>0);
+	g_return_if_fail(inHeight>0);
+
+	/* Get current size of stage */
+	clutter_actor_get_size(CLUTTER_ACTOR(self), &stageWidth, &stageHeight);
+
+	/* If either stage's width or height does not match screen's width or height
+	 * resize the stage.
+	 */
+	if((gint)stageWidth!=inWidth ||
+		(gint)stageHeight!=inHeight)
+	{
+		g_debug("Screen resized to %dx%d but stage has size of %dx%d - resizing stage",
+					inWidth, inHeight,
+					(gint)stageWidth, (gint)stageHeight);
+
+		clutter_actor_set_size(CLUTTER_ACTOR(self), inWidth, inHeight);
+	}
+}
+#endif
 
 /* IMPLEMENTATION: ClutterActor */
 
@@ -1612,6 +1661,26 @@ static void xfdashboard_stage_init(XfdashboardStage *self)
 								"theme-changed",
 								G_CALLBACK(_xfdashboard_stage_on_application_theme_changed),
 								self);
+
+#if !CLUTTER_CHECK_VERSION(0, 17, 2)
+	{
+		gint					screenWidth, screenHeight;
+
+		/* Resize stage to match screen size and listen for futher screen size changes
+		 * to resize stage again.
+		 * This should only be needed when compiled against Clutter prior to 0.17.2
+		 * because this version or newer ones seem to handle window resizes correctly.
+		 */
+		screenWidth=xfdashboard_window_tracker_get_screen_width(priv->windowTracker);
+		screenHeight=xfdashboard_window_tracker_get_screen_height(priv->windowTracker);
+		_xfdashboard_stage_on_screen_size_changed(self, screenWidth, screenHeight, priv->windowTracker);
+
+		g_signal_connect_swapped(priv->windowTracker,
+									"screen-size-changed",
+									G_CALLBACK(_xfdashboard_stage_on_screen_size_changed),
+									self);
+	}
+#endif
 }
 
 /* IMPLEMENTATION: Public API */
