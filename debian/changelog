@@ -1,3 +1,9 @@
+xfdashboard (0.4.2-0ubuntu1) wily; urgency=medium
+
+  * Imported Upstream version 0.4.2.
+
+ -- Unit 193 <unit193@ubuntu.com>  Sun, 31 May 2015 00:06:59 -0400
+
 xfdashboard (0.4.1-0ubuntu1) wily; urgency=medium
 
   * Imported Upstream version 0.4.1.
