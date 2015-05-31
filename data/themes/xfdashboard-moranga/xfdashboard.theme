@@ -11,5 +11,5 @@ Style=xfdashboard-moranga.css
 Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Author=lacios
-Version=0.4.1git.2fba513
+Version=0.4.2git.cafce64
 Screenshot=screenshot-xfdashboard-moranga.png

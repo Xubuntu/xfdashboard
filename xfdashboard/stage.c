@@ -1265,7 +1265,6 @@ static void _xfdashboard_stage_on_monitor_removed(XfdashboardStage *self,
 	}
 }
 
-#if !CLUTTER_CHECK_VERSION(0, 17, 2)
 /* Screen size has changed */
 static void _xfdashboard_stage_on_screen_size_changed(XfdashboardStage *self,
 														gint inWidth,
@@ -1294,7 +1293,6 @@ static void _xfdashboard_stage_on_screen_size_changed(XfdashboardStage *self,
 		clutter_actor_set_size(CLUTTER_ACTOR(self), inWidth, inHeight);
 	}
 }
-#endif
 
 /* IMPLEMENTATION: ClutterActor */
 
@@ -1662,15 +1660,17 @@ static void xfdashboard_stage_init(XfdashboardStage *self)
 								G_CALLBACK(_xfdashboard_stage_on_application_theme_changed),
 								self);
 
-#if !CLUTTER_CHECK_VERSION(0, 17, 2)
+	/* Resize stage to match screen size and listen for futher screen size changes
+	 * to resize stage again.
+	 * This should only be needed when compiled against Clutter prior to 1.17.2
+	 * because this version or newer ones seem to handle window resizes correctly.
+	 */
+	if(clutter_major_version<1 ||
+		(clutter_major_version==1 && clutter_minor_version<17) ||
+		(clutter_major_version==1 && clutter_minor_version==17 && clutter_micro_version<2))
 	{
 		gint					screenWidth, screenHeight;
 
-		/* Resize stage to match screen size and listen for futher screen size changes
-		 * to resize stage again.
-		 * This should only be needed when compiled against Clutter prior to 0.17.2
-		 * because this version or newer ones seem to handle window resizes correctly.
-		 */
 		screenWidth=xfdashboard_window_tracker_get_screen_width(priv->windowTracker);
 		screenHeight=xfdashboard_window_tracker_get_screen_height(priv->windowTracker);
 		_xfdashboard_stage_on_screen_size_changed(self, screenWidth, screenHeight, priv->windowTracker);
@@ -1679,8 +1679,9 @@ static void xfdashboard_stage_init(XfdashboardStage *self)
 									"screen-size-changed",
 									G_CALLBACK(_xfdashboard_stage_on_screen_size_changed),
 									self);
+
+		g_debug("Tracking screen resizes to resize stage");
 	}
-#endif
 }
 
 /* IMPLEMENTATION: Public API */
@@ -1734,7 +1735,7 @@ void xfdashboard_stage_set_background_image_type(XfdashboardStage *self, Xfdashb
 							clutter_actor_set_content(priv->backgroundImageLayer, backgroundContent);
 							g_object_unref(backgroundContent);
 
-							g_debug("Dekstop window was found and set up as background image for stage");
+							g_debug("Desktop window was found and set up as background image for stage");
 						}
 							else
 							{
@@ -1742,7 +1743,7 @@ void xfdashboard_stage_set_background_image_type(XfdashboardStage *self, Xfdashb
 															"window-opened",
 															G_CALLBACK(_xfdashboard_stage_on_desktop_window_opened),
 															self);
-								g_debug("Dekstop window was not found. Setting up signal to get notified when desktop background image was signalled");
+								g_debug("Desktop window was not found. Setting up signal to get notified when desktop window might be opened.");
 							}
 					}
 					break;
