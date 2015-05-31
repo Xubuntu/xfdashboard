@@ -1,3 +1,51 @@
+commit d5b1f7901aa63cf8bfe7821c720e106583cca152
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 30 19:56:07 2015 +0200
+
+    Update AppData
+
+commit b844c3156dfa7305c411a4eed933607533945cfe
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 30 11:59:03 2015 +0200
+
+    Fix typo
+
+commit e9ce17f69fa1d74d55b6cf66bdfaacf54d5ff9cc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 30 11:30:37 2015 +0200
+
+    Turn message into a debug message
+
+commit b1b53715e11de5b58f50465eb37fc775323297b5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Apr 25 11:54:47 2015 +0200
+
+    Rewrote function xfdashboard_window_tracker_get_root_window() to lookup desktop window
+    
+    Rewrote function to lookup desktop window by trying first to get window by known background pixmap ID and if it fails it will iterate through window list to lookup a window of type 'desktop'. If both methods fail, NULL will be returned to indicate that there is no matching window.
+    
+    This should fix issue GH #80
+
+commit 3c0951bd304f5f912ab04bbdbc86385b39e71611
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 30 11:24:42 2015 +0200
+
+    Decide at run-time not at compile-time if we need to track screen size changes to adjust stage size.
+    
+    I hope this fixes GH #95 finally.
+
+commit cafce64b5917746dde5ea1b3575b3ac566a4814b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 29 19:30:47 2015 +0200
+
+    Post-release version bump to 0.4.2
+
+commit 73d395c06c33192e41f556d3a6352fe92d42d4a9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 29 19:29:40 2015 +0200
+
+    Bump version to 0.4.1
+
 commit f2c6c4d8cf08a7621f7f75d0d7971a2fd7c47538
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Sat May 16 20:32:44 2015 +0200
