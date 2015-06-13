@@ -13,9 +13,9 @@ dnl ***************************
 dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
-m4_define([xfdashboard_version_minor], [4])
-m4_define([xfdashboard_version_micro], [2])
-m4_define([xfdashboard_version_build], [d5b1f79])
+m4_define([xfdashboard_version_minor], [5])
+m4_define([xfdashboard_version_micro], [0])
+m4_define([xfdashboard_version_build], [e64d4a8])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -43,7 +43,7 @@ dnl ***************************
 dnl *** Initialize autoconf ***
 dnl ***************************
 AC_COPYRIGHT([Copyright (c) 2012-2015 Stephan Haller <nomad@froevel.de>])
-AC_INIT([xfdashboard], [xfdashboard_version], [https://github.com/gmc-holle/xfdashboard], [xfdashboard])
+AC_INIT([xfdashboard], [xfdashboard_version], [http://goodies.xfce.org/projects/applications/xfdashboard/start], [xfdashboard])
 AC_PREREQ([2.50])
 AC_REVISION([xfdashboard_version_build])
 
@@ -271,23 +271,24 @@ echo
 echo "Build Configuration for $PACKAGE version $VERSION revision $REVISION:"
 echo
 echo "Library versions used:"
-echo "  libwnck:    $LIBWNCK_VERSION"
-echo "  clutter:    $CLUTTER_VERSION"
-echo "  cogl:       $CLUTTER_COGL_VERSION"
-echo "  gtk+:       $GTK_VERSION"
-echo "  glib:       $GLIB_VERSION"
-echo "  gio:        $GIO_VERSION"
-echo "  gio-unix:   $GIO_UNIX_VERSION"
-echo "  garcon:     $GARCON_VERSION"
-echo "  libxconf:   $LIBXFCONF_VERSION"
-echo "  dbus-glib:  $DBUS_GLIB_VERSION"
+echo "  libwnck:       $LIBWNCK_VERSION"
+echo "  clutter:       $CLUTTER_VERSION"
+echo "  cogl:          $CLUTTER_COGL_VERSION"
+echo "  gtk+:          $GTK_VERSION"
+echo "  glib:          $GLIB_VERSION"
+echo "  gio:           $GIO_VERSION"
+echo "  gio-unix:      $GIO_UNIX_VERSION"
+echo "  garcon:        $GARCON_VERSION"
+echo "  libxconf:      $LIBXFCONF_VERSION"
+echo "  libxfce4util:  $LIBXFCE4UTIL_VERSION"
+echo "  dbus-glib:     $DBUS_GLIB_VERSION"
 echo
 echo "Tools used:"
 echo "  glib-genmarshal:  $GLIB_GENMARSHAL"
 echo "  glib-mkenums:     $GLIB_MKENUMS"
 echo
 echo "Features enabled:"
-echo "  XComposite:  $enabled_x11_extension_composite"
-echo "  XDamage:     $enabled_x11_extension_damage"
-echo "  Xinerama:    $enabled_x11_extension_xinerama"
+echo "  XComposite:    $enabled_x11_extension_composite"
+echo "  XDamage:       $enabled_x11_extension_damage"
+echo "  Xinerama:      $enabled_x11_extension_xinerama"
 echo

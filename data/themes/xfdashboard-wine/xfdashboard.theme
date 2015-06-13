@@ -11,5 +11,5 @@ Style=xfdashboard-wine.css
 Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Author=lacios
-Version=0.4.2git.cafce64
+Version=0.5.0git.3db31a0
 Screenshot=screenshot-xfdashboard-wine.png

@@ -53,6 +53,11 @@
 	</provides>
 
 	<releases>
+		<release version="0.5.0" timestamp="1434045183">
+			<description>
+				<p>This unstable development introduces new options to workspace selector and loads the window contents in background to make the application feel smoother and faster, especially at start-up. It also contains a lots of bug-fixes and smaller improvements.</p>
+			</description>
+		</release>
 		<release version="0.4.2" timestamp="1433008431">
 			<description>
 				<p>This release hopefully fixes problems with the stage resizes finally. Also the method to determine the desktop window was changed.</p>

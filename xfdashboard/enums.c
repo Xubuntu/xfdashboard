@@ -80,6 +80,32 @@ GType xfdashboard_bindings_pool_error_enum_get_type(void)
 }
 
 
+/* enumerations from "image-content.h" */
+#include "image-content.h"
+
+GType xfdashboard_image_content_loading_state_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GEnumValue values[]=
+		{
+			{ XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_NONE, "XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_NONE", "none" },
+			{ XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADING, "XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADING", "loading" },
+			{ XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADED_SUCCESSFULLY, "XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADED_SUCCESSFULLY", "loaded-successfully" },
+			{ XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADED_FAILED, "XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADED_FAILED", "loaded-failed" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardImageContentLoadingState"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
+
+
 /* enumerations from "theme.h" */
 #include "theme.h"
 
