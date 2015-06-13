@@ -19,6 +19,12 @@ XfdashboardStageInterface
 	background-image-type: desktop;
 }
 
+/* Image content */
+XfdashboardImageContent
+{
+	missing-icon-name: "image-missing";
+}
+
 /* Window content */
 XfdashboardWindowContent
 {
@@ -154,6 +160,11 @@ XfdashboardLiveWindow .window-number
 	corner-radius: 4.0;
 }
 
+XfdashboardLiveWindow.window-state-urgent
+{
+	effects: window-urgency;
+}
+
 .drag-actor-XfdashboardLiveWindow:drag-handle
 {
 	background-type: outline fill rounded-corners;
@@ -166,16 +177,15 @@ XfdashboardLiveWindow .window-number
 /* Live workspaces */
 XfdashboardLiveWorkspace
 {
-	background-type: outline fill;
-	background-fill-color: #000000ff;
+	background-type: outline;
+	background-image-type: desktop;
 	outline-color: #404040ff;
 	outline-width: 1.0;
 }
 
 XfdashboardLiveWorkspace:active
 {
-	background-type: outline fill;
-	background-fill-color: #000000ff;
+	background-type: outline;
 	outline-color: #ffff00ff;
 	outline-width: 2.0;
 }
@@ -244,15 +254,13 @@ XfdashboardApplicationButton.view-mode-list
 }
 
 /* Workspace selector (incl. collapse box) */
-#workspace-selector
+XfdashboardWorkspaceSelector
 {
 	spacing: 8.0;
 	background-type: fill outline rounded-corners;
 	background-fill-color: @background;
 	outline-color: #5792e2ff;
 	outline-width: 0.5;
-	outline-borders: top left bottom;
-	corners: left;
 	orientation: vertical;
 	max-fraction: 0.20;
 	using-fraction: true;
@@ -263,11 +271,8 @@ XfdashboardApplicationButton.view-mode-list
 {
 	collapsed-size: 64.0;
 	collapse-orientation: left;
-}
-
-XfdashboardCollapseBox
-{
-	collapse-orientation: left;
+	outline-borders: top left bottom;
+	corners: left;
 }
 
 /* Search text box */

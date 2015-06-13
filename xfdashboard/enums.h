@@ -39,6 +39,10 @@ GType xfdashboard_binding_flags_get_type(void) G_GNUC_CONST;
 GType xfdashboard_bindings_pool_error_enum_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_BINDINGS_POOL_ERROR_ENUM	(xfdashboard_bindings_pool_error_enum_get_type())
 
+/* enumerations from "image-content.h" */
+GType xfdashboard_image_content_loading_state_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_IMAGE_CONTENT_LOADING_STATE	(xfdashboard_image_content_loading_state_get_type())
+
 /* enumerations from "theme.h" */
 GType xfdashboard_theme_error_enum_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_THEME_ERROR_ENUM	(xfdashboard_theme_error_enum_get_type())

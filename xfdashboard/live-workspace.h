@@ -29,6 +29,7 @@
 
 #include "background.h"
 #include "window-tracker-workspace.h"
+#include "window-tracker-monitor.h"
 
 G_BEGIN_DECLS
 
@@ -71,6 +72,15 @@ ClutterActor* xfdashboard_live_workspace_new_for_workspace(XfdashboardWindowTrac
 
 XfdashboardWindowTrackerWorkspace* xfdashboard_live_workspace_get_workspace(XfdashboardLiveWorkspace *self);
 void xfdashboard_live_workspace_set_workspace(XfdashboardLiveWorkspace *self, XfdashboardWindowTrackerWorkspace *inWorkspace);
+
+XfdashboardWindowTrackerMonitor* xfdashboard_live_workspace_get_monitor(XfdashboardLiveWorkspace *self);
+void xfdashboard_live_workspace_set_monitor(XfdashboardLiveWorkspace *self, XfdashboardWindowTrackerMonitor *inMonitor);
+
+gboolean xfdashboard_live_workspace_get_show_window_content(XfdashboardLiveWorkspace *self);
+void xfdashboard_live_workspace_set_show_window_content(XfdashboardLiveWorkspace *self, gboolean inShowWindowContent);
+
+XfdashboardStageBackgroundImageType xfdashboard_live_workspace_get_background_image_type(XfdashboardLiveWorkspace *self);
+void xfdashboard_live_workspace_set_background_image_type(XfdashboardLiveWorkspace *self, XfdashboardStageBackgroundImageType inType);
 
 G_END_DECLS
 

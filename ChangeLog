@@ -1,172 +1,162 @@
-commit d5b1f7901aa63cf8bfe7821c720e106583cca152
+commit e64d4a86ccfc1674dd935b9dd8c564d17f3546a2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 11 19:55:28 2015 +0200
+
+    Update AppData
+
+commit 831c15a184fb859a90dd604b6b0ada460de5730c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 11 19:52:30 2015 +0200
+
+    Add missing source file to POTFILES.in
+
+commit 52ed81d4770ad6da1fba4a15aaebfcae4ab3e94a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jun 10 21:55:22 2015 +0200
+
+    Improve detection if tooltip should be shown
+    
+    Previously the tooltip action only recognized to hide a tooltip if it was shown but it did not recognize not to show a tooltip if a interupting event (like button press) happened before the tooltip was shown at all. This commit fixes it and the tooltip should behave even more likely like a GTK+ tooltip now.
+
+commit 714cb1f09a51b366c7af87c23d74ed726fad5fc9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jun 8 22:53:55 2015 +0200
+
+    Fix not showing tooltip on same actor again when re-entering, e.g. after drag-n-drop
+
+commit 65d293b8b884c11a3a234b77d27e05695f64a96c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jun 8 22:01:04 2015 +0200
+
+    Make tooltip to behave more like a tooltip in GTK+ that means hide tooltip when leaving the actor not when moving the pointer - that is too early.
+
+commit e479f906d020735544e49b5c8d6b8ae0b8e5ac33
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jun 8 21:34:23 2015 +0200
+
+    Environment variable must be set AND set to anything than "0" (zero) to activate experimental code to resume window content in an idle source
+
+commit 9d8ea39b51aab1a6453497d772253bc15299346f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jun 8 21:26:06 2015 +0200
+
+    Fix setting up window content in experimental resume-on-idle code when running in daemon mode
+
+commit 9af1814b2377939ee7b77dc5281614605796703d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jun 8 20:35:41 2015 +0200
+
+    Make usage of new experimental code to resume window content in an idle source configurable at runtime via environment XFDASHBOARD_WINDOW_CONTENT_RESUME_ON_IDLE which should to set to a non-zero value.
+    
+    E.g. activate with:
+    XFDASHBOARD_WINDOW_CONTENT_RESUME_ON_IDLE=1 xfdashboard
+
+commit 763d5d7b4331ff28f9d75424310e57346fe50cdd
+Merge: f998fed a47176e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jun 7 20:47:21 2015 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit f998fedc11500952474fc5bac845e3eb469759a4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jun 7 20:42:24 2015 +0200
+
+    Add experimental delayed window content creation
+    
+    To make application "feel" faster on machines with slow graphics card (slow texture creation and/or uploading) a resume queue was implemented which will create the window texture in an idle source once at a time. This should help not to block the application at start-up or when switching to workspaces with many windows resulting in a "feeling" that the application is faster.
+    
+    This implementation is experimental so a #define must be set and the debug message will be printed regardless if G_MESSAGES_DEBUG is set or not. Once the implementation is stable the message will printed with g_debug() instead of g_message().
+
+commit a47176e49b1d2c82a5912cf26f0d169fcc9f6cde
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 5 08:42:14 2015 +0200
+
+    Forgot to implement new option "show-current-monitor-only" also at primary stage
+
+commit 3b15aaa2135d0d9f91c068b1ed5b7fde3483059b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 5 05:52:22 2015 +0200
+
+    Add libxfce4util version to output in configure.ac.in
+
+commit df0b91855cfd427da1e15623ac3302ce0a7bda82
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 5 05:44:01 2015 +0200
+
+    Fix project URL in configure.ac.in
+
+commit 4750f6063a61fc48134f7761614e1ea13aa697cc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 5 04:39:48 2015 +0200
+
+    Do not make new property "show-current-monitor-only" in XfdashboardWorkspaceSelector themable. It can now only be set in layout.
+
+commit 778c0a8908d9aa1ca8c10d019c07631843c73acc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 4 20:29:29 2015 +0200
+
+    Set also display in X message for fullscreen across all monitors
+
+commit 933bdd4807cd24eea9d2a05f0641ae15b81c7630
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 4 19:53:09 2015 +0200
+
+    Apply all last changes at default themes to all themes
+
+commit 42c0896817dc42b2f805254033f39c2aa9a0a7a2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 4 19:46:57 2015 +0200
+
+    Implement new option "show-current-monitor-only" to default theme
+
+commit 46346a7b4f880076e0776b3a172a31d46a115c1c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 4 19:43:46 2015 +0200
+
+    Implement option to show only those windows in a XfdashboardLiveWorkspace for the monitor where it is placed on
+    
+    This option is themable via property "show-current-monitor-only" at object instaces of class XfdashboardWorkspaceSelector.
+    
+    This commit addresses issue GH #87
+
+commit b77f9eee2a9f4fc499cafcbeb49a2b34fef8fee0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 4 17:51:03 2015 +0200
+
+    Fix typo
+
+commit b941f20f271011b17ad29a572b1e75ae73132af8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 4 17:10:21 2015 +0200
+
+    Correct calculation of workspace selector's size by fraction or maximum size in multi-monitor setup by using size of XfdashboardStageInterface for calculation instead of stage's size.
+
+commit e03e64154bf692148761c849c1d12ef97d9924b5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 4 13:42:40 2015 +0200
+
+    Avoid determining size of parent in XfdashboardScaledTableLayout recursively and infinitely when getting preferred width and/or height
+
+commit 3db31a00814bc25272832afd5425dc8cf2727200
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Sat May 30 19:56:07 2015 +0200
 
     Update AppData
 
-commit b844c3156dfa7305c411a4eed933607533945cfe
+commit 5a8792409333269c46d9b9bb20a4065a5d4c271c
 Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 30 11:59:03 2015 +0200
+Date:   Fri May 29 19:31:51 2015 +0200
 
-    Fix typo
+    Merge appdata from stable release
 
-commit e9ce17f69fa1d74d55b6cf66bdfaacf54d5ff9cc
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 30 11:30:37 2015 +0200
-
-    Turn message into a debug message
-
-commit b1b53715e11de5b58f50465eb37fc775323297b5
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat Apr 25 11:54:47 2015 +0200
-
-    Rewrote function xfdashboard_window_tracker_get_root_window() to lookup desktop window
-    
-    Rewrote function to lookup desktop window by trying first to get window by known background pixmap ID and if it fails it will iterate through window list to lookup a window of type 'desktop'. If both methods fail, NULL will be returned to indicate that there is no matching window.
-    
-    This should fix issue GH #80
-
-commit 3c0951bd304f5f912ab04bbdbc86385b39e71611
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 30 11:24:42 2015 +0200
-
-    Decide at run-time not at compile-time if we need to track screen size changes to adjust stage size.
-    
-    I hope this fixes GH #95 finally.
-
-commit cafce64b5917746dde5ea1b3575b3ac566a4814b
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Fri May 29 19:30:47 2015 +0200
-
-    Post-release version bump to 0.4.2
-
-commit 73d395c06c33192e41f556d3a6352fe92d42d4a9
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Fri May 29 19:29:40 2015 +0200
-
-    Bump version to 0.4.1
-
-commit f2c6c4d8cf08a7621f7f75d0d7971a2fd7c47538
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 20:32:44 2015 +0200
-
-    Free interfaces list at XfdashboardStage
-
-commit 712b9eba7cbfc2801c4d284d429233acc5b00206
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 20:22:04 2015 +0200
-
-    Free GFile object at XfdashboardThemeCss
-
-commit 12546ce2c6090c2270f6b302224e372e9c1d134e
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 20:06:18 2015 +0200
-
-    Free markup context and also list itself at XfdashboardThemeEffects
-
-commit d998915e0dfde6bc475984b15e002b8988233806
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 20:04:06 2015 +0200
-
-    Free markup context at XfdashboardBindingsPool
-
-commit 174905ba10e38fa85334a3e42c0f59c9d528b7bb
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 19:56:40 2015 +0200
-
-    Free property 'background-color' in XfdashboardStageInterface when object instance is disposed
-
-commit 544ec3ad32fb0db4a91f26874544648e87d078d1
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 19:54:46 2015 +0200
-
-    Free theme name when disposing object instance XfdashboardApplication
-
-commit a59674806904c1794b5d349a883cec2707c9a417
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 19:51:33 2015 +0200
-
-    Free ClutterColor when object instance XfdashboardWindowContent is disposed
-
-commit 9d540a9ad0f3f723481b9dd0f67cd1f83954cdac
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 19:49:25 2015 +0200
-
-    Free also list itself when object instance XfdashboardThemeLayout is disposed
-
-commit 8a5dfbde6a0b86105080a02dfb96f87ba77ec3e3
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 19:48:15 2015 +0200
-
-    Free also list itself when object instance XfdashboardThemeEffects is disposed
-
-commit 12c550deaaa37224c7721716df3619fde5cdc02b
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 19:44:16 2015 +0200
-
-    Free ClutterColor in function _xfdashboard_theme_css_function_alpha at XfdashboardThemeCSS
-
-commit 6961c6d7557dc1406c63d5e30af5420156d36615
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 19:35:36 2015 +0200
-
-    Free allocation box for window number in allocation function of XfdashboardLiveWindow
-
-commit 67f6331f37a57b60f53fe2b43db96eed766124f2
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 19:32:32 2015 +0200
-
-    Free icon name after setting button icon at XfdashboardApplicationButton
-
-commit ff26e5870f0ceaa9417eafb981c455b3e82ba217
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 19:28:50 2015 +0200
-
-    Free effect list after duplication at XfdashboardActor
-
-commit 7ab3d757d3b37a21df91182b32dc8fcae16c2e9d
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 19:58:49 2015 +0200
-
-    Fix typo
-
-commit 18e43f24f33905736dd2b7e5d6bf505265d75921
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 19:26:15 2015 +0200
-
-    Release allocated resources at fill data structure of object XfdashboardApplicationsMenuModel
-
-commit 2a123473c0220a92a462d9df8d270eb0500db5f3
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 19:25:02 2015 +0200
-
-    Free IDs in splitted effect list at XfdashboardActor
-
-commit 55fe657eb1087a208df9b924d5289f51a76cfcf4
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat May 16 19:17:46 2015 +0200
-
-    Free property 'favourites' at XfdashboardQuicklaunch when object instance is disposed
-
-commit 5fbe6add9dade0246d35c8e721a2cd564c2a85ac
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Fri May 29 13:44:31 2015 +0200
-
-    Turn warning into a message as Fedora tends to turn it into a fatal warning and crashes :( And this message is likely to be printed.
-
-commit 2cd41a86fe730462a978284305f52eb2f9bf6c40
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Wed May 20 06:33:06 2015 +0200
-
-    Updated translations (es, he, it_IT, sr) and added new translation (fr)
-
-commit 5861e5ac68db73f5c63b0a8574b4d578eb676b55
+commit e3777b86cf1165fbd2c5f0c2495519986036c2e2
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Thu May 28 08:15:07 2015 +0200
 
     Only resize stage to screen size and listen for further screen size changes to resize stage if compiled against Clutter prior to version 0.17.2 because from this version on Clutter seems to handle resizes of stage window in X11 correctly by itself.
 
-commit 08685e959ce253f61a7e37ad7d60fccf93b7c17e
+commit b35ebd000bc6aa140dedc608cfa5b6cde19c9fe6
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Tue May 26 18:37:00 2015 +0200
 
@@ -174,7 +164,223 @@ Date:   Tue May 26 18:37:00 2015 +0200
     
     Hopefully fixes problems reported at issue GH #95
 
-commit bafc9d54a9669e950e3fb58dee9eb8c3dc13c2ba
+commit 6e7a92ef4479d35ccf7ebb9bbb1b79f0d88962d3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun May 24 11:41:32 2015 +0200
+
+    Correct tooltip for delay timeout interval in settings dialog
+
+commit 35c473674dc834858e9aca9f08898c5106924bc4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 22 08:26:40 2015 +0200
+
+    Disable delayed search by default
+
+commit a0d77953b857c442c4628093745560ac842dd8ec
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu May 21 21:46:13 2015 +0200
+
+    Check for valid outline effect before enabling or disabling outline
+
+commit 1da3cd06b67d6017cdeeddc7c1e67b66d1f6805b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu May 21 21:36:53 2015 +0200
+
+    Check for valid canvas before invalidating
+
+commit f5796e58ff4fe9bcb24cf8785a0527178dc3c93f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu May 21 21:36:07 2015 +0200
+
+    Make delay timeout interval configurable in settings dialog
+
+commit 7bab9a1eb19d611f95b6b4e8086cd5de37dd2f22
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu May 21 21:14:36 2015 +0200
+
+    Show a notification if initial search has no results after delay timeout was reached
+
+commit e05166b18f27ada193baa2430d9818ec20a16cc8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu May 21 21:06:00 2015 +0200
+
+    Improve search responsiveness by delaying initial search
+    
+    Instead of performing a search with the first keystroke we will now create a timeout source now. When the timeout is reached the initial search with the latest entered search term is performed. Further searches will not be delayed and performed immediately until the search term is empty or the search view is resetted.
+    
+    The timeout interval to delay the initial is configurable by property "/components/search-view/delay-search-timeout" and expects an unsinged integer describe the timeout interval in milliseconds.
+    
+    This commit addresses issue GH #86
+
+commit 97c4d56ee1ae9f9f06088c69000a1be6f718752a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed May 20 15:36:00 2015 +0200
+
+    Revert "Split out window actor of XfdashboardLiveWorkspace into a new fully themable actor"
+    
+    This reverts commit 729bbb9ff2e012ecf995691bb7bd9e510cae0e68.
+    
+    This commit caused lot of usability and stability problems as described at issue GH #44. Reverting this commit reopens issue GH #89
+
+commit e5e34ef7583ea270e09796c18ac1124c8462cb90
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed May 20 06:33:06 2015 +0200
+
+    Updated translations (es, he, it_IT, sr) and added new translation (fr)
+
+commit 6be9a99e6e38a53b7ae861a45300a7165a25c327
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 21:45:30 2015 +0200
+
+    Handle "duplicate" id css selectors
+
+commit ebe04dd36089e04c36d7aedc7cdeb679d8acdf64
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 20:54:07 2015 +0200
+
+    Handle empty root section when filtering for NULL or unavailble root section
+
+commit f0fec3df5d403be04bd54bf5cb08038f7f302540
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 20:32:44 2015 +0200
+
+    Free interfaces list at XfdashboardStage
+
+commit 436890dcc080703e42d8808f19b7b23d45b939bb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 20:22:04 2015 +0200
+
+    Free GFile object at XfdashboardThemeCss
+
+commit f9d5f675b9a402645f3458e4d85ed594ae1a9d52
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 20:06:18 2015 +0200
+
+    Free markup context and also list itself at XfdashboardThemeEffects
+
+commit c116c5076d07f08565cd74ee526323b2d51eb41b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 20:04:06 2015 +0200
+
+    Free markup context at XfdashboardBindingsPool
+
+commit 85a55b53624da11b76eae6dd751da269063f2011
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:58:49 2015 +0200
+
+    Fix typo
+
+commit 9c32470534d97e27fc3270524d6beecf54f2c4d2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:56:40 2015 +0200
+
+    Free property 'background-color' in XfdashboardStageInterface when object instance is disposed
+
+commit 9251869c7a6d2f3f76bfb656ea03017dacb7f68a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:54:46 2015 +0200
+
+    Free theme name when disposing object instance XfdashboardApplication
+
+commit da63a9b7398c589ce52877685568017ca2ba17ce
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:51:33 2015 +0200
+
+    Free ClutterColor when object instance XfdashboardWindowContent is disposed
+
+commit e793f9ecee83501798d2e3cb86c0e933f54a4ee3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:49:25 2015 +0200
+
+    Free also list itself when object instance XfdashboardThemeLayout is disposed
+
+commit 7af76bdb55de63667fecc74042ada306f865154c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:48:15 2015 +0200
+
+    Free also list itself when object instance XfdashboardThemeEffects is disposed
+
+commit 78d797f34adb7255ec5e95ce4d0c85b94a0a531d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:44:16 2015 +0200
+
+    Free ClutterColor in function _xfdashboard_theme_css_function_alpha at XfdashboardThemeCSS
+
+commit 421cd11431b1900068a9e7d6e11ea3caee4e51f3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:35:36 2015 +0200
+
+    Free allocation box for window number in allocation function of XfdashboardLiveWindow
+
+commit f2f062abdb838244f9308c3db821f3dba5c5c609
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:32:32 2015 +0200
+
+    Free icon name after setting button icon at XfdashboardApplicationButton
+
+commit 7f37b8a9f103adaaa7fadd5e8317626b8f004556
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:28:50 2015 +0200
+
+    Free effect list after duplication at XfdashboardActor
+
+commit d13df5ad1e264cae2b5d01b5e980c6744633bbc8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:26:15 2015 +0200
+
+    Release allocated resources at fill data structure of object XfdashboardApplicationsMenuModel
+
+commit 2b3d4113e12cb0a167769b84af5cfabbc13b4784
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:25:02 2015 +0200
+
+    Free IDs in splitted effect list at XfdashboardActor
+
+commit 21384cfea709be58f29c406e9c90cf1bead57640
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:17:46 2015 +0200
+
+    Free property 'favourites' at XfdashboardQuicklaunch when object instance is disposed
+
+commit 8a23e998add5bddc73eda4c841b9d1be9fd00d89
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 19:11:17 2015 +0200
+
+    Apply coding style
+
+commit 191e98e2ab8e1bb09eccd8a305600c66afb7d635
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 16 18:42:39 2015 +0200
+
+    Free property 'missing-icon-name' in XfdashboardImageContent when object instance is disposed
+
+commit dd9039ad352df3e2d77b0550d5e2577b1287871d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 8 21:42:32 2015 +0200
+
+    Fix trying not to eat up CPU ... again!
+    
+    Do not connect a new signal handler for 'geometry-changed' for each window when application resume but unblock existing signal handler.
+
+commit 729bbb9ff2e012ecf995691bb7bd9e510cae0e68
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 1 22:09:42 2015 +0200
+
+    Split out window actor of XfdashboardLiveWorkspace into a new fully themable actor
+    
+    This commit addresses issue GH #89
+
+commit 9c527f22b9c12fc7875efb64d6dedbf03f4e17d7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 1 17:19:29 2015 +0200
+
+    Windows view should handle windows moved to workspace it currently shows
+    
+    For example if a workspace is removed while xfdashboard is running it may happen that the windows placed at the removed workspace are moved to the workspace the windows view shows currently. So connect to "window-workspace-changed" globally to get notified.
+    
+    This commit fixes GH #91
+
+commit b9bccc9079d294bee1f251a57024dcf811bcc789
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Fri May 1 15:01:30 2015 +0200
 
@@ -188,7 +394,7 @@ Date:   Fri May 1 15:01:30 2015 +0200
     
     This commit addresses issue GH #44
 
-commit d0153ec3a008f8a63861e9e8d52140ad17e60377
+commit 5da4858dd005446c50b8fd2c45a1584b1eb6a049
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Fri May 1 14:29:01 2015 +0200
 
@@ -202,7 +408,35 @@ Date:   Fri May 1 14:29:01 2015 +0200
     
     This commit addresses issue GH #88
 
-commit 858df6b86b41bfe16f96c465833104113acb1acc
+commit dc89ef7ca5485c2421ce8c63e253ff7005e32b53
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 1 12:02:00 2015 +0200
+
+    Apply all last changes at default themes to all themes
+
+commit 1959f14afb129afa00206e1caeb7bf2059f3f104
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 1 11:56:30 2015 +0200
+
+    Implement showing desktop also in XfdashboardLiveWorkspace
+    
+    Added a themable property 'background-image-type' which behave like the property 'background-image-type' at XfdashboardStage(Interface). If set to 'desktop' it will show the desktop's background at the workspace (e.g. as used in workspace selector).
+    
+    It is enabled by default as it is also enabled by default at XfdashboardStageInterface.
+    
+    This commit addresses issue GH #81
+
+commit 081f058f8251760bf2e07d71a0f3eb7a99753b33
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 1 11:05:27 2015 +0200
+
+    Implement themable property 'show-window-content' at XfdashboardLiveWorkspace
+    
+    This new themable property allows to manage if a workspace actor (e.g. used in workspace selector) should show the window content of the windows at this workspace or to show the windows' icon instead.
+    
+    This commit addresses issue GH #89
+
+commit 4ba375518c74e0b8321344a81d17b02849aee04c
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Mon Apr 27 06:43:08 2015 +0200
 
@@ -210,29 +444,98 @@ Date:   Mon Apr 27 06:43:08 2015 +0200
     
     Hopefully fixes issue GH #83
 
-commit dd16a7eb2f0a0705836f522ad1a2ef8c7a4507b9
+commit 62d87094630d157ca4e5b195de1f88380589d62d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Apr 25 11:54:47 2015 +0200
+
+    Rewrote function xfdashboard_window_tracker_get_root_window() to lookup desktop window
+    
+    Rewrote function to lookup desktop window by trying first to get window by known background pixmap ID and if it fails it will iterate through window list to lookup a window of type 'desktop'. If both methods fail, NULL will be returned to indicate that there is no matching window.
+    
+    This should fix issue GH #80
+
+commit 52e3f33c18d73cc406c1ca222df94c862c411d60
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Apr 22 21:31:29 2015 +0200
+
+    Apply all last changes at default themes to all themes
+
+commit 646724c63fbf6520fb874eaac99bc0d0a5f3c603
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Apr 22 21:27:42 2015 +0200
+
+    Add property 'padding' to XfdashboardEmblemEffect
+    
+    This property adds padding to the emblem. Technically a margin at the actor is logically added and reduces the space of the actor at the border by the value of padding. Another explaination is that this property adds an additional offset (next to the alignment) to the emblem position.
+
+commit 5a1697885835e67739fa72ed805b202096a0d4e2
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Wed Apr 22 20:59:21 2015 +0200
 
     Replace property 'unmapped-window-icon-gravity' with 'unmapped-window-icon-anchor-point' at all themes
 
-commit e6bf8e3dc7890313d3f59766c3dac73be3c3a295
+commit 76a4cf580bdbdca29f209649f572e320e6d0dfe9
 Author: Stephan Haller <nomad@froevel.de>
-Date:   Wed Apr 22 20:55:11 2015 +0200
+Date:   Wed Apr 22 20:29:45 2015 +0200
 
-    Mark property 'gravity' deprecated and introduce new property 'anchor-point' at XfdashboardEmblemEffect
+    Allow missing icon to show at XfdashboardImageContent when image could not be loaded to be themable by CSS. Therefore the property 'missing-icon-name' was introduced at XfdashboardImageContent.
+
+commit 18e0b070c26aef941f697cf0536dc786f9a5b464
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Apr 22 19:41:36 2015 +0200
+
+    Rename 'gravity' to 'anchor-point' in XfdashboardWindowContent
     
     Gravity does not describe well what this property is used for. So rename gravity to anchor point and replace all occurences with new definition and type.
-    
-    This deprecates property 'gravity' and a warning is printed each time this property is set to a new value.
 
-commit bddb21395febb3f5d5067f3bb1c14e0892f4b7be
+commit f88218f1f3c731151b36a125af4ade227c6fed0a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Apr 22 19:33:33 2015 +0200
+
+    Rename 'gravity' to 'anchor-point' in XfdashboardEmblemEffect
+    
+    Gravity does not describe well what this property is used for. So rename gravity to anchor point and replace all occurences with new definition and type.
+
+commit 244d67babb7d9efb608311c07c85195eec46c416
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Apr 20 21:33:48 2015 +0200
+
+    Add function to determine if a window needs attention (urgency window state) and allow XfdashboardLiveWindow to be stylable at specific window states (urgent, minimized, pinned)
+
+commit 6cd7ddd6af66c8b89ba62195b1cbb8c8b24fc957
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Mon Apr 20 20:31:19 2015 +0200
 
     Fix typo in XfdashboardWindowContent
 
-commit a07d874288677f645d6353ae2de638aab8ae99ef
+commit 16e3079288c5a6ffb9d322bd9fce3e11d9793d53
+Merge: a082e80 073347b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Apr 20 20:25:32 2015 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit a082e804317358d7f49e56a0b7f8e1587ffb68eb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Apr 20 20:23:52 2015 +0200
+
+    Add emblem effect
+    
+    This new emblem effect allows an icon to drawn over an actor as an effect. Implement this as an effect allows multiples icon (emblem) to be drawn over an actor and it can be defined by a theme via an effect XML file.
+
+commit d5ee269bf60906d954ad48b4fbbb3f57c5778f6e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Apr 15 13:30:35 2015 +0200
+
+    Allow settings application to be shown in other desktop environments than Xfce (GH #78)
+
+commit 073347b200ebcc43ad1a67264715b024576c65e3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Apr 15 13:30:35 2015 +0200
+
+    Allow settings application to be shown in other desktop environments than Xfce (GH #78)
+
+commit 9a06f70e92795b757fab65f86bc467de17d7768d
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Tue Apr 14 12:51:53 2015 +0200
 
@@ -240,17 +543,11 @@ Date:   Tue Apr 14 12:51:53 2015 +0200
     
     They were missing so far - means: not extracted.
 
-commit 8ab67cb29183ef9147e111c81c1407638a6dc014
+commit a33514e4c557024d738a5079ca6b64266f727fd0
 Author: Stephan Haller <nomad@froevel.de>
-Date:   Wed Apr 15 13:30:35 2015 +0200
+Date:   Sat Apr 11 20:51:12 2015 +0200
 
-    Allow settings application to be shown in other desktop environments than Xfce (GH #78)
-
-commit e518791c9c8e600ba0de3eecf22faeb54731b2f1
-Author: Stephan Haller <nomad@froevel.de>
-Date:   Sat Apr 11 20:53:16 2015 +0200
-
-    Post-release version bump to 0.4.1
+    Post-release version bump to 0.5.0
 
 commit b32320b680e44fbeaba7b5c6f74d148be12f09b3
 Author: Stephan Haller <nomad@froevel.de>

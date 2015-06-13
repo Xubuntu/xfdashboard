@@ -106,6 +106,8 @@ struct _XfdashboardWindowContentPrivate
 	XfdashboardWindowTracker				*windowTracker;
 	XfdashboardWindowContentWorkaroundMode	workaroundMode;
 	guint									workaroundStateSignalID;
+
+	gboolean								suspendAfterResumeOnIdle;
 };
 
 /* Properties */
@@ -130,9 +132,6 @@ enum
 	PROP_UNMAPPED_WINDOW_ICON_Y_SCALE,
 	PROP_UNMAPPED_WINDOW_ICON_ANCHOR_POINT,
 
-	/* DEPRECATED */
-	PROP_UNMAPPED_WINDOW_ICON_GRAVITY,
-
 	/* From interface: XfdashboardStylable */
 	PROP_STYLE_CLASSES,
 	PROP_STYLE_PSEUDO_CLASSES,
@@ -155,12 +154,179 @@ static gboolean		_xfdashboard_window_content_have_damage_extension=FALSE;
 static int			_xfdashboard_window_content_damage_event_base=0;
 
 static GHashTable*	_xfdashboard_window_content_cache=NULL;
-static guint		_xfdashboard_window_content_cache_shutdownSignalID=0;
+static guint		_xfdashboard_window_content_cache_shutdown_signal_id=0;
+
+static GList*		_xfdashboard_window_content_resume_idle_queue=NULL;
+static guint		_xfdashboard_window_content_resume_idle_id=0;
+static guint		_xfdashboard_window_content_resume_shutdown_signal_id=0;
 
 /* Forward declarations */
 static void _xfdashboard_window_content_suspend(XfdashboardWindowContent *self);
 static void _xfdashboard_window_content_resume(XfdashboardWindowContent *self);
+static gboolean _xfdashboard_window_content_resume_on_idle(gpointer inUserData);
 
+/* Remove all entries from resume queue and release all allocated resources */
+static void _xfdashboard_window_content_destroy_resume_queue(void)
+{
+	XfdashboardApplication					*application;
+	gint									queueSize;
+
+	/* Disconnect application "shutdown" signal handler */
+	if(_xfdashboard_window_content_resume_shutdown_signal_id)
+	{
+		g_message("Disconnecting shutdown signal handler %u because of resume queue destruction",
+					_xfdashboard_window_content_resume_shutdown_signal_id);
+
+		application=xfdashboard_application_get_default();
+		g_signal_handler_disconnect(application, _xfdashboard_window_content_resume_shutdown_signal_id);
+		_xfdashboard_window_content_resume_shutdown_signal_id=0;
+	}
+
+	/* Remove idle source if available */
+	if(_xfdashboard_window_content_resume_idle_id)
+	{
+		g_message("Removing resume window content idle source with ID %u",
+					_xfdashboard_window_content_resume_idle_id);
+
+		g_source_remove(_xfdashboard_window_content_resume_idle_id);
+		_xfdashboard_window_content_resume_idle_id=0;
+	}
+
+	/* Destroy resume-on-idle queue if available*/
+	if(_xfdashboard_window_content_resume_idle_queue)
+	{
+		queueSize=g_list_length(_xfdashboard_window_content_resume_idle_queue);
+		if(queueSize>0) g_warning(_("Destroying window content resume queue containing %d windows."), queueSize);
+#ifdef DEBUG
+		if(queueSize>0)
+		{
+			GList							*iter;
+			XfdashboardWindowContent		*content;
+			XfdashboardWindowTrackerWindow	*window;
+
+			for(iter=_xfdashboard_window_content_resume_idle_queue; iter; iter=g_list_next(iter))
+			{
+				content=XFDASHBOARD_WINDOW_CONTENT(iter->data);
+				window=xfdashboard_window_content_get_window(content);
+				g_print("Window content in resume queue: Item %s@%p for window '%s'",
+							G_OBJECT_TYPE_NAME(content), content,
+							xfdashboard_window_tracker_window_get_title(window));
+			}
+		}
+#endif
+
+		g_message("Destroying window content resume queue");
+		g_list_free(_xfdashboard_window_content_resume_idle_queue);
+		_xfdashboard_window_content_resume_idle_queue=NULL;
+	}
+}
+
+/* Remove window content from resume on idle queue */
+static void _xfdashboard_window_content_resume_on_idle_remove(XfdashboardWindowContent *self)
+{
+	XfdashboardWindowContentPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_WINDOW_CONTENT(self));
+
+	priv=self->priv;
+
+	/* Remove window content from queue */
+	if(_xfdashboard_window_content_resume_idle_queue)
+	{
+		GList							*queueEntry;
+
+		/* Lookup window content in queue and remove it from queue. If queue is empty
+		 * after removal, remove idle source also.
+		 */
+		queueEntry=g_list_find(_xfdashboard_window_content_resume_idle_queue, self);
+		if(queueEntry)
+		{
+			/* Remove window content from queue */
+			_xfdashboard_window_content_resume_idle_queue=g_list_delete_link(_xfdashboard_window_content_resume_idle_queue, queueEntry);
+			g_message("Removed queue entry %p for window '%s' because of releasing resources",
+						queueEntry,
+						xfdashboard_window_tracker_window_get_title(priv->window));
+		}
+	}
+
+	/* If queue is empty remove idle source as well */
+	if(!_xfdashboard_window_content_resume_idle_queue &&
+		_xfdashboard_window_content_resume_idle_id)
+	{
+		g_message("Removing idle source with ID %u because queue is empty",
+					_xfdashboard_window_content_resume_idle_id);
+
+		g_source_remove(_xfdashboard_window_content_resume_idle_id);
+		_xfdashboard_window_content_resume_idle_id=0;
+	}
+}
+
+/* Add window content to resume on idle queue */
+static void _xfdashboard_window_content_resume_on_idle_add(XfdashboardWindowContent *self)
+{
+	XfdashboardWindowContentPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_WINDOW_CONTENT(self));
+
+	priv=self->priv;
+
+	/* Only add callback to resume window content if no one was added */
+	if(!g_list_find(_xfdashboard_window_content_resume_idle_queue, self))
+	{
+		/* Queue window content for resume */
+		_xfdashboard_window_content_resume_idle_queue=g_list_append(_xfdashboard_window_content_resume_idle_queue, self);
+		g_message("Queued window resume of '%s'@%p", xfdashboard_window_tracker_window_get_title(priv->window), self);
+	}
+
+	/* Create idle source for resuming queued window contents but with
+	 * high priority to get window content created as soon as possible.
+	 */
+	if(_xfdashboard_window_content_resume_idle_queue &&
+		!_xfdashboard_window_content_resume_idle_id)
+	{
+		_xfdashboard_window_content_resume_idle_id=clutter_threads_add_idle_full(G_PRIORITY_HIGH_IDLE,
+																				_xfdashboard_window_content_resume_on_idle,
+																				NULL,
+																				NULL);
+		g_message("Created idle source with ID %u because of new resume queue created for window resume of '%s'@%p",
+					_xfdashboard_window_content_resume_idle_id,
+					xfdashboard_window_tracker_window_get_title(priv->window),
+					self);
+	}
+
+	/* Connect to "shutdown" signal of application to clean up resume queue */
+	if(!_xfdashboard_window_content_resume_shutdown_signal_id)
+	{
+		XfdashboardApplication			*application;
+
+		application=xfdashboard_application_get_default();
+		_xfdashboard_window_content_resume_shutdown_signal_id=g_signal_connect(application,
+																				"shutdown-final",
+																				G_CALLBACK(_xfdashboard_window_content_destroy_resume_queue),
+																				NULL);
+		g_message("Connected to shutdown signal with handler ID %u for resume queue destruction",
+					_xfdashboard_window_content_resume_shutdown_signal_id);
+	}
+}
+
+/* Check if experimental code for window resume on idle should be used */
+static gboolean _xfdashboard_window_content_resume_on_idle_is_enabled(void)
+{
+	static gboolean		firstTimeCalled=TRUE;
+	static gboolean		useExperimentalCode=FALSE;
+
+	if(firstTimeCalled)
+	{
+		const gchar		*envValue;
+
+		envValue=g_getenv("XFDASHBOARD_WINDOW_CONTENT_RESUME_ON_IDLE");
+		if(envValue && g_strcmp0(envValue, "0")!=0) useExperimentalCode=TRUE;
+
+		firstTimeCalled=FALSE;
+	}
+
+	return(useExperimentalCode);
+}
 /* Check if we should workaround unmapped window for requested window and set up workaround */
 static void _xfdashboard_window_content_on_workaround_state_changed(XfdashboardWindowContent *self,
 																	gpointer inUserData)
@@ -499,6 +665,9 @@ static void _xfdashboard_window_content_release_resources(XfdashboardWindowConte
 
 	priv=self->priv;
 
+	/* This live update will be suspended so remove it from queue */
+	_xfdashboard_window_content_resume_on_idle_remove(self);
+
 	/* Get display as it used more than once ;) */
 	display=clutter_x11_get_default_display();
 
@@ -573,6 +742,9 @@ static void _xfdashboard_window_content_suspend(XfdashboardWindowContent *self)
 
 	priv=self->priv;
 
+	/* This live update will be suspended so remove it from queue */
+	_xfdashboard_window_content_resume_on_idle_remove(self);
+
 	/* Get display as it used more than once ;) */
 	display=clutter_x11_get_default_display();
 
@@ -626,10 +798,205 @@ static void _xfdashboard_window_content_suspend(XfdashboardWindowContent *self)
 }
 
 /* Resume to handle live window updates */
+static gboolean _xfdashboard_window_content_resume_on_idle(gpointer inUserData)
+{
+	XfdashboardWindowContent			*self;
+	XfdashboardWindowContentPrivate		*priv;
+	GList								*queueEntry;
+	Display								*display;
+	CoglContext							*context;
+	GError								*error;
+	gint								trapError;
+	CoglTexture							*windowTexture;
+	gboolean							doContinueSource;
+
+	error=NULL;
+	windowTexture=NULL;
+
+	/* Get window content object from first entry in queue and remove it from queue */
+	queueEntry=g_list_first(_xfdashboard_window_content_resume_idle_queue);
+	if(!queueEntry)
+	{
+		g_warning(_("Resume handler called for empty queue."));
+
+		/* Queue must be empty but ensure it will */
+		if(_xfdashboard_window_content_resume_idle_queue)
+		{
+			g_message("Ensuring that window content resume queue is empty");
+			g_list_free(_xfdashboard_window_content_resume_idle_queue);
+			_xfdashboard_window_content_resume_idle_queue=NULL;
+		}
+
+		/* Queue must be empty so remove idle source */
+		_xfdashboard_window_content_resume_idle_id=0;
+		return(G_SOURCE_REMOVE);
+	}
+
+	self=XFDASHBOARD_WINDOW_CONTENT(queueEntry->data);
+	priv=self->priv;
+	g_message("Entering idle source with ID %u for window resume of '%s'@%p",
+				_xfdashboard_window_content_resume_idle_id,
+				xfdashboard_window_tracker_window_get_title(priv->window),
+				self);
+
+	g_message("Removing queued entry %p for window resume of '%s'@%p",
+				queueEntry,
+				xfdashboard_window_tracker_window_get_title(priv->window),
+				self);
+	_xfdashboard_window_content_resume_idle_queue=g_list_delete_link(_xfdashboard_window_content_resume_idle_queue, queueEntry);
+	if(_xfdashboard_window_content_resume_idle_queue)
+	{
+		doContinueSource=G_SOURCE_CONTINUE;
+	}
+		else
+		{
+			g_message("Resume idle source with ID %u will be remove because queue is empty",
+						_xfdashboard_window_content_resume_idle_id);
+
+			doContinueSource=G_SOURCE_REMOVE;
+			_xfdashboard_window_content_resume_idle_id=0;
+		}
+
+
+	/* We need at least the X composite extension to display images of windows
+	 * if still images or live updated ones
+	 */
+	if(!_xfdashboard_window_content_have_composite_extension)
+	{
+		return(doContinueSource);
+	}
+
+	/* Get display as it used more than once ;) */
+	display=clutter_x11_get_default_display();
+
+	/* Set up resources */
+	clutter_x11_trap_x_errors();
+	while(1)
+	{
+#ifdef HAVE_XCOMPOSITE
+		/* Get pixmap to render texture for */
+		priv->pixmap=XCompositeNameWindowPixmap(display, priv->xWindowID);
+		XSync(display, False);
+		if(priv->pixmap==None)
+		{
+			g_warning(_("Could not get pixmap for window '%s"), xfdashboard_window_tracker_window_get_title(priv->window));
+
+			/* Set flag to suspend window content after resuming because of error */
+			priv->suspendAfterResumeOnIdle=TRUE;
+			break;
+		}
+#else
+		/* We should never get here as existance of composite extension was checked before */
+		g_critical(_("Cannot resume window '%s' as composite extension is not available"),
+					xfdashboard_window_tracker_window_get_title(priv->window));
+		break;
+#endif
+
+		/* Create cogl X11 texture for live updates */
+		context=clutter_backend_get_cogl_context(clutter_get_default_backend());
+		windowTexture=COGL_TEXTURE(cogl_texture_pixmap_x11_new(context, priv->pixmap, FALSE, &error));
+		if(!windowTexture || error)
+		{
+			/* Creating texture may fail if window is _NOT_ on active workspace
+			 * so display error message just as debug message (this time)
+			 */
+			g_debug("Could not create texture for window '%s': %s",
+						xfdashboard_window_tracker_window_get_title(priv->window),
+						error ? error->message : _("Unknown error"));
+			if(error)
+			{
+				g_error_free(error);
+				error=NULL;
+			}
+
+			if(windowTexture)
+			{
+				cogl_object_unref(windowTexture);
+				windowTexture=NULL;
+			}
+
+			/* Set flag to suspend window content after resuming because of error */
+			priv->suspendAfterResumeOnIdle=TRUE;
+
+			break;
+		}
+
+		/* Set up damage to get notified about changed in pixmap */
+#ifdef HAVE_XDAMAGE
+		if(_xfdashboard_window_content_have_damage_extension)
+		{
+			priv->damage=XDamageCreate(display, priv->pixmap, XDamageReportBoundingBox);
+			XSync(display, False);
+			if(priv->damage==None)
+			{
+				g_warning(_("Could not create damage for window '%s' - using still image of window"), xfdashboard_window_tracker_window_get_title(priv->window));
+			}
+		}
+#endif
+
+		/* Release old texture (should be the fallback texture) and set new texture */
+		if(priv->texture)
+		{
+			cogl_object_unref(priv->texture);
+			priv->texture=windowTexture;
+		}
+
+		/* Set damage to new window texture */
+#ifdef HAVE_XDAMAGE
+		if(_xfdashboard_window_content_have_damage_extension &&
+			priv->damage!=None)
+		{
+			cogl_texture_pixmap_x11_set_damage_object(COGL_TEXTURE_PIXMAP_X11(priv->texture), priv->damage, COGL_TEXTURE_PIXMAP_X11_DAMAGE_BOUNDING_BOX);
+		}
+#endif
+
+		/* Now we use the window as texture and not the fallback texture anymore */
+		priv->isFallback=FALSE;
+
+		/* Window is not suspended anymore */
+		if(priv->isSuspended!=FALSE)
+		{
+			priv->isSuspended=FALSE;
+
+			/* Notify about property change */
+			g_object_notify_by_pspec(G_OBJECT(self), XfdashboardWindowContentProperties[PROP_SUSPENDED]);
+		}
+
+		/* Invalidate content to get it redrawn as soon as possible */
+		clutter_content_invalidate(CLUTTER_CONTENT(self));
+
+		/* We were able to set up window content so this window is definitely mapped */
+		priv->isMapped=TRUE;
+
+		/* End reached so break to get out of while loop */
+		break;
+	}
+
+	/* Check if window content should be suspended again after resume was done,
+	 * e.g. initial window content creation in suspended daemon mode.
+	 */
+	if(priv->suspendAfterResumeOnIdle)
+	{
+		_xfdashboard_window_content_suspend(self);
+		priv->suspendAfterResumeOnIdle=FALSE;
+	}
+
+	/* Check if everything went well */
+	trapError=clutter_x11_untrap_x_errors();
+	if(trapError!=0)
+	{
+		g_message("X error %d occured while resuming window '%s", trapError, xfdashboard_window_tracker_window_get_title(priv->window));
+		return(doContinueSource);
+	}
+
+	g_debug("Resuming live texture updates for window '%s'", xfdashboard_window_tracker_window_get_title(priv->window));
+	return(doContinueSource);
+}
+
 static void _xfdashboard_window_content_resume(XfdashboardWindowContent *self)
 {
 	XfdashboardWindowContentPrivate		*priv;
-	Display								*display G_GNUC_UNUSED;
+	Display								*display;
 	CoglContext							*context;
 	GError								*error;
 	gint								trapError;
@@ -641,6 +1008,18 @@ static void _xfdashboard_window_content_resume(XfdashboardWindowContent *self)
 	priv=self->priv;
 	error=NULL;
 	windowTexture=NULL;
+
+	/* Check if to use new experimental code to resume window content
+	 * in an idle source.
+	 */
+	if(_xfdashboard_window_content_resume_on_idle_is_enabled())
+	{
+		g_message("Using experimental code to resume on idle for window '%s'",
+					xfdashboard_window_tracker_window_get_title(priv->window));
+
+		_xfdashboard_window_content_resume_on_idle_add(self);
+		return;
+	}
 
 	/* We need at least the X composite extension to display images of windows
 	 * if still images or live updated ones
@@ -739,6 +1118,12 @@ static void _xfdashboard_window_content_resume(XfdashboardWindowContent *self)
 			/* Notify about property change */
 			g_object_notify_by_pspec(G_OBJECT(self), XfdashboardWindowContentProperties[PROP_SUSPENDED]);
 		}
+
+		/* Invalidate content to get it redrawn as soon as possible */
+		clutter_content_invalidate(CLUTTER_CONTENT(self));
+
+		/* We were able to set up window content so this window is definitely mapped */
+		priv->isMapped=TRUE;
 
 		/* End reached so break to get out of while loop */
 		break;
@@ -945,7 +1330,14 @@ static void _xfdashboard_window_content_set_window(XfdashboardWindowContent *sel
 	application=xfdashboard_application_get_default();
 	if(xfdashboard_application_is_suspended(application))
 	{
-		_xfdashboard_window_content_suspend(self);
+		if(_xfdashboard_window_content_resume_on_idle_is_enabled())
+		{
+			priv->suspendAfterResumeOnIdle=TRUE;
+		}
+			else
+			{
+				_xfdashboard_window_content_suspend(self);
+			}
 	}
 
 	/* Notify about property change */
@@ -969,8 +1361,8 @@ static void _xfdashboard_window_content_destroy_cache(void)
 
 	/* Disconnect application "shutdown" signal handler */
 	application=xfdashboard_application_get_default();
-	g_signal_handler_disconnect(application, _xfdashboard_window_content_cache_shutdownSignalID);
-	_xfdashboard_window_content_cache_shutdownSignalID=0;
+	g_signal_handler_disconnect(application, _xfdashboard_window_content_cache_shutdown_signal_id);
+	_xfdashboard_window_content_cache_shutdown_signal_id=0;
 
 	/* Destroy cache hashtable */
 	cacheSize=g_hash_table_size(_xfdashboard_window_content_cache);
@@ -1012,11 +1404,12 @@ static void _xfdashboard_window_content_create_cache(void)
 	_xfdashboard_window_content_cache=g_hash_table_new(g_direct_hash, g_direct_equal);
 	g_debug("Created window content cache hashtable");
 
-	/* Connect to "shutdown" signal of application to
-	 * clean up hashtable
-	 */
+	/* Connect to "shutdown" signal of application to clean up hashtable */
 	application=xfdashboard_application_get_default();
-	_xfdashboard_window_content_cache_shutdownSignalID=g_signal_connect(application, "shutdown-final", G_CALLBACK(_xfdashboard_window_content_destroy_cache), NULL);
+	_xfdashboard_window_content_cache_shutdown_signal_id=g_signal_connect(application,
+																		"shutdown-final",
+																		G_CALLBACK(_xfdashboard_window_content_destroy_cache),
+																		NULL);
 }
 
 /* IMPLEMENTATION: ClutterContent */
@@ -1331,9 +1724,6 @@ static void _xfdashboard_window_content_stylable_get_stylable_properties(Xfdashb
 	xfdashboard_stylable_add_stylable_property(self, ioStylableProperties, "unmapped-window-icon-x-scale");
 	xfdashboard_stylable_add_stylable_property(self, ioStylableProperties, "unmapped-window-icon-y-scale");
 	xfdashboard_stylable_add_stylable_property(self, ioStylableProperties, "unmapped-window-icon-anchor-point");
-
-	/* DEPRECATED */
-	xfdashboard_stylable_add_stylable_property(self, ioStylableProperties, "unmapped-window-icon-gravity");
 }
 
 /* Get/set style classes of stage */
@@ -1495,11 +1885,6 @@ static void _xfdashboard_window_content_set_property(GObject *inObject,
 			xfdashboard_window_content_set_unmapped_window_icon_y_scale(self, g_value_get_float(inValue));
 			break;
 
-		/* DEPRECATED */
-		case PROP_UNMAPPED_WINDOW_ICON_GRAVITY:
-			xfdashboard_window_content_set_unmapped_window_icon_gravity(self, g_value_get_enum(inValue));
-			break;
-
 		case PROP_UNMAPPED_WINDOW_ICON_ANCHOR_POINT:
 			xfdashboard_window_content_set_unmapped_window_icon_anchor_point(self, g_value_get_enum(inValue));
 			break;
@@ -1570,11 +1955,6 @@ static void _xfdashboard_window_content_get_property(GObject *inObject,
 
 		case PROP_UNMAPPED_WINDOW_ICON_Y_SCALE:
 			g_value_set_float(outValue, priv->unmappedWindowIconYScale);
-			break;
-
-		/* DEPRECATED */
-		case PROP_UNMAPPED_WINDOW_ICON_GRAVITY:
-			g_value_set_enum(outValue, xfdashboard_window_content_get_unmapped_window_icon_gravity(self));
 			break;
 
 		case PROP_UNMAPPED_WINDOW_ICON_ANCHOR_POINT:
@@ -1698,17 +2078,6 @@ void xfdashboard_window_content_class_init(XfdashboardWindowContentClass *klass)
 							1.0f,
 							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
-	/* DEPRECATED: Property 'unmapped-window-icon-gravity' is deprecated.
-	 *             Use property 'unmapped-window-icon-anchor-point' instead.
-	 */
-	XfdashboardWindowContentProperties[PROP_UNMAPPED_WINDOW_ICON_GRAVITY]=
-		g_param_spec_enum("unmapped-window-icon-gravity",
-							_("Unmapped window icon gravity"),
-							_("The gravity (anchor point) of unmapped window icon - Deprecated. Use property 'anchor-point' instead."),
-							CLUTTER_TYPE_GRAVITY,
-							CLUTTER_GRAVITY_NONE,
-							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-
 	XfdashboardWindowContentProperties[PROP_UNMAPPED_WINDOW_ICON_ANCHOR_POINT]=
 		g_param_spec_enum("unmapped-window-icon-anchor-point",
 							_("Unmapped window icon anchor point"),
@@ -1760,6 +2129,7 @@ void xfdashboard_window_content_init(XfdashboardWindowContent *self)
 	priv->stylePseudoClasses=NULL;
 	priv->windowTracker=xfdashboard_window_tracker_get_default();
 	priv->workaroundMode=XFDASHBOARD_WINDOW_CONTENT_WORKAROUND_MODE_NONE;
+	priv->workaroundStateSignalID=0;
 	priv->unmappedWindowIconXFill=FALSE;
 	priv->unmappedWindowIconYFill=FALSE;
 	priv->unmappedWindowIconXAlign=0.0f;
@@ -1767,6 +2137,7 @@ void xfdashboard_window_content_init(XfdashboardWindowContent *self)
 	priv->unmappedWindowIconXScale=1.0f;
 	priv->unmappedWindowIconYScale=1.0f;
 	priv->unmappedWindowIconAnchorPoint=XFDASHBOARD_ANCHOR_POINT_NONE;
+	priv->suspendAfterResumeOnIdle=FALSE;
 
 	/* Check extensions (will only be done once) */
 	_xfdashboard_window_content_check_extension();
@@ -2141,123 +2512,7 @@ void xfdashboard_window_content_set_unmapped_window_icon_y_scale(XfdashboardWind
 	}
 }
 
-/* DEPRECATED: Get/set gravity (anchor point) of unmapped window icon */
-ClutterGravity xfdashboard_window_content_get_unmapped_window_icon_gravity(XfdashboardWindowContent *self)
-{
-	XfdashboardWindowContentPrivate		*priv;
-	ClutterGravity						gravity;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_WINDOW_CONTENT(self), CLUTTER_GRAVITY_NONE);
-
-	priv=self->priv;
-	gravity=CLUTTER_GRAVITY_NONE;
-
-	switch(priv->unmappedWindowIconAnchorPoint)
-	{
-		case XFDASHBOARD_ANCHOR_POINT_NONE:
-			gravity=CLUTTER_GRAVITY_NONE;
-			break;
-
-		case XFDASHBOARD_ANCHOR_POINT_NORTH:
-			gravity=CLUTTER_GRAVITY_NORTH;
-			break;
-
-		case XFDASHBOARD_ANCHOR_POINT_NORTH_WEST:
-			gravity=CLUTTER_GRAVITY_NORTH_WEST;
-			break;
-
-		case XFDASHBOARD_ANCHOR_POINT_NORTH_EAST:
-			gravity=CLUTTER_GRAVITY_NORTH_EAST;
-			break;
-
-		case XFDASHBOARD_ANCHOR_POINT_SOUTH:
-			gravity=CLUTTER_GRAVITY_SOUTH;
-			break;
-
-		case XFDASHBOARD_ANCHOR_POINT_SOUTH_WEST:
-			gravity=CLUTTER_GRAVITY_SOUTH_WEST;
-			break;
-
-		case XFDASHBOARD_ANCHOR_POINT_SOUTH_EAST:
-			gravity=CLUTTER_GRAVITY_SOUTH_EAST;
-			break;
-
-		case XFDASHBOARD_ANCHOR_POINT_WEST:
-			gravity=CLUTTER_GRAVITY_WEST;
-			break;
-
-		case XFDASHBOARD_ANCHOR_POINT_EAST:
-			gravity=CLUTTER_GRAVITY_EAST;
-			break;
-
-		case XFDASHBOARD_ANCHOR_POINT_CENTER:
-			gravity=CLUTTER_GRAVITY_CENTER;
-			break;
-	}
-
-	return(gravity);
-}
-
-void xfdashboard_window_content_set_unmapped_window_icon_gravity(XfdashboardWindowContent *self, const ClutterGravity inGravity)
-{
-	XfdashboardAnchorPoint				anchorPoint;
-
-	g_return_if_fail(XFDASHBOARD_IS_WINDOW_CONTENT(self));
-	g_return_if_fail(inGravity>=CLUTTER_GRAVITY_NONE);
-	g_return_if_fail(inGravity<=CLUTTER_GRAVITY_CENTER);
-
-	anchorPoint=XFDASHBOARD_ANCHOR_POINT_NONE;
-
-	g_message("Setting deprecated property 'unmapped-window-icon-gravity' at %s, use 'unmapped-window-icon-anchor-point' instead", G_OBJECT_TYPE_NAME(self));
-
-	/* Convert gravity to anchor point */
-	switch(inGravity)
-	{
-		case CLUTTER_GRAVITY_NONE:
-			anchorPoint=XFDASHBOARD_ANCHOR_POINT_NONE;
-			break;
-
-		case CLUTTER_GRAVITY_NORTH:
-			anchorPoint=XFDASHBOARD_ANCHOR_POINT_NORTH;
-			break;
-
-		case CLUTTER_GRAVITY_NORTH_WEST:
-			anchorPoint=XFDASHBOARD_ANCHOR_POINT_NORTH_WEST;
-			break;
-
-		case CLUTTER_GRAVITY_NORTH_EAST:
-			anchorPoint=XFDASHBOARD_ANCHOR_POINT_NORTH_EAST;
-			break;
-
-		case CLUTTER_GRAVITY_SOUTH:
-			anchorPoint=XFDASHBOARD_ANCHOR_POINT_SOUTH;
-			break;
-
-		case CLUTTER_GRAVITY_SOUTH_WEST:
-			anchorPoint=XFDASHBOARD_ANCHOR_POINT_SOUTH_WEST;
-			break;
-
-		case CLUTTER_GRAVITY_SOUTH_EAST:
-			anchorPoint=XFDASHBOARD_ANCHOR_POINT_SOUTH_EAST;
-			break;
-
-		case CLUTTER_GRAVITY_WEST:
-			anchorPoint=XFDASHBOARD_ANCHOR_POINT_WEST;
-			break;
-
-		case CLUTTER_GRAVITY_EAST:
-			anchorPoint=XFDASHBOARD_ANCHOR_POINT_EAST;
-			break;
-
-		case CLUTTER_GRAVITY_CENTER:
-			anchorPoint=XFDASHBOARD_ANCHOR_POINT_CENTER;
-			break;
-	}
-
-	xfdashboard_window_content_set_unmapped_window_icon_anchor_point(self, anchorPoint);
-}
-
-/* Get/set anchor point of unmapped window icon */
+/* Get/set gravity (anchor point) of unmapped window icon */
 XfdashboardAnchorPoint xfdashboard_window_content_get_unmapped_window_icon_anchor_point(XfdashboardWindowContent *self)
 {
 	g_return_val_if_fail(XFDASHBOARD_IS_WINDOW_CONTENT(self), XFDASHBOARD_ANCHOR_POINT_NONE);

@@ -97,10 +97,6 @@ void xfdashboard_window_content_set_unmapped_window_icon_x_scale(XfdashboardWind
 gfloat xfdashboard_window_content_get_unmapped_window_icon_y_scale(XfdashboardWindowContent *self);
 void xfdashboard_window_content_set_unmapped_window_icon_y_scale(XfdashboardWindowContent *self, const gfloat inScale);
 
-/* DEPRECATED */
-ClutterGravity xfdashboard_window_content_get_unmapped_window_icon_gravity(XfdashboardWindowContent *self);
-void xfdashboard_window_content_set_unmapped_window_icon_gravity(XfdashboardWindowContent *self, const ClutterGravity inGravity);
-
 XfdashboardAnchorPoint xfdashboard_window_content_get_unmapped_window_icon_anchor_point(XfdashboardWindowContent *self);
 void xfdashboard_window_content_set_unmapped_window_icon_anchor_point(XfdashboardWindowContent *self, const XfdashboardAnchorPoint inAnchorPoint);
 
