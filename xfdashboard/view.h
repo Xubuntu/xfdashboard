@@ -32,6 +32,26 @@
 
 G_BEGIN_DECLS
 
+/* Public definitions */
+/**
+ * XfdashboardViewFitMode:
+ * @XFDASHBOARD_VIEW_FIT_MODE_NONE: Do not try to fit view into viewpad.
+ * @XFDASHBOARD_VIEW_FIT_MODE_HORIZONTAL: Try to fit view into viewpad horizontally.
+ * @XFDASHBOARD_VIEW_FIT_MODE_VERTICAL: Try to fit view into viewpad vertically.
+ * @XFDASHBOARD_VIEW_FIT_MODE_BOTH: Try to fit view into viewpad horizontally and vertically.
+ *
+ * Determines how a view should fit into a viewpad.
+ */
+typedef enum /*< prefix=XFDASHBOARD_VIEW_FIT_MODE >*/
+{
+	XFDASHBOARD_VIEW_FIT_MODE_NONE=0,
+	XFDASHBOARD_VIEW_FIT_MODE_HORIZONTAL,
+	XFDASHBOARD_VIEW_FIT_MODE_VERTICAL,
+	XFDASHBOARD_VIEW_FIT_MODE_BOTH
+} XfdashboardViewFitMode;
+
+
+/* Object declaration */
 #define XFDASHBOARD_TYPE_VIEW				(xfdashboard_view_get_type())
 #define XFDASHBOARD_VIEW(obj)				(G_TYPE_CHECK_INSTANCE_CAST((obj), XFDASHBOARD_TYPE_VIEW, XfdashboardView))
 #define XFDASHBOARD_IS_VIEW(obj)			(G_TYPE_CHECK_INSTANCE_TYPE((obj), XFDASHBOARD_TYPE_VIEW))
@@ -60,7 +80,7 @@ struct _XfdashboardViewClass
 
 	/*< public >*/
 	/* Virtual functions */
-	void (*set_fit_mode)(XfdashboardView *self, XfdashboardFitMode inFitMode);
+	void (*set_view_fit_mode)(XfdashboardView *self, XfdashboardViewFitMode inFitMode);
 
 	void (*activating)(XfdashboardView *self);
 	void (*activated)(XfdashboardView *self);
@@ -86,6 +106,7 @@ struct _XfdashboardViewClass
 								ClutterEvent *inEvent);
 };
 
+
 /* Public API */
 GType xfdashboard_view_get_type(void) G_GNUC_CONST;
 
@@ -98,8 +119,8 @@ void xfdashboard_view_set_name(XfdashboardView *self, const gchar *inName);
 const gchar* xfdashboard_view_get_icon(XfdashboardView *self);
 void xfdashboard_view_set_icon(XfdashboardView *self, const gchar *inIcon);
 
-XfdashboardFitMode xfdashboard_view_get_fit_mode(XfdashboardView *self);
-void xfdashboard_view_set_fit_mode(XfdashboardView *self, XfdashboardFitMode inFitMode);
+XfdashboardViewFitMode xfdashboard_view_get_view_fit_mode(XfdashboardView *self);
+void xfdashboard_view_set_view_fit_mode(XfdashboardView *self, XfdashboardViewFitMode inFitMode);
 
 gboolean xfdashboard_view_get_enabled(XfdashboardView *self);
 void xfdashboard_view_set_enabled(XfdashboardView *self, gboolean inIsEnabled);
