@@ -1,3 +1,13 @@
+xfdashboard (0.5.1-0ubuntu1) wily; urgency=medium
+
+  * Imported Upstream version 0.5.1
+  * d/copyright: Update my email address.
+  * d/control: Add build-dep on libxfce4ui-2-dev.
+  * d/p/add_application-tracker_to_potfiles.patch:
+    - Add missing xfdashboard/application-tracker.c to po/POTFILES.in.
+
+ -- Unit 193 <unit193@ubuntu.com>  Thu, 10 Sep 2015 21:17:53 -0400
+
 xfdashboard (0.5.0-0ubuntu1) wily; urgency=medium
 
   * Imported Upstream version 0.5.0.
