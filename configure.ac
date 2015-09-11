@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [5])
-m4_define([xfdashboard_version_micro], [0])
-m4_define([xfdashboard_version_build], [e64d4a8])
+m4_define([xfdashboard_version_micro], [1])
+m4_define([xfdashboard_version_build], [0c73b8d])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -33,6 +33,7 @@ m4_define([xcomposite_minimum_version], [0.2])
 m4_define([intltool_minimum_version], [0.35])
 m4_define([gtk_minimum_version], [3.2])
 m4_define([libxfce4util_minimum_version],[4.10.0])
+m4_define([libxfce4ui_minimum_version],[4.10.0])
 
 dnl *******************************************
 dnl *** Debugging support for GIT snapshots ***
@@ -54,6 +55,7 @@ AM_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE([1.8 no-dist-gzip dist-bzip2 tar-ustar])
 AM_MAINTAINER_MODE()
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+AC_CONFIG_MACRO_DIR([m4])
 
 dnl *******************************
 dnl *** Check for UNIX variants ***
@@ -78,7 +80,7 @@ dnl *** Initialize libtool ***
 dnl **************************
 LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
-AC_CONFIG_MACRO_DIR([m4])
+LT_LIB_M
 
 dnl **************************
 dnl *** Substitute version ***
@@ -199,6 +201,7 @@ XDT_CHECK_PACKAGE([GIO_UNIX], [gio-unix-2.0], [gio_minimum_version])
 XDT_CHECK_PACKAGE([GARCON], [garcon-1], [garcon_minimum_version])
 XDT_CHECK_PACKAGE([LIBXFCONF], [libxfconf-0], [xfconf_minimum_version])
 XDT_CHECK_PACKAGE([LIBXFCE4UTIL], [libxfce4util-1.0],[libxfce4util_minimum_version])
+XDT_CHECK_PACKAGE([LIBXFCE4UI], [libxfce4ui-2],[libxfce4ui_minimum_version])
 XDT_CHECK_PACKAGE([DBUS_GLIB], [dbus-glib-1], [dbus_glib_minimum_version], [
 	XDT_PROG_PKG_CONFIG()
 
@@ -280,6 +283,7 @@ echo "  gio:           $GIO_VERSION"
 echo "  gio-unix:      $GIO_UNIX_VERSION"
 echo "  garcon:        $GARCON_VERSION"
 echo "  libxconf:      $LIBXFCONF_VERSION"
+echo "  libxfce4ui:    $LIBXFCE4UI_VERSION"
 echo "  libxfce4util:  $LIBXFCE4UTIL_VERSION"
 echo "  dbus-glib:     $DBUS_GLIB_VERSION"
 echo

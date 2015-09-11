@@ -31,6 +31,10 @@
 
 G_BEGIN_DECLS
 
+/* enumerations from "background.h" */
+GType xfdashboard_background_type_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_BACKGROUND_TYPE	(xfdashboard_background_type_get_type())
+
 /* enumerations from "binding.h" */
 GType xfdashboard_binding_flags_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_BINDING_FLAGS	(xfdashboard_binding_flags_get_type())
@@ -38,6 +42,10 @@ GType xfdashboard_binding_flags_get_type(void) G_GNUC_CONST;
 /* enumerations from "bindings-pool.h" */
 GType xfdashboard_bindings_pool_error_enum_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_BINDINGS_POOL_ERROR_ENUM	(xfdashboard_bindings_pool_error_enum_get_type())
+
+/* enumerations from "button.h" */
+GType xfdashboard_button_style_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_BUTTON_STYLE	(xfdashboard_button_style_get_type())
 
 /* enumerations from "image-content.h" */
 GType xfdashboard_image_content_loading_state_get_type(void) G_GNUC_CONST;
@@ -62,26 +70,24 @@ GType xfdashboard_theme_layout_error_enum_get_type(void) G_GNUC_CONST;
 /* enumerations from "types.h" */
 GType xfdashboard_view_mode_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_VIEW_MODE	(xfdashboard_view_mode_get_type())
-GType xfdashboard_policy_get_type(void) G_GNUC_CONST;
-#define XFDASHBOARD_TYPE_POLICY	(xfdashboard_policy_get_type())
-GType xfdashboard_style_get_type(void) G_GNUC_CONST;
-#define XFDASHBOARD_TYPE_STYLE	(xfdashboard_style_get_type())
+GType xfdashboard_visibility_policy_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_VISIBILITY_POLICY	(xfdashboard_visibility_policy_get_type())
 GType xfdashboard_orientation_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_ORIENTATION	(xfdashboard_orientation_get_type())
-GType xfdashboard_background_type_get_type(void) G_GNUC_CONST;
-#define XFDASHBOARD_TYPE_BACKGROUND_TYPE	(xfdashboard_background_type_get_type())
 GType xfdashboard_corners_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_CORNERS	(xfdashboard_corners_get_type())
 GType xfdashboard_borders_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_BORDERS	(xfdashboard_borders_get_type())
-GType xfdashboard_fit_mode_get_type(void) G_GNUC_CONST;
-#define XFDASHBOARD_TYPE_FIT_MODE	(xfdashboard_fit_mode_get_type())
 GType xfdashboard_stage_background_image_type_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_STAGE_BACKGROUND_IMAGE_TYPE	(xfdashboard_stage_background_image_type_get_type())
 GType xfdashboard_selection_target_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_SELECTION_TARGET	(xfdashboard_selection_target_get_type())
 GType xfdashboard_anchor_point_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_ANCHOR_POINT	(xfdashboard_anchor_point_get_type())
+
+/* enumerations from "view.h" */
+GType xfdashboard_view_fit_mode_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_VIEW_FIT_MODE	(xfdashboard_view_fit_mode_get_type())
 G_END_DECLS
 
 #endif

@@ -881,12 +881,10 @@ XfdashboardWindowTrackerWorkspace* xfdashboard_live_workspace_get_workspace(Xfda
 void xfdashboard_live_workspace_set_workspace(XfdashboardLiveWorkspace *self, XfdashboardWindowTrackerWorkspace *inWorkspace)
 {
 	XfdashboardLiveWorkspacePrivate		*priv;
-	ClutterContent						*content;
 	XfdashboardWindowTrackerWindow		*window;
 	ClutterActor						*child;
 	ClutterActorIter					iter;
 	GList								*windows;
-	ClutterActor						*actor;
 
 	g_return_if_fail(XFDASHBOARD_IS_LIVE_WORKSPACE(self));
 	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WORKSPACE(inWorkspace));
@@ -931,16 +929,11 @@ void xfdashboard_live_workspace_set_workspace(XfdashboardLiveWorkspace *self, Xf
 		window=XFDASHBOARD_WINDOW_TRACKER_WINDOW(windows->data);
 		if(!window) continue;
 
-		/* Create window actor if window is visible */
+		/* Create window actor only if window is visible */
 		if(!_xfdashboard_live_workspace_is_visible_window(self, window)) continue;
 
-		actor=clutter_actor_new();
-		content=xfdashboard_window_content_new_for_window(window);
-		clutter_actor_set_content(actor, content);
-		g_object_unref(content);
-
-		/* Insert new actor at bottom */
-		clutter_actor_insert_child_above(CLUTTER_ACTOR(self), actor, NULL);
+		/* Create actor for window */
+		_xfdashboard_live_workspace_create_and_add_window_actor(self, window);
 	}
 
 	/* Notify about property change */

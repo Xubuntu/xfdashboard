@@ -34,7 +34,17 @@
 #include <gio/gdesktopappinfo.h>
 
 #include "stage.h"
+#include "stage-interface.h"
 #include "window-tracker.h"
+
+/**
+ * SECTION:utils
+ * @title: Utilities
+ * @short_description: Common functions, helpers, macros and definitions
+ * @include: xfdashboard/utils.h
+ *
+ * Utility functions to ease some common tasks.
+ */
 
 /* Gobject type for pointer arrays (GPtrArray) */
 GType xfdashboard_pointer_array_get_type(void)
@@ -51,22 +61,37 @@ GType xfdashboard_pointer_array_get_type(void)
 	return(type__volatile);
 }
 
-/* Show a notification */
-void xfdashboard_notify(ClutterActor *inSender, const gchar *inIconName, const gchar *inFormatText, ...)
+/**
+ * xfdashboard_notify:
+ * @inSender: The sending #ClutterActor or %NULL
+ * @inIconName: The icon name to display in notification or %NULL
+ * @inFormat: A standard printf() format string for notification text
+ * @...: The parameters to insert into the format string
+ *
+ * Shows a notification with the formatted text as specified in @inFormat
+ * and the parameters at the monitor where the sending actor @inSender
+ * is placed on.
+ *
+ * If @inSender is NULL the primary monitor is used.
+ *
+ * If @inIconName is NULL no icon will be shown in notification.
+ */
+void xfdashboard_notify(ClutterActor *inSender,
+							const gchar *inIconName,
+							const gchar *inFormat, ...)
 {
-	XfdashboardStage				*stage;
-	ClutterStageManager				*stageManager;
-	const GSList					*stages;
-	va_list							args;
-	gchar							*text;
+	XfdashboardStage					*stage;
+	ClutterStageManager					*stageManager;
+	va_list								args;
+	gchar								*text;
 
 	g_return_if_fail(inSender==NULL || CLUTTER_IS_ACTOR(inSender));
 
 	stage=NULL;
 
 	/* Build text to display */
-	va_start(args, inFormatText);
-	text=g_strdup_vprintf(inFormatText, args);
+	va_start(args, inFormat);
+	text=g_strdup_vprintf(inFormat, args);
 	va_end(args);
 
 	/* Get stage of sending actor if available */
@@ -75,17 +100,54 @@ void xfdashboard_notify(ClutterActor *inSender, const gchar *inIconName, const g
 	/* No sending actor specified or no stage found so get default stage */
 	if(!stage)
 	{
-		stageManager=clutter_stage_manager_get_default();
-		if(CLUTTER_IS_STAGE_MANAGER(stageManager))
-		{
-			stage=XFDASHBOARD_STAGE(clutter_stage_manager_get_default_stage(stageManager));
-		}
+		const GSList					*stages;
+		const GSList					*stagesIter;
+		ClutterActorIter				interfaceIter;
+		ClutterActor					*child;
+		XfdashboardWindowTrackerMonitor	*stageMonitor;
 
-		/* If we did not get default stage use first stage from manager */
-		if(!stage && stageManager)
+		/* Get stage manager to iterate through stages to find the one
+		 * for primary monitor or at least the first stage.
+		 */
+		stageManager=clutter_stage_manager_get_default();
+
+		/* Find stage for primary monitor and if we cannot find it
+		 * use first stage.
+		 */
+		if(stageManager &&
+			CLUTTER_IS_STAGE_MANAGER(stageManager))
 		{
+			/* Get list of all stages */
 			stages=clutter_stage_manager_peek_stages(stageManager);
-			if(stages) stage=XFDASHBOARD_STAGE(stages->data);
+
+			/* Iterate through list of all stage and lookup the one for
+			 * primary monitor.
+			 */
+			for(stagesIter=stages; stagesIter && !stage; stagesIter=stagesIter->next)
+			{
+				/* Skip this stage if it is not a XfdashboardStage */
+				if(!XFDASHBOARD_IS_STAGE(stagesIter->data)) continue;
+
+				/* Iterate through stage's children and lookup stage interfaces */
+				clutter_actor_iter_init(&interfaceIter, CLUTTER_ACTOR(stagesIter->data));
+				while(clutter_actor_iter_next(&interfaceIter, &child))
+				{
+					if(XFDASHBOARD_IS_STAGE_INTERFACE(child))
+					{
+						stageMonitor=xfdashboard_stage_interface_get_monitor(XFDASHBOARD_STAGE_INTERFACE(child));
+						if(xfdashboard_window_tracker_monitor_is_primary(stageMonitor))
+						{
+							stage=XFDASHBOARD_STAGE(clutter_actor_get_stage(child));
+						}
+					}
+				}
+			}
+
+			/* If we did not get stage for primary monitor use first stage */
+			if(!stage)
+			{
+				stage=XFDASHBOARD_STAGE(stagesIter->data);
+			}
 		}
 
 		/* If we still do not have found a stage to show notification
@@ -106,8 +168,16 @@ void xfdashboard_notify(ClutterActor *inSender, const gchar *inIconName, const g
 	g_free(text);
 }
 
-/* Create a application context for launching application by GIO.
- * Object returned must be freed with g_object_unref().
+/**
+ * xfdashboard_create_app_context:
+ * @inWorkspace: The workspace where to place application windows on or %NULL
+ *
+ * Returns a #GAppLaunchContext suitable for launching applications on the given display and workspace by GIO.
+ *
+ * If @inWorkspace is specified it sets workspace on which applications will be launched when using this context when running under a window manager that supports multiple workspaces.
+ * When the workspace is not specified it is up to the window manager to pick one, typically it will be the current workspace.
+ *
+ * Return value: (transfer full): the newly created #GAppLaunchContext or %NULL in case of an error. Use g_object_unref() to free return value.
  */
 GAppLaunchContext* xfdashboard_create_app_context(XfdashboardWindowTrackerWorkspace *inWorkspace)
 {
@@ -276,6 +346,12 @@ static void _xfdashboard_gvalue_transform_string_flags(const GValue *inSourceVal
 	g_type_class_unref(flagsClass);
 }
 
+/**
+ * xfdashboard_register_gvalue_transformation_funcs:
+ *
+ * Registers additional transformation functions used in #GValue to convert
+ * values between types.
+ */
 void xfdashboard_register_gvalue_transformation_funcs(void)
 {
 	/* Register GValue transformation functions not provided by Glib */
@@ -292,36 +368,17 @@ void xfdashboard_register_gvalue_transformation_funcs(void)
 	g_value_register_transform_func(G_TYPE_STRING, G_TYPE_ENUM, _xfdashboard_gvalue_transform_string_enum);
 }
 
-/* Determine if child is a sibling of actor deeply */
-gboolean xfdashboard_actor_contains_child_deep(ClutterActor *inActor, ClutterActor *inChild)
-{
-	ClutterActorIter	iter;
-	ClutterActor		*child;
-
-	g_return_val_if_fail(CLUTTER_IS_ACTOR(inActor), FALSE);
-	g_return_val_if_fail(CLUTTER_IS_ACTOR(inActor), FALSE);
-
-	/* For each child of actor call ourselve recursive */
-	clutter_actor_iter_init(&iter, inActor);
-	while(clutter_actor_iter_next(&iter, &child))
-	{
-		/* First check if current child of iterator is the one to lookup */
-		if(child==inChild) return(TRUE);
-
-		/* Then call ourselve with child as "top-parent" actor
-		 * to lookup recursively.
-		 */
-		if(xfdashboard_actor_contains_child_deep(child, inChild))
-		{
-			return(TRUE);
-		}
-	}
-
-	/* If we get here the child was not found deeply */
-	return(FALSE);
-}
-
-/* Find child by name deeply beginning at given actor */
+/**
+ * xfdashboard_find_actor_by_name:
+ * @inActor: The root #ClutterActor where to begin searching
+ * @inName: A string containg the name of the #ClutterActor to lookup
+ *
+ * Iterates through all children of @inActor recursively and looks for
+ * the child having the name as specified at @inName.
+ *
+ * Return value: (transfer none): The #ClutterActor matching the name
+ *               to lookup or %NULL if none was found.
+ */
 ClutterActor* xfdashboard_find_actor_by_name(ClutterActor *inActor, const gchar *inName)
 {
 	ClutterActorIter	iter;
@@ -346,9 +403,17 @@ ClutterActor* xfdashboard_find_actor_by_name(ClutterActor *inActor, const gchar 
 	return(NULL);
 }
 
-/* Split a string into a NULL-terminated list of tokens using the delimiters and remove
- * white-spaces at the beginning and end of each token. Empty tokens will not be added.
- * Caller is responsible to free result with g_strfreev() if not NULL.
+/**
+ * xfdashboard_split_string:
+ * @inString: The string to split
+ * @inDelimiters: A string containg the delimiters
+ *
+ * Split the string @inString into a NULL-terminated list of tokens using
+ * the delimiters at @inDelimiters and removes white-spaces at the beginning
+ * and end of each token. Empty tokens will not be added to list.
+ *
+ * Return value: A newly-allocated %NULL-terminated array of strings or %NULL
+ *               in case of an error. Use g_strfreev() to free it.
  */
 gchar** xfdashboard_split_string(const gchar *inString, const gchar *inDelimiters)
 {
@@ -446,12 +511,20 @@ gchar** xfdashboard_split_string(const gchar *inString, const gchar *inDelimiter
 	return(result);
 }
 
-/* Check if ID matches requirements that it has to begin either with one or
- * multiple '_' (underscore) following by a character of ASCII character set
- * or it has to begin with a character of ASCII character set directly. Each
- * following character in string can either be a digit, a character of
- * ASCII character set or any of the following symbols: '_' (underscore) or
- * '-' (minus).
+/**
+ * xfdashboard_is_valid_id:
+ * @inString: The string containing the ID to check
+ *
+ * Checks if ID specified at @inString matches the requirements to be a
+ * valid ID.
+ *
+ * To be a valid ID it has to begin either with one or multiple '_' (underscores)
+ * following by a character of ASCII character set or it has to begin with a
+ * character of ASCII character set directly. Each following character can either
+ * be a digit, a character of ASCII character set or any of the following symbols:
+ * '_' (underscore) or '-' (minus).
+ *
+ * Return value: %TRUE if @inString contains a valid ID, otherwise %FALSE
  */
 gboolean xfdashboard_is_valid_id(const gchar *inString)
 {
@@ -496,7 +569,18 @@ gboolean xfdashboard_is_valid_id(const gchar *inString)
 	return(TRUE);
 }
 
-/* Get textual representation for an enumeration value */
+/**
+ * xfdashboard_get_enum_value_name:
+ * @inEnumClass: The #GType of enum class
+ * @inValue: The numeric value of enumeration at @inEnumClass
+ *
+ * Returns textual representation for numeric value @inValue of
+ * enumeration class @inEnumClass.
+ *
+ * Return value: A string containig the textual representation or
+ *               %NULL if @inValue is not a value of enumeration
+ *               @inEnumClass. Use g_free() to free returned string.
+ */
 gchar* xfdashboard_get_enum_value_name(GType inEnumClass, gint inValue)
 {
 	GEnumClass		*enumClass;
@@ -554,6 +638,19 @@ static void _xfdashboard_dump_actor_internal(ClutterActor *inActor, gint inLevel
 	}
 }
 
+/**
+ * xfdashboard_dump_actor:
+ * @inActor: The #ClutterActor to dump
+ *
+ * Dumps a textual representation of actor specified in @inActor
+ * to console. The dump contains all children recursively displayed
+ * in a tree. Each entry contains the object class name, address,
+ * position and size of this actor and also the state like is-mapped,
+ * is-visible and a number of children it contains.
+ *
+ * This functions is for debugging purposes and should not be used
+ * normally.
+ */
 void xfdashboard_dump_actor(ClutterActor *inActor)
 {
 	_xfdashboard_dump_actor_internal(inActor, 0);

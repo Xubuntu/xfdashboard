@@ -32,6 +32,7 @@
 #include <clutter/x11/clutter-x11.h>
 #include <gtk/gtk.h>
 #include <garcon/garcon.h>
+#include <libxfce4ui/libxfce4ui.h>
 
 #include "stage.h"
 #include "types.h"
@@ -46,6 +47,7 @@
 #include "focus-manager.h"
 #include "bindings-pool.h"
 #include "application-database.h"
+#include "application-tracker.h"
 
 /* Define this class in GObject system */
 G_DEFINE_TYPE(XfdashboardApplication,
@@ -78,6 +80,9 @@ struct _XfdashboardApplicationPrivate
 	XfdashboardBindingsPool			*bindings;
 
 	XfdashboardApplicationDatabase	*appDatabase;
+	XfdashboardApplicationTracker	*appTracker;
+
+	XfceSMClient					*sessionManagementClient;
 };
 
 /* Properties */
@@ -151,6 +156,15 @@ static void _xfdashboard_application_quit(XfdashboardApplication *self, gboolean
 		/* Set flag that application is going to quit */
 		priv->isQuitting=TRUE;
 
+		/* If application is told to quit, set the restart style to something
+		 * where it won't restart itself.
+		 */
+		if(priv->sessionManagementClient &&
+			XFCE_IS_SM_CLIENT(priv->sessionManagementClient))
+		{
+			xfce_sm_client_set_restart_style(priv->sessionManagementClient, XFCE_SM_CLIENT_RESTART_NORMAL);
+		}
+
 		/* Destroy stages */
 		stages=clutter_stage_manager_list_stages(clutter_stage_manager_get_default());
 		for(entry=stages; entry!=NULL; entry=g_slist_next(entry)) clutter_actor_destroy(CLUTTER_ACTOR(entry->data));
@@ -176,6 +190,18 @@ static void _xfdashboard_application_quit(XfdashboardApplication *self, gboolean
 				g_object_notify_by_pspec(G_OBJECT(self), XfdashboardApplicationProperties[PROP_SUSPENDED]);
 			}
 		}
+}
+
+/* The session is going to quit */
+static void _xfdashboard_application_on_session_quit(XfdashboardApplication *self,
+														gpointer inUserData)
+{
+	g_return_if_fail(XFDASHBOARD_IS_APPLICATION(self));
+	g_return_if_fail(XFCE_IS_SM_CLIENT(inUserData));
+
+	/* Force application to quit */
+	g_debug("Received 'quit' from session management client - initiating shutdown");
+	_xfdashboard_application_quit(self, TRUE);
 }
 
 /* A stage window should be destroyed */
@@ -250,7 +276,7 @@ static void _xfdashboard_application_set_theme_name(XfdashboardApplication *self
 }
 
 /* Perform full initialization of this application instance */
-static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication *self)
+static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication *self, XfdashboardStage **outStage)
 {
 	XfdashboardApplicationPrivate	*priv;
 	GError							*error;
@@ -260,6 +286,7 @@ static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication 
 #endif
 
 	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATION(self), FALSE);
+	g_return_val_if_fail(outStage==NULL || *outStage==NULL, FALSE);
 
 	priv=self->priv;
 	error=NULL;
@@ -284,12 +311,25 @@ static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication 
 	garcon_set_environment_xdg(GARCON_ENVIRONMENT_XFCE);
 #endif
 
+	/* Setup the session management */
+	priv->sessionManagementClient=xfce_sm_client_get();
+	xfce_sm_client_set_priority(priv->sessionManagementClient, XFCE_SM_CLIENT_PRIORITY_DEFAULT);
+	xfce_sm_client_set_restart_style(priv->sessionManagementClient, XFCE_SM_CLIENT_RESTART_IMMEDIATELY);
+	g_signal_connect_swapped(priv->sessionManagementClient, "quit", G_CALLBACK(_xfdashboard_application_on_session_quit), self);
+
+	if(!xfce_sm_client_connect(priv->sessionManagementClient, &error))
+	{
+		g_warning("Failed to connect to session manager: %s",
+					(error && error->message) ? error->message : _("unknown error"));
+		g_clear_error(&error);
+	}
+
 	/* Initialize xfconf */
 	if(!xfconf_init(&error))
 	{
 		g_critical(_("Could not initialize xfconf: %s"),
 					(error && error->message) ? error->message : _("unknown error"));
-		if(error!=NULL) g_error_free(error);
+		if(error) g_error_free(error);
 		return(FALSE);
 	}
 
@@ -324,6 +364,14 @@ static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication 
 		g_critical(_("Could not load application database: %s"),
 					(error && error->message) ? error->message : _("unknown error"));
 		if(error!=NULL) g_error_free(error);
+		return(FALSE);
+	}
+
+	/* Set up application tracker */
+	priv->appTracker=xfdashboard_application_tracker_get_default();
+	if(!priv->appTracker)
+	{
+		g_critical(_("Could not initialize application tracker"));
 		return(FALSE);
 	}
 
@@ -376,17 +424,15 @@ static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication 
 	 */
 	priv->focusManager=xfdashboard_focus_manager_get_default();
 
-	/* Create primary stage on first monitor.
-	 * TODO: Create stage for each monitor connected
-	 *       but only primary monitor gets its stage
-	 *       setup for primary display
-	 */
+	/* Create stage containing all monitors */
 	stage=xfdashboard_stage_new();
-	if(!priv->isDaemon) clutter_actor_show(stage);
 	g_signal_connect_swapped(stage, "delete-event", G_CALLBACK(_xfdashboard_application_on_delete_stage), self);
 
 	/* Emit signal 'theme-changed' to get current theme loaded at each stage created */
 	g_signal_emit(self, XfdashboardApplicationSignals[SIGNAL_THEME_CHANGED], 0, priv->theme);
+
+	/* Set return results */
+	if(outStage) *outStage=XFDASHBOARD_STAGE(stage);
 
 	/* Initialization was successful so return TRUE */
 #ifdef DEBUG
@@ -395,6 +441,36 @@ static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication 
 	xfdashboard_notify(NULL, NULL, _("Welcome to %s!"), PACKAGE_NAME);
 #endif
 	return(TRUE);
+}
+
+/* Switch to requested view */
+static void _xfdashboard_application_switch_to_view(XfdashboardApplication *self, const gchar *inInternalViewName)
+{
+	GSList							*stages, *iter;
+
+	g_return_if_fail(XFDASHBOARD_IS_APPLICATION(self));
+
+	/* If no view name was specified then do nothing and return immediately */
+	if(!inInternalViewName ||
+		!inInternalViewName[0])
+	{
+		g_debug("No view to switch to specified");
+		return;
+	}
+
+	/* Iterate through list of stages and set specified view at stage */
+	g_debug("Trying to switch to view '%s'", inInternalViewName);
+
+	stages=clutter_stage_manager_list_stages(clutter_stage_manager_get_default());
+	for(iter=stages; iter; iter=g_slist_next(iter))
+	{
+		/* Tell stage to switch view */
+		if(XFDASHBOARD_IS_STAGE(iter->data))
+		{
+			xfdashboard_stage_set_switch_to_view(XFDASHBOARD_STAGE(iter->data),
+													inInternalViewName);
+		}
+	}
 }
 
 /* IMPLEMENTATION: GApplication */
@@ -426,6 +502,7 @@ static int _xfdashboard_application_command_line(GApplication *inApplication, GA
 {
 	XfdashboardApplication			*self;
 	XfdashboardApplicationPrivate	*priv;
+	XfdashboardStage				*stage;
 	GOptionContext					*context;
 	gboolean						result;
 	gint							argc;
@@ -435,12 +512,14 @@ static int _xfdashboard_application_command_line(GApplication *inApplication, GA
 	gboolean						optionQuit;
 	gboolean						optionRestart;
 	gboolean						optionToggle;
+	gchar							*optionSwitchToView;
 	GOptionEntry					XfdashboardApplicationOptions[]=
 									{
 										{ "daemonize", 'd', 0, G_OPTION_ARG_NONE, &optionDaemonize, N_("Fork to background"), NULL },
 										{ "quit", 'q', 0, G_OPTION_ARG_NONE, &optionQuit, N_("Quit running instance"), NULL },
 										{ "restart", 'r', 0, G_OPTION_ARG_NONE, &optionRestart, N_("Restart running instance"), NULL },
 										{ "toggle", 't', 0, G_OPTION_ARG_NONE, &optionToggle, N_("Toggles suspend/resume state if running instance was started in daemon mode otherwise it quits running non-daemon instance"), NULL },
+										{ "view", 0, 0, G_OPTION_ARG_STRING, &optionSwitchToView, N_(""), NULL },
 										{ NULL }
 									};
 
@@ -449,20 +528,24 @@ static int _xfdashboard_application_command_line(GApplication *inApplication, GA
 	self=XFDASHBOARD_APPLICATION(inApplication);
 	priv=self->priv;
 	error=NULL;
+	stage=NULL;
 
 	/* Set up options */
 	optionDaemonize=FALSE;
 	optionQuit=FALSE;
 	optionRestart=FALSE;
 	optionToggle=FALSE;
-
-	context=g_option_context_new(N_("- A Gnome Shell like dashboard for Xfce4"));
-	g_option_context_add_group(context, gtk_get_option_group(TRUE));
-	g_option_context_add_group(context, clutter_get_option_group_without_init());
-	g_option_context_add_main_entries(context, XfdashboardApplicationOptions, GETTEXT_PACKAGE);
+	optionSwitchToView=NULL;
 
 	/* Parse command-line arguments */
 	argv=g_application_command_line_get_arguments(inCommandLine, &argc);
+
+	/* Setup command-line options */
+	context=g_option_context_new(N_("- A Gnome Shell like dashboard for Xfce4"));
+	g_option_context_add_group(context, gtk_get_option_group(TRUE));
+	g_option_context_add_group(context, clutter_get_option_group_without_init());
+	g_option_context_add_group(context, xfce_sm_client_get_option_group(argc, argv));
+	g_option_context_add_main_entries(context, XfdashboardApplicationOptions, GETTEXT_PACKAGE);
 
 #ifdef DEBUG
 	/* I always forget the name of the environment variable to get the debug
@@ -478,8 +561,13 @@ static int _xfdashboard_application_command_line(GApplication *inApplication, GA
 	g_option_context_free(context);
 	if(result==FALSE)
 	{
+		/* Show error */
 		g_print(N_("%s\n"), (error && error->message) ? error->message : _("unknown error"));
 		if(error) g_error_free(error);
+
+		/* Release allocated resources */
+		if(optionSwitchToView) g_free(optionSwitchToView);
+
 		return(XFDASHBOARD_APPLICATION_ERROR_FAILED);
 	}
 
@@ -490,6 +578,10 @@ static int _xfdashboard_application_command_line(GApplication *inApplication, GA
 	{
 		/* Return state to restart this applicationa */
 		g_debug("Received request to restart application!");
+
+		/* Release allocated resources */
+		if(optionSwitchToView) g_free(optionSwitchToView);
+
 		return(XFDASHBOARD_APPLICATION_ERROR_RESTART);
 	}
 
@@ -499,6 +591,9 @@ static int _xfdashboard_application_command_line(GApplication *inApplication, GA
 		/* Quit existing instance */
 		g_debug("Quitting running instance!");
 		_xfdashboard_application_quit(self, TRUE);
+
+		/* Release allocated resources */
+		if(optionSwitchToView) g_free(optionSwitchToView);
 
 		return(XFDASHBOARD_APPLICATION_ERROR_QUIT);
 	}
@@ -514,11 +609,29 @@ static int _xfdashboard_application_command_line(GApplication *inApplication, GA
 		/* If application is running in daemon mode, toggle between suspend/resume ... */
 		if(priv->isDaemon)
 		{
-			if(priv->isSuspended) _xfdashboard_application_activate(inApplication);
-				else _xfdashboard_application_quit(self, FALSE);
+			if(priv->isSuspended)
+			{
+				/* Switch to view if requested */
+				_xfdashboard_application_switch_to_view(self, optionSwitchToView);
+
+				/* Show application again */
+				_xfdashboard_application_activate(inApplication);
+			}
+				else
+				{
+					/* Hide application */
+					_xfdashboard_application_quit(self, FALSE);
+				}
 		}
 			/* ... otherwise if not running in daemon mode, just quit */
-			else _xfdashboard_application_quit(self, FALSE);
+			else
+			{
+				/* Hide application */
+				_xfdashboard_application_quit(self, FALSE);
+			}
+
+		/* Release allocated resources */
+		if(optionSwitchToView) g_free(optionSwitchToView);
 
 		/* Stop here because option was handled and application does not get initialized */
 		return(XFDASHBOARD_APPLICATION_ERROR_NONE);
@@ -541,14 +654,30 @@ static int _xfdashboard_application_command_line(GApplication *inApplication, GA
 	if(!priv->inited)
 	{
 		/* Perform full initialization of this application instance */
-		result=_xfdashboard_application_initialize_full(self);
+		result=_xfdashboard_application_initialize_full(self, &stage);
 		if(result==FALSE) return(XFDASHBOARD_APPLICATION_ERROR_FAILED);
+
+		/* Switch to view if requested */
+		_xfdashboard_application_switch_to_view(self, optionSwitchToView);
+
+		/* Show application if not started daemonized */
+		if(!priv->isDaemon) clutter_actor_show(CLUTTER_ACTOR(stage));
 	}
 
 	/* Check if this instance need to be activated. Is should only be done
 	 * if instance is initialized
 	 */
-	if(priv->inited) _xfdashboard_application_activate(inApplication);
+	if(priv->inited)
+	{
+		/* Switch to view if requested */
+		_xfdashboard_application_switch_to_view(self, optionSwitchToView);
+
+		/* Show application */
+		_xfdashboard_application_activate(inApplication);
+	}
+
+	/* Release allocated resources */
+	if(optionSwitchToView) g_free(optionSwitchToView);
 
 	/* All done successfully so return status code 0 for success */
 	priv->inited=TRUE;
@@ -638,6 +767,18 @@ static void _xfdashboard_application_dispose(GObject *inObject)
 	{
 		g_object_unref(priv->appDatabase);
 		priv->appDatabase=NULL;
+	}
+
+	if(priv->appTracker)
+	{
+		g_object_unref(priv->appTracker);
+		priv->appTracker=NULL;
+	}
+
+	/* Shutdown session management */
+	if(priv->sessionManagementClient)
+	{
+		priv->sessionManagementClient=NULL;
 	}
 
 	/* Shutdown xfconf */
@@ -828,6 +969,7 @@ static void xfdashboard_application_init(XfdashboardApplication *self)
 	priv->theme=NULL;
 	priv->xfconfThemeChangedSignalID=0L;
 	priv->isQuitting=FALSE;
+	priv->sessionManagementClient=NULL;
 
 	/* Add callable DBUS actions for this application */
 	action=g_simple_action_new("Quit", NULL);

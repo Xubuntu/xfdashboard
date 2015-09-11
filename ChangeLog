@@ -1,3 +1,381 @@
+commit 0c73b8d136b55f3245dd373e03a8fc876ddc81c0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Sep 7 20:58:51 2015 +0200
+
+    Bump version to 0.5.1
+
+commit 43c2fb0153bda6fb66b113a90fd225b99b9bb462
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Sep 7 20:58:21 2015 +0200
+
+    Update AppData
+
+commit 1d83ec9a6c268de71e9e035b906317db1fdf95c6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Sep 7 20:53:04 2015 +0200
+
+    Unify more usual setup tasks for favourite and dynamic non-favourite application buttons and make adding/removing favourites and dynamic non-favourites actors more robust, e.g. only favourites can be reordered etc.
+
+commit eaf494e571f4014f93432f9c9a5da27f62e9c08c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 3 10:27:28 2015 +0200
+
+    Since GTK+ version 3.10 the setting "gtk-tooltip-timeout" is deprecated and ignored by GTK+ derived application. So we should behave the same and set the timeout statically to the default duration which GTK+ is also using.
+    
+    This also prevents warning about forthcoming deprecation of this setting printed to console.
+
+commit a2567828e3bee8a3d3ca4d486abe520de8f1d488
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 3 10:15:33 2015 +0200
+
+    Create convinient functions to create actors for favourites and non-favourites. Also rename CSS classes "is-favourite-app" and "is-dynamic-app" to "favourite-app" and "dynamic-app"
+
+commit 6723b283d64319d523d77d3613faccc3afac07a3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 3 09:31:58 2015 +0200
+
+    Re-add removed favourite as dynamically added application button for non-favourites apps when the corresponding application is still running.
+
+commit 088e265bf6326a45912dc41a91b9f0a543f47aab
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 3 08:59:30 2015 +0200
+
+    Set CSS class 'is-favourite-app' for dragged preview icon to get it included in list of favourites when drag'n'drop action ends and property is updated
+
+commit 1a061206fd09046f3ddc79ed8d448b0c7fdd61be
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 3 08:43:55 2015 +0200
+
+    Do not return preview icon actor when looking up actor for a requested GAppInfo
+
+commit 322ce14486e4a85a1b4eec8a09c78dd9a0d0b15b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 3 08:39:48 2015 +0200
+
+    Remove any dynamically added non-favourite application button for a newly added favourite in XfdashboardQuicklaunch
+
+commit 540f31f5839c3e7a34384c7266a8dfb8f1ada725
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 3 08:31:51 2015 +0200
+
+    Hide dynamically added application buttons for non-favourite apps when a drag'n'drop action begins and show them again when the action ended.
+
+commit e4d4c36f268f038e8afc24a4e35bd4b1ef59ef4b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 2 21:52:38 2015 +0200
+
+    Fix use-after-free and use more descriptive messages
+
+commit 3f0396cc874854da0e67cdc1ad987a78bb7812e7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 2 21:14:30 2015 +0200
+
+    If an application button exists when current selection should be added to favourites by action then move existing one before separator (between application buttons for favourites and non-favourites) and ensure that the correct CSS class is set. Otherwise fallback to normal behaviour adding a new application button for current selection.
+
+commit 6d6f7e09195990764fc70ced58e2d69a7ed72dca
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 2 21:09:09 2015 +0200
+
+    Keep application buttons for favourites always above dynamically added one for non-favourite applications running
+
+commit ab6859fc8af85ecb54adad713bd83f0fdebdec48
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 2 20:46:56 2015 +0200
+
+    Do not mistakenly "convert" dynamically added application button for non-favourites to favourites when reordering favourites
+
+commit 7f53cf0025288586b4aaded6d5cf77583b365f32
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 2 20:32:26 2015 +0200
+
+    Dynamically add application buttons for newly started applications which are not favourites and remove these button if the associated application has stopped.
+
+commit 0821b65ca252f3fe9548bb6bd3f82c4a0e973f6d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 2 18:12:48 2015 +0200
+
+    Add CSS class ".is-favourite-app" to XfdashboardApplicationButton in XfdashboardQuicklaunch which represents a user-stored favourite app
+
+commit fee37153e9dd21d61bdd803954ae343d922427c6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 2 09:30:46 2015 +0200
+
+    Remove unused code blocks
+
+commit 077b613be93d3d3fa1236fe6396e1a8f3da737c7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Aug 29 21:26:29 2015 +0200
+
+    Clean up configure.ac.in
+
+commit 5fe39a89d371e690d9470b9ad0e83bf24c89239c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Aug 29 21:21:30 2015 +0200
+
+    Convert development messages to debug messages
+
+commit 5285a138aac29a1a696530251ba6e9de461bd3b9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Aug 29 20:38:29 2015 +0200
+
+    Add session management to xfdashboard to restart it if it crashes
+    
+    This fixes bug report #12143
+
+commit 0281b359c4fd52b2bd301ed8ed9108ebfd80b98e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 25 13:10:11 2015 +0200
+
+    Fix wrong conversion and iteration in xfdashboard_notify
+
+commit fc17ce3c726ace049f1c0952ba3d8eff3bb5ebd9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 25 12:44:49 2015 +0200
+
+    Add command-line option "--view"
+    
+    The command-line option "--view [internal name of view]" allows to specify which view to show when xfdashboard gets visible once. It "overrides" any view configured in settings.
+    
+    This commit completes implementation needed to fix bug #12144
+
+commit fbe5f54dae53494619a73987de71ac02a0036cf5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 25 10:21:19 2015 +0200
+
+    Fix checking statements
+
+commit c19fc8b5ae15e5ef8c32a5593436821635aa09d0
+Merge: ff38864 f4fce06
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 25 07:11:08 2015 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit ff3886492e34554b7e4441c8798c01c99dc4e219
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Aug 24 21:03:39 2015 +0200
+
+    Implement function to allow a single-time switch to another view on resume as configured in settings or to switch to a view at initial start-up.
+    
+    The view name set must be the internal view name of the view to switch to. This "switch" will only performed once, that means after the switch the name set will be resetted and the configured view in the settings will be considered again.
+    
+    This commit is part of implementation needed to fix bug #12144
+
+commit f4fce063f612f905652b86cfa969d5e2e870be2d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Aug 21 11:18:54 2015 +0200
+
+    Fixed settings application to set xfconf property '/switch-to-view-on-resume' instead of '/switch-view-on-resume'.
+    
+    '/switch-to-view-on-resume' was always the only settings existing in xfdashboard.
+
+commit c6f54161e0da534e1a1062fc8878ebf37522ed8f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Aug 16 21:56:24 2015 +0200
+
+    Add gtk-doc documentation annotations to box-layout.{c,h}
+
+commit c0c329897a825134e1bbaa91790d87f05311f50f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Aug 16 18:33:52 2015 +0200
+
+    Let function xfdashboard_notify() match documentation ;)
+    
+    The documentation say that xfdashboard_notify() will lookup stage of primary monitor if no sending actor is specified but it did only lookup default or first stage. Now we iterate through all stages to lookup the one of primary monitor first and then fallback to old behaviour.
+
+commit 0d30a12b20e673bcc2e866bfe223240afb4b0e4c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Aug 16 11:23:09 2015 +0200
+
+    Remove xfdashboard_actor_contains_child_deep() and replace it with clutter_actor_contains().
+    
+    I don't know why I created this complex and slow function xfdashboard_actor_contains_child_deep() when clutter_actor_contains() does already the wanted function :/
+
+commit 2d6f3f5c9aecf5bce44abe132c1b9b547dc1d7d1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Aug 16 11:17:54 2015 +0200
+
+    Add gtk-doc documentation annotations to utils.{c,h}
+
+commit d33853588b37dab0a864987d285c0deb45339ef6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 13 21:33:20 2015 +0200
+
+    Another fix for gtk-doc
+
+commit bf9fcf184b9a9ef2f7330cea6da007767d8ddd2c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 13 21:30:48 2015 +0200
+
+    Fix gtk-doc generation for some types
+
+commit 6d3e9f2ad548cf8d0cc6cda2d9c871b0246b1b7d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 13 21:10:47 2015 +0200
+
+    Fix enum generation for XFDASHBOARD_BUTTON_STYLE
+
+commit 8b2869e1daf9d9f5812ab4d3e5edcd287a5bdde2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 13 21:04:57 2015 +0200
+
+    Rename XfdashboardPolicy to XfdashboardVisibilityPolicy
+
+commit 2236c64db6ca0b7bb1902b9bc0296909b3bcf5a4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 13 20:56:10 2015 +0200
+
+    Move XfdashboardBackgroundType to XfdashboardBackground
+
+commit 0e812090fbe664c560903a0bc4b0e5474ee1917c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 13 20:54:07 2015 +0200
+
+    Move XfdashboardStyle to XfdashboardButton and rename it to XfdashboardButtonStyle
+
+commit 9e5232fc8da05096aad1cb4ab4974334f1bad4b8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 13 20:41:17 2015 +0200
+
+    Move XfdashboardApplicationErrorCode to XfdashboardApplication
+
+commit 62493f4a0d2b5e2d5e6d82ba8990ced3f3b5aad2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 13 20:36:37 2015 +0200
+
+    Rename property name for XfdashboardViewFitMode in view
+
+commit 5b4f6aa87057d0921935ea71c715752138c285e1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 13 20:34:01 2015 +0200
+
+    Rename XfdashboardFitMode to XfdashboardViewFitMode
+
+commit a77cbd69ea5817da664f74688a807f255eda3e2f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 13 20:22:51 2015 +0200
+
+    Move XfdashboardFitMode to XfdashboardView
+
+commit 133cff1ef7488b3b175d252dda113fa640480cbe
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 13 20:17:21 2015 +0200
+
+    Add gtk-doc documentation annotations to types.h
+
+commit c2c296266853b67e2751f245b79a1b5c7e1f1b87
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Aug 6 22:14:36 2015 +0200
+
+    Prepare build system for other tools to reuse compiled object files, e.g. gtkdoc
+    
+    Build a static library for all files except the main file containing function main() to reuse the compiled object files in other tools like gtkdoc. The final executable binary 'xfdashboard' is created by compiling main file containing function main() and link it against the static library and all other needed shared libraries (as it was done before)
+
+commit f5061d595b6e10586fd30ba361a4ba1dda2ba7aa
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jul 6 23:38:27 2015 +0200
+
+    Updated translations (es, he, it_IT, sr, fr)
+
+commit f67eefbedb33d4afc9751b6f00612ac54d1ac9d8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jul 6 16:51:59 2015 +0200
+
+    Emit signal for a stopped application _AFTER_ it was removed from list of running application. Otherwise a request if that application is running will still be answered with yes.
+
+commit 3d959b2cc42f99115c7c2fbbacbf2cd16ef67ab3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jul 5 18:18:44 2015 +0200
+
+    Remove more unused variables to keep compiler quiet ;)
+
+commit d26d7c6bd75b9ada7f628506a01007bd6b38b3d4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jul 5 18:18:02 2015 +0200
+
+    Remove unused variables to keep compiler quiet ;)
+
+commit f8fdb5231c95ea06bca79ac056d2991d3fd5cc3b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jul 5 18:17:21 2015 +0200
+
+    Apply all last changes at default themes to all themes
+
+commit fc8adc0efbfc5d6a5836ef706e337ffaadd16a21
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jul 5 17:58:45 2015 +0200
+
+    Update default theme to show an icon (emblem effect) to favourite which are running
+
+commit 35041da184d79fadb797ca0276df29e13295ac03
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jul 5 17:56:15 2015 +0200
+
+    Reflect running state in XfdashboardApplicationButton by adding CSS class "running" if it running. Otherwise this CSS class will be removed to indicate it is not running.
+
+commit 906d8707535074fb2d26af5d005c2da629bd9836
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jul 5 17:54:28 2015 +0200
+
+    Create single-instance of XfdashboardApplicationTracker in application
+
+commit a0e9e8919b310cfed7967bf23c62a867290ca436
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jul 5 17:48:14 2015 +0200
+
+    Implement basic application tracker
+    
+    The application tracker tries to determine and to keep track of running application. It does it by in two ways currently for each new window opened.
+    
+    1.) Parse the environment variables of the process ID which own the window. If it has the environment variables GIO_LAUNCHED_DESKTOP_FILE and GIO_LAUNCHED_DESKTOP_FILE_PID and GIO_LAUNCHED_DESKTOP_FILE_PID matches the process ID of the window's owner process then it assumed that the application in GIO_LAUNCHED_DESKTOP_FILE is running. This step only work at Linux currently.
+    2.) Get some properties from the window (resource class etc.), add '.desktop' to the value and try to lookup a matching application in XfdashboardApplicationDatasbase, first with unmodified value and then in all lower-case.
+    
+    This commit implements a first version for GH #39
+
+commit 3edba62d5e474d44dd309925cd80f192afacfd6a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 30 19:51:24 2015 +0200
+
+    Fix comment (get rid of TODO)
+
+commit 10c09bee560bc5f9d304e3259738f5693ce0982b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jun 27 02:11:48 2015 +0200
+
+    Make new experimental code to create and resume window content in an idle source configurable in settings application also
+
+commit 7a24c30a92cb9f3f57e8e11e7856b2667d6b119a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jun 27 01:38:17 2015 +0200
+
+    New experimental code to create and resume window content in an idle source is working well so make it configurable via a xfconf property called "/window-content-creation-priority".
+    
+    The following values are valid: immediate, high, normal and low. The value 'immediate' will create the window content for each window at the time it was requested which is the default behaviour known so far. This value ('immediate') is also the default value if property was not set or set to an invalid value. The other values how fast and the number of window content textures should be created application is idle. While 'high' tries to create as many window content textures as possible, the values 'normal' and 'low' will create much less.
+
+commit 42e1862cbba95c4e63e74b64ecde7fde15e5b9e5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 11 22:26:40 2015 +0200
+
+    Fix bug that pinned windows are not shown at newly created (but not current) workspace at XfdashboardLiveWorkspace
+
+commit b9deefe3e85f0f5792aa8d945e0f91e8fc38a6e3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 11 21:42:11 2015 +0200
+
+    Updated dependencies in README
+
+commit bace36bd479c31317ada54c2c0a29c7d6661069a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 11 19:57:53 2015 +0200
+
+    Post-release version bump to 0.5.1
+
+commit cac3024a0f5e986a0e2ab3c5e02633b50cb8ea7d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 11 19:56:17 2015 +0200
+
+    Bump version to 0.5.0
+
 commit e64d4a86ccfc1674dd935b9dd8c564d17f3546a2
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Thu Jun 11 19:55:28 2015 +0200
