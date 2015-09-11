@@ -1,0 +1,16 @@
+Description: Add missing xfdashboard/application-tracker.c to po/POTFILES.in
+Author: Unit 193 <unit193@ubuntu.com>
+
+Origin: vendor
+Last-Update: 2015-09-10
+
+--- xfdashboard-0.5.1.orig/po/POTFILES.in
++++ xfdashboard-0.5.1/po/POTFILES.in
+@@ -17,6 +17,7 @@ xfdashboard/actor.c
+ xfdashboard/application-button.c
+ xfdashboard/application.c
+ xfdashboard/application-database.c
++xfdashboard/application-tracker.c
+ xfdashboard/applications-menu-model.c
+ xfdashboard/applications-search-provider.c
+ xfdashboard/applications-view.c
