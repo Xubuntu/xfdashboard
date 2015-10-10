@@ -133,7 +133,8 @@ static gboolean _xfdashboard_application_tracker_item_add_window(XfdashboardAppl
 	}
 
 	/* If we get here the window was not found in list of windows of application
-	 * tracker item, so add it to this list.
+	 * tracker item, so add it to beginning of this list as it should be the
+	 * last active windows for this application.
 	 */
 	inItem->windows=g_list_prepend(inItem->windows, inWindow);
 
@@ -470,12 +471,16 @@ static GAppInfo* _xfdashboard_application_tracker_get_desktop_id_from_window_nam
 	GAppInfo								*foundAppInfo;
 	gchar									**names;
 	gchar									**iter;
+	GList									*apps;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATION_TRACKER(self), NULL);
 	g_return_val_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inWindow), NULL);
 
 	priv=self->priv;
 	foundAppInfo=NULL;
+
+	/* Get list of applications */
+	apps=xfdashboard_application_database_get_all_applications(priv->appDatabase);
 
 	/* Get window's names */
 	names=xfdashboard_window_tracker_window_get_instance_names(inWindow);
@@ -485,59 +490,95 @@ static GAppInfo* _xfdashboard_application_tracker_get_desktop_id_from_window_nam
 	while(iter && *iter)
 	{
 		GAppInfo							*appInfo;
+		gchar								*iterName;
+		gchar								*iterNameLowerCase;
+
+		/* Build desktop ID from iterated name */
+		if(!g_str_has_suffix(*iter, ".desktop")) iterName=g_strconcat(*iter, ".desktop", NULL);
+			else iterName=g_strdup(*iter);
+
+		iterNameLowerCase=g_utf8_strdown(iterName, -1);
 
 		/* Lookup application from unmodified name */
-		if(g_str_has_suffix(*iter, ".desktop"))
-		{
-			appInfo=xfdashboard_application_database_lookup_desktop_id(priv->appDatabase, *iter);
-		}
-			else
-			{
-				gchar						*desktopID;
-
-				desktopID=g_strconcat(*iter, ".desktop", NULL);
-				appInfo=xfdashboard_application_database_lookup_desktop_id(priv->appDatabase, desktopID);
-				g_free(desktopID);
-			}
+		appInfo=xfdashboard_application_database_lookup_desktop_id(priv->appDatabase, iterName);
 
 		/* Lookup application from to-lower-case converted name if previous
 		 * lookup with unmodified name failed.
 		 */
 		if(!appInfo)
 		{
-			gchar							*lowerDesktopID;
+			/* Lookup application from lower-case name */
+			appInfo=xfdashboard_application_database_lookup_desktop_id(priv->appDatabase, iterNameLowerCase);
+		}
 
-			/* Convert name to lower case */
-			lowerDesktopID=g_utf8_strdown(*iter, -1);
+		/* If no application was found for the name it may be an application
+		 * located in a subdirectory. Then the desktop ID is prefixed with
+		 * the subdirectory's name followed by a dash. So iterate through all
+		 * applications and lookup with glob pattern '*-' followed by name
+		 * and suffix '.desktop'.
+		 */
+		if(!appInfo)
+		{
+			GList							*iterApps;
+			GList							*foundSubdirApps;
+			gchar							*globName;
+			GPatternSpec					*globPattern;
+			GAppInfo						*globAppInfo;
 
-			/* Lookup application from lower-case name. No need to add '.desktop'
-			 * as suffix as it was done before.
+			/* Build glob pattern */
+			globName=g_strconcat("*-", iterNameLowerCase, NULL);
+			globPattern=g_pattern_spec_new(globName);
+
+			/* Iterate through application and collect applications matching
+			 * glob pattern.
 			 */
-			if(g_str_has_suffix(lowerDesktopID, ".desktop"))
+			foundSubdirApps=NULL;
+			for(iterApps=apps; iterApps; iterApps=g_list_next(iterApps))
 			{
-				appInfo=xfdashboard_application_database_lookup_desktop_id(priv->appDatabase, lowerDesktopID);
-			}
-				else
+				if(!G_IS_APP_INFO(iterApps->data)) continue;
+				globAppInfo=G_APP_INFO(iterApps->data);
+
+				if(g_pattern_match_string(globPattern, g_app_info_get_id(globAppInfo)))
 				{
-					gchar					*desktopID;
-
-					desktopID=g_strconcat(lowerDesktopID, ".desktop", NULL);
-					appInfo=xfdashboard_application_database_lookup_desktop_id(priv->appDatabase, desktopID);
-					g_free(desktopID);
+					foundSubdirApps=g_list_prepend(foundSubdirApps, globAppInfo);
+					g_debug("Found possible application '%s' for window '%s' using pattern '%s'",
+							g_app_info_get_id(globAppInfo),
+							xfdashboard_window_tracker_window_get_title(inWindow),
+							globName);
 				}
-
-			/* Free lower case of name */
-			g_free(lowerDesktopID);
-
-			/* If we still did not find an application continue with next
-			 * name in list.
-			 */
-			if(!appInfo)
-			{
-				/* Continue with next name in list */
-				iter++;
-				continue;
 			}
+
+			/* If exactly one application was collected because it matched
+			 * the glob pattern then we found the application.
+			 */
+			if(g_list_length(foundSubdirApps)==1)
+			{
+				appInfo=G_APP_INFO(g_object_ref(G_OBJECT(foundSubdirApps->data)));
+
+				g_debug("Found exactly one application named '%s' for window '%s' using pattern '%s'",
+						g_app_info_get_id(globAppInfo),
+						xfdashboard_window_tracker_window_get_title(inWindow),
+						globName);
+			}
+
+			/* Release allocated resources */
+			if(foundSubdirApps) g_list_free(foundSubdirApps);
+			if(globPattern) g_pattern_spec_free(globPattern);
+			if(globName) g_free(globName);
+		}
+
+		/* If we still did not find an application continue with next
+		 * name in list.
+		 */
+		if(!appInfo)
+		{
+			/* Release allocated resources */
+			if(iterName) g_free(iterName);
+			if(iterNameLowerCase) g_free(iterNameLowerCase);
+
+			/* Continue with next name in list */
+			iter++;
+			continue;
 		}
 
 		/* Check if found application info matches previous one. If it does not match
@@ -552,9 +593,12 @@ static GAppInfo* _xfdashboard_application_tracker_get_desktop_id_from_window_nam
 						g_app_info_get_id(appInfo));
 
 			/* Release allocated resources */
+			if(iterName) g_free(iterName);
+			if(iterNameLowerCase) g_free(iterNameLowerCase);
 			if(foundAppInfo) g_object_unref(foundAppInfo);
 			if(appInfo) g_object_unref(appInfo);
 			if(names) g_strfreev(names);
+			if(apps) g_list_free_full(apps, g_object_unref);
 
 			return(NULL);
 		}
@@ -563,6 +607,8 @@ static GAppInfo* _xfdashboard_application_tracker_get_desktop_id_from_window_nam
 		if(!foundAppInfo) foundAppInfo=g_object_ref(appInfo);
 
 		/* Release allocated resources */
+		if(iterName) g_free(iterName);
+		if(iterNameLowerCase) g_free(iterNameLowerCase);
 		if(appInfo) g_object_unref(appInfo);
 
 		/* Continue with next name in list */
@@ -571,6 +617,7 @@ static GAppInfo* _xfdashboard_application_tracker_get_desktop_id_from_window_nam
 
 	/* Release allocated resources */
 	if(names) g_strfreev(names);
+	if(apps) g_list_free_full(apps, g_object_unref);
 
 	/* Return found application info */
 	g_debug("Resolved window names of '%s' to desktop ID '%s'",
@@ -701,6 +748,44 @@ static void _xfdashboard_application_tracker_on_window_closed(XfdashboardApplica
 	}
 }
 
+/* The active window has changed */
+static void _xfdashboard_application_tracker_on_active_window_changed(XfdashboardApplicationTracker *self,
+																		XfdashboardWindowTrackerWindow *inOldActiveWindow,
+																		XfdashboardWindowTrackerWindow *inNewActiveWindow,
+																		gpointer inUserData)
+{
+	XfdashboardApplicationTrackerItem		*item;
+
+	g_return_if_fail(XFDASHBOARD_IS_APPLICATION_TRACKER(self));
+	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inNewActiveWindow));
+
+	/* Find application tracker item in list of known running applications
+	 * matching the new active window.
+	 */
+	item= _xfdashboard_application_tracker_find_item_by_window(self, inNewActiveWindow);
+	if(!item)
+	{
+		g_debug("Could not find running application for new active window '%s'",
+					xfdashboard_window_tracker_window_get_title(inNewActiveWindow));
+
+		return;
+	}
+
+	g_debug("New active window is '%s' and belongs to desktop ID '%s'",
+				xfdashboard_window_tracker_window_get_title(inNewActiveWindow),
+				item->desktopID);
+
+	/* Move new active window of found application tracker item to begin of
+	 * list of windows by removing window from list and prepending it to list
+	 * again. This will sort the list of window in order of last activation.
+	 * That means the first window in list was the last active one for this
+	 * application.
+	 */
+	item->windows=g_list_remove(item->windows, inNewActiveWindow);
+	item->windows=g_list_prepend(item->windows, inNewActiveWindow);
+}
+
+
 /* IMPLEMENTATION: GObject */
 
 /* Dispose this object */
@@ -797,6 +882,10 @@ static void xfdashboard_application_tracker_init(XfdashboardApplicationTracker *
 								"window-closed",
 								G_CALLBACK(_xfdashboard_application_tracker_on_window_closed),
 								self);
+	g_signal_connect_swapped(priv->windowTracker,
+								"active-window-changed",
+								G_CALLBACK(_xfdashboard_application_tracker_on_active_window_changed),
+								self);
 }
 
 /* IMPLEMENTATION: Public API */
@@ -830,4 +919,39 @@ gboolean xfdashboard_application_tracker_is_running_by_app_info(XfdashboardAppli
 	g_return_val_if_fail(G_IS_APP_INFO(inAppInfo), FALSE);
 
 	return(_xfdashboard_application_tracker_find_item_by_app_info(self, inAppInfo) ? TRUE : FALSE);
+}
+
+/* Get window list (sorted by last activation time) for an application.
+ * The returned GList is owned by application and should not be modified or freed.
+ */
+const GList* xfdashboard_application_tracker_get_window_list_by_desktop_id(XfdashboardApplicationTracker *self,
+																			const gchar *inDesktopID)
+{
+	XfdashboardApplicationTrackerItem	*item;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATION_TRACKER(self), NULL);
+	g_return_val_if_fail(inDesktopID && *inDesktopID, NULL);
+
+	/* Get application tracker item for requested desktop ID */
+	item=_xfdashboard_application_tracker_find_item_by_desktop_id(self, inDesktopID);
+	if(!item) return(NULL);
+
+	/* Return list of windows for found application tracker item */
+	return(item->windows);
+}
+
+const GList*  xfdashboard_application_tracker_get_window_list_by_app_info(XfdashboardApplicationTracker *self,
+																			GAppInfo *inAppInfo)
+{
+	XfdashboardApplicationTrackerItem	*item;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATION_TRACKER(self), NULL);
+	g_return_val_if_fail(G_IS_APP_INFO(inAppInfo), NULL);
+
+	/* Get application tracker item for requested desktop ID */
+	item=_xfdashboard_application_tracker_find_item_by_app_info(self, inAppInfo);
+	if(!item) return(NULL);
+
+	/* Return list of windows for found application tracker item */
+	return(item->windows);
 }

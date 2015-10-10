@@ -1,15 +1,15 @@
 [Xfdashboard Theme]
 Name=xfdashboard-moranga
-Name[es]=Tablero Xf moranga
+Name[es]=xfdashboard-moranga
 Name[fr]=xfdashboard-moranga
 Name[sr]=Полетник Моранга
 Comment=Moranga theme for xfdashboard
-Comment[es]=Tema Moranga para el Tablero Xf
+Comment[es]=Tema de color calabaza para xfdashboard
 Comment[fr]=Thème Moranga pour xfdashboard
 Comment[sr]=Тема полетника моранга
 Style=xfdashboard-moranga.css
 Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Author=lacios
-Version=0.5.1git.fee3715
+Version=0.5.2git.e54fd25
 Screenshot=screenshot-xfdashboard-moranga.png

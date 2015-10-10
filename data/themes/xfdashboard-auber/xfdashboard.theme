@@ -1,15 +1,15 @@
 [Xfdashboard Theme]
 Name=xfdashboard-auber
-Name[es]=Tablero Xf auber
+Name[es]=xfdashboard-auber
 Name[fr]=xfdashboard-aube
 Name[sr]=Полетник Аубер
 Comment=Aubergine theme for xfdashboard
-Comment[es]=Tema Aubergín para el Tablero Xf
+Comment[es]=Tema de color berenjena para xfdashboard
 Comment[fr]=Thème Aubergine pour xfdashboard
 Comment[sr]=Тема полетника Aubergine
 Style=xfdashboard-auber.css
 Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Author=lacios
-Version=0.5.1git.fee3715
+Version=0.5.2git.e54fd25
 Screenshot=screenshot-xfdashboard-auber.png

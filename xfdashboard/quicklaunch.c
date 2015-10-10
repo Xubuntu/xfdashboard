@@ -45,6 +45,7 @@
 #include "desktop-app-info.h"
 #include "application-database.h"
 #include "application-tracker.h"
+#include "window-tracker-window.h"
 
 /* Define this class in GObject system */
 static void _xfdashboard_quicklaunch_focusable_iface_init(XfdashboardFocusableInterface *iface);
@@ -126,7 +127,10 @@ enum
 static guint XfdashboardQuicklaunchSignals[SIGNAL_LAST]={ 0, };
 
 /* IMPLEMENTATION: Private variables and methods */
-#define FAVOURITES_XFCONF_PROP		"/favourites"
+#define FAVOURITES_XFCONF_PROP				"/favourites"
+
+#define LAUNCH_NEW_INSTANCE_XFCONF_PROP		"/always-launch-new-instance"
+#define DEFAULT_LAUNCH_NEW_INSTANCE			TRUE
 
 #define DEFAULT_SCALE_MIN			0.1
 #define DEFAULT_SCALE_MAX			1.0
@@ -305,18 +309,102 @@ static gboolean _xfdashboard_quicklaunch_has_favourite_appinfo(XfdashboardQuickl
 /* An application icon (favourite) in quicklaunch was clicked */
 static void _xfdashboard_quicklaunch_on_favourite_clicked(XfdashboardQuicklaunch *self, gpointer inUserData)
 {
-	XfdashboardApplicationButton		*button;
+	XfdashboardQuicklaunchPrivate			*priv;
+	XfdashboardApplicationButton			*button;
+	gboolean								launchNewInstance;
 
 	g_return_if_fail(XFDASHBOARD_IS_QUICKLAUNCH(self));
 	g_return_if_fail(XFDASHBOARD_IS_APPLICATION_BUTTON(inUserData));
 
+	priv=self->priv;
 	button=XFDASHBOARD_APPLICATION_BUTTON(inUserData);
 
-	/* Launch application */
+	/* If user wants to activate the last active windows for a running instance
+	 * of application whose button was clicked, then check if a window exists
+	 * and activate it. Otherwise launch a new instance.
+	 */
+	launchNewInstance=xfconf_channel_get_bool(xfdashboard_application_get_xfconf_channel(),
+												LAUNCH_NEW_INSTANCE_XFCONF_PROP,
+												DEFAULT_LAUNCH_NEW_INSTANCE);
+	if(!launchNewInstance)
+	{
+		GAppInfo							*appInfo;
+		const GList							*windows;
+		XfdashboardWindowTrackerWindow		*lastActiveWindow;
+		XfdashboardWindowTrackerWorkspace	*lastActiveWorkspace;
+
+		/* Get application information of application button */
+		appInfo=xfdashboard_application_button_get_app_info(button);
+		if(!appInfo)
+		{
+			xfdashboard_notify(CLUTTER_ACTOR(self),
+								"gtk-dialog-error",
+								_("Launching application '%s' failed: %s"),
+								xfdashboard_application_button_get_display_name(button),
+								_("No information available for application"));
+
+			g_warning(_("Launching application '%s' failed: %s"),
+						xfdashboard_application_button_get_display_name(button),
+						_("No information available for application"));
+
+			return;
+		}
+
+		/* Get list of windows for application */
+		windows=xfdashboard_application_tracker_get_window_list_by_app_info(priv->appTracker, appInfo);
+		if(windows)
+		{
+			/* Get last active window for application which is the first one in list */
+			lastActiveWindow=XFDASHBOARD_WINDOW_TRACKER_WINDOW(windows->data);
+
+			/* If last active window for application if available, wwitch to workspace
+			 * where it is placed at and activate it.
+			 */
+			if(lastActiveWindow)
+			{
+				/* Switch to workspace where window is placed at */
+				lastActiveWorkspace=xfdashboard_window_tracker_window_get_workspace(lastActiveWindow);
+				xfdashboard_window_tracker_workspace_activate(lastActiveWorkspace);
+
+				/* Activate window */
+				xfdashboard_window_tracker_window_activate(lastActiveWindow);
+
+				/* Activating last active window of application seems to be successfully
+				 * so quit application.
+				 */
+				xfdashboard_application_quit();
+
+				return;
+			}
+		}
+
+		/* If we get here we found the application but no active window,
+		 * so check if application is running. If it is display a warning
+		 * message as notification and return from this function. If it
+		 * is not running, continue to start a new instance.
+		 */
+		if(xfdashboard_application_tracker_is_running_by_app_info(priv->appTracker, appInfo))
+		{
+			xfdashboard_notify(CLUTTER_ACTOR(self),
+								"gtk-dialog-error",
+								_("Launching application '%s' failed: %s"),
+								xfdashboard_application_button_get_display_name(button),
+								_("No windows to activate for application"));
+
+			g_warning(_("Launching application '%s' failed: %s"),
+						xfdashboard_application_button_get_display_name(button),
+						_("No windows to activate for application"));
+
+			return;
+		}
+	}
+
+	/* Launch a new instance of application whose button was clicked */
 	if(xfdashboard_application_button_execute(button, NULL))
 	{
-		/* Launching application seems to be successfuly so quit application */
+		/* Launching application seems to be successfully so quit application */
 		xfdashboard_application_quit();
+
 		return;
 	}
 }
