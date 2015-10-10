@@ -1,3 +1,10 @@
+xfdashboard (0.5.2-0ubuntu1) wily; urgency=medium
+
+  * Imported Upstream version 0.5.2
+    - Drop patches applied upstream.
+
+ -- Unit 193 <unit193@ubuntu.com>  Sat, 10 Oct 2015 14:45:21 -0400
+
 xfdashboard (0.5.1-0ubuntu1) wily; urgency=medium
 
   * Imported Upstream version 0.5.1
