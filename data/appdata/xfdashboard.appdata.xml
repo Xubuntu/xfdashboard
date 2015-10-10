@@ -12,7 +12,7 @@
 
 	<description>
 		<p>Xfdashboard provides a GNOME shell dashboard like interface for use with Xfce desktop.</p>
-		<p xml:lang="es">El TableroXf provee un Intérprete de panel como el de GNOME para usarse en el entorno de escritorio Xfce.</p>
+		<p xml:lang="es">Xfdashboard provee un Intérprete de panel como el de GNOME para usarse en el entorno de escritorio Xfce.</p>
 		<p xml:lang="fr">Xfdashboard fournit un tableau de bord shell GNOME comme interface pour une utilisation avec le bureau Xfce.</p>
 		<p xml:lang="sr">Полетник Иксфце-а је сучеље попут Гномове шкољке за употребу на радној површи Иксфце-а.</p>
 		<p>It can be configured to run to any keyboard shortcut and when executed provides an overview of applications currently open enabling the user to switch between different applications. The search feature works like Xfce's app finder which makes it convenient to search for and start applications.</p>
@@ -53,6 +53,11 @@
 	</provides>
 
 	<releases>
+		<release version="0.5.2" timestamp="1444326527">
+			<description>
+				<p>This unstable development introduces a new configurable options to allows start a new instance of an application or to activate the current window. It also improves the detection of running application as well as bug-fixes and other smaller improvements.</p>
+			</description>
+		</release>
 		<release version="0.5.1" timestamp="1441652092">
 			<description>
 				<p>This unstable development introduces a new configurable options to speed up loading window contents in background and it shows also running applications in quicklaunch for those not being stored as favourites. As usual it also contains a lots of bug-fixes and smaller improvements.</p>

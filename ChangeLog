@@ -1,3 +1,103 @@
+commit e54fd25833d02376d9c4a8b2bce59d94d5abd5b2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Oct 1 22:08:32 2015 +0200
+
+    I18n: Update localization (es)
+
+commit e2d0b150510d275edc08ba2433d3c6b3c629aa43
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Sep 28 16:38:55 2015 +0200
+
+    Consider desktop files in sub-directories if not found via the application name directly
+    
+    If we cannot find an matching application from any window name (instance name, class name etc.) directly in application database consider it may located in a sub-directory, e.g. kile in kde4 resulting in a desktop file called 'kde4-kile.desktop'. Then create a glob pattern '*-<<NAME>>' and iterate through all registered applications in application database collecting all matching the glob pattern. If the resulting list contains exactly one application it should be the one we're looking for.
+    
+    This commit hopefully fixes GH #99
+
+commit 2f77e9a85ae1a865a955731542f3abafb34abf7f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 16 18:30:45 2015 +0200
+
+    Switch to workspace where last known active window of a running application is placed at first and then activate this window. Otherwise the window will be move to current workspace.
+
+commit 7205d024a4d7ecdaf41c17b2269700582a8908fc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 16 16:12:32 2015 +0200
+
+    Removed blank line and mark this commit as last commit for implementing new option to always start a new instance of an application or to active the last known active window of application whose button was clicked in quicklaunch.
+    
+    This commit (and the ones before) should fix issue GH #97
+
+commit 644b7142a01e3e0afb567112c4a090e5880837c5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 16 16:08:11 2015 +0200
+
+    Allow path to UI file of settings application be configurable and overriden by environment variable XFDASHBOARD_UI_PATH
+    
+    This makes development easier to test modifications of UI file without installing it system-wide.
+
+commit 87b3b24c00fe1d962068cfa3930f5ced4c3b6717
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 16 16:06:48 2015 +0200
+
+    Make new xfconf property "/always-launch-new-instance" configurable in settings application.
+
+commit a83cebcff0956d50a556f77d6ee21b1548921080
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 16 15:51:32 2015 +0200
+
+    Add a new xfconf boolean property called "/always-launch-new-instance" to make new function - to start always a new instance of application or to activate the last active window for application - configurable.
+
+commit d9831e22442db9e213d16e2e1267e924c1f386c5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 16 15:44:52 2015 +0200
+
+    Add function to activate last active window of a running application instance or to force to start always a new instance of application for the application whose favourite button was clicked.
+
+commit af40d9edb12318d89a831e3a6841fb8585396f7b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 16 14:09:59 2015 +0200
+
+    Add accessor functions for windows list of a running application at application tracker
+
+commit 09068e7f733e296e062663ba42b34eb48ccb040b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 16 13:37:27 2015 +0200
+
+    Keep list of windows for a running application in application tracker list sorted in order of last activation so that the first window in list is always the last window activated for this application.
+
+commit 6924a162e460cf2acbe1ef65fe7da7b6286127e3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 15 06:33:41 2015 +0200
+
+    Fixed a totally messed up typo :/
+
+commit 30bd31bf868f2b23e2a040cb7f56230b8fe2f321
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 15 06:33:00 2015 +0200
+
+    Fixed parameter order in debug message
+
+commit fb20f76efcdc840c945ab3e1f29caee7461f2d6c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 30 11:24:42 2015 +0200
+
+    Decide at run-time not at compile-time if we need to track screen size changes to adjust stage size.
+    
+    I hope this fixes GH #95 finally.
+
+commit 7c3a7f7867bf7ae8ef315c75073e4dbcfd1f5198
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 8 06:38:17 2015 +0200
+
+    I18n: Updated translations es, fr, he, it_IT and sr
+
+commit f5442a20494334e4ab85613fd83c9100e438cc30
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Sep 7 21:01:39 2015 +0200
+
+    Post-release version bump to 0.5.2
+
 commit 0c73b8d136b55f3245dd373e03a8fc876ddc81c0
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Mon Sep 7 20:58:51 2015 +0200

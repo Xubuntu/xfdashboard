@@ -1,9 +1,10 @@
 [Xfdashboard Theme]
 Name=xfdashboard
+Name[es]=xfdashboard
 Name[fr]=xfdashboard
 Name[sr]=полетник иксфцеа
 Comment=Default theme for xfdashboard
-Comment[es]=Tema predeterminado para el Tablero Xf
+Comment[es]=Tema predeterminado para Xfdashboard
 Comment[fr]=Thème par défaut pour xfdashboard
 Comment[he]=ערכת נושא ברירת מחדל עבור xfdashboard
 Comment[sr]=Подразумевана тема полетника
@@ -11,5 +12,5 @@ Style=xfdashboard.css
 Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Author=Stephan Haller
-Version=0.5.1git.fee3715
+Version=0.5.2git.e54fd25
 Screenshot=screenshot-xfdashboard.png
