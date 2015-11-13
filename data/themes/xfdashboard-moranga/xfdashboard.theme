@@ -2,14 +2,16 @@
 Name=xfdashboard-moranga
 Name[es]=xfdashboard-moranga
 Name[fr]=xfdashboard-moranga
+Name[lt]=xfdashboard-moliūgas
 Name[sr]=Полетник Моранга
 Comment=Moranga theme for xfdashboard
 Comment[es]=Tema de color calabaza para xfdashboard
 Comment[fr]=Thème Moranga pour xfdashboard
+Comment[lt]=Moliūginė xfdashboard tema
 Comment[sr]=Тема полетника моранга
 Style=xfdashboard-moranga.css
 Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Author=lacios
-Version=0.5.2git.e54fd25
+Version=0.5.3git.7cce9a1
 Screenshot=screenshot-xfdashboard-moranga.png

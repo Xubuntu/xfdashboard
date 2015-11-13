@@ -158,8 +158,8 @@ static ClutterActor* _xfdashboard_quicklaunch_get_actor_for_appinfo(XfdashboardQ
 	GAppInfo						*desktopAppInfo;
 	GFile							*desktopFile;
 
-	g_return_val_if_fail(XFDASHBOARD_IS_QUICKLAUNCH(self), TRUE);
-	g_return_val_if_fail(G_IS_APP_INFO(inAppInfo), TRUE);
+	g_return_val_if_fail(XFDASHBOARD_IS_QUICKLAUNCH(self), NULL);
+	g_return_val_if_fail(G_IS_APP_INFO(inAppInfo), NULL);
 
 	priv=self->priv;
 
@@ -338,7 +338,7 @@ static void _xfdashboard_quicklaunch_on_favourite_clicked(XfdashboardQuicklaunch
 		if(!appInfo)
 		{
 			xfdashboard_notify(CLUTTER_ACTOR(self),
-								"gtk-dialog-error",
+								"dialog-error",
 								_("Launching application '%s' failed: %s"),
 								xfdashboard_application_button_get_display_name(button),
 								_("No information available for application"));
@@ -386,7 +386,7 @@ static void _xfdashboard_quicklaunch_on_favourite_clicked(XfdashboardQuicklaunch
 		if(xfdashboard_application_tracker_is_running_by_app_info(priv->appTracker, appInfo))
 		{
 			xfdashboard_notify(CLUTTER_ACTOR(self),
-								"gtk-dialog-error",
+								"dialog-error",
 								_("Launching application '%s' failed: %s"),
 								xfdashboard_application_button_get_display_name(button),
 								_("No windows to activate for application"));

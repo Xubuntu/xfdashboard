@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [5])
-m4_define([xfdashboard_version_micro], [2])
-m4_define([xfdashboard_version_build], [e54fd25])
+m4_define([xfdashboard_version_micro], [3])
+m4_define([xfdashboard_version_build], [e5bf13f])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -112,7 +112,7 @@ AC_SUBST(LIBM)
 dnl ******************************
 dnl *** Check for i18n support ***
 dnl ******************************
-XDT_I18N([es fr he it_IT sr ])
+XDT_I18N([es fr he it_IT lt sr ])
 
 dnl *******************************
 dnl *** Check for X11 installed ***
@@ -262,6 +262,8 @@ data/themes/xfdashboard-dark/Makefile
 data/themes/xfdashboard-mint/Makefile
 data/themes/xfdashboard-moranga/Makefile
 data/themes/xfdashboard-wine/Makefile
+plugins/Makefile
+plugins/clock-view/Makefile
 po/Makefile.in
 settings/Makefile
 xfdashboard/Makefile

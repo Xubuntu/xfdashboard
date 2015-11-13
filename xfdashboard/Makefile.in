@@ -163,6 +163,8 @@ am_libxfdashboard_la_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	libxfdashboard_la-live-window.lo \
 	libxfdashboard_la-live-workspace.lo \
 	libxfdashboard_la-outline-effect.lo \
+	libxfdashboard_la-plugin.lo \
+	libxfdashboard_la-plugins-manager.lo \
 	libxfdashboard_la-quicklaunch.lo \
 	libxfdashboard_la-scaled-table-layout.lo \
 	libxfdashboard_la-scrollbar.lo \
@@ -497,6 +499,7 @@ AM_CPPFLAGS = \
 	-DG_LOG_DOMAIN=\"xfdashboard\" \
 	-DPACKAGE_DATADIR=\"$(datadir)\" \
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\" \
+	-DPACKAGE_LIBDIR=\"$(libdir)\" \
 	$(PLATFORM_CPPFLAGS)
 
 noinst_LTLIBRARIES = \
@@ -538,6 +541,8 @@ xfdashboard_headers = \
 	live-window.h \
 	live-workspace.h \
 	outline-effect.h \
+	plugin.h \
+	plugins-manager.h \
 	quicklaunch.h \
 	scaled-table-layout.h \
 	scrollbar.h \
@@ -601,6 +606,8 @@ libxfdashboard_la_SOURCES = \
 	live-window.c \
 	live-workspace.c \
 	outline-effect.c \
+	plugin.c \
+	plugins-manager.c \
 	quicklaunch.c \
 	scaled-table-layout.c \
 	scrollbar.c \
@@ -811,6 +818,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-live-workspace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-marshal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-outline-effect.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-plugin.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-plugins-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-quicklaunch.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-scaled-table-layout.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-scrollbar.Plo@am__quote@
@@ -1073,6 +1082,20 @@ libxfdashboard_la-outline-effect.lo: outline-effect.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='outline-effect.c' object='libxfdashboard_la-outline-effect.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-outline-effect.lo `test -f 'outline-effect.c' || echo '$(srcdir)/'`outline-effect.c
+
+libxfdashboard_la-plugin.lo: plugin.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-plugin.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-plugin.Tpo -c -o libxfdashboard_la-plugin.lo `test -f 'plugin.c' || echo '$(srcdir)/'`plugin.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-plugin.Tpo $(DEPDIR)/libxfdashboard_la-plugin.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='plugin.c' object='libxfdashboard_la-plugin.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-plugin.lo `test -f 'plugin.c' || echo '$(srcdir)/'`plugin.c
+
+libxfdashboard_la-plugins-manager.lo: plugins-manager.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-plugins-manager.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-plugins-manager.Tpo -c -o libxfdashboard_la-plugins-manager.lo `test -f 'plugins-manager.c' || echo '$(srcdir)/'`plugins-manager.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-plugins-manager.Tpo $(DEPDIR)/libxfdashboard_la-plugins-manager.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='plugins-manager.c' object='libxfdashboard_la-plugins-manager.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-plugins-manager.lo `test -f 'plugins-manager.c' || echo '$(srcdir)/'`plugins-manager.c
 
 libxfdashboard_la-quicklaunch.lo: quicklaunch.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-quicklaunch.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-quicklaunch.Tpo -c -o libxfdashboard_la-quicklaunch.lo `test -f 'quicklaunch.c' || echo '$(srcdir)/'`quicklaunch.c

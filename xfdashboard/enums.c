@@ -157,6 +157,30 @@ GType xfdashboard_image_content_loading_state_get_type(void)
 }
 
 
+/* enumerations from "plugin.h" */
+#include "plugin.h"
+
+GType xfdashboard_plugin_error_enum_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GEnumValue values[]=
+		{
+			{ XFDASHBOARD_PLUGIN_ERROR_NONE, "XFDASHBOARD_PLUGIN_ERROR_NONE", "none" },
+			{ XFDASHBOARD_PLUGIN_ERROR_ERROR, "XFDASHBOARD_PLUGIN_ERROR_ERROR", "error" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardPluginErrorEnum"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
+
+
 /* enumerations from "theme.h" */
 #include "theme.h"
 
