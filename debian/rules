@@ -22,3 +22,6 @@ override_dh_auto_install:
 
 override_dh_strip:
 	dh_strip --dbg-package=xfdashboard-dbg
+
+override_dh_makeshlibs:
+	dh_makeshlibs -X debian/xfdashboard/usr/lib/$(DEB_HOST_MULTIARCH)/xfdashboard/plugins/*.so
