@@ -1,3 +1,11 @@
+xfdashboard (0.5.3-0ubuntu1) xenial; urgency=medium
+
+  * Imported Upstream version 0.5.3
+  * d/rules: Don't make shlibs for the plugins.
+  * d/rules: Remove *.la files in the auto_install override.
+
+ -- Unit 193 <unit193@ubuntu.com>  Fri, 13 Nov 2015 15:55:45 -0500
+
 xfdashboard (0.5.2-0ubuntu1) wily; urgency=medium
 
   * Imported Upstream version 0.5.2
