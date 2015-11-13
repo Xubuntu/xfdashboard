@@ -19,6 +19,7 @@ override_dh_installchangelogs:
 
 override_dh_auto_install:
 	dh_auto_install --destdir=debian/xfdashboard
+	find debian/xfdashboard/ -name '*.la' -delete
 
 override_dh_strip:
 	dh_strip --dbg-package=xfdashboard-dbg
