@@ -1,3 +1,167 @@
+commit e5bf13f4859d2704852e4894200bc727d1a61970
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 13 18:53:46 2015 +0100
+
+    I18n: Added localization (lt) and updates POTFILES.in to include new files
+
+commit 955fa62cd433503bc760cea6e3aef75b3bdbf702
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 13 18:50:23 2015 +0100
+
+    Remove left-over TODO
+
+commit e8454d9bc2483cba98fc510f6ef11dfe6d931a22
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Nov 12 21:52:47 2015 +0100
+
+    Rename XfdashboardPluginManager to XfdashboardPluginsManager
+
+commit 7cce9a188c085c636f2e8f5642e1a3c080d8bdab
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Nov 12 21:45:28 2015 +0100
+
+    Fix upper/lower-case issue in comment '/* IMPLEMENTATION: ... */'
+
+commit a83bf40b54267c921097a7d13f906ae5bde87c9a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Nov 12 21:39:07 2015 +0100
+
+    Re-add support for environment variable XFDASHBOARD_FORCE_NEW_INSTANCE
+    
+    This environment variable can be set to any value as it needs only to exist. But it is only checked if xfdashboard is compiled with debug support.
+    
+    If this enviroment variable is set to any value then it spawn a new instance of xfdashboard regardless if any other instance is already running. This is interesting to test a new compile of xfdashboard for debugging purposes while (a stable) xfdashboard instance is running in background in daemonized mode.
+
+commit a156305a746425012d28143d808efdf6d38c7a34
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Nov 12 21:36:59 2015 +0100
+
+    Fix year in copyright messages and remove support for environment variable XFDASHBOARD_FORCE_NEW_INSTANCE in XfdashboardApplication
+
+commit cefed5340b9a0cd0bd16a6855048de39a1e9b6d1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Nov 12 21:11:15 2015 +0100
+
+    Implemented a basic and simple plugin system
+    
+    This commit is huge as it implements a basic and simple plugin system as well a sample plugin adding a new view showing a clock when this plugin is enabled. By default the plugin manager does not load anything as it looks at the property "/enabled-plugin" in channel "xfdashboard" of xfconf which is empty by default. The plugin manager expects an array of string at this property whereby each string in this array contains the name of the plugin to load, e.g. "clock-view" for the sample clock view plugin.
+    
+    The plugin are searched in the following search paths in this order: the path at the environment variable XFDASHBOARD_PLUGINS_PATH (if set), $HOME/.local/share/xfdashboard/plugins, (install prefix)/lib/xfdashboard/plugins.
+    
+    The sample plugin can be tested by enabling it with the command (you should add parameter "-n" to xfconf-query at the beginning at the first time):
+    xfconf-query -c xfdashboard -p /enabled-plugins -a -s clock-view -t string
+    
+    To disable all plugins use:
+    xfconf-query -c xfdashboard -r -p /enabled-plugins
+    
+    Currently the plugin manager does not listen to changes at this property in xfconf so it does not load or unload any plugin automatically at changes. The application has to be restarted.
+
+commit 1c001eac4be7acf7a608acafb6e48f993f7cf476
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Nov 11 13:54:28 2015 +0100
+
+    Fix unregistering views and search provider (and possibly a memory leak) at XfdashboardSearchManager and XfdashboardViewManager
+
+commit 3daf3160f1c8728145166ab74885a65e023b8f8d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 6 11:40:32 2015 +0100
+
+    Get rid of warning messages in XfdashboardApplicationTracker when active windows changes but a NULL pointer was sent (why ever?)
+
+commit cbc2776b687019443989bac7cbc24aabcc520785
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 3 22:59:35 2015 +0100
+
+    Fix typos at annotations of view-selector.c
+
+commit aa3dc1bcb3fe6f9ff6b10c65a5b74e4198233515
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 3 22:46:32 2015 +0100
+
+    Fix return value in g_return_val_if_fail() at function _xfdashboard_quicklaunch_get_actor_for_appinfo()
+    
+    Thanks to DarkneSS of openSuSE
+
+commit 50e44c6bc360c6a4fb0a769113d8d90c04ddb373
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 23 22:48:21 2015 +0200
+
+    I18n: Update localization (es)
+
+commit a031815f24517ba048118595d6bf39ed66304e40
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 23 22:32:34 2015 +0200
+
+    Add gtk-doc documentation annotations to view-selector.{c,h}
+
+commit a18e24639a8c2fccbd5cea5d0adc510d995666a5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 23 20:21:25 2015 +0200
+
+    Try to improve scrollbar adjustment when value is out of range either because the range shrank or a value higher than range was set.
+    
+    This will hopefully solve some visual glitches in search view, i.e. empty search view although results should be available and visible.
+
+commit caeed161c40eb206469c876e95d15eac8aac46bb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 23 20:03:08 2015 +0200
+
+    Block 'toggled' signal handler at stage when a view is activated otherwise this signal handler will enforce the windows view or applications view being shown depending on the toggle state of application button in quicklaunch.
+
+commit 3f7ba6e0b9e09777809163e3892d7d6b22c03c58
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Oct 21 21:36:17 2015 +0200
+
+    Replace default icon for applications search provider and default icon for applications view to match the icon for the button in quicklaunch used to switch between windows view and applications view / search view at the default theme
+
+commit eb6846b87442797e060aadc13e370bd139594b9a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Oct 15 21:13:18 2015 +0200
+
+    Replace default icon for applications search provider to match the default icon for applications view
+
+commit 084be1d506d27c45958601bae515e70f43319910
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Oct 15 21:11:36 2015 +0200
+
+    Introduce a new CSS class which will be added to XfdashboardSearchResultContainer. The CSS class name is build with a prefix "search-provider-id-" followed by the search provider's ID (like "applications" for XfdashboardApplicationsSearchProvider used by applications search provider) - so the complete CSS class name would be ".search-provider-id-applications" (for use in CSS) in this case.
+
+commit 6ca73cc1e0d3f1508bbf537c2b5dd213e77ff2ec
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Oct 15 21:00:09 2015 +0200
+
+    Rewrote search manager to use IDs.
+    
+    Remember: The idea was to also support multi-purpose search providers. This kind of search provider register themselve several times with different IDs. They can determine their purpose by reading the ID and behave different depending on the ID. E.g. a Gnome Shell search provider will be created once for each different search provider installed but with different ID specifying which search provider is meant. They could then enabled and disabled seperately. E.g. "gnome-shell-search-provider-net.sacredchao.QuodLibet.SearchProvider" could create an instance of GnomeShellSearchProvider but searches only songs in QuodLibet and "gnome-shell-search-provider-org.gnome.seahorse.Application" would search keys and certificates in seahorse etc.
+
+commit 1a7972f7b409b70f918c268906133799ce6c781c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Oct 15 08:43:13 2015 +0200
+
+    Rewrote view manager to use IDs.
+    
+    Views do not specify their internal names by themselve but are now registered with an ID directly and the GType of this view is registered with this ID. Doing it this way makes it possible to define multi-purpose views of the same type. This is not interesting for views but for search providers.
+    
+    Multi-purpose views (and later search providers) can reuse the same type but behave different depending on the ID. Thinking of one Gnome shell search provider object that will be registered several time but with different ID whereby the ID specifies with search provider to call via DBUS. This is just an example.
+
+commit c506433d2afb7714d9df9401193949b226b5edc3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 13 08:30:06 2015 +0200
+
+    Replace GTK+ stock icon names with the corresponding ones from Icon Naming Specification
+
+commit 31e0994c8d551576c565d9ba3e9636ae333fa24f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Oct 8 19:55:21 2015 +0200
+
+    Post-release version bump to 0.5.3
+
+commit 96f150b0307fec79859e883992f21bc9c0831cd6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Oct 8 19:53:05 2015 +0200
+
+    Bump version to 0.5.2
+
 commit e54fd25833d02376d9c4a8b2bce59d94d5abd5b2
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Thu Oct 1 22:08:32 2015 +0200

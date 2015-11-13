@@ -1373,9 +1373,8 @@ static void xfdashboard_applications_view_init(XfdashboardApplicationsView *self
 	priv->xfconfShowAllAppsMenuBindingID=0;
 
 	/* Set up view */
-	xfdashboard_view_set_internal_name(XFDASHBOARD_VIEW(self), "applications");
 	xfdashboard_view_set_name(XFDASHBOARD_VIEW(self), _("Applications"));
-	xfdashboard_view_set_icon(XFDASHBOARD_VIEW(self), "gtk-home");
+	xfdashboard_view_set_icon(XFDASHBOARD_VIEW(self), "go-home");
 
 	/* Set up actor */
 	xfdashboard_actor_set_can_focus(XFDASHBOARD_ACTOR(self), TRUE);
@@ -1500,7 +1499,7 @@ void xfdashboard_applications_view_set_spacing(XfdashboardApplicationsView *self
 	}
 }
 
-/* Implementation: Public API */
+/* IMPLEMENTATION: Public API */
 
 /* Get/set icon name for 'go-back-to-parent-menu' entries */
 const gchar* xfdashboard_applications_view_get_parent_menu_icon(XfdashboardApplicationsView *self)

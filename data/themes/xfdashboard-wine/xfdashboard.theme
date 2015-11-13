@@ -2,14 +2,16 @@
 Name=xfdashboard-wine
 Name[es]=xfdashboard-wine
 Name[fr]=xfdashboard-vin
+Name[lt]=xfdashboard-vynas
 Name[sr]=Полетник у вину
 Comment=Red wine theme for xfdashboard
 Comment[es]=Tema de color vino para el xfdashboard
 Comment[fr]=Thème vin rouge pour xfdashboard
+Comment[lt]=Raudono vyno xfdashboard tema
 Comment[sr]=Тема полетника у боји црвеног вина
 Style=xfdashboard-wine.css
 Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Author=lacios
-Version=0.5.2git.e54fd25
+Version=0.5.3git.7cce9a1
 Screenshot=screenshot-xfdashboard-wine.png

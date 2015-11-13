@@ -2,13 +2,15 @@
 Name=xfdashboard-blue
 Name[es]=xfdashboard-blue
 Name[fr]=Bleu xfdashboard
+Name[lt]=xfdashboard-mėlyna
 Name[sr]=Полетник плави
 Comment=Blue theme for xfdashboard
 Comment[es]=Tema de color azul para xfdashboard
 Comment[fr]=Thème Bleu pour xfdashboard
+Comment[lt]=Mėlyna xfdashboard tema
 Comment[sr]=Плава тема полетника
 Style=xfdashboard-blue.css
 Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Author=lacios
-Version=0.5.2git.e54fd25
+Version=0.5.3git.7cce9a1

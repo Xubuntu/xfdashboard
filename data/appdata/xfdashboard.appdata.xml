@@ -53,6 +53,11 @@
 	</provides>
 
 	<releases>
+		<release version="0.5.3" timestamp="1447437275">
+			<description>
+				<p>This unstable development introduces a basic and simple plugin system as well as a sample plugin adding a new view showing a clock.</p>
+			</description>
+		</release>
 		<release version="0.5.2" timestamp="1444326527">
 			<description>
 				<p>This unstable development introduces a new configurable options to allows start a new instance of an application or to activate the current window. It also improves the detection of running application as well as bug-fixes and other smaller improvements.</p>
@@ -71,18 +76,21 @@
 		<release version="0.4.2" timestamp="1433008431">
 			<description>
 				<p>This release hopefully fixes problems with the stage resizes finally. Also the method to determine the desktop window was changed.</p>
+				<p xml:lang="es">Esta versión corrige finalmente los problemas con el cambio de tamaño del escenario. También el método para determinar la ventana del escritorio que ha cambiado.</p>
 				<p xml:lang="fr">Cette version corrige avec espoir des problèmes avec le redimensionnement de la scène finalement. Aussi la méthode pour déterminer la fenêtre du bureau a été modifiée.</p>
 			</description>
 		</release>
 		<release version="0.4.1" timestamp="1432920422">
 			<description>
 				<p>This release hopefully fixes problems with the stage as it size might not reflect the screen size preventing dragging windows over the whole screen. It also includes lots of smaller bug-fixes.</p>
+				<p xml:lang="es">Esta versión corrige problemas como que el tamaño no pueda reflejar el tamaño de la ventana previniendo arrastrar las ventanas por toda la pantalla. También incluye muchas correcciones de errores pequeñas.</p>
 				<p xml:lang="fr">Cette version corrige avec espoir des problèmes avec la scène comme ne pouvant pas refléter la taille de l'écran empêchant le déplacement des fenêtres sur la totalité de l'écran. Elle comprend aussi beaucoup de petites corrections de bugs.</p>
 			</description>
 		</release>
 		<release version="0.4.0" timestamp="1428778076">
 			<description>
 				<p>This stable version introduces lots of new features. like multi-monitor support, configurable key bindings and a settings dialog. It also contains a lot of other larger and smaller improvements.</p>
+				<p xml:lang="es">Esta versión de desarrollo estable introduce un montón de nuevas características: soporte multi-monitor, atajos de teclado configurables y un diálogo de ajustes. También contiene muchas otras grandes y pequeñas mejoras.</p>
 				<p xml:lang="fr">Cette version stable introduit beaucoup de nouvelles fonctionnalités. comme le support multi-moniteur, les raccourcis clavier configurables et une boîte de dialogue de paramètres. Il contient aussi beaucoup d'autres améliorations plus grandes et plus petites.</p>
 				<p xml:lang="sr">Ово стабилно издање претставља много нових могућности, нпр. подршку за више екрана, подешавање пречица и прозор поставки. Садржи доста малих и великих побољшања.</p>
 			</description>
@@ -97,6 +105,7 @@
 		<release version="0.3.90" timestamp="1426700895">
 			<description>
 				<p>This unstable development introduces support for multiple monitors and also bug-fixes and other smaller improvements.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable introduce el soporte de múltiples monitores, correcciones de errores y otras pequeñas mejoras.</p>
 				<p xml:lang="fr">Cette évolution instable introduit le support de plusieurs écrans et aussi des corrections de bogues et d'autres petites améliorations.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање представља подршку за више екрана и исправке грешака, као и још ситних побољшања.</p>
 			</description>
@@ -104,6 +113,7 @@
 		<release version="0.3.9" timestamp="1424455951">
 			<description>
 				<p>This unstable development introduces an application database and monitoring of installed and uninstalled applications. It also includes bug-fixes and other smaller improvements.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable introduce una aplicación de base de datos y monitorización de las aplicaciones instaladas y desinstaladas. También incluye correcciones de errores y otras pequeñas mejoras.</p>
 				<p xml:lang="fr">Cette évolution instable introduit une base de données application et le suivi des applications installées et désinstallées. Il comprend également des corrections de bogues et d'autres petites améliorations.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање добија могућност складиштења и надгледања података о уграђеним и уклоњеним програмима. Такође, има и исправке грешака, као и друга побољшања.</p>
 			</description>
@@ -111,6 +121,7 @@
 		<release version="0.3.8" timestamp="1422108114">
 			<description>
 				<p>This unstable development introduces a hotkey tracker to allow starting xfdashboard with a single press of &lt;Super&gt; key.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable introduce un rastreador de atajos para permitir iniciar xfdashboard con la pulsación de la tecla &lt;Super&gt;.</p>
 				<p xml:lang="fr">Cette évolution instable introduit un tracker de raccourci pour permettre à partir xfdashboard avec une simple pression sur le touches &lt;Super&gt;.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање доноси пратиоца пречица ради покретања полетника једним притиском дугмета &lt;Супер&gt;</p>
 			</description>
@@ -118,6 +129,7 @@
 		<release version="0.3.7" timestamp="1421530687">
 			<description>
 				<p>This unstable development fixes a bug which rendered the new settings application completely unusable.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable corrige un error que hacía que la nueva aplicación de ajustes quedará totalmente inutilizable.</p>
 				<p xml:lang="fr">Cette évolution instable corrige un bogue qui rendait les nouveaux paramètres application complètement inutilisable.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање исправља бубу која приказује нови програм поставки потпуно неупотребљиво.</p>
 			</description>
@@ -125,6 +137,7 @@
 		<release version="0.3.6" timestamp="1421519406">
 			<description>
 				<p>This unstable development introduces a settings application.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable introduce una aplicación de ajustes</p>
 				<p xml:lang="fr">Cette évolution instable introduit une application paramètres.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање доноси програм поставки полетника.</p>
 			</description>
@@ -200,6 +213,7 @@
 				<p>Initial release.</p>
 				<p xml:lang="es">Primera versión.</p>
 				<p xml:lang="fr">Première publication.</p>
+				<p xml:lang="lt">Pradinė laida.</p>
 				<p xml:lang="sr">Прво издање</p>
 			</description>
 		</release>
