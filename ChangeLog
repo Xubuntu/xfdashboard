@@ -1,3 +1,211 @@
+commit 08f0f800a7f7ddddd5cb337dff0139a7e9fc1dc3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Dec 18 22:21:27 2015 +0100
+
+    I18n: Update localization (lt)
+
+commit c6aad4dc1621c4c967d0395ac40860b5757f9987
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Dec 18 16:14:56 2015 +0100
+
+    Modify themes to apply new implementation to define focusable actor and their order.
+
+commit b8cdc29081c94cb9aecfe4af4f465c4cd26a7070
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Dec 18 16:11:08 2015 +0100
+
+    Instead of a static string to access data from an object created by XfdashboardThemeLayout use a GQuark. Also fix a bug registering focusable actors in reversed order.
+
+commit e17aee8942c702a703da4f6c5b979cdc786ae76e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Dec 18 16:02:14 2015 +0100
+
+    Register focusable actor as define by theme (if they are defined) at focus manager.
+    
+    If no <focusables> element exists at loaded theme then the default implementation takes place, i.e. registering a fixed set of actor in a fixed order.
+    
+    This commit closes issue GH #104
+
+commit 61969ad776c7f6ad642a61e420319dff337d30d0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Dec 18 15:18:18 2015 +0100
+
+    Use GPtrArray instead of GSList to keep and copy list of defined focusable actor references. Use GPtrArray to set final resolved focusable actor at top-level actor (usually XfdashboardStageInterface) at creation. This is a preparation for next step to register them at focus manager.
+
+commit 6da1b4dab37e00c09fd61a8083c14f0d03163679
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Dec 18 13:44:37 2015 +0100
+
+    Begin implementation of theme defined focusable actors and their order
+    
+    This commit only add parsing <focusables> and <focus> as described in issue GH #104 , it does not register and use the defined actors in focus manager yet.
+    
+    This commit is addressed to issue GH #104
+
+commit 68bf0163720718bc34d7380b3102f6c0d272e74a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Dec 16 18:40:38 2015 +0100
+
+    Fix access to first stage in list of stages when looking the stage where to show notification in xfdashboard_notify()
+
+commit 200e82af251d135cdeb9bede3145673110cb8363
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Dec 16 12:42:36 2015 +0100
+
+    Split function to determine desktop ID via environment variables from PID of newly opened windows in application tracker into operating system dependent functions.
+    
+    The current implementation does not respect the operating system for which is was compiled. It is assumed that a proc filesystem does exist and provides a file at /proc/$PID/environ. But this is only true for Linux but not for *BSD systems. To support *BSD (if anyone using a BSD system would implement it) different operating system and their specific way to retrieve environment variables of a process the originate function was split into a independent and an OS-specified function. The OS-specific function for Linux was converted with this commit as the independent function was cleaned up. The OS-specific function will be compiled depending on which condition via #if defined(__XXX___) succeeds.
+    
+    A fallback "OS-depending" function also exist just printed a warning once that this system is unsupported.
+
+commit 7599cf786ff8b5a0f4cdf1b21a01404c02cb5d20
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Dec 16 09:48:54 2015 +0100
+
+    Let new actor XfdashboardActionButton implement interface XfdashboardFocusable so it can act as source for actions in function _xfdashboard_action_button_clicked()
+
+commit 802611b306a6b5ed694b054237f3cd18dba571f0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Dec 16 09:22:16 2015 +0100
+
+    Fix comments in XfdashboardFocusable regarding selection support
+
+commit 4c3f8bcac4d6006fb6b5793504ec9fa7ab99960d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Dec 14 14:03:06 2015 +0100
+
+    Added missed modifications to focus manager needed for implementation of XfdashboardActionButton at commit d41a71837e20dbd6ea70214bc94a3152fc456370 for issue GH #102
+
+commit cb4bc3f00a8e3236443dbc39e9587fadb8afa11c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Dec 14 13:48:29 2015 +0100
+
+    Implement action signal "exit" at XfdashboardApplication to perform quit of application which is useful at XfdashboardActionButton actors
+
+commit d41a71837e20dbd6ea70214bc94a3152fc456370
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Dec 14 13:38:24 2015 +0100
+
+    Implemented a new actor XfdashboardActionButton
+    
+    The new actor XfdashboardActionButton is a button and derived from XfdashboardButton. It perform an action on a specified target actor class when clicked. It is configured similar to a (key) binding - see bindings.xml - and behaves similar but is reduced to a target and an action. E.g. if a XfdashboardActionButton is added to a layout (xfdashboard.xml) a target like "XfdashboardFocusManager" with action "focus-move-next" can be defined which will move the focus to next registered focusable actor like the default key "Tab" in bindings.xml
+    
+    This implementation closes issues GH #102
+
+commit 31b841d5ae0e77c75507ecce5f9aab7eca03cee8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Dec 14 13:37:31 2015 +0100
+
+    Turn general message into a debug message
+
+commit 9a6db0999754e1c2ab872874ba0c41a74ddf0f05
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Dec 9 13:58:36 2015 +0100
+
+    Allow mouse wheel to change workspace in windows view at any pointer position
+    
+    The current behaviour of the setting "/components/windows-view/scroll-event-changes-workspace" is to change workspace if pointer is over the windows view (and only there) when the mouse wheel is used.
+    
+    This behaviour was changed to allow the pointer to be anywhere on a monitor with an active windows view when the mouse wheel is used. Using the default theme that means that in a single monitor setup the windows view must be active to change workspace with mouse wheel (and enabled setting "/components/windows-view/scroll-event-changes-workspace" of course). The pointer can be anywhere: quicklaunch, search text box etc. In a multi-monitor setup the requirements of a single-monitor also affects the primary monitor in this setup but at all non-primary monitor is will always work if the pointer is at a non-primary monitor as it will only show a windows view ;)
+    
+    This commit fixes GH #103 (and also some typos)
+
+commit d6945c6758247bd1f1e291e36c20d99d1424e3d4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Dec 8 21:38:26 2015 +0100
+
+    Add kudos to AppData
+    
+    Add kudos to AppData as explained at https://git.gnome.org/browse/gnome-software/plain/doc/kudos.md
+
+commit dc5ec8d5b7bb9b636640c3a9be8e3a9a844328e2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Dec 8 21:00:07 2015 +0100
+
+    Split out function to find parent XfdashboardStageInterface or XfdashboardStage of an actor into a seperate function and use it for applicable.
+
+commit acd55cbd62ffe881b798453c36a340a385de1afb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Dec 1 09:21:55 2015 +0100
+
+    Fix typo and compiler warning when compiling on BSD-derived systems
+    
+    Fixes bug 12337
+    
+    Thanks to ToZ
+
+commit 71c9ad1e60afef802145f2de60e2609a7969a408
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Nov 28 10:00:36 2015 +0100
+
+    Include error message from GError when creating directory monitor failed at FreeBSD
+
+commit dff986d51053abfa9ed320e504ec1dc21fac43fa
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Nov 28 09:56:20 2015 +0100
+
+    Do not free and clear GError object we have propagated with g_propagate_error()
+
+commit 13b037eedc6e9c329e4ef1dad659f1c3e1c24c48
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Nov 28 09:55:42 2015 +0100
+
+    Another try for a workaround at FreeBSD with broken directory monitor in Glib
+
+commit 62db87af0df4e7504d48b190c0a8a7bc5814f9bc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Nov 25 21:33:11 2015 +0100
+
+    Do not return with failure result if file monitor for a path could not be created with an error. That means that only failures on file monitor creations *with* a GError will return failure result.
+    
+    This is a try for a workaround for FreeBSD with "broken" Glib.
+
+commit 371e50063b86b5d5c21db13b0fb74e995619a377
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 24 22:04:31 2015 +0100
+
+    Fix access after string was freed
+
+commit 38f7c2cd03005b4f3c7bb7668e81a294606e7154
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 24 21:52:39 2015 +0100
+
+    Add more debug message to _xfdashboard_application_database_load_applications_recursive
+    
+    I hope these debug message could help solving problems when loading application desktop files failed, e.g. on FreeBSD 10.2 with maybe broken glib.
+
+commit d0748a218646577bd599ba20d58ac23106b00409
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Nov 23 22:43:57 2015 +0100
+
+    I18n: Update localization (fr)
+
+commit 1d7811156ecb96f42d14ab145792c84042cca66b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 17 09:46:37 2015 +0100
+
+    Silence compiler warnings (aka fixed bugs :( )
+
+commit 5aa475317aca2387cb6dcd15f3ab7fee1204a734
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Nov 16 09:32:08 2015 +0100
+
+    Fix return value in g_return_val_if_fail() at function _xfdashboard_clock_view_on_timeout() at clock-view plugin
+    
+    Thanks to Lev for reporting
+
+commit 808d8014f75990e41fac7ea68204c7bf48dbad84
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 13 18:57:47 2015 +0100
+
+    Post-release version bump to 0.5.4
+
+commit a3fa8cef5250560a238e1190d92e53a9595f904b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 13 18:56:36 2015 +0100
+
+    Bump version to 0.5.3
+
 commit e5bf13f4859d2704852e4894200bc727d1a61970
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Fri Nov 13 18:53:46 2015 +0100
