@@ -1,0 +1,16 @@
+Description: Add missing file to POTFILES.in.
+Author: Unit 193 <unit193@ubuntu.com>
+
+Origin: vendor
+Last-Update: 2015-12-21
+
+--- xfdashboard-0.5.4.orig/po/POTFILES.in
++++ xfdashboard-0.5.4/po/POTFILES.in
+@@ -15,6 +15,7 @@ plugins/clock-view/clock-view.c
+ plugins/clock-view/plugin.c
+ settings/main.c
+ settings/settings.c
++xfdashboard/action-button.c
+ xfdashboard/actor.c
+ xfdashboard/application-button.c
+ xfdashboard/application.c
