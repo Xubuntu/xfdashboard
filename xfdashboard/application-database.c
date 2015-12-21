@@ -31,6 +31,7 @@
 #include "application-database.h"
 #include "desktop-app-info.h"
 
+
 /* Define this class in GObject system */
 G_DEFINE_TYPE(XfdashboardApplicationDatabase,
 				xfdashboard_application_database,
@@ -740,6 +741,10 @@ static gboolean _xfdashboard_application_database_load_applications_recursive(Xf
 													g_file_info_get_name(info));
 			if(!childPath)
 			{
+				g_debug("Unable to build path to search for desktop files for path='%s' and file='%s'",
+						path,
+						g_file_info_get_name(info));
+
 				/* Set error */
 				g_set_error(outError,
 								G_IO_ERROR,
@@ -765,6 +770,11 @@ static gboolean _xfdashboard_application_database_load_applications_recursive(Xf
 																						&error);
 			if(!childSuccess)
 			{
+				g_debug("Unable to iterate desktop files at %s%s%s",
+						path,
+						G_DIR_SEPARATOR_S,
+						g_file_info_get_name(info));
+
 				/* Propagate error */
 				g_propagate_error(outError, error);
 
@@ -888,6 +898,8 @@ static gboolean _xfdashboard_application_database_load_applications_recursive(Xf
 	monitorData=_xfdashboard_application_database_monitor_data_new(inCurrentPath);
 	if(!monitorData)
 	{
+		g_debug("Failed to create data object for file monitor for path '%s'", path);
+
 		/* Set error */
 		g_set_error(outError,
 						G_IO_ERROR,
@@ -904,21 +916,47 @@ static gboolean _xfdashboard_application_database_load_applications_recursive(Xf
 	}
 
 	monitorData->monitor=g_file_monitor(inCurrentPath, G_FILE_MONITOR_NONE, NULL, &error);
-	if(!monitorData->monitor)
+	if(!monitorData->monitor && error)
 	{
+#if defined(__unix__)
+		/* Workaround for FreeBSD with Glib bug (file/directory monitors cannot be created) */
+		g_warning(_("[workaround for FreeBSD] Cannot initialize file monitor for path '%s' but will not fail: %s"),
+					path,
+					error ? error->message : _("Unknown error"));
+
+		/* Clear error as this error will not fail at FreeBSD */
+		g_clear_error(&error);
+#else
+		g_debug("Failed to initialize file monitor for path '%s'", path);
+
 		/* Propagate error */
 		g_propagate_error(outError, error);
 
 		/* Release allocated resources */
 		if(monitorData) _xfdashboard_application_database_monitor_data_free(monitorData);
+
 		if(path) g_free(path);
 		if(topLevelPath) g_free(topLevelPath);
 		if(enumerator) g_object_unref(enumerator);
 
 		return(FALSE);
+#endif
 	}
 
-	*ioFileMonitors=g_list_prepend(*ioFileMonitors, monitorData);
+	/* If file monitor could be created, add it to list of file monitors ... */
+	if(monitorData && monitorData->monitor)
+	{
+		*ioFileMonitors=g_list_prepend(*ioFileMonitors, monitorData);
+
+		g_debug("Added file monitor for path '%s'", path);
+	}
+		/* ... otherwise free file monitor data */
+		else
+		{
+			if(monitorData) _xfdashboard_application_database_monitor_data_free(monitorData);
+
+			g_debug("Destroying file monitor for path '%s'", path);
+		}
 
 	g_debug("Finished scanning directory '%s' for search path '%s'",
 				path,
@@ -985,7 +1023,6 @@ static gboolean _xfdashboard_application_database_load_applications(XfdashboardA
 			if(fileMonitors) g_list_free_full(fileMonitors, g_object_unref);
 			if(apps) g_hash_table_unref(apps);
 			if(directory) g_object_unref(directory);
-			if(error) g_error_free(error);
 
 			return(FALSE);
 		}

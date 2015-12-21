@@ -8,12 +8,14 @@
 	<summary xml:lang="es">Tal vez un intérprete de órdenes a modo de panel para Xfce</summary>
 	<summary xml:lang="fr">Peut-être un shell GNOME comme un tableau de bord pour Xfce</summary>
 	<summary xml:lang="he">אולי לוח מחוונים דומה Gnome עבור Xfce</summary>
+	<summary xml:lang="lt">Galbūt, į Gnome apvalkalą panašus skydelis, skirtas Xfce</summary>
 	<summary xml:lang="sr">Полетник Иксфце-а који подсећа на Гномову шкољку</summary>
 
 	<description>
 		<p>Xfdashboard provides a GNOME shell dashboard like interface for use with Xfce desktop.</p>
 		<p xml:lang="es">Xfdashboard provee un Intérprete de panel como el de GNOME para usarse en el entorno de escritorio Xfce.</p>
 		<p xml:lang="fr">Xfdashboard fournit un tableau de bord shell GNOME comme interface pour une utilisation avec le bureau Xfce.</p>
+		<p xml:lang="lt">Xfdashboard pateikia į Gnome apvalkalo skydelį panašią sąsają, skirtą naudoti Xfce darbalaukyje.</p>
 		<p xml:lang="sr">Полетник Иксфце-а је сучеље попут Гномове шкољке за употребу на радној површи Иксфце-а.</p>
 		<p>It can be configured to run to any keyboard shortcut and when executed provides an overview of applications currently open enabling the user to switch between different applications. The search feature works like Xfce's app finder which makes it convenient to search for and start applications.</p>
 		<p xml:lang="es">Puede ser configurado para funcionar con cualquier combinación de teclas y cuando se ejecuta proporciona una visión general de las aplicaciones que estén abiertas permitendo al usuario cambiar entre diferentes aplicaciones. La función de búsqueda funciona como el buscador de aplicaciones de Xfce que hace que sea conveniente para buscar e iniciar aplicaciones.</p>
@@ -52,7 +54,17 @@
 		<binary>xfdashboard</binary>
 	</provides>
 
+	<kudos>
+		<kudo>HiDpiIcon</kudo>
+		<kudo>ModernToolkit</kudo>
+	</kudos>
+
 	<releases>
+		<release version="0.5.4" timestamp="1450515013">
+			<description>
+				<p>This unstable development introduces a new optional configuration to themes about defining which elements can be focused and in which order.</p>
+			</description>
+		</release>
 		<release version="0.5.3" timestamp="1447437275">
 			<description>
 				<p>This unstable development introduces a basic and simple plugin system as well as a sample plugin adding a new view showing a clock.</p>

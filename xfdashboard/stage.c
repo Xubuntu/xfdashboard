@@ -129,14 +129,14 @@ static guint XfdashboardStageSignals[SIGNAL_LAST]={ 0, };
 
 
 /* IMPLEMENTATION: Private variables and methods */
-#define NOTIFICATION_TIMEOUT_XFCONF_PROP		"/min-notification-timeout"
-#define DEFAULT_NOTIFICATION_TIMEOUT			3000
-#define RESET_SEARCH_ON_RESUME_XFCONF_PROP		"/reset-search-on-resume"
-#define DEFAULT_RESET_SEARCH_ON_RESUME			TRUE
-#define SWITCH_VIEW_ON_RESUME_XFCONF_PROP		"/switch-to-view-on-resume"
-#define DEFAULT_SWITCH_VIEW_ON_RESUME			NULL
-#define XFDASHBOARD_THEME_LAYOUT_PRIMARY		"primary"
-#define XFDASHBOARD_THEME_LAYOUT_SECONDARY		"secondary"
+#define NOTIFICATION_TIMEOUT_XFCONF_PROP				"/min-notification-timeout"
+#define DEFAULT_NOTIFICATION_TIMEOUT					3000
+#define RESET_SEARCH_ON_RESUME_XFCONF_PROP				"/reset-search-on-resume"
+#define DEFAULT_RESET_SEARCH_ON_RESUME					TRUE
+#define SWITCH_VIEW_ON_RESUME_XFCONF_PROP				"/switch-to-view-on-resume"
+#define DEFAULT_SWITCH_VIEW_ON_RESUME					NULL
+#define XFDASHBOARD_THEME_LAYOUT_PRIMARY				"primary"
+#define XFDASHBOARD_THEME_LAYOUT_SECONDARY				"secondary"
 
 /* Handle an event */
 static gboolean _xfdashboard_stage_event(ClutterActor *inActor, ClutterEvent *inEvent)
@@ -802,6 +802,9 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 	XfdashboardWindowTrackerMonitor		*monitor;
 	ClutterActorIter					childIter;
 	ClutterActor						*child;
+	GObject								*focusObject;
+	GPtrArray							*interfaceFocusTable;
+	guint								i;
 
 	g_return_if_fail(XFDASHBOARD_IS_STAGE(self));
 	g_return_if_fail(XFDASHBOARD_IS_THEME(inTheme));
@@ -938,6 +941,9 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 		interface=CLUTTER_ACTOR(iter->data);
 		if(!interface) continue;
 
+		/* Get focus table of interface */
+		interfaceFocusTable=g_object_get_qdata(G_OBJECT(interface), XFDASHBOARD_THEME_LAYOUT_FOCUS_TABLE_DATA);
+
 		/* Add interface to stage */
 		clutter_actor_add_child(CLUTTER_ACTOR(self), interface);
 
@@ -964,7 +970,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 				g_signal_connect(child, "destroy", G_CALLBACK(_xfdashboard_stage_reset_reference_on_destroy), &priv->viewSelector);
 
 				/* Register this focusable actor if it is focusable */
-				if(XFDASHBOARD_IS_FOCUSABLE(priv->viewSelector))
+				if(!interfaceFocusTable && XFDASHBOARD_IS_FOCUSABLE(priv->viewSelector))
 				{
 					xfdashboard_focus_manager_register(priv->focusManager,
 														XFDASHBOARD_FOCUSABLE(priv->viewSelector));
@@ -996,7 +1002,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 											self);
 
 				/* Register this focusable actor if it is focusable */
-				if(XFDASHBOARD_IS_FOCUSABLE(priv->searchbox))
+				if(!interfaceFocusTable && XFDASHBOARD_IS_FOCUSABLE(priv->searchbox))
 				{
 					xfdashboard_focus_manager_register(priv->focusManager,
 														XFDASHBOARD_FOCUSABLE(priv->searchbox));
@@ -1014,7 +1020,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 				g_signal_connect_swapped(priv->viewpad, "view-activated", G_CALLBACK(_xfdashboard_stage_on_view_activated), self);
 
 				/* Register this focusable actor if it is focusable */
-				if(XFDASHBOARD_IS_FOCUSABLE(priv->viewpad))
+				if(!interfaceFocusTable && XFDASHBOARD_IS_FOCUSABLE(priv->viewpad))
 				{
 					xfdashboard_focus_manager_register(priv->focusManager,
 														XFDASHBOARD_FOCUSABLE(priv->viewpad));
@@ -1047,7 +1053,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 				}
 
 				/* Register this focusable actor if it is focusable */
-				if(XFDASHBOARD_IS_FOCUSABLE(priv->quicklaunch))
+				if(!interfaceFocusTable && XFDASHBOARD_IS_FOCUSABLE(priv->quicklaunch))
 				{
 					xfdashboard_focus_manager_register(priv->focusManager,
 														XFDASHBOARD_FOCUSABLE(priv->quicklaunch));
@@ -1062,7 +1068,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 				g_signal_connect(child, "destroy", G_CALLBACK(_xfdashboard_stage_reset_reference_on_destroy), &priv->workspaces);
 
 				/* Register this focusable actor if it is focusable */
-				if(XFDASHBOARD_IS_FOCUSABLE(priv->workspaces))
+				if(!interfaceFocusTable && XFDASHBOARD_IS_FOCUSABLE(priv->workspaces))
 				{
 					xfdashboard_focus_manager_register(priv->focusManager,
 														XFDASHBOARD_FOCUSABLE(priv->workspaces));
@@ -1077,7 +1083,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 				g_signal_connect(child, "destroy", G_CALLBACK(_xfdashboard_stage_reset_reference_on_destroy), &priv->notification);
 
 				/* Register this focusable actor if it is focusable */
-				if(XFDASHBOARD_IS_FOCUSABLE(priv->notification))
+				if(!interfaceFocusTable && XFDASHBOARD_IS_FOCUSABLE(priv->notification))
 				{
 					xfdashboard_focus_manager_register(priv->focusManager,
 														XFDASHBOARD_FOCUSABLE(priv->notification));
@@ -1096,7 +1102,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 				g_signal_connect(child, "destroy", G_CALLBACK(_xfdashboard_stage_reset_reference_on_destroy), &priv->tooltip);
 
 				/* Register this focusable actor if it is focusable */
-				if(XFDASHBOARD_IS_FOCUSABLE(priv->tooltip))
+				if(!interfaceFocusTable && XFDASHBOARD_IS_FOCUSABLE(priv->tooltip))
 				{
 					xfdashboard_focus_manager_register(priv->focusManager,
 														XFDASHBOARD_FOCUSABLE(priv->tooltip));
@@ -1105,6 +1111,32 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 				/* Hide tooltip by default */
 				clutter_actor_hide(priv->tooltip);
 				clutter_actor_set_reactive(priv->tooltip, FALSE);
+			}
+		}
+
+		/* Register focusable actors at focus manager */
+		if(interfaceFocusTable)
+		{
+			for(i=0; i<interfaceFocusTable->len; i++)
+			{
+				/* Get actor to register at focus manager */
+				focusObject=G_OBJECT(g_ptr_array_index(interfaceFocusTable, i));
+				if(!focusObject) continue;
+
+				/* Check that actor is focusable */
+				if(!XFDASHBOARD_IS_FOCUSABLE(focusObject))
+				{
+					g_warning("Object %s is not focusable and cannot be registered.",
+								G_OBJECT_TYPE_NAME(focusObject));
+					continue;
+				}
+
+				/* Register actor at focus manager */
+				xfdashboard_focus_manager_register(priv->focusManager,
+													XFDASHBOARD_FOCUSABLE(focusObject));
+				g_debug("Registering actor %s of interface with ID '%s' at focus manager",
+						G_OBJECT_TYPE_NAME(focusObject),
+						clutter_actor_get_name(interface));
 			}
 		}
 	}
@@ -1750,7 +1782,7 @@ static void xfdashboard_stage_init(XfdashboardStage *self)
 									G_CALLBACK(_xfdashboard_stage_on_screen_size_changed),
 									self);
 
-		g_message("Tracking screen resizes to resize stage");
+		g_debug("Tracking screen resizes to resize stage");
 	}
 }
 
