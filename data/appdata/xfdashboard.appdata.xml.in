@@ -37,6 +37,8 @@
 	<url type="bugtracker">https://github.com/gmc-holle/xfdashboard/issues</url>
 	<url type="help">http://goodies.xfce.org/projects/applications/xfdashboard/manual</url>
 
+	<project_group>XFCE</project_group>
+
 	<updatecontact>nomad@froevel.de</updatecontact>
 
 	<provides>
@@ -48,7 +50,22 @@
 		<kudo>ModernToolkit</kudo>
 	</kudos>
 
+	<keywords>
+		<keyword>window management</keyword>
+		<keyword>application management</keyword>
+		<keyword>organize</keyword>
+		<keyword>search tool</keyword>
+		<keyword>search</keyword>
+	</keywords>
+
 	<releases>
+		<release version="0.5.5" timestamp="1454269066">
+			<description>
+				<_p>This unstable development introduces a new search provider plugin
+				which uses installed Gnome-Shell search providers as additional source.
+				</_p>
+			</description>
+		</release>
 		<release version="0.5.4" timestamp="1450515013">
 			<description>
 				<_p>This unstable development introduces a new optional configuration to

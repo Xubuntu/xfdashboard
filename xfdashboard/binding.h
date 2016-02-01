@@ -1,7 +1,7 @@
 /*
  * binding: A keyboard or pointer binding
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ struct _XfdashboardBindingClass
 typedef enum /*< flags,prefix=XFDASHBOARD_BINDING_FLAGS >*/
 {
 	XFDASHBOARD_BINDING_FLAGS_NONE=0,
-	XFDASHBOARD_BINDING_FLAGS_ALLOW_UNFOCUSABLE_TARGET
+	XFDASHBOARD_BINDING_FLAGS_ALLOW_UNFOCUSABLE_TARGET=1 << 0,
 } XfdashboardBindingFlags;
 
 GType xfdashboard_binding_get_type(void) G_GNUC_CONST;

@@ -1,7 +1,7 @@
 /*
  * applications-view: A view showing all installed applications as menu
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,6 +103,49 @@ static GParamSpec* XfdashboardApplicationsViewProperties[PROP_LAST]={ 0, };
 
 /* Forward declarations */
 static void _xfdashboard_applications_view_on_item_clicked(XfdashboardApplicationsView *self, gpointer inUserData);
+
+/* Set up child actor for current view mode */
+static void _xfdashboard_applications_view_setup_actor_for_view_mode(XfdashboardApplicationsView *self, ClutterActor *inActor)
+{
+	XfdashboardApplicationsViewPrivate	*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_APPLICATIONS_VIEW(self));
+	g_return_if_fail(CLUTTER_IS_ACTOR(inActor));
+
+	priv=self->priv;
+
+	/* In list mode just fill all available space and align to top-left corner */
+	if(priv->viewMode==XFDASHBOARD_VIEW_MODE_LIST)
+	{
+		clutter_actor_set_x_expand(inActor, TRUE);
+		clutter_actor_set_y_expand(inActor, TRUE);
+		clutter_actor_set_x_align(inActor, CLUTTER_ACTOR_ALIGN_START);
+		clutter_actor_set_y_align(inActor, CLUTTER_ACTOR_ALIGN_START);
+
+		if(XFDASHBOARD_IS_STYLABLE(inActor)) xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(inActor), "view-mode-list");
+	}
+		/* In view mode do not fill all available space and align to top-center
+		 * corner or middle-left corner depending on request mode of actor.
+		 */
+		else
+		{
+			clutter_actor_set_x_expand(inActor, FALSE);
+			clutter_actor_set_y_expand(inActor, FALSE);
+			if(clutter_actor_get_request_mode(inActor)==CLUTTER_REQUEST_HEIGHT_FOR_WIDTH)
+			{
+				clutter_actor_set_x_align(CLUTTER_ACTOR(inActor), CLUTTER_ACTOR_ALIGN_CENTER);
+				clutter_actor_set_y_align(CLUTTER_ACTOR(inActor), CLUTTER_ACTOR_ALIGN_START);
+			}
+				else
+				{
+					clutter_actor_set_x_align(CLUTTER_ACTOR(inActor), CLUTTER_ACTOR_ALIGN_START);
+					clutter_actor_set_y_align(CLUTTER_ACTOR(inActor), CLUTTER_ACTOR_ALIGN_CENTER);
+				}
+
+			if(XFDASHBOARD_IS_STYLABLE(inActor)) xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(inActor), "view-mode-icon");
+		}
+}
+
 
 /* Drag of an menu item begins */
 static void _xfdashboard_applications_view_on_drag_begin(ClutterDragAction *inAction,
@@ -351,19 +394,15 @@ static void _xfdashboard_applications_view_on_all_applications_menu_clicked(Xfda
 	/* Create parent menu item */
 	actor=xfdashboard_button_new();
 
-	if(priv->parentMenuIcon) xfdashboard_button_set_icon(XFDASHBOARD_BUTTON(actor), priv->parentMenuIcon);
+	if(priv->parentMenuIcon) xfdashboard_button_set_icon_name(XFDASHBOARD_BUTTON(actor), priv->parentMenuIcon);
 
 	if(priv->viewMode==XFDASHBOARD_VIEW_MODE_LIST) actorText=g_markup_printf_escaped(priv->formatTitleDescription, _("Back"), _("Go back to previous menu"));
 		else actorText=g_markup_printf_escaped(priv->formatTitleOnly, _("Back"));
 	xfdashboard_button_set_text(XFDASHBOARD_BUTTON(actor), actorText);
 	g_free(actorText);
 
-	if(priv->viewMode==XFDASHBOARD_VIEW_MODE_LIST) xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(actor), "view-mode-list");
-		else xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(actor), "view-mode-icon");
-
 	/* Add to view and layout */
-	clutter_actor_set_x_expand(CLUTTER_ACTOR(actor), TRUE);
-	clutter_actor_set_y_expand(CLUTTER_ACTOR(actor), TRUE);
+	_xfdashboard_applications_view_setup_actor_for_view_mode(self, CLUTTER_ACTOR(actor));
 	clutter_actor_add_child(CLUTTER_ACTOR(self), CLUTTER_ACTOR(actor));
 	clutter_actor_show(actor);
 
@@ -399,14 +438,10 @@ static void _xfdashboard_applications_view_on_all_applications_menu_clicked(Xfda
 		/* Create actor for app info */
 		actor=xfdashboard_application_button_new_from_app_info(G_APP_INFO(appInfo));
 
-		if(priv->viewMode==XFDASHBOARD_VIEW_MODE_LIST) xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(actor), "view-mode-list");
-			else xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(actor), "view-mode-icon");
-
 		g_signal_connect_swapped(actor, "clicked", G_CALLBACK(_xfdashboard_applications_view_on_item_clicked), self);
 
 		/* Add to view and layout */
-		clutter_actor_set_x_expand(CLUTTER_ACTOR(actor), TRUE);
-		clutter_actor_set_y_expand(CLUTTER_ACTOR(actor), TRUE);
+		_xfdashboard_applications_view_setup_actor_for_view_mode(self, CLUTTER_ACTOR(actor));
 		clutter_actor_add_child(CLUTTER_ACTOR(self), CLUTTER_ACTOR(actor));
 		clutter_actor_show(actor);
 
@@ -465,19 +500,15 @@ static void _xfdashboard_applications_view_on_filter_changed(XfdashboardApplicat
 		/* Create and adjust of "parent menu" button to application buttons */
 		actor=xfdashboard_button_new();
 
-		if(priv->parentMenuIcon) xfdashboard_button_set_icon(XFDASHBOARD_BUTTON(actor), priv->parentMenuIcon);
+		if(priv->parentMenuIcon) xfdashboard_button_set_icon_name(XFDASHBOARD_BUTTON(actor), priv->parentMenuIcon);
 
 		if(priv->viewMode==XFDASHBOARD_VIEW_MODE_LIST) actorText=g_markup_printf_escaped(priv->formatTitleDescription, _("Back"), _("Go back to previous menu"));
 			else actorText=g_markup_printf_escaped(priv->formatTitleOnly, _("Back"));
 		xfdashboard_button_set_text(XFDASHBOARD_BUTTON(actor), actorText);
 		g_free(actorText);
 
-		if(priv->viewMode==XFDASHBOARD_VIEW_MODE_LIST) xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(actor), "view-mode-list");
-			else xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(actor), "view-mode-icon");
-
 		/* Add to view and layout */
-		clutter_actor_set_x_expand(CLUTTER_ACTOR(actor), TRUE);
-		clutter_actor_set_y_expand(CLUTTER_ACTOR(actor), TRUE);
+		_xfdashboard_applications_view_setup_actor_for_view_mode(self, CLUTTER_ACTOR(actor));
 		clutter_actor_add_child(CLUTTER_ACTOR(self), CLUTTER_ACTOR(actor));
 		clutter_actor_show(actor);
 
@@ -497,19 +528,15 @@ static void _xfdashboard_applications_view_on_filter_changed(XfdashboardApplicat
 
 		/* Create and adjust of "parent menu" button to application buttons */
 		actor=xfdashboard_button_new();
-		xfdashboard_button_set_icon(XFDASHBOARD_BUTTON(actor), ALL_APPLICATIONS_MENU_ICON);
+		xfdashboard_button_set_icon_name(XFDASHBOARD_BUTTON(actor), ALL_APPLICATIONS_MENU_ICON);
 
 		if(priv->viewMode==XFDASHBOARD_VIEW_MODE_LIST) actorText=g_markup_printf_escaped(priv->formatTitleDescription, _("All applications"), _("List of all installed applications"));
 			else actorText=g_markup_printf_escaped(priv->formatTitleOnly, _("All applications"));
 		xfdashboard_button_set_text(XFDASHBOARD_BUTTON(actor), actorText);
 		g_free(actorText);
 
-		if(priv->viewMode==XFDASHBOARD_VIEW_MODE_LIST) xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(actor), "view-mode-list");
-			else xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(actor), "view-mode-icon");
-
 		/* Add to view and layout */
-		clutter_actor_set_x_expand(CLUTTER_ACTOR(actor), TRUE);
-		clutter_actor_set_y_expand(CLUTTER_ACTOR(actor), TRUE);
+		_xfdashboard_applications_view_setup_actor_for_view_mode(self, CLUTTER_ACTOR(actor));
 		clutter_actor_add_child(CLUTTER_ACTOR(self), CLUTTER_ACTOR(actor));
 		clutter_actor_show(actor);
 
@@ -554,7 +581,7 @@ static void _xfdashboard_applications_view_on_filter_changed(XfdashboardApplicat
 					actor=xfdashboard_button_new();
 
 					iconName=garcon_menu_element_get_icon_name(menuElement);
-					if(iconName) xfdashboard_button_set_icon(XFDASHBOARD_BUTTON(actor), iconName);
+					if(iconName) xfdashboard_button_set_icon_name(XFDASHBOARD_BUTTON(actor), iconName);
 
 					if(priv->viewMode==XFDASHBOARD_VIEW_MODE_LIST)
 					{
@@ -573,12 +600,8 @@ static void _xfdashboard_applications_view_on_filter_changed(XfdashboardApplicat
 					g_signal_connect(actor, "clicked", G_CALLBACK(_xfdashboard_applications_view_on_menu_clicked), menuElement);
 				}
 
-			if(priv->viewMode==XFDASHBOARD_VIEW_MODE_LIST) xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(actor), "view-mode-list");
-				else xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(actor), "view-mode-icon");
-
 			/* Add to view and layout */
-			clutter_actor_set_x_expand(CLUTTER_ACTOR(actor), TRUE);
-			clutter_actor_set_y_expand(CLUTTER_ACTOR(actor), TRUE);
+			_xfdashboard_applications_view_setup_actor_for_view_mode(self, CLUTTER_ACTOR(actor));
 			clutter_actor_add_child(CLUTTER_ACTOR(self), CLUTTER_ACTOR(actor));
 			clutter_actor_show(actor);
 

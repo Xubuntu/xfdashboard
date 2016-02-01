@@ -2,7 +2,7 @@
  * background: An actor providing background rendering. Usually other
  *             actors are derived from this one.
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -223,9 +223,12 @@ static void _xfdashboard_background_allocate(ClutterActor *self,
 	CLUTTER_ACTOR_CLASS(xfdashboard_background_parent_class)->allocate(self, inBox, inFlags);
 
 	/* Set size of canvas */
-	clutter_canvas_set_size(CLUTTER_CANVAS(priv->fillCanvas),
-								clutter_actor_box_get_width(inBox),
-								clutter_actor_box_get_height(inBox));
+	if(priv->fillCanvas)
+	{
+		clutter_canvas_set_size(CLUTTER_CANVAS(priv->fillCanvas),
+									clutter_actor_box_get_width(inBox),
+									clutter_actor_box_get_height(inBox));
+	}
 }
 
 /* IMPLEMENTATION: GObject */

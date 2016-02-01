@@ -1,7 +1,7 @@
 /*
  * viewpad: A viewpad managing views
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,24 +53,26 @@ G_DEFINE_TYPE_WITH_CODE(XfdashboardViewpad,
 struct _XfdashboardViewpadPrivate
 {
 	/* Properties related */
-	gfloat					spacing;
-	XfdashboardView			*activeView;
+	gfloat							spacing;
+	XfdashboardView					*activeView;
 	XfdashboardVisibilityPolicy		hScrollbarPolicy;
-	gboolean				hScrollbarVisible;
+	gboolean						hScrollbarVisible;
 	XfdashboardVisibilityPolicy		vScrollbarPolicy;
-	gboolean				vScrollbarVisible;
+	gboolean						vScrollbarVisible;
 
 	/* Instance related */
-	XfdashboardViewManager	*viewManager;
+	XfdashboardViewManager			*viewManager;
 
-	ClutterLayoutManager	*layout;
-	ClutterActor			*container;
-	ClutterActor			*hScrollbar;
-	ClutterActor			*vScrollbar;
+	ClutterLayoutManager			*layout;
+	ClutterActor					*container;
+	ClutterActor					*hScrollbar;
+	ClutterActor					*vScrollbar;
 
-	guint					scrollbarUpdateID;
+	guint							scrollbarUpdateID;
 
-	gboolean				doRegisterFocusableViews;
+	gboolean						doRegisterFocusableViews;
+
+	ClutterActorBox					*lastAllocation;
 };
 
 /* Properties */
@@ -495,50 +497,81 @@ static void _xfdashboard_viewpad_on_view_scroll_to(XfdashboardViewpad *self,
 		}
 }
 
-/* Determine if scrolling is needed to get requested actor visible in viewpad */
-static gboolean _xfdashboard_viewpad_on_view_child_needs_scroll(XfdashboardViewpad *self,
-																ClutterActor *inActor,
-																gpointer inUserData)
+/* Determine if scrolling is needed to get requested actor visible in viewpad and
+ * return the distance in x and y direction if scrolling is needed.
+ */
+static gboolean _xfdashboard_viewpad_view_needs_scrolling_for_child(XfdashboardViewpad *self,
+																	XfdashboardView *inView,
+																	ClutterActor *inViewChild,
+																	gfloat *outScrollX,
+																	gfloat *outScrollY)
 {
 	XfdashboardViewpadPrivate	*priv;
-	XfdashboardView				*view;
 	ClutterVertex				origin;
 	ClutterVertex				transformedUpperLeft;
 	ClutterVertex				transformedLowerRight;
 	gfloat						x, y, w, h;
+	gboolean					viewFitsIntoViewpad;
 	gboolean					needScrolling;
+	gfloat						scrollX, scrollY;
+	gfloat						viewpadWidth, viewpadHeight;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_VIEWPAD(self), FALSE);
-	g_return_val_if_fail(CLUTTER_IS_ACTOR(inActor), FALSE);
-	g_return_val_if_fail(XFDASHBOARD_IS_VIEW(inUserData), FALSE);
+	g_return_val_if_fail(XFDASHBOARD_IS_VIEW(inView), FALSE);
+	g_return_val_if_fail(CLUTTER_IS_ACTOR(inViewChild), FALSE);
 
 	priv=self->priv;
-	view=XFDASHBOARD_VIEW(inUserData);
+	viewFitsIntoViewpad=FALSE;
 	needScrolling=FALSE;
+	scrollX=scrollY=0.0f;
 
-	/* Get position and size of view but respect scrolled position */
-	if(view==priv->activeView)
+	/* Check if view would fit into this viewpad completely */
+	if(priv->lastAllocation)
 	{
-		x=xfdashboard_scrollbar_get_value(XFDASHBOARD_SCROLLBAR(priv->hScrollbar));
-		y=xfdashboard_scrollbar_get_value(XFDASHBOARD_SCROLLBAR(priv->vScrollbar));
-		clutter_actor_get_size(CLUTTER_ACTOR(self), &w, &h);
+		viewpadWidth=clutter_actor_box_get_width(priv->lastAllocation);
+		viewpadHeight=clutter_actor_box_get_height(priv->lastAllocation);
+
+		clutter_actor_get_size(CLUTTER_ACTOR(inView), &w, &h);
+		if(w<=viewpadWidth && h<=viewpadHeight) viewFitsIntoViewpad=TRUE;
 	}
 		else
 		{
-			if(clutter_actor_has_clip(CLUTTER_ACTOR(view)))
+			clutter_actor_get_size(CLUTTER_ACTOR(self), &viewpadWidth, &viewpadHeight);
+		}
+
+	/* Get position and size of view but respect scrolled position */
+	if(inView==priv->activeView)
+	{
+		x=xfdashboard_scrollbar_get_value(XFDASHBOARD_SCROLLBAR(priv->hScrollbar));
+		y=xfdashboard_scrollbar_get_value(XFDASHBOARD_SCROLLBAR(priv->vScrollbar));
+		w=viewpadWidth;
+		h=viewpadHeight;
+	}
+		else
+		{
+			if(clutter_actor_has_clip(CLUTTER_ACTOR(inView)))
 			{
-				clutter_actor_get_clip(CLUTTER_ACTOR(view), &x, &y, &w, &h);
+				clutter_actor_get_clip(CLUTTER_ACTOR(inView), &x, &y, &w, &h);
 			}
 				else
 				{
 					x=y=0.0f;
-					clutter_actor_get_size(CLUTTER_ACTOR(view), &w, &h);
+					clutter_actor_get_size(CLUTTER_ACTOR(inView), &w, &h);
 				}
 		}
 
 	/* Check that upper left point of actor is visible otherwise set flag for scrolling */
-	origin.x=origin.y=origin.z=0.0f;
-	clutter_actor_apply_relative_transform_to_point(inActor, CLUTTER_ACTOR(view), &origin, &transformedUpperLeft);
+	if(!viewFitsIntoViewpad)
+	{
+		origin.x=origin.y=origin.z=0.0f;
+		clutter_actor_apply_relative_transform_to_point(inViewChild, CLUTTER_ACTOR(inView), &origin, &transformedUpperLeft);
+	}
+		else
+		{
+			origin.x=origin.y=origin.z=0.0f;
+			clutter_actor_apply_relative_transform_to_point(CLUTTER_ACTOR(inView), CLUTTER_ACTOR(self), &origin, &transformedUpperLeft);
+		}
+
 	if(transformedUpperLeft.x<x ||
 		transformedUpperLeft.x>(x+w) ||
 		transformedUpperLeft.y<y ||
@@ -548,75 +581,20 @@ static gboolean _xfdashboard_viewpad_on_view_child_needs_scroll(XfdashboardViewp
 	}
 
 	/* Check that lower right point of actor is visible otherwise set flag for scrolling */
-	clutter_actor_get_size(inActor, &origin.x, &origin.y);
-	clutter_actor_apply_relative_transform_to_point(inActor, CLUTTER_ACTOR(view), &origin, &transformedLowerRight);
-	if(transformedLowerRight.x<x ||
-		transformedLowerRight.x>(x+w) ||
-		transformedLowerRight.y<y ||
-		transformedLowerRight.y>(y+h))
+	if(!viewFitsIntoViewpad)
 	{
-		needScrolling=TRUE;
-	}
-
-	/* Return result */
-	return(needScrolling);
-}
-
-/* Ensure that a child of a view is visible by scrolling if needed */
-static void _xfdashboard_viewpad_on_view_child_ensure_visible(XfdashboardViewpad *self,
-														ClutterActor *inActor,
-														gpointer inUserData)
-{
-	XfdashboardViewpadPrivate	*priv;
-	XfdashboardView				*view;
-	ClutterVertex				origin;
-	ClutterVertex				transformedUpperLeft;
-	ClutterVertex				transformedLowerRight;
-	gfloat						x, y, w, h;
-	gboolean					needScrolling;
-
-	g_return_if_fail(XFDASHBOARD_IS_VIEWPAD(self));
-	g_return_if_fail(CLUTTER_IS_ACTOR(inActor));
-	g_return_if_fail(XFDASHBOARD_IS_VIEW(inUserData));
-
-	priv=self->priv;
-	view=XFDASHBOARD_VIEW(inUserData);
-	needScrolling=FALSE;
-
-	/* Get position and size of view but respect scrolled position */
-	if(view==priv->activeView)
-	{
-		x=xfdashboard_scrollbar_get_value(XFDASHBOARD_SCROLLBAR(priv->hScrollbar));
-		y=xfdashboard_scrollbar_get_value(XFDASHBOARD_SCROLLBAR(priv->vScrollbar));
-		clutter_actor_get_size(CLUTTER_ACTOR(self), &w, &h);
+		origin.z=0.0f;
+		clutter_actor_get_size(inViewChild, &origin.x, &origin.y);
+		clutter_actor_apply_relative_transform_to_point(inViewChild, CLUTTER_ACTOR(inView), &origin, &transformedLowerRight);
 	}
 		else
 		{
-			if(clutter_actor_has_clip(CLUTTER_ACTOR(view)))
-			{
-				clutter_actor_get_clip(CLUTTER_ACTOR(view), &x, &y, &w, &h);
-			}
-				else
-				{
-					x=y=0.0f;
-					clutter_actor_get_size(CLUTTER_ACTOR(view), &w, &h);
-				}
+			origin.x=clutter_actor_box_get_width(priv->lastAllocation);
+			origin.y=clutter_actor_box_get_height(priv->lastAllocation);
+			origin.z=0.0f;
+			clutter_actor_apply_relative_transform_to_point(CLUTTER_ACTOR(inView), CLUTTER_ACTOR(self), &origin, &transformedLowerRight);
 		}
 
-	/* Check that upper left point of actor is visible otherwise set flag for scrolling */
-	origin.x=origin.y=origin.z=0.0f;
-	clutter_actor_apply_relative_transform_to_point(inActor, CLUTTER_ACTOR(view), &origin, &transformedUpperLeft);
-	if(transformedUpperLeft.x<x ||
-		transformedUpperLeft.x>(x+w) ||
-		transformedUpperLeft.y<y ||
-		transformedUpperLeft.y>(y+h))
-	{
-		needScrolling=TRUE;
-	}
-
-	/* Check that lower right point of actor is visible otherwise set flag for scrolling */
-	clutter_actor_get_size(inActor, &origin.x, &origin.y);
-	clutter_actor_apply_relative_transform_to_point(inActor, CLUTTER_ACTOR(view), &origin, &transformedLowerRight);
 	if(transformedLowerRight.x<x ||
 		transformedLowerRight.x>(x+w) ||
 		transformedLowerRight.y<y ||
@@ -637,12 +615,59 @@ static void _xfdashboard_viewpad_on_view_child_ensure_visible(XfdashboardViewpad
 
 		if(distanceUpperLeft<=distanceLowerRight)
 		{
-			_xfdashboard_viewpad_on_view_scroll_to(self, transformedUpperLeft.x, transformedUpperLeft.y, view);
+			scrollX=transformedUpperLeft.x;
+			scrollY=transformedUpperLeft.y;
 		}
 			else
 			{
-				_xfdashboard_viewpad_on_view_scroll_to(self, transformedUpperLeft.x, transformedLowerRight.y-h, view);
+				scrollX=transformedUpperLeft.x;
+				scrollY=transformedLowerRight.y-h;
 			}
+	}
+
+	/* Store values computed */
+	if(outScrollX) *outScrollX=scrollX;
+	if(outScrollY) *outScrollY=scrollY;
+
+	/* Return TRUE if scrolling is needed otherwise FALSE */
+	return(needScrolling);
+}
+
+/* Determine if scrolling is needed to get requested actor visible in viewpad */
+static gboolean _xfdashboard_viewpad_on_view_child_needs_scroll(XfdashboardViewpad *self,
+																ClutterActor *inActor,
+																gpointer inUserData)
+{
+	XfdashboardView				*view;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_VIEWPAD(self), FALSE);
+	g_return_val_if_fail(CLUTTER_IS_ACTOR(inActor), FALSE);
+	g_return_val_if_fail(XFDASHBOARD_IS_VIEW(inUserData), FALSE);
+
+	view=XFDASHBOARD_VIEW(inUserData);
+
+	/* Determine if scrolling is needed and return result */
+	return(_xfdashboard_viewpad_view_needs_scrolling_for_child(self, view, inActor, NULL, NULL));
+}
+
+/* Ensure that a child of a view is visible by scrolling if needed */
+static void _xfdashboard_viewpad_on_view_child_ensure_visible(XfdashboardViewpad *self,
+														ClutterActor *inActor,
+														gpointer inUserData)
+{
+	XfdashboardView				*view;
+	gfloat						scrollX, scrollY;
+
+	g_return_if_fail(XFDASHBOARD_IS_VIEWPAD(self));
+	g_return_if_fail(CLUTTER_IS_ACTOR(inActor));
+	g_return_if_fail(XFDASHBOARD_IS_VIEW(inUserData));
+
+	view=XFDASHBOARD_VIEW(inUserData);
+
+	/* Check if scrolling is needed to scroll in direction and amount determined */
+	if(_xfdashboard_viewpad_view_needs_scrolling_for_child(self, view, inActor, &scrollX, &scrollY))
+	{
+		_xfdashboard_viewpad_on_view_scroll_to(self, scrollX, scrollY, view);
 	}
 }
 
@@ -981,6 +1006,15 @@ static void _xfdashboard_viewpad_allocate(ClutterActor *self,
 		/* Notify about property change */
 		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardViewpadProperties[PROP_VSCROLLBAR_VISIBLE]);
 	}
+
+	/* Remember this allocation as last one set */
+	if(priv->lastAllocation)
+	{
+		clutter_actor_box_free(priv->lastAllocation);
+		priv->lastAllocation=NULL;
+	}
+
+	priv->lastAllocation=clutter_actor_box_copy(inBox);
 }
 
 /* IMPLEMENTATION: Interface XfdashboardFocusable */
@@ -1072,6 +1106,13 @@ static void _xfdashboard_viewpad_dispose(GObject *inObject)
 		g_signal_handlers_disconnect_by_data(priv->viewManager, self);
 		g_object_unref(priv->viewManager);
 		priv->viewManager=NULL;
+	}
+
+	/* Release allocated resources */
+	if(priv->lastAllocation)
+	{
+		clutter_actor_box_free(priv->lastAllocation);
+		priv->lastAllocation=NULL;
 	}
 
 	/* Call parent's class dispose method */
@@ -1315,6 +1356,7 @@ static void xfdashboard_viewpad_init(XfdashboardViewpad *self)
 	priv->vScrollbarPolicy=XFDASHBOARD_VISIBILITY_POLICY_AUTOMATIC;
 	priv->scrollbarUpdateID=0;
 	priv->doRegisterFocusableViews=FALSE;
+	priv->lastAllocation=NULL;
 
 	/* Set up this actor */
 	clutter_actor_set_reactive(CLUTTER_ACTOR(self), TRUE);

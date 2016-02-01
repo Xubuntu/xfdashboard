@@ -2,7 +2,7 @@
  * search-result-container: An container for results from a search provider
  *                          which has a header and container for items
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,22 +63,10 @@ struct _XfdashboardSearchResultContainerClass
 	/*< public >*/
 	/* Virtual functions */
 	void (*icon_clicked)(XfdashboardSearchResultContainer *self);
+	void (*item_clicked)(XfdashboardSearchResultContainer *self, GVariant *inItem, ClutterActor *inActor);
 };
 
 /* Public API */
-typedef enum /*< skip,prefix=XFDASHBOARD_SEARCH_RESULT_CONTAINER_SELECTION_STEP_SIZE >*/
-{
-	XFDASHBOARD_SEARCH_RESULT_CONTAINER_SELECTION_STEP_SIZE_BEGIN_END,	/* Set to first or last item */
-	XFDASHBOARD_SEARCH_RESULT_CONTAINER_SELECTION_STEP_SIZE_COLUMN,		/* Arrow left or arrow right key */
-	XFDASHBOARD_SEARCH_RESULT_CONTAINER_SELECTION_STEP_SIZE_ROW			/* Arrow up or arrow down key */
-} XfdashboardSearchResultContainerSelectionStepSize;
-
-typedef enum /*< skip,prefix=XFDASHBOARD_SEARCH_RESULT_CONTAINER_SELECTION_DIRECTIO >*/
-{
-	XFDASHBOARD_SEARCH_RESULT_CONTAINER_SELECTION_DIRECTION_FORWARD,
-	XFDASHBOARD_SEARCH_RESULT_CONTAINER_SELECTION_DIRECTION_BACKWARD
-} XfdashboardSearchResultContainerSelectionDirection;
-
 GType xfdashboard_search_result_container_get_type(void) G_GNUC_CONST;
 
 ClutterActor* xfdashboard_search_result_container_new(XfdashboardSearchProvider *inProvider);
@@ -98,9 +86,11 @@ void xfdashboard_search_result_container_set_spacing(XfdashboardSearchResultCont
 gfloat xfdashboard_search_result_container_get_padding(XfdashboardSearchResultContainer *self);
 void xfdashboard_search_result_container_set_padding(XfdashboardSearchResultContainer *self, const gfloat inPadding);
 
-void xfdashboard_search_result_container_add_result_actor(XfdashboardSearchResultContainer *self,
-															ClutterActor *inResultActor,
-															ClutterActor *inInsertAfter);
+gint xfdashboard_search_result_container_get_initial_result_size(XfdashboardSearchResultContainer *self);
+void xfdashboard_search_result_container_set_initial_result_size(XfdashboardSearchResultContainer *self, const gint inSize);
+
+gint xfdashboard_search_result_container_get_more_result_size(XfdashboardSearchResultContainer *self);
+void xfdashboard_search_result_container_set_more_result_size(XfdashboardSearchResultContainer *self, const gint inSize);
 
 void xfdashboard_search_result_container_set_focus(XfdashboardSearchResultContainer *self, gboolean inSetFocus);
 
@@ -110,7 +100,12 @@ gboolean xfdashboard_search_result_container_set_selection(XfdashboardSearchResu
 ClutterActor* xfdashboard_search_result_container_find_selection(XfdashboardSearchResultContainer *self,
 																	ClutterActor *inSelection,
 																	XfdashboardSelectionTarget inDirection,
-																	XfdashboardView *inView);
+																	XfdashboardView *inView,
+																	gboolean inAllowWrap);
+void xfdashboard_search_result_container_activate_selection(XfdashboardSearchResultContainer *self,
+																	ClutterActor *inSelection);
+
+void xfdashboard_search_result_container_update(XfdashboardSearchResultContainer *self, XfdashboardSearchResultSet *inResults);
 
 G_END_DECLS
 

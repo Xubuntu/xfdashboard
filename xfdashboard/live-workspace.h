@@ -2,7 +2,7 @@
  * live-workspace: An actor showing the content of a workspace which will
  *                 be updated if changed.
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,6 +81,12 @@ void xfdashboard_live_workspace_set_show_window_content(XfdashboardLiveWorkspace
 
 XfdashboardStageBackgroundImageType xfdashboard_live_workspace_get_background_image_type(XfdashboardLiveWorkspace *self);
 void xfdashboard_live_workspace_set_background_image_type(XfdashboardLiveWorkspace *self, XfdashboardStageBackgroundImageType inType);
+
+gboolean xfdashboard_live_workspace_get_show_workspace_name(XfdashboardLiveWorkspace *self);
+void xfdashboard_live_workspace_set_show_workspace_name(XfdashboardLiveWorkspace *self, gboolean inIsVisible);
+
+gfloat xfdashboard_live_workspace_get_workspace_name_padding(XfdashboardLiveWorkspace *self);
+void xfdashboard_live_workspace_set_workspace_name_padding(XfdashboardLiveWorkspace *self, gfloat inPadding);
 
 G_END_DECLS
 

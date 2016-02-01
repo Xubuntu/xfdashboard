@@ -1,3 +1,491 @@
+commit ea28ea0c9e3aaf6f76e920702fe9994d7f303cb5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 31 20:40:36 2016 +0100
+
+    Update AppData
+
+commit edfcd29bde3c81f07bb10ec4bcba8c1cb48bbd97
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 31 20:16:40 2016 +0100
+
+    I18n: Update POTFILES.in to include new files
+
+commit 2cf2b07eac5ee529780a5c54eff2dd38b2eb8603
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 31 20:09:37 2016 +0100
+
+    Remove unused definitions
+
+commit 4eb77d9704980d95bd9f5431401bd027364308bb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 31 19:53:34 2016 +0100
+
+    Let plugins use signal action handlers instead of overriding virtual class functions
+
+commit 0b81e8da1e768972f88b8008cafb62d67f76b8dd
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 31 18:42:09 2016 +0100
+
+    Simple correction to fix overriding virtual functions in class XfdashboardPlugin when more than one plugin is registered.
+    
+    But it would be better to define signals and let the plugins connect to them.
+
+commit 43b341b06afa117b5a9fb600c410c0666a9051c3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 31 17:30:32 2016 +0100
+
+    Add new plugin gnome-shell-search-providers which uses all search providers used by Gnome-Shell
+
+commit d2d2023a545fd4022a6c08895acd999f7923d19e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 31 16:13:36 2016 +0100
+
+    Fix moving selection beyond limits of search result container, e.g. select first item in next search provider if moving selection in current provider would be "behind" last item.
+
+commit b828c2fbe5387d3670aa27ac9468ed90b94f63b9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jan 29 14:20:05 2016 +0100
+
+    Fix again the check if scrolling is needed to get a child visible in a view
+
+commit f1726c560ad3442769db7cba649f5b94ba1577a0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 28 16:27:51 2016 +0100
+
+    Fix visual error at applications view when using icon mode.
+    
+    Previously the applications view allocated all available space for a child actor what is ok when in list view mode but in icon view mode emblems etc. are aligned wrongly. So set up child actors different depending on view mode.
+
+commit cbb4b330b84abde03f5faca678e7f6cfe42c6e07
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 28 14:54:05 2016 +0100
+
+    Fix a division by zero bug when calculating x and y coordinates of each cell in _xfdashboard_dynamic_table_layout_update_layout_data() and correct allocation of container to get scroll bars visible if neccessary (the allocation of container was not set at all and that was the bug).
+
+commit 99178d95346ae6bd2b721f23175ed2b58b78d697
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 26 13:52:31 2016 +0100
+
+    Add/remove pseudo-class ':insensitive' when actor changes its reactive state
+
+commit 24c143fd959919e6d275303339a19ee88c953ef9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 26 13:43:41 2016 +0100
+
+    Fix starting a real new application instance when environment variable XFDASHBOARD_FORCE_NEW_INSTANCE is set to any (even empty) value. Needs xfdashboard being built with DEBUG enabled.
+
+commit 22da40f367b91a7966256c93628bd582345f21fc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 26 13:42:40 2016 +0100
+
+    Correct values for enums used as flags
+
+commit 53cad0b01a5f9b5d8331276f42408aa9a2931cd1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 26 09:19:02 2016 +0100
+
+    Rename 'match mode' to 'sort mode' as it affects the sorting of the results and not the match algorithm and rename 'launch count' to 'used counter' and 'most used'. Also fix results not being displayed when sort mode is 'most used'. At least fix typos.
+
+commit e5629552bb4d082128fff23a28fdea008079de2a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 25 13:19:10 2016 +0100
+
+    Add missing annotiations to enums to skip while creating enums.h and enums.c
+
+commit f9c07454d4e19a9c15f95eef1e462d3042d154ec
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 25 13:13:02 2016 +0100
+
+    Allow configuration how matching applications are sorted when searching. This behaviour is controlled via an unsigned integer property called "/components/applications-search-provider/match-mode" in channel "xfdashboard" at Xfconf which represents a flag.
+    
+    The default is "none" (with value zero) which is the old behaviour by just sorting them by title in alphabetical order. It is possible to sort them by relevance or score (with value one) and/or number of application launches (with value two).
+    
+    This commit addresses also issue GH #106
+
+commit 8d988509115e9ddd7a2c6d98e4fa843574fab743
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 25 11:44:32 2016 +0100
+
+    Fix typo
+
+commit 06af6d07757661444adfcc5abec5308ebab47d75
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 25 11:43:45 2016 +0100
+
+    Correct calculation of score if number of application launches should be included in score calculation.
+
+commit 5ba001585d60cb2d8c869a5f4779ec1bbfe20b7d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 25 11:42:59 2016 +0100
+
+    Respect score of items in result set when sorting.
+    
+    This should complete issue GH #106
+
+commit e028bd16cae9300aac9a3db44bbf6795ef271e84
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 25 10:21:33 2016 +0100
+
+    Allow storing the score (so called relevance) of an item also in the result set.
+    
+    This commit addresses issue GH #106
+
+commit 2b175198e1893776fd04991b12159b468c0def42
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 25 09:40:09 2016 +0100
+
+    Use renamed function _xfdashboard_applications_search_provider_score() instead of _xfdashboard_applications_search_provider_match()
+
+commit 8398e4548d59f2850447da91ef0ec27f44bdb648
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 25 09:38:58 2016 +0100
+
+    Rename relevance to score
+
+commit 9aa8fbc59bb88fb052251ff2da8f9767052cf5e5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 24 14:55:41 2016 +0100
+
+    Add missing new-line in g_print
+
+commit 4ea33c505f14177c89fd9fd510b67455bdbf3221
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 24 14:53:50 2016 +0100
+
+    Simplify usage of global statistics variable by using a struct including all variables instead of declaring thousands of single global variables.
+
+commit 11f855a21f9a80f364c2d2beda4f0e92ba51b75d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 24 14:34:40 2016 +0100
+
+    Calculate relevance of each matching application to search terms in applications search provider
+    
+    It does only the calculation but the result set is still ordered alphabetically.
+    
+    This commit addresses isseu GH #106
+
+commit 540c01306290be8105c87f55631bc27225400e7e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 24 13:37:09 2016 +0100
+
+    Add keywords to AppData
+
+commit 7128b3dc9b1325bf0b7748b1e5f6f00405b52cc9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 23 15:50:37 2016 +0100
+
+    Move utility functions to get paths to config files, cache files or data files for plugins to XfdashboardPlugin class
+
+commit 153c3d926f8b46a030982366abd0dc05804709ae
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 23 13:09:34 2016 +0100
+
+    Build filename to statistics file in initialization and do not rely on utility functions anymore reverted with the commit before
+
+commit db7a3e0ca29f6bd1425363e0516f8cf589a5a1d3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 23 13:02:46 2016 +0100
+
+    Revert "Add utility functions to get paths to config files, cache files or data files for any object..."
+    
+    This reverts commit 024817df48c6be842b28af7d6fbbb6dbf8ddad02.
+
+commit 2d58da5051646071b8b4d33c6c5906d4820244ec
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 23 12:10:05 2016 +0100
+
+    Add project group to AppData
+
+commit 3d583b44fc4ea6b91803c946efab0ede9b64f1d3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jan 22 13:43:58 2016 +0100
+
+    Use _xfdashboard_applications_search_provider_statistics_get() to get statistics data for an application instead of doing a lookup by ourselve
+
+commit f7d406750f0174c6a309fa75b8e5921340aff84b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jan 22 12:02:31 2016 +0100
+
+    Make loading and saving statistics file of XfdashboardApplicationsSearchProvider more robust.
+
+commit b3c84eddbfbe44f97086aef17a1cb33bf92f6c9c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 21 08:46:45 2016 +0100
+
+    Rename "app-data" etc. to statistics at XfdashboardApplicationsSearchProvider
+
+commit 96c42fa2d0095b82a988c99e94fdc4dbd6d80128
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 20 15:37:21 2016 +0100
+
+    Count how often an application was launched by xfdashboard. It can be used to calculate the relevance of an application in a search.
+    
+    This is a preparation work for issue GH #106
+
+commit 68f73b327c655169ce0be85896260b198acc0a62
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 20 08:33:59 2016 +0100
+
+    Removed unused code
+
+commit 67353ce414b06121fea4a3bcab3c2566fdabfbb3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 20 08:31:16 2016 +0100
+
+    Make use of new signal "application-launched" at XfdashboardApplication in actor XfdashboardApplicationButton
+
+commit 3c2524ca84b6d5b8897c2d29b7849e1f3c9236ec
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 20 08:23:25 2016 +0100
+
+    Add new signal "application-launched" to XfdashboardApplication which can be used by any object to indicate that it launched an application successfully. It just has to provide the corresponding GAppInfo for the launched application.
+
+commit 024817df48c6be842b28af7d6fbbb6dbf8ddad02
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 19 14:46:25 2016 +0100
+
+    Add utility functions to get paths to config files, cache files or data files for any object. This is useful for views, search providers and plugins of any kind to store their datas or configurations (if Xfconf is not an option).
+
+commit bce77d52c007ebe304248baccabcf90a6da61b7a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 18 14:03:16 2016 +0100
+
+    Implement a new actor in XfdashboardLiveWorkspace showing the workspace's name
+    
+    This new actor is hidden by default but can be turned on at a theme. The workspace name actor gets the class ".title" added so that the actor (a XfdashboardButton) can also be themed.
+    
+    This commit addresses issue GH #105
+
+commit 78916ca8dda3e6df606aa9fb4c6bc0bdef9e4164
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jan 15 23:31:00 2016 +0100
+
+    Fix scrolling to ensure a view's child is visible in viewpad especially when view changed its size that is will now fits into viewpad completely.
+
+commit bde79247310026dd1672e686d962cef83bf97025
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jan 15 22:59:36 2016 +0100
+
+    Fix returning void for function expecting a pointer
+
+commit 15798733722d78e3a485b37853d8a9b0bb9550ad
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 14 13:59:56 2016 +0100
+
+    I forgot to rename variables inside new seperate function :(
+
+commit 4269fd8db017905e48a90af1edac95b84fa9f9a7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 14 13:57:32 2016 +0100
+
+    Remove redundant code and consolidate into a new seperate function which is called instead using redundant code
+
+commit f9767ae7f12a5f5b97983ac3a229c28f18645a9d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 14 13:43:42 2016 +0100
+
+    Check that fill canvas is set when allocating XfdashboardBackground actor.
+    
+    At some circumstances that variable was not set (anymore?) and critical messages of clutter_canvas_set_size about CLUTTER_IS_CANVAS() failures were thrown. Maybe that XfdashboardBackground was already disposed which causes the fill canvas object to be destroyed but the allocation function was called anyway. Checking the pointer should silence this warnings ;)
+
+commit 34d4d61e5259e568e1acecc947ff8b1acf76a903
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 13 12:46:20 2016 +0100
+
+    Fix crash when removing result item actors before adding new one and/or selection changes while updating
+
+commit 8a454b55d49ed4cab4a33ece23326601d1dd594f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 10 12:45:13 2016 +0100
+
+    If I say that setting "initial-results-size" to zero means to show all result items by default, it should behave so.
+
+commit 5b1b55940d1fca59ab992a33a55732c3c8fbf09b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 10 12:13:57 2016 +0100
+
+    Fix compiler warnings
+
+commit 3a6220770e8c5f7ad4d6cf09f1119f6db332e42c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 10 12:09:52 2016 +0100
+
+    Limit number of search results shown for each search provider in search view but make it configurable by theme.
+
+commit 66e8b1ae4168b2ca4d07dcd10d26931826700bb3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 9 09:22:52 2016 +0100
+
+    Remove "TODO" from XfdashboardSearchView
+
+commit ee8156fc055e1cd0d5a93d0ec48455434238bbcc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 9 09:08:56 2016 +0100
+
+    Move logic to handle mapping of actors for result items from search view to result container of each search provider handled by search view
+
+commit 5a11fb9cb07a67ed180a56a497592aaadb59128c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jan 8 09:58:09 2016 +0100
+
+    Update result container for a search provider in search view *after* search terms has been updated so that the updated and current search terms are available when updating result container.
+
+commit b71ead6939e556c44842213fd7ba61bfea4ea621
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 7 08:39:06 2016 +0100
+
+    Fix typo
+
+commit e6f9e4b55873df0f9501663e87afb1d612ea7bc4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 7 08:27:23 2016 +0100
+
+    Remove unused enums
+
+commit 3fb22f7091674ae766b1fb19bd883d9edfc558a3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 6 16:22:18 2016 +0100
+
+    Fix compiler warning
+
+commit 9e9107083fa8284c4c4e7ff10da51fd125ca6124
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 6 16:16:12 2016 +0100
+
+    Allow search providers to return success state for result item activation or search launches
+    
+    The search view will now by default quit (standalone) or toggle (daemon mode) when activating result item or launching search provider's application was successful.
+
+commit cf19efa4ce9ba763fa0605b448cfa17243e81572
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 6 15:46:11 2016 +0100
+
+    Add more descriptive comments to functions at applications search provider again
+
+commit 610654d037b69d32c9130dd806fe7e4d73b333d1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 6 15:45:09 2016 +0100
+
+    Add more descriptive comments to functions at applications search provider
+
+commit 58c20e925999699f3e09fa4a2ab460bc5dda7956
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 6 15:42:52 2016 +0100
+
+    Fix typo
+
+commit 1a789e6d3e9d1e4d8cff2f24074ca025e4e1b410
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 6 14:24:37 2016 +0100
+
+    Improve sharing cached image contents between images created for icon-names or file-name directly (via xfdashboard_image_content_new_for_icon_name()) or GIcons derived from GFileIcon or GThemedIcon (via xfdashboard_image_content_new_for_gicon()).
+
+commit eac95653cd03b86d320e0c8a7c8463e6fe9e5109
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 6 12:37:39 2016 +0100
+
+    Create better hash value for icon-names or filenames of icons in XfdashboardImageContent
+
+commit 4d7e95c98f2ff7dc900ed00c9e2a4cdee4a626db
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 6 12:36:46 2016 +0100
+
+    Fix typo
+
+commit e4950462b351e2398c4fc67a77f647b3bc753d4b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 6 12:35:41 2016 +0100
+
+    Create better hash value for GIcons in XfdashboardImageContent
+
+commit 1cbdcb627b3210e95f8884a05ed9f7c765958d14
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 6 12:29:45 2016 +0100
+
+    Allow usage of GIcons at XfdashboardButton
+
+commit a47f30432eb196abc3dc643790724d69219a31ad
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 5 15:41:52 2016 +0100
+
+    Search provider may return NULL pointers instead of empty result sets. Fix accessing NULL pointers when accessing result sets.
+
+commit 5845ef436497ace005dc8a78cc34bd1ac2666f56
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 5 13:06:37 2016 +0100
+
+    Fix memory leak (free GKeyFile if loading from file fails)
+
+commit c0fcf668b13b4fa7b1d5435aedf39fa7beddaf96
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 5 12:16:21 2016 +0100
+
+    Allow a search provider to initialize after property 'provider-id' is set. The property 'provider-id' is set on object creation but after *_class_init and *_init function of object class and inherited classes are called. So the provider's *_init function cannot rely on this property to initialize early. So the search manager calls the overidable initialize function if it was set in *_class_init function.
+
+commit b81b3e22540d4f366d325b631e84d400946c72c7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 5 11:50:48 2016 +0100
+
+    Correctly lookup search provider in search view by ID
+
+commit f6cc50d2c66aba6f08180d08cd5efd04b68b904e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 5 11:15:41 2016 +0100
+
+    Throw and handle warning on closing plugin module when g_module_close return FALSE.
+    
+    It was by mistake handled when TRUE was returned :(
+
+commit 7cad8ee7f553d51fd714485f0e6d1fa014c13aca
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 2 08:56:56 2016 +0100
+
+    Happy new year :)
+    
+    Updating to new year 2016
+
+commit 43a4d5de904b8423d8954278641335d705848be0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jan 2 08:52:50 2016 +0100
+
+    I18n: Update localization (lt)
+
+commit 9a7a73d917750d8e741c8f63f23961a6fcc3ed89
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Dec 22 19:21:52 2015 +0100
+
+    Fix using void return value in if-statement
+    
+    Fixes bug #12372
+
+commit ae7e60a33ef7aad46e012072328c73db771669ac
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Dec 22 12:43:37 2015 +0100
+
+    Respect window border when moving window
+    
+    Fixes one open issue at GH #98
+
+commit ac42dd789cd41d94377db6dc37f2e2406da52157
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Dec 22 12:22:50 2015 +0100
+
+    Allow moving a window from one monitor to another in multi-monitor setups by drag'n'drop the window between window views.
+    
+    This commit addresses issue GH #98
+
+commit 523aad9033ef620bf742810fafdad630085d8a12
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Dec 19 09:55:30 2015 +0100
+
+    Post-release version bump to 0.5.5
+
+commit 13dbe5aa20d670172d39b60f32ed683f6645be28
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Dec 19 09:53:55 2015 +0100
+
+    Bump version to 0.5.4
+
 commit 08f0f800a7f7ddddd5cb337dff0139a7e9fc1dc3
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Fri Dec 18 22:21:27 2015 +0100

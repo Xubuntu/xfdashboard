@@ -4,7 +4,7 @@
 /*
  * enums: Definitions of enumerations and flags used in GObject objects
  * 
- * Copyrigt 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyrigt 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,10 @@
 #include <glib-object.h>
 
 G_BEGIN_DECLS
+
+/* enumerations from "applications-search-provider.h" */
+GType xfdashboard_applications_search_provider_sort_mode_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE	(xfdashboard_applications_search_provider_sort_mode_get_type())
 
 /* enumerations from "background.h" */
 GType xfdashboard_background_type_get_type(void) G_GNUC_CONST;

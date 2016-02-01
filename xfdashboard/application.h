@@ -2,7 +2,7 @@
  * application: Single-instance managing application and single-instance
  *              objects like window manager and so on.
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,6 +88,8 @@ struct _XfdashboardApplicationClass
 	void (*shutdown_final)(XfdashboardApplication *self);
 
 	void (*theme_changed)(XfdashboardApplication *self, XfdashboardTheme *inTheme);
+
+	void (*application_launched)(XfdashboardApplication *self, GAppInfo *inAppInfo);
 
 	/* Binding actions */
 	gboolean (*exit)(XfdashboardApplication *self,

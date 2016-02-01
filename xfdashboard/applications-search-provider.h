@@ -2,7 +2,7 @@
  * applications-search-provider: Search provider for searching installed
  *                               applications
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,17 @@
 
 G_BEGIN_DECLS
 
+/* Public definitions */
+typedef enum /*< flags,prefix=XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE >*/
+{
+	XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_NONE=0,
+
+	XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_NAMES=1 << 0,
+	XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_MOST_USED=1 << 1,
+} XfdashboardApplicationsSearchProviderSortMode;
+
+
+/* Object declaration */
 #define XFDASHBOARD_TYPE_APPLICATIONS_SEARCH_PROVIDER				(xfdashboard_applications_search_provider_get_type())
 #define XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER(obj)				(G_TYPE_CHECK_INSTANCE_CAST((obj), XFDASHBOARD_TYPE_APPLICATIONS_SEARCH_PROVIDER, XfdashboardApplicationsSearchProvider))
 #define XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(obj)			(G_TYPE_CHECK_INSTANCE_TYPE((obj), XFDASHBOARD_TYPE_APPLICATIONS_SEARCH_PROVIDER))
@@ -59,8 +70,12 @@ struct _XfdashboardApplicationsSearchProviderClass
 	/* Virtual functions */
 };
 
+
 /* Public API */
 GType xfdashboard_applications_search_provider_get_type(void) G_GNUC_CONST;
+
+XfdashboardApplicationsSearchProviderSortMode xfdashboard_applications_search_provider_get_sort_mode(XfdashboardApplicationsSearchProvider *self);
+void xfdashboard_applications_search_provider_set_sort_mode(XfdashboardApplicationsSearchProvider *self, const XfdashboardApplicationsSearchProviderSortMode inMode);
 
 G_END_DECLS
 

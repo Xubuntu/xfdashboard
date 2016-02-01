@@ -2,7 +2,7 @@
  * plugin: A plugin class managing loading the shared object as well as
  *         initializing and setting up extensions to this application
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,10 @@ G_BEGIN_DECLS
 	inFunctionNamePrefix##_register_plugin_type(XFDASHBOARD_PLUGIN(self));
 
 
+/* Definitions */
+#define XFDASHBOARD_PLUGIN_ACTION_HANDLED	(TRUE)
+
+
 /* Object declaration */
 #define XFDASHBOARD_TYPE_PLUGIN				(xfdashboard_plugin_get_type())
 #define XFDASHBOARD_PLUGIN(obj)				(G_TYPE_CHECK_INSTANCE_CAST((obj), XFDASHBOARD_TYPE_PLUGIN, XfdashboardPlugin))
@@ -73,12 +77,10 @@ struct _XfdashboardPluginClass
 
 	/*< public >*/
 	/* Virtual functions */
-	void (*initialize)(XfdashboardPlugin *self);
+	gboolean (*enable)(XfdashboardPlugin *self);
+	gboolean (*disable)(XfdashboardPlugin *self);
 
-	void (*enable)(XfdashboardPlugin *self);
-	void (*disable)(XfdashboardPlugin *self);
-
-	void (*configure)(XfdashboardPlugin *self);
+	gboolean (*configure)(XfdashboardPlugin *self);
 };
 
 /* Error */
@@ -103,6 +105,10 @@ void xfdashboard_plugin_set_info(XfdashboardPlugin *self,
 
 void xfdashboard_plugin_enable(XfdashboardPlugin *self);
 void xfdashboard_plugin_disable(XfdashboardPlugin *self);
+
+const gchar* xfdashboard_plugin_get_config_path(XfdashboardPlugin *self);
+const gchar* xfdashboard_plugin_get_cache_path(XfdashboardPlugin *self);
+const gchar* xfdashboard_plugin_get_data_path(XfdashboardPlugin *self);
 
 G_END_DECLS
 

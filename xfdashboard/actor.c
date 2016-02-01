@@ -1,7 +1,7 @@
 /*
  * actor: Abstract base actor
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -187,6 +187,33 @@ static void _xfdashboard_actor_on_name_changed(GObject *inObject,
 	 * of view of css) has changed. Also invalidate children as they
 	 * might reference the old, invalid ID or the new, valid one.
 	 */
+	_xfdashboard_actor_invalidate_recursive(CLUTTER_ACTOR(self));
+}
+
+/* Actor's reactive state changed */
+static void _xfdashboard_actor_on_reactive_changed(GObject *inObject,
+													GParamSpec *inSpec,
+													gpointer inUserData)
+{
+	XfdashboardActor			*self;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inObject));
+
+	self=XFDASHBOARD_ACTOR(inObject);
+
+	/* Set pseudo-class ':insensitive' if actor is now not reactive
+	 * and remove this pseudo-class if actor is now reactive.
+	 */
+	if(clutter_actor_get_reactive(CLUTTER_ACTOR(self)))
+	{
+		xfdashboard_stylable_add_pseudo_class(XFDASHBOARD_STYLABLE(self), "insensitive");
+	}
+		else
+		{
+			xfdashboard_stylable_remove_pseudo_class(XFDASHBOARD_STYLABLE(self), "insensitive");
+		}
+
+	/* Invalide styling to get it recomputed */
 	_xfdashboard_actor_invalidate_recursive(CLUTTER_ACTOR(self));
 }
 
@@ -967,6 +994,7 @@ void xfdashboard_actor_init(XfdashboardActor *self)
 	/* Connect signals */
 	g_signal_connect(self, "notify::mapped", G_CALLBACK(_xfdashboard_actor_on_mapped_changed), NULL);
 	g_signal_connect(self, "notify::name", G_CALLBACK(_xfdashboard_actor_on_name_changed), NULL);
+	g_signal_connect(self, "notify::reactive", G_CALLBACK(_xfdashboard_actor_on_reactive_changed), NULL);
 }
 
 /* IMPLEMENTATION: GType */

@@ -1,7 +1,7 @@
 /*
  * image-content: An asynchronous loaded and cached image content
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1291,19 +1291,19 @@ void xfdashboard_image_content_init(XfdashboardImageContent *self)
 /* Create new instance or use cached one for themed icon name or absolute icon filename.
  * If icon does not exists a themed fallback icon will be used.
  * If even the themed fallback icon cannot be found we set an empty image.
- * In all cases a valid ClutterImage object is returned must be unreffed with
+ * In all cases a valid ClutterImage object is returned and must be unreffed with
  * g_object_unref().
  */
 ClutterContent* xfdashboard_image_content_new_for_icon_name(const gchar *inIconName, gint inSize)
 {
-	ClutterImage		*image;
-	gchar				*key;
+	ClutterImage			*image;
+	gchar					*key;
 
 	g_return_val_if_fail(inIconName!=NULL, NULL);
 	g_return_val_if_fail(inSize>0, NULL);
 
 	/* Check if we have a cache image for icon otherwise create image instance */
-	key=g_strdup_printf("%s,%d", inIconName, inSize);
+	key=g_strdup_printf("icon-name:%s,%d", inIconName, inSize);
 	if(!key)
 	{
 		g_warning(_("Could not create key for icon name '%s' at size %u"), inIconName, inSize);
@@ -1328,19 +1328,69 @@ ClutterContent* xfdashboard_image_content_new_for_icon_name(const gchar *inIconN
 /* Create new instance or use cached one for GIcon object.
  * If icon does not exists a themed fallback icon will be used.
  * If even the themed fallback icon cannot be found we set an empty image.
- * In all cases a valid ClutterImage object is returned must be unreffed with
+ * In all cases a valid ClutterImage object is returned and must be unreffed with
  * g_object_unref().
  */
 ClutterContent* xfdashboard_image_content_new_for_gicon(GIcon *inIcon, gint inSize)
 {
-	ClutterImage		*image;
-	gchar				*key;
+	ClutterImage			*image;
+	gchar					*key;
 
 	g_return_val_if_fail(G_IS_ICON(inIcon), NULL);
 	g_return_val_if_fail(inSize>0, NULL);
 
+	image=NULL;
+
+	/* If GIcon is a file icon get filename and redirect to create function for
+	 * icon-names/file-names to share images created with this function. If we
+	 * have problems in getting the filename fallthrough to default behaviour.
+	 */
+	if(G_IS_FILE_ICON(inIcon))
+	{
+		GFile				*iconFile;
+		gchar				*iconFilename;
+
+		/* Get file object of icon*/
+		iconFile=g_file_icon_get_file(G_FILE_ICON(inIcon));
+		if(iconFile)
+		{
+			iconFilename=g_file_get_path(iconFile);
+			if(iconFilename)
+			{
+				/* Redirect to create function for icon-names/file-names */
+				image=CLUTTER_IMAGE(xfdashboard_image_content_new_for_icon_name(iconFilename, inSize));
+
+				/* Release allocated resources */
+				g_free(iconFilename);
+
+				/* Return image */
+				return(CLUTTER_CONTENT(image));
+			}
+		}
+	}
+
+	/* If GIcon is a themed icon with exactly one name associated, get name
+	 * and redirect to create function for icon-names/file-names to share
+	 * images created with this function. If we have problems in getting
+	 * the icon-name fallthrough to default behaviour.
+	 */
+	if(G_IS_THEMED_ICON(inIcon))
+	{
+		const gchar* const	*iconNames;
+
+		iconNames=g_themed_icon_get_names(G_THEMED_ICON(inIcon));
+		if(g_strv_length((gchar**)iconNames)==1)
+		{
+			/* Redirect to create function for icon-names/file-names */
+			image=CLUTTER_IMAGE(xfdashboard_image_content_new_for_icon_name(*iconNames, inSize));
+
+			/* Return image */
+			return(CLUTTER_CONTENT(image));
+		}
+	}
+
 	/* Check if we have a cache image for icon otherwise create image instance */
-	key=g_strdup_printf("%s,%d", g_icon_to_string(inIcon), inSize);
+	key=g_strdup_printf("gicon:%s-%u,%d", G_OBJECT_TYPE_NAME(inIcon), g_icon_hash(inIcon), inSize);
 	if(!key)
 	{
 		g_warning(_("Could not create key for gicon '%s' at size %u"), g_icon_to_string(inIcon), inSize);
@@ -1371,8 +1421,8 @@ ClutterContent* xfdashboard_image_content_new_for_gicon(GIcon *inIcon, gint inSi
  */
 ClutterContent* xfdashboard_image_content_new_for_pixbuf(GdkPixbuf *inPixbuf)
 {
-	ClutterContent		*image;
-	GError				*error;
+	ClutterContent			*image;
+	GError					*error;
 
 	g_return_val_if_fail(GDK_IS_PIXBUF(inPixbuf), NULL);
 

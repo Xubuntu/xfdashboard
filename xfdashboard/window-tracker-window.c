@@ -6,7 +6,7 @@
  *                        within versions. We only need to use #ifdefs in
  *                        window tracker object and nowhere else in the code.
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -300,6 +300,21 @@ GType xfdashboard_window_tracker_window_get_type(void)
 {
 	return(WNCK_TYPE_WINDOW);
 }
+
+/* Check if both windows are the same */
+gboolean xfdashboard_window_tracker_window_is_equal(XfdashboardWindowTrackerWindow *inLeft,
+													XfdashboardWindowTrackerWindow *inRight)
+{
+	g_return_val_if_fail(WNCK_IS_WINDOW(inLeft), FALSE);
+	g_return_val_if_fail(WNCK_IS_WINDOW(inRight), FALSE);
+
+	/* Check if both are the same window*/
+	if(inLeft==inRight) return(TRUE);
+
+	/* If we get here then they cannot be considered equal */
+	return(FALSE);
+}
+
 
 /* Determine if window is minimized */
 gboolean xfdashboard_window_tracker_window_is_minized(XfdashboardWindowTrackerWindow *inWindow)
@@ -613,15 +628,43 @@ void xfdashboard_window_tracker_window_move_resize(XfdashboardWindowTrackerWindo
 													gint inHeight)
 {
 	WnckWindowMoveResizeMask	flags;
+	gint						contentWidth, contentHeight;
+	gint						borderWidth, borderHeight;
+
+	gint						contentX, contentY;
+	gint						borderX, borderY;
 
 	g_return_if_fail(WNCK_IS_WINDOW(inWindow));
 
+	/* Get window border size to respect it when moving window */
+	wnck_window_get_client_window_geometry(WNCK_WINDOW(inWindow), &contentX, &contentY, &contentWidth, &contentHeight);
+	wnck_window_get_geometry(WNCK_WINDOW(inWindow), &borderX, &borderY, &borderWidth, &borderHeight);
+
 	/* Get modification flags */
 	flags=0;
-	if(inX>=0) flags|=WNCK_WINDOW_CHANGE_X;
-	if(inY>=0) flags|=WNCK_WINDOW_CHANGE_Y;
-	if(inWidth>=0) flags|=WNCK_WINDOW_CHANGE_WIDTH;
-	if(inHeight>=0) flags|=WNCK_WINDOW_CHANGE_HEIGHT;
+	if(inX>=0)
+	{
+		flags|=WNCK_WINDOW_CHANGE_X;
+		inX-=(contentX-borderX);
+	}
+
+	if(inY>=0)
+	{
+		flags|=WNCK_WINDOW_CHANGE_Y;
+		inY-=(contentY-borderY);
+	}
+
+	if(inWidth>=0)
+	{
+		flags|=WNCK_WINDOW_CHANGE_WIDTH;
+		inWidth+=(borderWidth-contentWidth);
+	}
+
+	if(inHeight>=0)
+	{
+		flags|=WNCK_WINDOW_CHANGE_HEIGHT;
+		inHeight+=(borderHeight-contentHeight);
+	}
 
 	/* Set geometry */
 	wnck_window_set_geometry(WNCK_WINDOW(inWindow),

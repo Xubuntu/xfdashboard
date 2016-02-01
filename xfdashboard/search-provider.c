@@ -1,7 +1,7 @@
 /*
  * search-provider: Abstract class for search providers
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -309,49 +309,49 @@ ClutterActor* xfdashboard_search_provider_create_result_actor(XfdashboardSearchP
 /* Launch search in external service or application the search provider relies on
  * with provided list of search terms.
  */
-void xfdashboard_search_provider_launch_search(XfdashboardSearchProvider *self,
-												const gchar **inSearchTerms)
+gboolean xfdashboard_search_provider_launch_search(XfdashboardSearchProvider *self,
+													const gchar **inSearchTerms)
 {
 	XfdashboardSearchProviderClass	*klass;
 
-	g_return_if_fail(XFDASHBOARD_IS_SEARCH_PROVIDER(self));
-	g_return_if_fail(inSearchTerms);
+	g_return_val_if_fail(XFDASHBOARD_IS_SEARCH_PROVIDER(self), FALSE);
+	g_return_val_if_fail(inSearchTerms, FALSE);
 
 	klass=XFDASHBOARD_SEARCH_PROVIDER_GET_CLASS(self);
 
 	/* Launch search by search provider */
 	if(klass->launch_search)
 	{
-		klass->launch_search(self, inSearchTerms);
-		return;
+		return(klass->launch_search(self, inSearchTerms));
 	}
 
 	/* If we get here the virtual function was not overridden */
 	XFDASHBOARD_SEARCH_PROVIDER_NOTE_NOT_IMPLEMENTED(self, "launch_search");
+	return(FALSE);
 }
 
 /* A result item actor was clicked so ask search provider to handle it */
-void xfdashboard_search_provider_activate_result(XfdashboardSearchProvider* self,
-													GVariant *inResultItem,
-													ClutterActor *inActor,
-													const gchar **inSearchTerms)
+gboolean xfdashboard_search_provider_activate_result(XfdashboardSearchProvider* self,
+														GVariant *inResultItem,
+														ClutterActor *inActor,
+														const gchar **inSearchTerms)
 {
 	XfdashboardSearchProviderClass	*klass;
 
-	g_return_if_fail(XFDASHBOARD_IS_SEARCH_PROVIDER(self));
-	g_return_if_fail(inResultItem);
-	g_return_if_fail(CLUTTER_IS_ACTOR(inActor));
-	g_return_if_fail(inSearchTerms);
+	g_return_val_if_fail(XFDASHBOARD_IS_SEARCH_PROVIDER(self), FALSE);
+	g_return_val_if_fail(inResultItem, FALSE);
+	g_return_val_if_fail(CLUTTER_IS_ACTOR(inActor), FALSE);
+	g_return_val_if_fail(inSearchTerms, FALSE);
 
 	klass=XFDASHBOARD_SEARCH_PROVIDER_GET_CLASS(self);
 
 	/* Handle click action at result item actor by search provider */
 	if(klass->activate_result)
 	{
-		klass->activate_result(self, inResultItem, inActor, inSearchTerms);
-		return;
+		return(klass->activate_result(self, inResultItem, inActor, inSearchTerms));
 	}
 
 	/* If we get here the virtual function was not overridden */
 	XFDASHBOARD_SEARCH_PROVIDER_NOTE_NOT_IMPLEMENTED(self, "activate_result");
+	return(FALSE);
 }

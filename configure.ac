@@ -6,7 +6,7 @@ dnl
 dnl
 dnl xfdashboard - Maybe a Gnome shell like dashboard for Xfce
 dnl
-dnl Copyright (c) 2012-2015 Stephan Haller <nomad@froevel.de>
+dnl Copyright (c) 2012-2016 Stephan Haller <nomad@froevel.de>
 dnl
 
 dnl ***************************
@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [5])
-m4_define([xfdashboard_version_micro], [4])
-m4_define([xfdashboard_version_build], [08f0f80])
+m4_define([xfdashboard_version_micro], [5])
+m4_define([xfdashboard_version_build], [ea28ea0])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -43,7 +43,7 @@ m4_define([xfdashboard_debug_default], [ifelse(xfdashboard_version_tag(), [git],
 dnl ***************************
 dnl *** Initialize autoconf ***
 dnl ***************************
-AC_COPYRIGHT([Copyright (c) 2012-2015 Stephan Haller <nomad@froevel.de>])
+AC_COPYRIGHT([Copyright (c) 2012-2016 Stephan Haller <nomad@froevel.de>])
 AC_INIT([xfdashboard], [xfdashboard_version], [http://goodies.xfce.org/projects/applications/xfdashboard/start], [xfdashboard])
 AC_PREREQ([2.50])
 AC_REVISION([xfdashboard_version_build])
@@ -264,6 +264,7 @@ data/themes/xfdashboard-moranga/Makefile
 data/themes/xfdashboard-wine/Makefile
 plugins/Makefile
 plugins/clock-view/Makefile
+plugins/gnome-shell-search-provider/Makefile
 po/Makefile.in
 settings/Makefile
 xfdashboard/Makefile
