@@ -1,7 +1,7 @@
 /*
  * view-selector: A selector for registered views
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -170,7 +170,7 @@ static void _xfdashboard_view_selector_on_view_icon_changed(XfdashboardView *inV
 	g_return_if_fail(XFDASHBOARD_IS_TOGGLE_BUTTON(inUserData));
 
 	button=XFDASHBOARD_BUTTON(inUserData);
-	xfdashboard_button_set_icon(button, xfdashboard_view_get_icon(inView));
+	xfdashboard_button_set_icon_name(button, xfdashboard_view_get_icon(inView));
 }
 
 /* Called when the name of a view has changed */

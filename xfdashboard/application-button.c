@@ -2,7 +2,7 @@
  * application-button: A button representing an application
  *                     (either by menu item or desktop file)
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
 #include "utils.h"
 #include "application-tracker.h"
 #include "stylable.h"
+#include "application.h"
 
 /* Define this class in GObject system */
 G_DEFINE_TYPE(XfdashboardApplicationButton,
@@ -125,33 +126,24 @@ static void _xfdashboard_application_button_update_text(XfdashboardApplicationBu
 static void _xfdashboard_application_button_update_icon(XfdashboardApplicationButton *self)
 {
 	XfdashboardApplicationButtonPrivate		*priv;
-	gchar									*iconName;
+	GIcon									*gicon;
 
 	g_return_if_fail(XFDASHBOARD_IS_APPLICATION_BUTTON(self));
 
 	priv=self->priv;
-	iconName=NULL;
+	gicon=NULL;
 
-	/* Get icon */
+	/* Get icon and set up button icon*/
 	if(priv->appInfo)
 	{
-		GIcon								*gicon;
-
 		gicon=g_app_info_get_icon(G_APP_INFO(priv->appInfo));
-		if(gicon)
-		{
-			iconName=g_icon_to_string(gicon);
-			g_object_unref(gicon);
-		}
 	}
 
-	if(!iconName) iconName=g_strdup("image-missing");
-
-	/* Set up button and release allocated resources */
-	if(iconName) xfdashboard_button_set_icon(XFDASHBOARD_BUTTON(self), iconName);
+	if(gicon) xfdashboard_button_set_gicon(XFDASHBOARD_BUTTON(self), gicon);
+		else xfdashboard_button_set_icon_name(XFDASHBOARD_BUTTON(self), "image-missing");
 
 	/* Release allocated resources */
-	if(iconName) g_free(iconName);
+	if(gicon) g_object_unref(gicon);
 }
 
 /* Update running state of button actor */
@@ -675,6 +667,7 @@ gboolean xfdashboard_application_button_execute(XfdashboardApplicationButton *se
 	error=NULL;
 	if(!g_app_info_launch(priv->appInfo, NULL, context, &error))
 	{
+		/* Show notification about failed application launch */
 		xfdashboard_notify(CLUTTER_ACTOR(self),
 							xfdashboard_application_button_get_icon_name(self),
 							_("Launching application '%s' failed: %s"),
@@ -687,10 +680,16 @@ gboolean xfdashboard_application_button_execute(XfdashboardApplicationButton *se
 	}
 		else
 		{
+			/* Show notification about successful application launch */
 			xfdashboard_notify(CLUTTER_ACTOR(self),
 								xfdashboard_application_button_get_icon_name(self),
 								_("Application '%s' launched"),
 								xfdashboard_application_button_get_display_name(self));
+
+			/* Emit signal for successful application launch */
+			g_signal_emit_by_name(xfdashboard_application_get_default(), "application-launched", priv->appInfo);
+
+			/* Set status that application has been started successfully */
 			started=TRUE;
 		}
 

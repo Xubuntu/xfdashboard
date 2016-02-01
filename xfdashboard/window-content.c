@@ -1,7 +1,7 @@
 /*
  * window: A managed window of window manager
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@
 #include "enums.h"
 
 /* Definitions */
-typedef enum
+typedef enum /*< skip,prefix=XFDASHBOARD_WINDOW_CONTENT_WORKAROUND_MODE >*/
 {
 	XFDASHBOARD_WINDOW_CONTENT_WORKAROUND_MODE_NONE=0,
 	XFDASHBOARD_WINDOW_CONTENT_WORKAROUND_MODE_UNMINIMIZING,
@@ -230,7 +230,7 @@ static void _xfdashboard_window_content_destroy_resume_queue(void)
 			{
 				content=XFDASHBOARD_WINDOW_CONTENT(iter->data);
 				window=xfdashboard_window_content_get_window(content);
-				g_print("Window content in resume queue: Item %s@%p for window '%s'",
+				g_print("Window content in resume queue: Item %s@%p for window '%s'\n",
 							G_OBJECT_TYPE_NAME(content), content,
 							xfdashboard_window_tracker_window_get_title(window));
 			}

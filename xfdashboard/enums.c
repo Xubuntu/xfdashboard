@@ -4,7 +4,7 @@
 /*
  * enums: Definitions of enumerations and flags used in GObject objects
  * 
- * Copyrigt 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyrigt 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,31 @@
 #endif /* HAVE_CONFIG_H */
 
 #include "enums.h"
+
+
+/* enumerations from "applications-search-provider.h" */
+#include "applications-search-provider.h"
+
+GType xfdashboard_applications_search_provider_sort_mode_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GFlagsValue values[]=
+		{
+			{ XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_NONE, "XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_NONE", "none" },
+			{ XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_NAMES, "XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_NAMES", "names" },
+			{ XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_MOST_USED, "XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_MOST_USED", "most-used" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardApplicationsSearchProviderSortMode"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
 
 
 /* enumerations from "background.h" */

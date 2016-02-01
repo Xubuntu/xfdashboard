@@ -1,7 +1,7 @@
 /*
  * search-provider: Abstract class for search providers
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,8 @@ struct _XfdashboardSearchProviderClass
 
 	/*< public >*/
 	/* Virtual functions */
+	void (*initialize)(XfdashboardSearchProvider *self);
+
 	const gchar* (*get_name)(XfdashboardSearchProvider *self);
 	const gchar* (*get_icon)(XfdashboardSearchProvider *self);
 
@@ -68,10 +70,10 @@ struct _XfdashboardSearchProviderClass
 	ClutterActor* (*create_result_actor)(XfdashboardSearchProvider *self,
 											GVariant *inResultItem);
 
-	void (*launch_search)(XfdashboardSearchProvider *self,
-							const gchar **inSearchTerms);
+	gboolean (*launch_search)(XfdashboardSearchProvider *self,
+								const gchar **inSearchTerms);
 
-	void (*activate_result)(XfdashboardSearchProvider* self,
+	gboolean (*activate_result)(XfdashboardSearchProvider* self,
 								GVariant *inResultItem,
 								ClutterActor *inActor,
 								const gchar **inSearchTerms);
@@ -93,13 +95,13 @@ XfdashboardSearchResultSet* xfdashboard_search_provider_get_result_set(Xfdashboa
 ClutterActor* xfdashboard_search_provider_create_result_actor(XfdashboardSearchProvider *self,
 																GVariant *inResultItem);
 
-void xfdashboard_search_provider_launch_search(XfdashboardSearchProvider *self,
-												const gchar **inSearchTerms);
-
-void xfdashboard_search_provider_activate_result(XfdashboardSearchProvider* self,
-													GVariant *inResultItem,
-													ClutterActor *inActor,
+gboolean xfdashboard_search_provider_launch_search(XfdashboardSearchProvider *self,
 													const gchar **inSearchTerms);
+
+gboolean xfdashboard_search_provider_activate_result(XfdashboardSearchProvider* self,
+														GVariant *inResultItem,
+														ClutterActor *inActor,
+														const gchar **inSearchTerms);
 
 G_END_DECLS
 

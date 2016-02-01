@@ -4,7 +4,7 @@
  *                         size of monitor within screen and also a flag
  *                         if this monitor is the primary one.
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,6 +65,9 @@ struct _XfdashboardWindowTrackerMonitorClass
 
 /* Public API */
 GType xfdashboard_window_tracker_monitor_get_type(void) G_GNUC_CONST;
+
+gboolean xfdashboard_window_tracker_monitor_is_equal(XfdashboardWindowTrackerMonitor *inLeft,
+														XfdashboardWindowTrackerMonitor *inRight);
 
 gint xfdashboard_window_tracker_monitor_get_number(XfdashboardWindowTrackerMonitor *self);
 

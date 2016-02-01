@@ -2,7 +2,7 @@
  * plugin: A plugin class managing loading the shared object as well as
  *         initializing and setting up extensions to this application
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,8 @@
 
 #include <glib/gi18n-lib.h>
 
+#include "marshal.h"
+
 
 /* Forward declaration */
 typedef enum /*< skip,prefix=XFDASHBOARD_PLUGIN_STATE >*/
@@ -51,12 +53,6 @@ G_DEFINE_TYPE(XfdashboardPlugin,
 
 struct _XfdashboardPluginPrivate
 {
-	/* Instance related */
-	gchar						*filename;
-	GModule						*module;
-	XfdashboardPluginState		state;
-	gchar						*lastLoadingError;
-
 	/* Properties related */
 	gchar						*id;
 	gchar						*name;
@@ -64,6 +60,18 @@ struct _XfdashboardPluginPrivate
 	gchar						*author;
 	gchar						*copyright;
 	gchar						*license;
+
+	gchar						*configPath;
+	gchar						*cachePath;
+	gchar						*dataPath;
+
+	/* Instance related */
+	gchar						*filename;
+	GModule						*module;
+	void 						(*initialize)(XfdashboardPlugin *self);
+	XfdashboardPluginState		state;
+	gchar						*lastLoadingError;
+
 };
 
 /* Properties */
@@ -80,21 +88,37 @@ enum
 	PROP_COPYRIGHT,
 	PROP_LICENSE,
 
+	PROP_CONFIG_PATH,
+	PROP_CACHE_PATH,
+	PROP_DATA_PATH,
+
 	PROP_LAST
 };
 
 static GParamSpec* XfdashboardPluginProperties[PROP_LAST]={ 0, };
 
+/* Signals */
+enum
+{
+	/* Actions */
+	ACTION_ENABLE,
+	ACTION_DISABLE,
+	ACTION_CONFIGURE,
+
+	SIGNAL_LAST
+};
+
+static guint XfdashboardPluginSignals[SIGNAL_LAST]={ 0, };
+
 
 /* IMPLEMENTATION: Private variables and methods */
-#define XFDASHBOARD_PLUGIN_CRITICAL_NOT_IMPLEMENTED(self, vfunc) \
-	g_critical(_("Plugin at path '%s' does not implement required virtual function XfdashboardPlugin::%s"), \
+#define XFDASHBOARD_PLUGIN_CRITICAL_NOT_IMPLEMENTED(self, action) \
+	g_critical(_("Plugin at path '%s' does not implement required signal handler %s::%s"), \
 				self->priv->filename ? self->priv->filename : _("unknown filename"), \
-				vfunc);
+				G_OBJECT_TYPE_NAME(self), \
+				action);
 
 #define XFDASHBOARD_PLUGIN_FUNCTION_NAME_INITIALIZE		"plugin_init"
-#define XFDASHBOARD_PLUGIN_FUNCTION_NAME_ENABLE			"plugin_enable"
-#define XFDASHBOARD_PLUGIN_FUNCTION_NAME_DISABLE		"plugin_disable"
 
 /* Get display name for XFDASHBOARD_PLUGIN_STATE_* enum values */
 static const gchar* _xfdashboard_plugin_get_plugin_state_value_name(XfdashboardPluginState inState)
@@ -158,6 +182,54 @@ static void _xfdashboard_plugin_set_filename(XfdashboardPlugin *self, const gcha
 	}
 }
 
+/* Update special paths for this plugin */
+static gboolean _xfdashboard_plugin_update_special_paths(XfdashboardPlugin *self)
+{
+	XfdashboardPluginPrivate		*priv;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_PLUGIN(self), FALSE);
+
+	priv=self->priv;
+
+	/* Check that ID of plugin is set */
+	if(!priv->id)
+	{
+		g_critical(_("Cannot get path for plugin at %s"), priv->filename);
+		return(FALSE);
+	}
+
+	/* Freeze notification */
+	g_object_freeze_notify(G_OBJECT(self));
+
+	/* Update paths of this plugin */
+	if(priv->configPath)
+	{
+		g_free(priv->configPath);
+		priv->configPath=NULL;
+	}
+	priv->configPath=g_build_filename(g_get_user_config_dir(), "xfdashboard", priv->id, NULL);
+
+	if(priv->cachePath)
+	{
+		g_free(priv->cachePath);
+		priv->cachePath=NULL;
+	}
+	priv->cachePath=g_build_filename(g_get_user_cache_dir(), "xfdashboard", priv->id, NULL);
+
+	if(priv->dataPath)
+	{
+		g_free(priv->dataPath);
+		priv->dataPath=NULL;
+	}
+	priv->dataPath=g_build_filename(g_get_user_data_dir(), "xfdashboard", priv->id, NULL);
+
+	/* Thaw notification */
+	g_object_thaw_notify(G_OBJECT(self));
+
+	/* Updating paths was successful */
+	return(TRUE);
+}
+
 /* Set ID for plugin */
 static void _xfdashboard_plugin_set_id(XfdashboardPlugin *self, const gchar *inID)
 {
@@ -179,6 +251,9 @@ static void _xfdashboard_plugin_set_id(XfdashboardPlugin *self, const gchar *inI
 
 		/* Notify about property change */
 		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardPluginProperties[PROP_ID]);
+
+		/* When ID changes then also paths of this plugin change */
+		_xfdashboard_plugin_update_special_paths(self);
 	}
 }
 
@@ -322,6 +397,41 @@ static void _xfdashboard_plugin_set_license(XfdashboardPlugin *self, const gchar
 	}
 }
 
+/* Default implementation of signal handler "enable" */
+static gboolean _xfdashboard_plugin_enable(XfdashboardPlugin *self)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_PLUGIN(self), XFDASHBOARD_PLUGIN_ACTION_HANDLED);
+
+	/* We should never reach this code because each plugin must connect a signal handler
+	 * for this action and return TRUE to indicate that this action was handled.
+	 */
+	XFDASHBOARD_PLUGIN_CRITICAL_NOT_IMPLEMENTED(self, "enable");
+	return(XFDASHBOARD_PLUGIN_ACTION_HANDLED);
+}
+
+/* Default implementation of signal handler "disable" */
+static gboolean _xfdashboard_plugin_disable(XfdashboardPlugin *self)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_PLUGIN(self), XFDASHBOARD_PLUGIN_ACTION_HANDLED);
+
+	/* We should never reach this code because each plugin must connect a signal handler
+	 * for this action and return TRUE to indicate that this action was handled.
+	 */
+	XFDASHBOARD_PLUGIN_CRITICAL_NOT_IMPLEMENTED(self, "disable");
+	return(XFDASHBOARD_PLUGIN_ACTION_HANDLED);
+}
+
+/* Default implementation of signal handler "configure" */
+static gboolean _xfdashboard_plugin_configure(XfdashboardPlugin *self)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_PLUGIN(self), XFDASHBOARD_PLUGIN_ACTION_HANDLED);
+
+	/* We should never reach this code because each plugin must connect a signal handler
+	 * for this action and return TRUE to indicate that this action was handled.
+	 */
+	XFDASHBOARD_PLUGIN_CRITICAL_NOT_IMPLEMENTED(self, "configure");
+	return(XFDASHBOARD_PLUGIN_ACTION_HANDLED);
+}
 
 /* IMPLEMENTATION: GTypeModule */
 
@@ -330,14 +440,12 @@ static gboolean _xfdashboard_plugin_load(GTypeModule *inModule)
 {
 	XfdashboardPlugin			*self;
 	XfdashboardPluginPrivate	*priv;
-	XfdashboardPluginClass		*klass;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_PLUGIN(inModule), FALSE);
 	g_return_val_if_fail(G_IS_TYPE_MODULE(inModule), FALSE);
 
 	self=XFDASHBOARD_PLUGIN(inModule);
 	priv=self->priv;
-	klass=XFDASHBOARD_PLUGIN_GET_CLASS(self);
 
 	/* Reset last loading error if set */
 	if(priv->lastLoadingError)
@@ -386,25 +494,22 @@ static gboolean _xfdashboard_plugin_load(GTypeModule *inModule)
 	/* Check that plugin provides all necessary functions and get the address
 	 * to these functions.
 	 */
-	if(!g_module_symbol(priv->module, XFDASHBOARD_PLUGIN_FUNCTION_NAME_INITIALIZE, (gpointer*)&klass->initialize) ||
-		!g_module_symbol(priv->module, XFDASHBOARD_PLUGIN_FUNCTION_NAME_ENABLE, (gpointer*)&klass->enable) ||
-		!g_module_symbol(priv->module, XFDASHBOARD_PLUGIN_FUNCTION_NAME_DISABLE, (gpointer*)&klass->disable))
+	if(!g_module_symbol(priv->module, XFDASHBOARD_PLUGIN_FUNCTION_NAME_INITIALIZE, (gpointer*)&priv->initialize))
 	{
 		priv->lastLoadingError=g_strdup(g_module_error());
 		return(FALSE);
 	}
 
 	/* Initialize plugin */
-	if(klass->initialize)
+	if(priv->initialize)
 	{
-		klass->initialize(self);
+		priv->initialize(self);
 	}
 		else
 		{
 			/* If we get here the virtual function was not overridden */
-			priv->lastLoadingError=g_strdup(_("Plugin does not implement required virtual function XfdashboardPlugin::initialize"));
-
-			XFDASHBOARD_PLUGIN_CRITICAL_NOT_IMPLEMENTED(self, "initialize");
+			priv->lastLoadingError=g_strdup_printf(_("Plugin does not implement required function %s"), XFDASHBOARD_PLUGIN_FUNCTION_NAME_INITIALIZE);
+			g_critical("Loading plugin at '%s' failed: %s", priv->filename, priv->lastLoadingError);
 			return(FALSE);
 		}
 
@@ -436,14 +541,12 @@ static void _xfdashboard_plugin_unload(GTypeModule *inModule)
 {
 	XfdashboardPlugin			*self;
 	XfdashboardPluginPrivate	*priv;
-	XfdashboardPluginClass		*klass;
 
 	g_return_if_fail(XFDASHBOARD_IS_PLUGIN(inModule));
 	g_return_if_fail(G_IS_TYPE_MODULE(inModule));
 
 	self=XFDASHBOARD_PLUGIN(inModule);
 	priv=self->priv;
-	klass=XFDASHBOARD_PLUGIN_GET_CLASS(self);
 
 	/* Disable plugin if it is still enabled */
 	if(priv->state==XFDASHBOARD_PLUGIN_STATE_ENABLED)
@@ -456,7 +559,7 @@ static void _xfdashboard_plugin_unload(GTypeModule *inModule)
 	if(priv->module)
 	{
 		/* Close module */
-		if(g_module_close(priv->module))
+		if(!g_module_close(priv->module))
 		{
 			g_warning(_("Plugin '%s' could not be unloaded successfully: %s"),
 						priv->id ? priv->id : _("Unknown"),
@@ -465,9 +568,7 @@ static void _xfdashboard_plugin_unload(GTypeModule *inModule)
 		}
 
 		/* Unset module and function pointers from plugin module */
-		klass->initialize=NULL;
-		klass->enable=NULL;
-		klass->disable=NULL;
+		priv->initialize=NULL;
 
 		priv->module=NULL;
 	}
@@ -531,6 +632,27 @@ static void _xfdashboard_plugin_dispose(GObject *inObject)
 		g_free(priv->license);
 		priv->license=NULL;
 	}
+
+	if(priv->configPath)
+	{
+		g_free(priv->configPath);
+		priv->configPath=NULL;
+	}
+
+	if(priv->cachePath)
+	{
+		g_free(priv->cachePath);
+		priv->cachePath=NULL;
+	}
+
+	if(priv->dataPath)
+	{
+		g_free(priv->dataPath);
+		priv->dataPath=NULL;
+	}
+
+	/* Sanity checks that module was unloaded - at least by us */
+	g_assert(priv->initialize==NULL);
 
 	/* Call parent's class dispose method */
 	G_OBJECT_CLASS(xfdashboard_plugin_parent_class)->dispose(inObject);
@@ -618,6 +740,18 @@ static void _xfdashboard_plugin_get_property(GObject *inObject,
 			g_value_set_string(outValue, priv->license);
 			break;
 
+		case PROP_CONFIG_PATH:
+			g_value_set_string(outValue, priv->configPath);
+			break;
+
+		case PROP_CACHE_PATH:
+			g_value_set_string(outValue, priv->cachePath);
+			break;
+
+		case PROP_DATA_PATH:
+			g_value_set_string(outValue, priv->dataPath);
+			break;
+
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(inObject, inPropID, inSpec);
 			break;
@@ -634,6 +768,10 @@ static void xfdashboard_plugin_class_init(XfdashboardPluginClass *klass)
 	GObjectClass			*gobjectClass=G_OBJECT_CLASS(klass);
 
 	/* Override functions */
+	klass->enable=_xfdashboard_plugin_enable;
+	klass->disable=_xfdashboard_plugin_disable;
+	klass->configure=_xfdashboard_plugin_configure;
+
 	moduleClass->load=_xfdashboard_plugin_load;
 	moduleClass->unload=_xfdashboard_plugin_unload;
 
@@ -694,7 +832,65 @@ static void xfdashboard_plugin_class_init(XfdashboardPluginClass *klass)
 							NULL,
 							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+	XfdashboardPluginProperties[PROP_CONFIG_PATH]=
+		g_param_spec_string("config-path",
+							_("Config path"),
+							_("The base path to configuration files of this plugin"),
+							NULL,
+							G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+	XfdashboardPluginProperties[PROP_CACHE_PATH]=
+		g_param_spec_string("cache-path",
+							_("Cache path"),
+							_("The base path to cache files of this plugin"),
+							NULL,
+							G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+	XfdashboardPluginProperties[PROP_DATA_PATH]=
+		g_param_spec_string("data-path",
+							_("Data path"),
+							_("The base path to data files of this plugin"),
+							NULL,
+							G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
 	g_object_class_install_properties(gobjectClass, PROP_LAST, XfdashboardPluginProperties);
+
+	/* Define signals */
+	XfdashboardPluginSignals[ACTION_ENABLE]=
+		g_signal_new("enable",
+						G_TYPE_FROM_CLASS(klass),
+						G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+						G_STRUCT_OFFSET(XfdashboardPluginClass, enable),
+						g_signal_accumulator_true_handled,
+						NULL,
+						_xfdashboard_marshal_BOOLEAN__OBJECT,
+						G_TYPE_BOOLEAN,
+						1,
+						XFDASHBOARD_TYPE_PLUGIN);
+
+	XfdashboardPluginSignals[ACTION_DISABLE]=
+		g_signal_new("disable",
+						G_TYPE_FROM_CLASS(klass),
+						G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+						G_STRUCT_OFFSET(XfdashboardPluginClass, disable),
+						g_signal_accumulator_true_handled,
+						NULL,
+						_xfdashboard_marshal_BOOLEAN__OBJECT,
+						G_TYPE_BOOLEAN,
+						1,
+						XFDASHBOARD_TYPE_PLUGIN);
+
+	XfdashboardPluginSignals[ACTION_CONFIGURE]=
+		g_signal_new("configure",
+						G_TYPE_FROM_CLASS(klass),
+						G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+						G_STRUCT_OFFSET(XfdashboardPluginClass, configure),
+						g_signal_accumulator_true_handled,
+						NULL,
+						_xfdashboard_marshal_BOOLEAN__OBJECT,
+						G_TYPE_BOOLEAN,
+						1,
+						XFDASHBOARD_TYPE_PLUGIN);
 }
 
 /* Object initialization
@@ -709,6 +905,7 @@ static void xfdashboard_plugin_init(XfdashboardPlugin *self)
 	/* Set up default values */
 	priv->filename=NULL;
 	priv->module=NULL;
+	priv->initialize=NULL;
 	priv->state=XFDASHBOARD_PLUGIN_STATE_NONE;
 	priv->lastLoadingError=NULL;
 
@@ -718,6 +915,10 @@ static void xfdashboard_plugin_init(XfdashboardPlugin *self)
 	priv->author=NULL;
 	priv->copyright=NULL;
 	priv->license=NULL;
+
+	priv->configPath=NULL;
+	priv->cachePath=NULL;
+	priv->dataPath=NULL;
 }
 
 
@@ -809,12 +1010,12 @@ void xfdashboard_plugin_set_info(XfdashboardPlugin *self,
 void xfdashboard_plugin_enable(XfdashboardPlugin *self)
 {
 	XfdashboardPluginPrivate		*priv;
-	XfdashboardPluginClass			*klass;
+	gboolean						result;
 
 	g_return_if_fail(XFDASHBOARD_IS_PLUGIN(self));
 
 	priv=self->priv;
-	klass=XFDASHBOARD_PLUGIN_GET_CLASS(self);
+	result=FALSE;
 
 	/* Do nothing and return immediately if plugin is enabled already */
 	if(priv->state==XFDASHBOARD_PLUGIN_STATE_ENABLED)
@@ -833,34 +1034,23 @@ void xfdashboard_plugin_enable(XfdashboardPlugin *self)
 		return;
 	}
 
-	/* Call overriden enable function of plugin */
-	if(klass->enable)
-	{
-		/* Enable plugin */
-		klass->enable(self);
-		g_debug("Plugin '%s' enabled", priv->id);
+	/* Emit signal action 'enable' to enable plugin */
+	g_signal_emit(self, XfdashboardPluginSignals[ACTION_ENABLE], 0, self, &result);
+	g_debug("Plugin '%s' enabled", priv->id);
 
-		/* Set disabled state, i.e. revert to initialized state */
-		priv->state=XFDASHBOARD_PLUGIN_STATE_ENABLED;
-
-		return;
-	}
-
-	/* If we get here the virtual function was not overridden */
-	XFDASHBOARD_PLUGIN_CRITICAL_NOT_IMPLEMENTED(self, "enable");
-	return;
+	/* Set enabled state */
+	priv->state=XFDASHBOARD_PLUGIN_STATE_ENABLED;
 }
 
 /* Disable plugin */
 void xfdashboard_plugin_disable(XfdashboardPlugin *self)
 {
 	XfdashboardPluginPrivate		*priv;
-	XfdashboardPluginClass			*klass;
+	gboolean						result;
 
 	g_return_if_fail(XFDASHBOARD_IS_PLUGIN(self));
 
 	priv=self->priv;
-	klass=XFDASHBOARD_PLUGIN_GET_CLASS(self);
 
 	/* Do nothing and return immediately if plugin is not enabled */
 	if(priv->state!=XFDASHBOARD_PLUGIN_STATE_ENABLED)
@@ -869,20 +1059,34 @@ void xfdashboard_plugin_disable(XfdashboardPlugin *self)
 		return;
 	}
 
-	/* Call overriden disable function of plugin */
-	if(klass->disable)
-	{
-		/* Disable plugin */
-		klass->disable(self);
-		g_debug("Plugin '%s' disabled", priv->id);
+	/* Emit signal action 'disable' to disable plugin */
+	g_signal_emit(self, XfdashboardPluginSignals[ACTION_DISABLE], 0, self, &result);
+	g_debug("Plugin '%s' disabled", priv->id);
 
-		/* Set disabled state, i.e. revert to initialized state */
-		priv->state=XFDASHBOARD_PLUGIN_STATE_INITIALIZED;
+	/* Set disabled state, i.e. revert to initialized state */
+	priv->state=XFDASHBOARD_PLUGIN_STATE_INITIALIZED;
+}
 
-		return;
-	}
+/* Get base path to configuration files of this plugin */
+const gchar* xfdashboard_plugin_get_config_path(XfdashboardPlugin *self)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_PLUGIN(self), NULL);
 
-	/* If we get here the virtual function was not overridden */
-	XFDASHBOARD_PLUGIN_CRITICAL_NOT_IMPLEMENTED(self, "disable");
-	return;
+	return(self->priv->configPath);
+}
+
+/* Get base path to cache files of this plugin */
+const gchar* xfdashboard_plugin_get_cache_path(XfdashboardPlugin *self)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_PLUGIN(self), NULL);
+
+	return(self->priv->cachePath);
+}
+
+/* Get base path to data files of this plugin */
+const gchar* xfdashboard_plugin_get_data_path(XfdashboardPlugin *self)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_PLUGIN(self), NULL);
+
+	return(self->priv->dataPath);
 }

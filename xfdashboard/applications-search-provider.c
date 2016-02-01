@@ -2,7 +2,7 @@
  * applications-search-provider: Search provider for searching installed
  *                               applications
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +30,15 @@
 
 #include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
+#include <errno.h>
 
 #include "application-database.h"
 #include "application-button.h"
 #include "application.h"
 #include "drag-action.h"
+#include "utils.h"
+#include "enums.h"
+
 
 /* Define this class in GObject system */
 G_DEFINE_TYPE(XfdashboardApplicationsSearchProvider,
@@ -47,22 +51,613 @@ G_DEFINE_TYPE(XfdashboardApplicationsSearchProvider,
 
 struct _XfdashboardApplicationsSearchProviderPrivate
 {
-	/* Instance related */
-	XfdashboardApplicationDatabase		*appDB;
-	guint								applicationAddedID;
-	guint								applicationRemovedID;
+	/* Properties related */
+	XfdashboardApplicationsSearchProviderSortMode	nextSortMode;
 
-	GList								*allApps;
+	/* Instance related */
+	XfdashboardApplicationDatabase					*appDB;
+	guint											applicationAddedID;
+	guint											applicationRemovedID;
+
+	GList											*allApps;
+
+	XfconfChannel									*xfconfChannel;
+	guint											xfconfSortModeBindingID;
+	XfdashboardApplicationsSearchProviderSortMode	currentSortMode;
 };
+
+/* Properties */
+enum
+{
+	PROP_0,
+
+	PROP_SORT_MODE,
+
+	PROP_LAST
+};
+
+static GParamSpec* XfdashboardApplicationsSearchProviderProperties[PROP_LAST]={ 0, };
 
 /* IMPLEMENTATION: Private variables and methods */
-#define DEFAULT_DELIMITERS			"\t\n\r "
+#define SORT_MODE_XFCONF_PROP													"/components/applications-search-provider/sort-mode"
 
-typedef struct _XfdashboardApplicationsSearchProviderSearchData		XfdashboardApplicationsSearchProviderSearchData;
-struct _XfdashboardApplicationsSearchProviderSearchData
+#define DEFAULT_DELIMITERS														"\t\n\r "
+
+#define XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_FILE				"applications-search-provider-statistics.ini"
+#define XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_ENTRIES_GROUP		"Entries"
+#define XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_ENTRIES_COUNT		"Count"
+#define XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_USED_COUNTER_GROUP	"Used Counters"
+
+typedef struct _XfdashboardApplicationsSearchProviderGlobal			XfdashboardApplicationsSearchProviderGlobal;
+struct _XfdashboardApplicationsSearchProviderGlobal
 {
-	gchar 									*searchTerm;
+	gchar								*filename;
+
+	GHashTable							*stats;
+
+	guint								shutdownSignalID;
+	guint								applicationLaunchedSignalID;
+
+	guint								maxUsedCounter;
 };
+
+G_LOCK_DEFINE_STATIC(_xfdashboard_applications_search_provider_statistics_lock);
+XfdashboardApplicationsSearchProviderGlobal		_xfdashboard_applications_search_provider_statistics={0, };
+
+typedef struct _XfdashboardApplicationsSearchProviderStatistics		XfdashboardApplicationsSearchProviderStatistics;
+struct _XfdashboardApplicationsSearchProviderStatistics
+{
+	gint								refCount;
+
+	guint								usedCounter;
+};
+
+/* Create, destroy, ref and unref statistics data */
+static XfdashboardApplicationsSearchProviderStatistics* _xfdashboard_applications_search_provider_statistics_new(void)
+{
+	XfdashboardApplicationsSearchProviderStatistics	*data;
+
+	/* Create statistics data */
+	data=g_new0(XfdashboardApplicationsSearchProviderStatistics, 1);
+	if(!data) return(NULL);
+
+	/* Set up statistics data */
+	data->refCount=1;
+
+	return(data);
+}
+
+static void _xfdashboard_applications_search_provider_statistics_free(XfdashboardApplicationsSearchProviderStatistics *inData)
+{
+	g_return_if_fail(inData);
+
+	/* Release common allocated resources */
+	g_free(inData);
+}
+
+static XfdashboardApplicationsSearchProviderStatistics* _xfdashboard_applications_search_provider_statistics_ref(XfdashboardApplicationsSearchProviderStatistics *inData)
+{
+	g_return_val_if_fail(inData, NULL);
+
+	inData->refCount++;
+	return(inData);
+}
+
+static void _xfdashboard_applications_search_provider_statistics_unref(XfdashboardApplicationsSearchProviderStatistics *inData)
+{
+	g_return_if_fail(inData);
+
+	inData->refCount--;
+	if(inData->refCount==0) _xfdashboard_applications_search_provider_statistics_free(inData);
+}
+
+static XfdashboardApplicationsSearchProviderStatistics* _xfdashboard_applications_search_provider_statistics_get(const gchar *inAppID)
+{
+	XfdashboardApplicationsSearchProviderStatistics		*stats;
+
+	g_return_val_if_fail(_xfdashboard_applications_search_provider_statistics.stats, NULL);
+	g_return_val_if_fail(inAppID && *inAppID, NULL);
+
+	/* Lookup statistics data by application ID. If this application could not be found,
+	 * then return NULL pointer.
+	 */
+	if(!g_hash_table_lookup_extended(_xfdashboard_applications_search_provider_statistics.stats, inAppID, NULL, (gpointer*)&stats))
+	{
+		stats=NULL;
+	}
+
+	/* Return statistics data or NULL */
+	return(stats);
+}
+
+/* An application was launched successfully */
+static void _xfdashboard_applications_search_provider_on_application_launched(XfdashboardApplication *inApplication,
+																				GAppInfo *inAppInfo,
+																				gpointer inUserData)
+{
+	const gchar											*appID;
+	XfdashboardApplicationsSearchProviderStatistics		*stats;
+
+	g_return_if_fail(G_IS_APP_INFO(inAppInfo));
+
+	/* Lock for thread-safety */
+	G_LOCK(_xfdashboard_applications_search_provider_statistics_lock);
+
+	/* Get application ID which is used to lookup and store statistics */
+	appID=g_app_info_get_id(inAppInfo);
+
+	/* Create new statistics data if application is new, otherwise take an extra
+	 * reference on statistics data to keep it alive as it will be removed and
+	 * re-added when updating and the removal may decrease the reference counter
+	 * to zero which destroys the statistics data.
+	 */
+	stats=_xfdashboard_applications_search_provider_statistics_get(appID);
+	if(!stats) stats=_xfdashboard_applications_search_provider_statistics_new();
+		else _xfdashboard_applications_search_provider_statistics_ref(stats);
+
+	/* Increase launch counter and remember it has highest launch counter if it
+	 * is now higher than the one we remembered.
+	 */
+	stats->usedCounter++;
+	if(stats->usedCounter>_xfdashboard_applications_search_provider_statistics.maxUsedCounter)
+	{
+		_xfdashboard_applications_search_provider_statistics.maxUsedCounter=stats->usedCounter;
+	}
+
+	/* Store updated statistics */
+	g_hash_table_insert(_xfdashboard_applications_search_provider_statistics.stats,
+						g_strdup(appID),
+						_xfdashboard_applications_search_provider_statistics_ref(stats));
+
+	/* Release extra reference we took to keep this statistics data alive */
+	_xfdashboard_applications_search_provider_statistics_unref(stats);
+
+	/* Unlock for thread-safety */
+	G_UNLOCK(_xfdashboard_applications_search_provider_statistics_lock);
+}
+
+/* Save statistics to file */
+static gboolean _xfdashboard_applications_search_provider_save_statistics(GError **outError)
+{
+	GKeyFile												*keyFile;
+	gchar													*keyFileData;
+	gsize													keyFileLength;
+	GList													*allAppIDs;
+	GList													*iter;
+	guint													entriesCount;
+	gchar													*fileFolder;
+	GError													*error;
+
+	g_return_val_if_fail(outError==NULL || *outError==NULL, FALSE);
+
+	error=NULL;
+
+	/* If we have no filename do not store statistics but do not return error */
+	if(!_xfdashboard_applications_search_provider_statistics.filename) return(TRUE);
+
+	/* Create parent folders for key file if not available */
+	fileFolder=g_path_get_dirname(_xfdashboard_applications_search_provider_statistics.filename);
+	if(g_mkdir_with_parents(fileFolder, 0700)<0)
+	{
+		int											errno_save;
+
+		/* Get error code */
+		errno_save=errno;
+
+		/* Set error */
+		g_set_error(outError,
+						G_IO_ERROR,
+						g_io_error_from_errno(errno_save),
+						_("Could not create configuration folder for applications search provider at %s: %s"),
+						fileFolder,
+						g_strerror(errno_save));
+
+		/* Release allocated resources */
+		if(fileFolder) g_free(fileFolder);
+
+		return(FALSE);
+	}
+
+	/* Create and set up key file to store statistics */
+	keyFile=g_key_file_new();
+
+	/* Get list of all applications from statistics hash table, iterate through
+	 * all applications and store them in key file.
+	 */
+	allAppIDs=g_hash_table_get_keys(_xfdashboard_applications_search_provider_statistics.stats);
+
+	g_key_file_set_integer(keyFile,
+							XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_ENTRIES_GROUP,
+							XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_ENTRIES_COUNT,
+							g_list_length(allAppIDs));
+
+	entriesCount=0;
+	for(iter=allAppIDs; iter; iter=g_list_next(iter))
+	{
+		gchar												*name;
+		const gchar											*appID;
+		XfdashboardApplicationsSearchProviderStatistics		*stats;
+
+		/* Get current iterated application desktop ID */
+		appID=(const gchar*)iter->data;
+
+		/* Get statistics data (it must exist because we got a list of all keys) */
+		stats=_xfdashboard_applications_search_provider_statistics_get(appID);
+		g_assert(stats!=NULL);
+
+		/* Store application desktop ID in "entries" overview group and increase counter */
+		entriesCount++;
+
+		name=g_strdup_printf("%d", entriesCount);
+		g_key_file_set_string(keyFile,
+								XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_ENTRIES_GROUP,
+								name,
+								appID);
+		g_free(name);
+
+		/* Store statistics in key file in their groups but try to avoid to store
+		 * default values to keep key file small.
+		 */
+		if(stats->usedCounter>0)
+		{
+			g_key_file_set_integer(keyFile,
+									XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_USED_COUNTER_GROUP,
+									appID,
+									stats->usedCounter);
+		}
+	}
+
+	/* Store key file for statistics in file */
+	keyFileData=g_key_file_to_data(keyFile, &keyFileLength, NULL);
+	if(!g_file_set_contents(_xfdashboard_applications_search_provider_statistics.filename, keyFileData, keyFileLength, &error))
+	{
+		/* Propagate error */
+		g_propagate_error(outError, error);
+
+		/* Release allocated resources */
+		if(fileFolder) g_free(fileFolder);
+		if(keyFileData) g_free(keyFileData);
+		if(keyFile) g_key_file_free(keyFile);
+
+		return(FALSE);
+	}
+
+	/* Release allocated resources */
+	if(fileFolder) g_free(fileFolder);
+	if(keyFileData) g_free(keyFileData);
+	if(keyFile) g_key_file_free(keyFile);
+
+	/* If we get here saving statistics file was successful */
+	return(TRUE);
+}
+
+/* Load statistics from file */
+static gboolean _xfdashboard_applications_search_provider_load_statistics(XfdashboardApplicationsSearchProvider *self,
+																			GError **outError)
+{
+	GKeyFile												*keyFile;
+	GList													*allAppIDs;
+	GList													*iter;
+	guint													entriesCount;
+	GError													*error;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(self), FALSE);
+	g_return_val_if_fail(outError==NULL || *outError==NULL, FALSE);
+
+	error=NULL;
+
+	/* If no statistics were set up, we cannot load from file */
+	if(!_xfdashboard_applications_search_provider_statistics.stats)
+	{
+			/* Set error */
+			g_set_error(outError,
+							G_IO_ERROR,
+							G_IO_ERROR_FAILED,
+							_("Statistics were not initialized"));
+
+			return(FALSE);
+	}
+
+	/* Get path to statistics file to load statistics from */
+	if(!_xfdashboard_applications_search_provider_statistics.filename)
+	{
+		_xfdashboard_applications_search_provider_statistics.filename=
+			g_build_filename(g_get_user_data_dir(),
+								"xfdashboard",
+								XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_FILE,
+								NULL);
+
+		if(!_xfdashboard_applications_search_provider_statistics.filename)
+		{
+			/* Set error */
+			g_set_error(outError,
+							G_IO_ERROR,
+							G_IO_ERROR_NOT_FOUND,
+							_("Could not build path to statistics file of applications search provider"));
+
+			return(FALSE);
+		}
+	}
+	g_debug("Will load statistics of applications search provider from %s",
+			_xfdashboard_applications_search_provider_statistics.filename);
+
+	/* If statistics file does not exist then return immediately but with success */
+	if(!g_file_test(_xfdashboard_applications_search_provider_statistics.filename, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
+	{
+		g_debug("Statistics file %s does not exists. Will create empty statistics database for applications search provider",
+				_xfdashboard_applications_search_provider_statistics.filename);
+
+		return(TRUE);
+	}
+
+	/* Load statistics from key file */
+	keyFile=g_key_file_new();
+	if(!g_key_file_load_from_file(keyFile, _xfdashboard_applications_search_provider_statistics.filename, G_KEY_FILE_NONE, &error))
+	{
+		/* Propagate error */
+		g_propagate_error(outError, error);
+
+		/* Release allocated resources */
+		if(keyFile) g_key_file_free(keyFile);
+
+		return(FALSE);
+	}
+
+	/* Get number of applications and their application desktop IDs from key file */
+	entriesCount=g_key_file_get_integer(keyFile,
+										XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_ENTRIES_GROUP,
+										XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_ENTRIES_COUNT,
+										&error);
+	if(error)
+	{
+		/* Propagate error */
+		g_propagate_error(outError, error);
+
+		/* Release allocated resources */
+		if(keyFile) g_key_file_free(keyFile);
+
+		return(FALSE);
+	}
+	g_debug("Will load statistics for %d applications", entriesCount);
+
+	allAppIDs=NULL;
+	while(entriesCount>0)
+	{
+		gchar											*name;
+		gchar											*appID;
+
+		/* Get application desktop ID */
+		name=g_strdup_printf("%d", entriesCount);
+		appID=g_key_file_get_string(keyFile,
+									XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_ENTRIES_GROUP,
+									name,
+									&error);
+		g_free(name);
+
+		if(error)
+		{
+			/* Propagate error */
+			g_propagate_error(outError, error);
+
+			/* Release allocated resources */
+			if(appID) g_free(appID);
+			if(allAppIDs) g_list_free_full(allAppIDs, g_free);
+			if(keyFile) g_key_file_free(keyFile);
+
+			return(FALSE);
+		}
+
+		/* Store application desktop ID in list to iterate */
+		allAppIDs=g_list_prepend(allAppIDs, appID);
+		g_debug("Will load statistics for application '%s'", appID);
+
+		/* Continue with next application in entries group */
+		entriesCount--;
+	}
+
+	/* Iterate through all application desktop IDs and create statistics data
+	 * with default values for each one first. Then try to load stored values
+	 * from key file.
+	 */
+	for(iter=allAppIDs; iter; iter=g_list_next(iter))
+	{
+		const gchar											*appID;
+		XfdashboardApplicationsSearchProviderStatistics		*stats;
+
+		/* Get current iterated application desktop ID */
+		appID=(const gchar*)iter->data;
+
+		/* Create statistics data for application with default values */
+		stats=_xfdashboard_applications_search_provider_statistics_new();
+		if(!stats)
+		{
+			g_critical(_("Could not create statistics data for application '%s' of applications search provider"), appID);
+			continue;
+		}
+
+		/* Try to load stored values for application from key file */
+		if(g_key_file_has_key(keyFile, XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_USED_COUNTER_GROUP, appID, NULL))
+		{
+			stats->usedCounter=g_key_file_get_integer(keyFile,
+														XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_USED_COUNTER_GROUP,
+														appID,
+														&error);
+			if(error)
+			{
+				g_critical(_("Could not get value from group [%s] for application %s from statistics file of applications search provider: %s"),
+							XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_USED_COUNTER_GROUP,
+							appID,
+							error->message);
+				g_clear_error(&error);
+			}
+
+			if(stats->usedCounter>_xfdashboard_applications_search_provider_statistics.maxUsedCounter)
+			{
+				_xfdashboard_applications_search_provider_statistics.maxUsedCounter=stats->usedCounter;
+			}
+		}
+
+		/* Store statistics data for application in hash-table */
+		g_hash_table_insert(_xfdashboard_applications_search_provider_statistics.stats, g_strdup(appID), _xfdashboard_applications_search_provider_statistics_ref(stats));
+		g_debug("Loaded and stored statistics for '%s' for applications search provider", appID);
+
+		/* Release allocated resources */
+		_xfdashboard_applications_search_provider_statistics_unref(stats);
+	}
+
+	/* Release allocated resources */
+	if(allAppIDs) g_list_free_full(allAppIDs, g_free);
+	if(keyFile) g_key_file_free(keyFile);
+
+	/* If we get here saving statistics file was successful */
+	g_debug("Loaded statistics of applications search provider from %s",
+			_xfdashboard_applications_search_provider_statistics.filename);
+
+	return(TRUE);
+}
+
+/* Destroy statistics for this search provider */
+static void _xfdashboard_applications_search_provider_destroy_statistics(void)
+{
+	XfdashboardApplication			*application;
+	GError							*error;
+
+	error=NULL;
+
+	/* Only existing statistics can be destroyed */
+	if(!_xfdashboard_applications_search_provider_statistics.stats) return;
+
+	/* Lock for thread-safety */
+	G_LOCK(_xfdashboard_applications_search_provider_statistics_lock);
+
+	/* Get application instance */
+	application=xfdashboard_application_get_default();
+
+	/* Disconnect application "shutdown" signal handler */
+	if(_xfdashboard_applications_search_provider_statistics.shutdownSignalID)
+	{
+		g_signal_handler_disconnect(application, _xfdashboard_applications_search_provider_statistics.shutdownSignalID);
+		_xfdashboard_applications_search_provider_statistics.shutdownSignalID=0;
+	}
+
+	/* Disconnect application "application-launched" signal handler */
+	if(_xfdashboard_applications_search_provider_statistics.applicationLaunchedSignalID)
+	{
+		g_signal_handler_disconnect(application, _xfdashboard_applications_search_provider_statistics.applicationLaunchedSignalID);
+		_xfdashboard_applications_search_provider_statistics.applicationLaunchedSignalID=0;
+	}
+
+	/* Save statistics to file */
+	if(!_xfdashboard_applications_search_provider_save_statistics(&error))
+	{
+		g_critical(_("Failed to save statistics of applications search provider to %s: %s"),
+					_xfdashboard_applications_search_provider_statistics.filename,
+					error ? error->message : _("Unknown error"));
+		if(error) g_clear_error(&error);
+	}
+
+	/* Destroy statistics */
+	g_debug("Destroying statistics of applications search provider");
+	g_hash_table_destroy(_xfdashboard_applications_search_provider_statistics.stats);
+	_xfdashboard_applications_search_provider_statistics.stats=NULL;
+
+	/* Destroy filename for statistics */
+	if(_xfdashboard_applications_search_provider_statistics.filename)
+	{
+		g_free(_xfdashboard_applications_search_provider_statistics.filename);
+		_xfdashboard_applications_search_provider_statistics.filename=NULL;
+	}
+
+	/* Reset other variables */
+	_xfdashboard_applications_search_provider_statistics.maxUsedCounter=0;
+
+	/* Unlock for thread-safety */
+	G_UNLOCK(_xfdashboard_applications_search_provider_statistics_lock);
+}
+
+/* Create and load statistics for this search provider if not done already */
+static void _xfdashboard_applications_search_provider_create_statistics(XfdashboardApplicationsSearchProvider *self)
+{
+	XfdashboardApplication			*application;
+	GError							*error;
+
+	g_return_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(self));
+
+	error=NULL;
+
+	/* Statistics were already set up */
+	if(_xfdashboard_applications_search_provider_statistics.stats) return;
+
+	g_assert(!_xfdashboard_applications_search_provider_statistics.shutdownSignalID);
+	g_assert(!_xfdashboard_applications_search_provider_statistics.applicationLaunchedSignalID);
+
+	/* Lock for thread-safety */
+	G_LOCK(_xfdashboard_applications_search_provider_statistics_lock);
+
+	/* Initialize non-critical variables */
+	_xfdashboard_applications_search_provider_statistics.maxUsedCounter=0;
+
+	/* Create hash-table for statistics */
+	_xfdashboard_applications_search_provider_statistics.stats=
+		g_hash_table_new_full(g_str_hash,
+								g_str_equal,
+								g_free,
+								(GDestroyNotify)_xfdashboard_applications_search_provider_statistics_unref);
+	g_debug("Created statistics of applications search provider");
+
+	/* Load statistics from file */
+	if(!_xfdashboard_applications_search_provider_load_statistics(self, &error))
+	{
+		g_critical(_("Failed to load statistics of applications search provider from %s: %s"),
+					_xfdashboard_applications_search_provider_statistics.filename,
+					error ? error->message : _("Unknown error"));
+		if(error) g_clear_error(&error);
+
+		/* Destroy hash-table to avoid the half-loaded hash-table being stored again
+		 * and overriding existing statistics file (even if it may be broken).
+		 * Also release 
+		 */
+		if(_xfdashboard_applications_search_provider_statistics.stats)
+		{
+			g_hash_table_destroy(_xfdashboard_applications_search_provider_statistics.stats);
+			_xfdashboard_applications_search_provider_statistics.stats=NULL;
+		}
+
+		if(_xfdashboard_applications_search_provider_statistics.filename)
+		{
+			g_free(_xfdashboard_applications_search_provider_statistics.filename);
+			_xfdashboard_applications_search_provider_statistics.filename=NULL;
+		}
+
+		/* Unlock for thread-safety */
+		G_UNLOCK(_xfdashboard_applications_search_provider_statistics_lock);
+
+		/* Return here to prevent further initializations of statistics
+		 * which are not used and not deinitialized in 'destroy' function.
+		 */
+		return;
+	}
+
+	/* Get application instance */
+	application=xfdashboard_application_get_default();
+
+	/* Connect to "shutdown" signal of application to clean up statistics */
+	_xfdashboard_applications_search_provider_statistics.shutdownSignalID=
+		g_signal_connect(application,
+							"shutdown-final",
+							G_CALLBACK(_xfdashboard_applications_search_provider_destroy_statistics),
+							NULL);
+
+	/* Connect to "application-launched" signal of application to track app launches */
+	_xfdashboard_applications_search_provider_statistics.applicationLaunchedSignalID=
+		g_signal_connect(application,
+							"application-launched",
+							G_CALLBACK(_xfdashboard_applications_search_provider_on_application_launched),
+							NULL);
+
+	/* Unlock for thread-safety */
+	G_UNLOCK(_xfdashboard_applications_search_provider_statistics_lock);
+}
 
 /* An application was added to database */
 static void _xfdashboard_applications_search_provider_on_application_added(XfdashboardApplicationsSearchProvider *self,
@@ -166,30 +761,51 @@ static void _xfdashboard_applications_search_provider_on_drag_end(ClutterDragAct
 	}
 }
 
-/* Check if given app info matches search terms */
-static gboolean _xfdashboard_applications_search_provider_is_match(XfdashboardApplicationsSearchProvider *self,
-																	gchar **inSearchTerms,
-																	GAppInfo *inAppInfo)
+/* Check if given app info matches search terms and return score as fraction
+ * between 0.0and 1.0 - so called "relevance". A negative score means that
+ * the given app info does not match at all.
+ */
+static gfloat _xfdashboard_applications_search_provider_score(XfdashboardApplicationsSearchProvider *self,
+																gchar **inSearchTerms,
+																GAppInfo *inAppInfo)
 {
-	gboolean						isMatch;
-	gchar							*title;
-	gchar							*description;
-	const gchar						*command;
-	const gchar						*value;
-	gint							matchesFound, matchesExpected;
+	XfdashboardApplicationsSearchProviderPrivate		*priv;
+	gchar												*title;
+	gchar												*description;
+	const gchar											*command;
+	const gchar											*value;
+	gint												matchesFound, matchesExpected;
+	gfloat												pointsSearch;
+	gfloat												score;
 
-	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(self), FALSE);
-	g_return_val_if_fail(G_IS_APP_INFO(inAppInfo), FALSE);
+	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(self), -1.0f);
+	g_return_val_if_fail(G_IS_APP_INFO(inAppInfo), -1.0f);
 
-	isMatch=FALSE;
+	priv=self->priv;
+	score=-1.0f;
 
 	/* Empty search term matches no menu item */
-	if(!inSearchTerms) return(FALSE);
+	if(!inSearchTerms) return(0.0f);
 
 	matchesExpected=g_strv_length(inSearchTerms);
-	if(matchesExpected==0) return(FALSE);
+	if(matchesExpected==0) return(0.0f);
 
-	/* Check if title, description or command matches all search terms */
+	/* Calculate the highest score points possible which is the highest
+	 * launch count among all applications, display name matches all search terms,
+	 * description matches all search terms and also the command matches all
+	 * search terms.
+	 *
+	 * But a matching display names weights more than a matching description and
+	 * also a matching command weights more than a matching description. The weights
+	 * are 0.4 for matching display names, 0.4 for matching commands and 0.2 for
+	 * matching descriptions.
+	 *
+	 * While iterating through all search terms we add the weights "points" for
+	 * each matching item and when we iterated through all search terms we divide
+	 * the total weight "points" by the number of search terms to get the average
+	 * which is also the result score when *not* taking the launch count of
+	 * application into account.
+	 */
 	value=g_app_info_get_display_name(inAppInfo);
 	if(value) title=g_utf8_strdown(value, -1);
 		else title=NULL;
@@ -201,54 +817,101 @@ static gboolean _xfdashboard_applications_search_provider_is_match(XfdashboardAp
 	command=g_app_info_get_executable(inAppInfo);
 
 	matchesFound=0;
+	pointsSearch=0.0f;
 	while(*inSearchTerms)
 	{
 		gboolean						termMatch;
 		gchar							*commandPos;
+		gfloat							pointsTerm;
 
-		/* Reset "found" indicator */
+		/* Reset "found" indicator and score of current search term */
 		termMatch=FALSE;
+		pointsTerm=0.0f;
 
 		/* Check for current search term */
-		if(!termMatch &&
-			title &&
+		if(title &&
 			g_strstr_len(title, -1, *inSearchTerms))
 		{
+			pointsTerm+=0.4;
 			termMatch=TRUE;
 		}
 
-		if(!termMatch &&
-			description &&
+		if(description &&
 			g_strstr_len(description, -1, *inSearchTerms))
 		{
+			pointsTerm+=0.2;
 			termMatch=TRUE;
 		}
 
-		if(!termMatch && command)
+		if(command)
 		{
 			commandPos=g_strstr_len(command, -1, *inSearchTerms);
 			if(commandPos &&
 				(commandPos==command || *(commandPos-1)==G_DIR_SEPARATOR))
 			{
+				pointsTerm+=0.4;
 				termMatch=TRUE;
 			}
 		}
 
 		/* Increase match counter if we found a match */
-		if(termMatch) matchesFound++;
+		if(termMatch)
+		{
+			matchesFound++;
+			pointsSearch+=pointsTerm;
+		}
 
 		/* Continue with next search term */
 		inSearchTerms++;
 	}
 
-	if(matchesFound>=matchesExpected) isMatch=TRUE;
+	/* If we got a match in either title, description or command for each search term
+	 * then calculate score and also check if we should take the number of
+	 * launches of this application into account.
+	 */
+	if(matchesFound>=matchesExpected)
+	{
+		gfloat											currentPoints;
+		gfloat											maxPoints;
+		XfdashboardApplicationsSearchProviderStatistics	*stats;
+
+		currentPoints=0.0f;
+		maxPoints=0.0f;
+
+		/* Set maximum points to the number of expected number of matches
+		 * if we should take title, description and command into calculation.
+		 */
+		if(priv->currentSortMode & XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_NAMES)
+		{
+			currentPoints+=pointsSearch;
+			maxPoints+=matchesExpected*1.0f;
+		}
+
+		/* If used counter should be taken into calculation add the highest number
+		 * of any application to the highest points possible and also add the number
+		 * of launches of this application to the total points we got so far.
+		 */
+		if(priv->currentSortMode & XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_MOST_USED)
+		{
+			maxPoints+=(_xfdashboard_applications_search_provider_statistics.maxUsedCounter*1.0f);
+
+			stats=_xfdashboard_applications_search_provider_statistics_get(g_app_info_get_id(inAppInfo));
+			if(stats) currentPoints+=(stats->usedCounter*1.0f);
+		}
+
+		/* Calculate score but if maximum points is still zero we should do a simple
+		 * match by setting score to 1.
+		 */
+		if(maxPoints>0.0f) score=currentPoints/maxPoints;
+			else score=1.0f;
+	}
 
 	/* Release allocated resources */
 	if(description) g_free(description);
 	if(title) g_free(title);
 
-	/* If we get here return TRUE to show model data item or FALSE to hide */
-	return(isMatch);
+	/* Return score of this application for requested search terms */
+	return(score);
 }
 
 /* Callback to sort each item in result set */
@@ -308,20 +971,27 @@ static gint _xfdashboard_applications_search_provider_sort_result_set(GVariant *
 }
 
 /* IMPLEMENTATION: XfdashboardSearchProvider */
+static void _xfdashboard_applications_search_provider_initialize(XfdashboardSearchProvider *inProvider)
+{
+	g_return_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(inProvider));
 
-/* Overriden virtual function: get_name */
+	/* Create and load statistics hash-table (will only be done once) */
+	_xfdashboard_applications_search_provider_create_statistics(XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER(inProvider));
+}
+
+/* Get display name for this search provider */
 static const gchar* _xfdashboard_applications_search_provider_get_name(XfdashboardSearchProvider *inProvider)
 {
 	return(_("Applications"));
 }
 
-/* Overriden virtual function: get_icon */
+/* Get icon-name for this search provider */
 static const gchar* _xfdashboard_applications_search_provider_get_icon(XfdashboardSearchProvider *inProvider)
 {
 	return("go-home");
 }
 
-/* Overriden virtual function: get_result_set */
+/* Get result set for requested search terms */
 static XfdashboardSearchResultSet* _xfdashboard_applications_search_provider_get_result_set(XfdashboardSearchProvider *inProvider,
 																							const gchar **inSearchTerms,
 																							XfdashboardSearchResultSet *inPreviousResultSet)
@@ -334,11 +1004,15 @@ static XfdashboardSearchResultSet* _xfdashboard_applications_search_provider_get
 	gchar												**terms, **termsIter;
 	GVariant											*resultItem;
 	XfdashboardDesktopAppInfo							*appInfo;
+	gfloat												score;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(inProvider), NULL);
 
 	self=XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER(inProvider);
 	priv=self->priv;
+
+	/* Set new match mode */
+	priv->currentSortMode=priv->nextSortMode;
 
 	/* To perform case-insensitive searches through model convert all search terms
 	 * to lower-case before starting search.
@@ -399,9 +1073,11 @@ static XfdashboardSearchResultSet* _xfdashboard_applications_search_provider_get
 			xfdashboard_search_result_set_has_item(inPreviousResultSet, resultItem))
 		{
 			/* Check for a match against search terms */
-			if(_xfdashboard_applications_search_provider_is_match(self, terms, G_APP_INFO(appInfo)))
+			score=_xfdashboard_applications_search_provider_score(self, terms, G_APP_INFO(appInfo));
+			if(score>=0.0f)
 			{
 				xfdashboard_search_result_set_add_item(resultSet, g_variant_ref(resultItem));
+				xfdashboard_search_result_set_set_item_score(resultSet, resultItem, score);
 			}
 		}
 
@@ -431,7 +1107,7 @@ static XfdashboardSearchResultSet* _xfdashboard_applications_search_provider_get
 	return(resultSet);
 }
 
-/* Overriden virtual function: create_result_actor */
+/* Create actor for a result item of the result set returned from a search request */
 static ClutterActor* _xfdashboard_applications_search_provider_create_result_actor(XfdashboardSearchProvider *inProvider,
 																					GVariant *inResultItem)
 {
@@ -475,26 +1151,21 @@ static ClutterActor* _xfdashboard_applications_search_provider_create_result_act
 	return(actor);
 }
 
-/* Overriden virtual function: create_result_actor */
-static void _xfdashboard_applications_search_provider_activate_result(XfdashboardSearchProvider* inProvider,
-																		GVariant *inResultItem,
-																		ClutterActor *inActor,
-																		const gchar **inSearchTerms)
+/* Activate result item */
+static gboolean _xfdashboard_applications_search_provider_activate_result(XfdashboardSearchProvider* inProvider,
+																			GVariant *inResultItem,
+																			ClutterActor *inActor,
+																			const gchar **inSearchTerms)
 {
 	XfdashboardApplicationButton		*button;
 
-	g_return_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(inProvider));
-	g_return_if_fail(XFDASHBOARD_IS_APPLICATION_BUTTON(inActor));
+	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(inProvider), FALSE);
+	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATION_BUTTON(inActor), FALSE);
 
 	button=XFDASHBOARD_APPLICATION_BUTTON(inActor);
 
 	/* Launch application */
-	if(xfdashboard_application_button_execute(button, NULL))
-	{
-		/* Launching application seems to be successfuly so quit application */
-		xfdashboard_application_quit();
-		return;
-	}
+	return(xfdashboard_application_button_execute(button, NULL));
 }
 
 /* IMPLEMENTATION: GObject */
@@ -530,8 +1201,59 @@ static void _xfdashboard_applications_search_provider_dispose(GObject *inObject)
 		priv->allApps=NULL;
 	}
 
+	if(priv->xfconfSortModeBindingID)
+	{
+		xfconf_g_property_unbind(priv->xfconfSortModeBindingID);
+		priv->xfconfSortModeBindingID=0;
+	}
+
+	if(priv->xfconfChannel)
+	{
+		priv->xfconfChannel=NULL;
+	}
+
 	/* Call parent's class dispose method */
 	G_OBJECT_CLASS(xfdashboard_applications_search_provider_parent_class)->dispose(inObject);
+}
+
+/* Set/get properties */
+static void _xfdashboard_applications_search_provider_set_property(GObject *inObject,
+																	guint inPropID,
+																	const GValue *inValue,
+																	GParamSpec *inSpec)
+{
+	XfdashboardApplicationsSearchProvider			*self=XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER(inObject);
+
+	switch(inPropID)
+	{
+		case PROP_SORT_MODE:
+			xfdashboard_applications_search_provider_set_sort_mode(self, g_value_get_flags(inValue));
+			break;
+
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID(inObject, inPropID, inSpec);
+			break;
+	}
+}
+
+static void _xfdashboard_applications_search_provider_get_property(GObject *inObject,
+																	guint inPropID,
+																	GValue *outValue,
+																	GParamSpec *inSpec)
+{
+	XfdashboardApplicationsSearchProvider			*self=XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER(inObject);
+	XfdashboardApplicationsSearchProviderPrivate	*priv=self->priv;
+
+	switch(inPropID)
+	{
+		case PROP_SORT_MODE:
+			g_value_set_flags(outValue, priv->nextSortMode);
+			break;
+
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID(inObject, inPropID, inSpec);
+			break;
+	}
 }
 
 /* Class initialization
@@ -545,7 +1267,10 @@ static void xfdashboard_applications_search_provider_class_init(XfdashboardAppli
 
 	/* Override functions */
 	gobjectClass->dispose=_xfdashboard_applications_search_provider_dispose;
+	gobjectClass->set_property=_xfdashboard_applications_search_provider_set_property;
+	gobjectClass->get_property=_xfdashboard_applications_search_provider_get_property;
 
+	providerClass->initialize=_xfdashboard_applications_search_provider_initialize;
 	providerClass->get_name=_xfdashboard_applications_search_provider_get_name;
 	providerClass->get_icon=_xfdashboard_applications_search_provider_get_icon;
 	providerClass->get_result_set=_xfdashboard_applications_search_provider_get_result_set;
@@ -554,6 +1279,17 @@ static void xfdashboard_applications_search_provider_class_init(XfdashboardAppli
 
 	/* Set up private structure */
 	g_type_class_add_private(klass, sizeof(XfdashboardApplicationsSearchProviderPrivate));
+
+	/* Define properties */
+	XfdashboardApplicationsSearchProviderProperties[PROP_SORT_MODE]=
+		g_param_spec_flags("sort-mode",
+							_("Sort mode"),
+							_("Defines how to sort matching applications"),
+							XFDASHBOARD_TYPE_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE,
+							XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_NONE,
+							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+	g_object_class_install_properties(gobjectClass, PROP_LAST, XfdashboardApplicationsSearchProviderProperties);
 }
 
 /* Object initialization
@@ -564,6 +1300,11 @@ static void xfdashboard_applications_search_provider_init(XfdashboardApplication
 	XfdashboardApplicationsSearchProviderPrivate	*priv;
 
 	self->priv=priv=XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_GET_PRIVATE(self);
+
+	/* Set up default values */
+	priv->xfconfChannel=xfdashboard_application_get_xfconf_channel();
+	priv->currentSortMode=XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_NONE;
+	priv->nextSortMode=XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_NONE;
 
 	/* Get application database */
 	priv->appDB=xfdashboard_application_database_get_default();
@@ -578,4 +1319,41 @@ static void xfdashboard_applications_search_provider_init(XfdashboardApplication
 
 	/* Get list of all installed applications */
 	priv->allApps=xfdashboard_application_database_get_all_applications(priv->appDB);
+
+	/* Bind to xfconf to react on changes */
+	priv->xfconfSortModeBindingID=
+		xfconf_g_property_bind(priv->xfconfChannel,
+								SORT_MODE_XFCONF_PROP,
+								G_TYPE_UINT,
+								self,
+								"sort-mode");
+}
+
+/* IMPLEMENTATION: Public API */
+
+/* Get/set sorting mode */
+XfdashboardApplicationsSearchProviderSortMode xfdashboard_applications_search_provider_get_sort_mode(XfdashboardApplicationsSearchProvider *self)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(self), XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_NONE);
+
+	return(self->priv->nextSortMode);
+}
+
+void xfdashboard_applications_search_provider_set_sort_mode(XfdashboardApplicationsSearchProvider *self, const XfdashboardApplicationsSearchProviderSortMode inMode)
+{
+	XfdashboardApplicationsSearchProviderPrivate	*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(self));
+
+	priv=self->priv;
+
+	/* Set value if changed */
+	if(priv->nextSortMode!=inMode)
+	{
+		/* Set value */
+		priv->nextSortMode=inMode;
+
+		/* Notify about property change */
+		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardApplicationsSearchProviderProperties[PROP_SORT_MODE]);
+	}
 }

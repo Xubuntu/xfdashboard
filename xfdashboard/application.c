@@ -2,7 +2,7 @@
  * application: Single-instance managing application and single-instance
  *              objects like window manager and so on.
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,6 +111,7 @@ enum
 	SIGNAL_SUSPEND,
 	SIGNAL_RESUME,
 	SIGNAL_THEME_CHANGED,
+	SIGNAL_APPLICATION_LAUNCHED,
 
 	/* Actions */
 	ACTION_EXIT,
@@ -989,6 +990,18 @@ static void xfdashboard_application_class_init(XfdashboardApplicationClass *klas
 						1,
 						XFDASHBOARD_TYPE_THEME);
 
+	XfdashboardApplicationSignals[SIGNAL_APPLICATION_LAUNCHED]=
+		g_signal_new("application-launched",
+						G_TYPE_FROM_CLASS(klass),
+						G_SIGNAL_RUN_LAST,
+						G_STRUCT_OFFSET(XfdashboardApplicationClass, application_launched),
+						NULL,
+						NULL,
+						g_cclosure_marshal_VOID__OBJECT,
+						G_TYPE_NONE,
+						1,
+						G_TYPE_APP_INFO);
+
 	XfdashboardApplicationSignals[ACTION_EXIT]=
 		g_signal_new("exit",
 						G_TYPE_FROM_CLASS(klass),
@@ -1064,7 +1077,7 @@ XfdashboardApplication* xfdashboard_application_get_default(void)
 			else appID=g_strdup(XFDASHBOARD_APP_ID);
 
 		application=g_object_new(XFDASHBOARD_TYPE_APPLICATION,
-									"application-id", XFDASHBOARD_APP_ID,
+									"application-id", appID,
 									"flags", G_APPLICATION_HANDLES_COMMAND_LINE,
 									NULL);
 

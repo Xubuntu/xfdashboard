@@ -2,7 +2,7 @@
  * background: An actor providing background rendering. Usually other
  *             actors are derived from this one.
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,9 +46,9 @@ typedef enum /*< flags,prefix=XFDASHBOARD_BACKGROUND_TYPE >*/
 {
 	XFDASHBOARD_BACKGROUND_TYPE_NONE=0,
 
-	XFDASHBOARD_BACKGROUND_TYPE_FILL=1 << 1,
-	XFDASHBOARD_BACKGROUND_TYPE_OUTLINE=1 << 2,
-	XFDASHBOARD_BACKGROUND_TYPE_ROUNDED_CORNERS=1 << 3,
+	XFDASHBOARD_BACKGROUND_TYPE_FILL=1 << 0,
+	XFDASHBOARD_BACKGROUND_TYPE_OUTLINE=1 << 1,
+	XFDASHBOARD_BACKGROUND_TYPE_ROUNDED_CORNERS=1 << 2,
 } XfdashboardBackgroundType;
 
 

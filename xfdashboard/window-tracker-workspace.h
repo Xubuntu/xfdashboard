@@ -7,7 +7,7 @@
  *                           use #ifdefs in window tracker object and
  *                           nowhere else in the code.
  * 
- * Copyright 2012-2015 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,6 +46,9 @@ typedef struct _WnckWorkspaceClass								XfdashboardWindowTrackerWorkspaceClass
 
 /* Public API */
 GType xfdashboard_window_tracker_workspace_get_type(void) G_GNUC_CONST;
+
+gboolean xfdashboard_window_tracker_workspace_is_equal(XfdashboardWindowTrackerWorkspace *inLeft,
+														XfdashboardWindowTrackerWorkspace *inRight);
 
 gint xfdashboard_window_tracker_workspace_get_number(XfdashboardWindowTrackerWorkspace *inWorkspace);
 const gchar* xfdashboard_window_tracker_workspace_get_name(XfdashboardWindowTrackerWorkspace *inWorkspace);
