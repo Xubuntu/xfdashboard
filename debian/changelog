@@ -1,3 +1,11 @@
+xfdashboard (0.5.90-0ubuntu1) xenial; urgency=medium
+
+  * Imported Upstream version 0.5.90
+  * Update standards-version to 3.9.7.
+  * Add the -plugins, libxfdashboard0, and libxfdashboard-dev packages.
+
+ -- Unit 193 <unit193@ubuntu.com>  Mon, 29 Feb 2016 15:02:49 -0500
+
 xfdashboard (0.5.5-0ubuntu1) xenial; urgency=medium
 
   * Imported Upstream version 0.5.5
