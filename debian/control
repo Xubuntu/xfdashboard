@@ -26,11 +26,49 @@ Vcs-Git: https://bitbucket.org/xubuntu/xfdashboard/
 Package: xfdashboard
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: xfdashboard-plugins
 Description: GNOME shell like dashboard for Xfce
  xfdashboard provides an overview of applications currently open enabling the
  user to switch between different applications. The search feature works like
  Xfce's appfinder which makes it convenient to search for and start
  applications.
+
+Package: xfdashboard-plugins
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Enhances: xfdashboard
+Description: GNOME shell like dashboard for Xfce - plugins
+ xfdashboard provides an overview of applications currently open enabling the
+ user to switch between different applications. The search feature works like
+ Xfce's appfinder which makes it convenient to search for and start
+ applications.
+ .
+ This package contains the xfdashboard plugins.
+
+Package: libxfdashboard0
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: GNOME shell like dashboard for Xfce - shared library
+ xfdashboard provides an overview of applications currently open enabling the
+ user to switch between different applications. The search feature works like
+ Xfce's appfinder which makes it convenient to search for and start
+ applications.
+ .
+ This package contains the libxfdashboard shared library.
+
+Package: libxfdashboard-dev
+Section: libdevel
+Architecture: any
+Depends: libxfdashboard0 (= ${binary:Version}),${shlibs:Depends}, ${misc:Depends}
+Description: GNOME shell like dashboard for Xfce - development files
+ xfdashboard provides an overview of applications currently open enabling the
+ user to switch between different applications. The search feature works like
+ Xfce's appfinder which makes it convenient to search for and start
+ applications.
+ .
+ This package provides the libxfdashboard development files.
 
 Package: xfdashboard-dbg
 Architecture: any
