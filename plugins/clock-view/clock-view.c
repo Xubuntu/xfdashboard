@@ -25,14 +25,15 @@
 #include "config.h"
 #endif
 
+#include "clock-view.h"
+
+#include <libxfdashboard/libxfdashboard.h>
 #include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
 #include <math.h>
 
-#include "clock-view.h"
-#include "utils.h"
-#include "view.h"
-#include "fill-box-layout.h"
+#include "clock-view-settings.h"
+
 
 /* Define this class in GObject system */
 G_DEFINE_DYNAMIC_TYPE(XfdashboardClockView,
@@ -49,10 +50,13 @@ XFDASHBOARD_DEFINE_PLUGIN_TYPE(xfdashboard_clock_view);
 struct _XfdashboardClockViewPrivate
 {
 	/* Instance related */
-	ClutterActor			*clockActor;
-	ClutterContent			*clockCanvas;
-	guint					timeoutID;
+	ClutterActor					*clockActor;
+	ClutterContent					*clockCanvas;
+	guint							timeoutID;
+
+	XfdashboardClockViewSettings	*settings;
 };
+
 
 /* IMPLEMENTATION: Private variables and methods */
 
@@ -63,12 +67,14 @@ static gboolean _xfdashboard_clock_view_on_draw_canvas(XfdashboardClockView *sel
 														int inHeight,
 														gpointer inUserData)
 {
-	GDateTime		*now;
-	gfloat			hours, minutes, seconds;
-	ClutterColor	*color;
+	XfdashboardClockViewPrivate		*priv;
+	GDateTime						*now;
+	gfloat							hours, minutes, seconds;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_CLOCK_VIEW(self), TRUE);
 	g_return_val_if_fail(CLUTTER_IS_CANVAS(inUserData), TRUE);
+
+	priv=self->priv;
 
 	/* Get the current time and compute the angles */
 	now=g_date_time_new_now_local();
@@ -107,42 +113,31 @@ static gboolean _xfdashboard_clock_view_on_draw_canvas(XfdashboardClockView *sel
 	cairo_set_line_width(inContext, 0.1f);
 
 	/* The blue circle that holds the seconds indicator */
-	clutter_cairo_set_source_color(inContext, CLUTTER_COLOR_Blue);
+	clutter_cairo_set_source_color(inContext,
+									xfdashboard_clock_view_settings_get_background_color(priv->settings));
 	cairo_arc(inContext, 0.0f, 0.0f, 0.4f, 0.0f, G_PI*2.0f);
 	cairo_stroke(inContext);
 
 	/* The seconds indicator */
-	color=clutter_color_copy(CLUTTER_COLOR_White);
-	color->alpha=128;
-
-	clutter_cairo_set_source_color(inContext, color);
+	clutter_cairo_set_source_color(inContext,
+									xfdashboard_clock_view_settings_get_second_color(priv->settings));
 	cairo_move_to(inContext, 0.0f, 0.0f);
 	cairo_arc(inContext, sinf(seconds)*0.4f, -cosf(seconds)*0.4f, 0.05f, 0.0f, G_PI*2);
 	cairo_fill(inContext);
 
-	clutter_color_free(color);
-
 	/* The minutes indicator */
-	color=clutter_color_copy(CLUTTER_COLOR_LightChameleon);
-	color->alpha=196;
-
-	clutter_cairo_set_source_color(inContext, color);
+	clutter_cairo_set_source_color(inContext,
+									xfdashboard_clock_view_settings_get_minute_color(priv->settings));
 	cairo_move_to(inContext, 0.0f, 0.0f);
 	cairo_line_to(inContext, sinf(minutes)*0.4f, -cosf(minutes)*0.4f);
 	cairo_stroke(inContext);
 
-	clutter_color_free(color);
-
 	/* The hours indicator */
-	color=clutter_color_copy(CLUTTER_COLOR_LightChameleon);
-	color->alpha=196;
-
-	clutter_cairo_set_source_color(inContext, color);
+	clutter_cairo_set_source_color(inContext,
+									xfdashboard_clock_view_settings_get_hour_color(priv->settings));
 	cairo_move_to(inContext, 0.0f, 0.0f);
 	cairo_line_to(inContext, sinf(hours)*0.2f, -cosf(hours)*0.2f);
 	cairo_stroke(inContext);
-
-	clutter_color_free(color);
 
 	/* Done drawing */
 	return(CLUTTER_EVENT_STOP);
@@ -249,6 +244,12 @@ static void _xfdashboard_clock_view_dispose(GObject *inObject)
 		priv->clockCanvas=NULL;
 	}
 
+	if(priv->settings)
+	{
+		g_object_unref(priv->settings);
+		priv->settings=NULL;
+	}
+
 	/* Call parent's class dispose method */
 	G_OBJECT_CLASS(xfdashboard_clock_view_parent_class)->dispose(inObject);
 }
@@ -291,6 +292,9 @@ void xfdashboard_clock_view_init(XfdashboardClockView *self)
 
 	/* Set up default values */
 	priv->timeoutID=0;
+
+	/* Set up settings */
+	priv->settings=xfdashboard_clock_view_settings_new();
 
 	/* Set up this actor */
 	xfdashboard_view_set_view_fit_mode(XFDASHBOARD_VIEW(self), XFDASHBOARD_VIEW_FIT_MODE_BOTH);

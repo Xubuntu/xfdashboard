@@ -24,8 +24,7 @@
 #ifndef __XFDASHBOARD_CLOCK_VIEW__
 #define __XFDASHBOARD_CLOCK_VIEW__
 
-#include "plugin.h"
-#include "view.h"
+#include <libxfdashboard/libxfdashboard.h>
 
 G_BEGIN_DECLS
 
@@ -46,7 +45,7 @@ struct _XfdashboardClockView
 	XfdashboardView						parent_instance;
 
 	/* Private structure */
-	XfdashboardClockViewPrivate	*priv;
+	XfdashboardClockViewPrivate			*priv;
 };
 
 struct _XfdashboardClockViewClass
@@ -58,7 +57,6 @@ struct _XfdashboardClockViewClass
 
 /* Public API */
 GType xfdashboard_clock_view_get_type(void) G_GNUC_CONST;
-void xfdashboard_clock_view_type_register(GTypeModule *inModule);
 
 XFDASHBOARD_DECLARE_PLUGIN_TYPE(xfdashboard_clock_view);
 

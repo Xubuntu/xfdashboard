@@ -25,8 +25,7 @@
 #ifndef __XFDASHBOARD_GNOME_SHELL_SEARCH_PROVIDER__
 #define __XFDASHBOARD_GNOME_SHELL_SEARCH_PROVIDER__
 
-#include "plugin.h"
-#include "search-provider.h"
+#include <libxfdashboard/libxfdashboard.h>
 
 G_BEGIN_DECLS
 
@@ -58,8 +57,6 @@ struct _XfdashboardGnomeShellSearchProviderClass
 };
 
 /* Public API */
-#define XFDASHBOARD_GNOME_SHELL_SEARCH_PROVIDER_PREFIX			"gnome-shell-search-provider_"
-
 GType xfdashboard_gnome_shell_search_provider_get_type(void) G_GNUC_CONST;
 void xfdashboard_gnome_shell_search_provider_type_register(GTypeModule *inModule);
 

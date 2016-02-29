@@ -1,3 +1,405 @@
+commit 577fad650088473e321505beb56159201dc12efa
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Feb 28 08:55:24 2016 +0100
+
+    Updated POTFILES.in
+
+commit 06ba2e2dd4c5cddf84118139e181090642464a58
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 27 14:36:48 2016 +0100
+
+    Set title in plugin preferences dialog to let user know which plugin he will configure now ;)
+
+commit fc14c1e161fb4d5bb225c505dbfb049264a177bb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 27 14:22:03 2016 +0100
+
+    Let plugin decide which widget should be visible and do not enfore all widgets to be visible in settings application. Doing so could make widgets visible which shouldn't ... at least not unconditionally.
+
+commit 86517cf40b94fc0e1cfdaa0614020f5f7e7dbbea
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 27 14:17:52 2016 +0100
+
+    Completed configuration dialog for hot corner plugin
+
+commit c8d7a43f72a2d19527a2e6b2cbffc434d4abaaf8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 25 15:11:39 2016 +0100
+
+    Implemented most parts of configuration dialog for hot corner plugin
+
+commit 53de6b0fed50b4b29e00e94ead03abe9b59ba553
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 25 13:02:53 2016 +0100
+
+    Register additional GValue transformation function from libxfdashboard to transform values stored in Xfconf when getting or setting such a "transform-needed" value
+
+commit 8df1aa731dc4da6ac51d2f409c6f8a2c0856c02b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 25 12:58:03 2016 +0100
+
+    A little bit of nicer configuration dialog for clock view plugin
+
+commit 2f68659c2c23a9404ca544047d7010db5eba8258
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 25 12:41:22 2016 +0100
+
+    Add missing registration of XfdashboardHotCornerSettings class in plugin
+
+commit 4899b2002b4715739660daec8688bc0143f973e6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 25 12:36:30 2016 +0100
+
+    Fix memory leak in configure function of clock view plugin
+
+commit 8fa7f400b26e184c5eca12ca5beb400fdc1c7d2f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 25 12:12:49 2016 +0100
+
+    Move settings of hot corner plugin into a seperate object class to share it, e.g. with configure function of hot corner plugin which is not implemented yet
+
+commit 91daf36fc8ddcda6e5a57aaad000378c95aa1aeb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 25 08:45:53 2016 +0100
+
+    Change usage and inclusion of libxfdashboard.
+    
+    Like many other libraries we only allow to include the new created file libxfdashboard.h with "#include <libxfdashboard/libxfdashboard.h>" when not within the library itself or the main and settings applications. Plugins must now include <libxfdashboard/libxfdashboard.h> instead of each used header file directly.
+
+commit f23d69335dd5acffe80412305ce794668604ccba
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 24 21:37:07 2016 +0100
+
+    Rename __XFDASHBOARD_* to __LIBXFDASHBOARD_* also in template to generate enums.{h,c}
+
+commit 0b441551622e4fec48b62969a89342506129dc67
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 24 21:35:15 2016 +0100
+
+    Rename __XFDASHBOARD_* to __LIBXFDASHBOARD_* in definitions to prevent recursive header inclusions
+
+commit f761ab3aa66872426ff616d307213d41ba8bdd61
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 24 19:14:33 2016 +0100
+
+    Replace some left-overs of XFOVERVIEW (the very very very very old name) with current one - XFDASHBOARD
+
+commit cabd591662f9084513342bd4b4fe86d6b42841c9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 23 22:34:52 2016 +0100
+
+    Just a cosmetical correction ;)
+
+commit c67768aa8b6b7025611ebcd2ac7ca1602e9c88a3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 23 22:33:39 2016 +0100
+
+    Fix compiler warnings
+
+commit 486914b7e97a5b3bba2e78123817cf445bfa32f1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 23 22:32:33 2016 +0100
+
+    Add compile-time switches for deprecated functions at GTK+
+
+commit af246d5d9458e71bef2cef0eb8ecf9d5a6451d71
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 23 22:28:28 2016 +0100
+
+    Implement full configuration dialog for clock view plugin
+
+commit 3cca65c529168c69154d4370fb405b189e006f3f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 23 21:26:11 2016 +0100
+
+    Move settings of clock view into a seperate object class to share it, e.g. with configure function of clock-view plugin
+
+commit 52515185cedf2c3b23cdfe2a40f62aa30eb79eca
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 22 13:17:08 2016 +0100
+
+    Fix compiler warnings
+
+commit 6b971bfd46c13c6052d65fd59482cdeeb4ca5eb3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 22 12:58:01 2016 +0100
+
+    Implement plugin preferences dialog in settings application
+    
+    The plugins do not have any preferences widgets yet and only plugin "clock-view" shows a "not yet implemented" label.
+
+commit f1db0eeeda071748e6f212685f30117ca9196c3e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Feb 19 20:58:37 2016 +0100
+
+    We check already that the signal handlers 'enable' and 'disable' are connected we do not need default handlers and we do not need the boolean return value to check if it was handled so change it to void.
+
+commit 2fc34032344ca661f3735aa7f4da29f5dd495898
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 18 22:13:04 2016 +0100
+
+    I18n: Updated translations es, fr, he, it_IT, lt and sr
+
+commit a76ceae99e875375cbb1de327db27e7ae1124a44
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 18 22:06:37 2016 +0100
+
+    Turn g_message into debug or warning messages
+
+commit 5094bcda25e9976a1579fe8cf382531298225b29
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 18 22:03:28 2016 +0100
+
+    Enable (or load) and disable plugins at runtime depending on changes at Xfconf property "/enabled-plugin" in channel xfdashboard
+
+commit 144d09d511736480f26fc3f3e15ce9a59da482eb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 18 16:15:53 2016 +0100
+
+    Set check flag for each plugin enabled when initializing plugins tab in settings application
+
+commit 914f710112122c7ebcdea088a48ad2a9630428de
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 18 16:11:59 2016 +0100
+
+    The plugin ID should be unique but not configurable by developer. So let ID be determine from filename - exactly: Get basename of filename and strip off the file extension. This way it's the old behaviour but the ID is set automatically.
+
+commit b2b813eb245b9ddbbaafd71953c2e88db678828e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 18 15:42:06 2016 +0100
+
+    Configure list of enabled plugins in settings application
+
+commit 6819d47f46fcd2e3485ae8e0427cf94a007f2479
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 17 13:13:12 2016 +0100
+
+    As the shared library libxfdashboard is more or less the "application" and xfdashboard is (more or less) just a wrapper around it the library should include the version as library "version-info". I tried to use the calculation of current, revision and age for this library version information as GTK+ does. I really hope it make sense and works ... on all platforms.
+
+commit 100dcbb99d94ed71a38cee006cc919bb882eedc2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 17 09:39:26 2016 +0100
+
+    Install header files for libxfdashboard shared library and API
+
+commit 95d81b21b5bb2a4a1cc6524ca8e0932f42cc83bb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 17 08:59:29 2016 +0100
+
+    Split application into core library (shared library libxfdashboard.so) and simple application to make objects reusable (e.g. plugin object in settings application) and to have an API
+
+commit e4406d58d089be05d6d70bf9af37a3652902c1f4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 15 20:47:06 2016 +0100
+
+    Fix typos
+
+commit 60f85a3090d68a2afa942d22b7c7572d3212de3d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 15 20:45:54 2016 +0100
+
+    Split creation and handling of tab 'General' into seperate files at xfdashboard settings application
+
+commit 57b4bc4642436108218ccff65a0f69004d22fef4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 15 15:07:53 2016 +0100
+
+    Split creation and handling of tab 'Themes' into seperate files at xfdashboard settings application
+
+commit 73e7b2a24771f7226f3a4638ed76795d8a2d06e9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 15 14:28:50 2016 +0100
+
+    Fix typo
+
+commit 328067b45c9e0fac39eeaa6c86b95358ce7e2e42
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 15 11:43:10 2016 +0100
+
+    Remove unused code
+
+commit 426b12118af0faedbcaf9e3f773ba9e23d14a684
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 15 11:40:18 2016 +0100
+
+    Ensure view is visible when allocation changes and scrollbar ranges might have changed.
+    
+    Scrollbar ranges might get smaller, e.g. in search view when view is greater than viewpad and a new search is started. Then only the scrollbar ranges are adjusted to new size but view's clipping is not. This commit should ensure that the clipping is adjusted to position of scrollbars.
+    
+    Hopefully fixes GH #112
+
+commit fb4b56dad0b305d4d5fb960c68a1b2dd52ff620e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 15 09:41:34 2016 +0100
+
+    Fix calculation of number of columns and rows and the largest width and/or height in XfdashboardDynamicTableLayout to prevent recursive and infinite calls to the same function again (and again and again) and also correct number of columns or rows when we need to reduce them to fit into given allocation.
+    
+    This commit should finally fix issue GH #111
+
+commit 2929b13715f4cf003bb311e48f230d684d537ca4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 15 09:10:50 2016 +0100
+
+    Do not set allocation on container within the layout manager's allocation function at XfdashboardDynamicTableLayout.
+    
+    That is a nasty bug as it will call the allocation function recursive in an infinite loop because setting the allocation on the container will call the layout manager's allocation function again and again and again ...
+
+commit 5d23581562685a14538c7d40339161090ecdbe6a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Feb 14 16:13:08 2016 +0100
+
+    Make hot-corner plugin configurable
+
+commit 27845e3097021718a7e3ad5d10d34f00cc0887cb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Feb 14 14:20:09 2016 +0100
+
+    Make plugin ID a definition specified in Makefile instead of source files also at hot-corner plugin
+
+commit af2f5285ed101fb98999e080094aa4e611e8aad5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Feb 14 14:18:43 2016 +0100
+
+    Make plugin ID a definition specified in Makefile instead of source files
+
+commit af556647a381455f2a2e9ee06a5f1830a0933e03
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Feb 14 14:16:17 2016 +0100
+
+    Make colors to draw each element in clock view with configurable.
+
+commit 6fb58018ce868198942300f7735db3c00baaabab
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 13 09:34:49 2016 +0100
+
+    Add a utility function to view manager to check if a view with a specific ID was already registered
+
+commit 273d5d9a4247f4d0d90ae25453cb231c3529605f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 13 09:27:00 2016 +0100
+
+    Add a utility function to search manager to check if a search provider with a specific ID was already registered
+
+commit 5ecd8226869bba767401f757da33cf28edc6a9ef
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Feb 13 09:18:37 2016 +0100
+
+    Implement file monitor to Gnome-Shell search provider plugin to get notified about new, modified or removed providers during run-time.
+
+commit b2195fb94094a0651f4de0c0ebdc6ed2fedf54b5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Feb 12 08:23:18 2016 +0100
+
+    Fix signal definition for action to enable, disable or configure a XfdashboardPlugin instance
+
+commit 878dfc995349a78ac990ce4f3641edc71850844b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 10 14:20:36 2016 +0100
+
+    Only lookup view by ID when ID is available
+
+commit 12ce19ec031b1e2a2874a3dfdcd5130adc97679d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 10 14:13:36 2016 +0100
+
+    Add hot-corner plugin
+    
+    This is a plugin of the "other" category as it does not extend xfdashboard with any new views or search providers. It will check the pointer position and if it stays in an configured hot-corner (currently statically set to top-left corner) for a configured time interval (currently statically set to 350ms) it will switch the application's state. That means it will suspend the application if is active at that moment or activate it if was suspended. To do this xfdashboard must be running in daemon mode.
+
+commit 2e17bd75258fb95e2e6a0c23f703d863d8b81d81
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 10 09:24:20 2016 +0100
+
+    Add function to check if a window is fullscreen
+
+commit ca122f4599553fa41d28c08b3630166dcff1a6b7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 10 09:14:50 2016 +0100
+
+    Ensure that minimized flag is not set besides the maximized flags at window to consider it is maximized.
+    
+    In my point of view it should be an error when the minimized flag is set along with the (both) flags for being maximized. But maybe it is just not a good name and it should be a 'hide' flag instead of 'minimized' flag. Then it makes sense that all these flags at set at once and we have to check additionally that the minimized (hide) flag is *not* set to consider that window is maximized.
+
+commit 2a0fb47a2dc017e218b3931a9b1c5f332cc26ba0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 10 09:11:28 2016 +0100
+
+    Add class '.window-state-maximized' to actors of type XfdashboardLiveWindow when the associated window is maximized.
+    
+    That's just a new class added to the already present classes '.window-state-pinned', '.window-state-minimized' and '.window-state-urgent'.
+
+commit 8f4af294efa3d27364fdb91cc72126df95b5f219
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 10 09:08:14 2016 +0100
+
+    Fix typo by renaming function name xfdashboard_window_tracker_window_is_m(in|ax)ized to xfdashboard_window_tracker_window_is_m(in|ax)imized
+
+commit 7afdcec08a047f1ad707aafa7a13f9cdf15951e2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Feb 10 09:04:57 2016 +0100
+
+    Add missing function for public API function to check if a window is maximized
+
+commit 69890b54838f782ee9c2d2307ae2979e40b10a4d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 9 07:46:22 2016 +0100
+
+    Use a macro for plugin ID in Gnome-Shell search provider plugin to ensure to use always the same ID at all places
+
+commit 40c8a2f4340d17e1f0b691042c8dd67a45c6fdf6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 9 07:41:05 2016 +0100
+
+    Use a macro for plugin ID in clock view to ensure to use always the same ID at all places
+
+commit 8b39782007575570917035d9aa478dd946e67c59
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 9 07:39:20 2016 +0100
+
+    Keep search providers at search view listed in order as they were registered
+
+commit ac8d1f0875edf24ff06c7c2d6e9e73a7695e6217
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 8 20:47:55 2016 +0100
+
+    Fix actors of applications view filling whole horizontal space
+
+commit f1a6c0c5156289b761b23aec109a4211d61cff6c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 8 20:42:09 2016 +0100
+
+    Chnage IDs of plugins to be prefixed with "de.froevel.xfdashboard."
+
+commit 8539ae3b7172e9f1ff8ff20396d3906b7a06da06
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 8 20:40:01 2016 +0100
+
+    Change IDs of builtin "plugins" to be prefixed with "builtin."
+
+commit cf492bb3211da3f48e3c6cbb4a87904a8ab5f032
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 2 14:49:26 2016 +0100
+
+    Merge commits
+
+commit 0ab88e19aa6cc147910178e7922822eec7628a46
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 2 14:41:00 2016 +0100
+
+    Unify API of XfdashboardApplication to match other single instance APIs
+
+commit 8c58c6c6e9d2ccb4ff9fb634f0c475bf3dff4d34
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 31 20:43:08 2016 +0100
+
+    Post-release version bump to 0.5.6
+
+commit a89c2e647bbb407471807cbf0fb3af7e04761954
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jan 31 20:42:00 2016 +0100
+
+    Bump version to 0.5.5
+
 commit ea28ea0c9e3aaf6f76e920702fe9994d7f303cb5
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Sun Jan 31 20:40:36 2016 +0100

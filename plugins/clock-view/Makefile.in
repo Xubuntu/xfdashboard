@@ -129,9 +129,11 @@ am__installdirs = "$(DESTDIR)$(plugindir)"
 LTLIBRARIES = $(plugin_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 clock_view_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(top_builddir)/libxfdashboard/libxfdashboard.la
 am_clock_view_la_OBJECTS = clock_view_la-clock-view.lo \
-	clock_view_la-plugin.lo
+	clock_view_la-clock-view-settings.lo clock_view_la-plugin.lo
 clock_view_la_OBJECTS = $(am_clock_view_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -312,6 +314,7 @@ LIBXFCONF_CFLAGS = @LIBXFCONF_CFLAGS@
 LIBXFCONF_LIBS = @LIBXFCONF_LIBS@
 LIBXFCONF_REQUIRED_VERSION = @LIBXFCONF_REQUIRED_VERSION@
 LIBXFCONF_VERSION = @LIBXFCONF_VERSION@
+LIBXFDASHBOARD_VERINFO = @LIBXFDASHBOARD_VERINFO@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -428,13 +431,14 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 plugindir = $(libdir)/xfdashboard/plugins
+PLUGIN_ID = clock-view
 AM_CPPFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_srcdir) \
-	-I$(top_srcdir)/xfdashboard \
 	-DG_LOG_DOMAIN=\"xfdashboard-plugin-clock_view\" \
 	-DLIBEXECDIR=\"$(libexecdir)\" \
-	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"
+	-DPACKAGE_LOCALE_DIR=\"$(localedir)\" \
+	-DPLUGIN_ID=\"$(PLUGIN_ID)\"
 
 plugin_LTLIBRARIES = \
 	clock-view.la
@@ -442,24 +446,34 @@ plugin_LTLIBRARIES = \
 clock_view_la_SOURCES = \
 	clock-view.c \
 	clock-view.h \
+	clock-view-settings.c \
+	clock-view-settings.h \
 	plugin.c
 
 clock_view_la_CFLAGS = \
-	$(PLATFORM_CFLAGS) \
 	$(LIBXFCE4UTIL_CFLAGS) \
 	$(GTK_CFLAGS) \
-	$(CLUTTER_CFLAGS)
+	$(CLUTTER_CFLAGS) \
+	$(LIBXFCONF_CFLAGS) \
+	$(GARCON_CFLAGS) \
+	$(PLATFORM_CFLAGS)
 
 clock_view_la_LDFLAGS = \
 	-avoid-version \
 	-export-dynamic \
+	-export-symbols-regex '^plugin_init$$' \
+	-no-undefined \
 	-module \
+	-shared \
 	$(PLATFORM_LDFLAGS)
 
 clock_view_la_LIBADD = \
 	$(LIBXFCE4UTIL_LIBS) \
 	$(GTK_LIBS) \
-	$(CLUTTER_LIBS)
+	$(CLUTTER_LIBS) \
+	$(LIBXFCONF_LIBS) \
+	$(GARCON_LIBS) \
+	$(top_builddir)/libxfdashboard/libxfdashboard.la
 
 CLEANFILES = \
 	$(plugin_DATA)
@@ -548,6 +562,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/clock_view_la-clock-view-settings.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/clock_view_la-clock-view.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/clock_view_la-plugin.Plo@am__quote@
 
@@ -578,6 +593,13 @@ clock_view_la-clock-view.lo: clock-view.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='clock-view.c' object='clock_view_la-clock-view.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(clock_view_la_CFLAGS) $(CFLAGS) -c -o clock_view_la-clock-view.lo `test -f 'clock-view.c' || echo '$(srcdir)/'`clock-view.c
+
+clock_view_la-clock-view-settings.lo: clock-view-settings.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(clock_view_la_CFLAGS) $(CFLAGS) -MT clock_view_la-clock-view-settings.lo -MD -MP -MF $(DEPDIR)/clock_view_la-clock-view-settings.Tpo -c -o clock_view_la-clock-view-settings.lo `test -f 'clock-view-settings.c' || echo '$(srcdir)/'`clock-view-settings.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/clock_view_la-clock-view-settings.Tpo $(DEPDIR)/clock_view_la-clock-view-settings.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='clock-view-settings.c' object='clock_view_la-clock-view-settings.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(clock_view_la_CFLAGS) $(CFLAGS) -c -o clock_view_la-clock-view-settings.lo `test -f 'clock-view-settings.c' || echo '$(srcdir)/'`clock-view-settings.c
 
 clock_view_la-plugin.lo: plugin.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(clock_view_la_CFLAGS) $(CFLAGS) -MT clock_view_la-plugin.lo -MD -MP -MF $(DEPDIR)/clock_view_la-plugin.Tpo -c -o clock_view_la-plugin.lo `test -f 'plugin.c' || echo '$(srcdir)/'`plugin.c

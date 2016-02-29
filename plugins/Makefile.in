@@ -289,6 +289,7 @@ LIBXFCONF_CFLAGS = @LIBXFCONF_CFLAGS@
 LIBXFCONF_LIBS = @LIBXFCONF_LIBS@
 LIBXFCONF_REQUIRED_VERSION = @LIBXFCONF_REQUIRED_VERSION@
 LIBXFCONF_VERSION = @LIBXFCONF_VERSION@
+LIBXFDASHBOARD_VERINFO = @LIBXFDASHBOARD_VERINFO@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -406,7 +407,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = \
 	clock-view \
-	gnome-shell-search-provider
+	gnome-shell-search-provider \
+	hot-corner
 
 all: all-recursive
 

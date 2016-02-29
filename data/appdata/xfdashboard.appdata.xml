@@ -70,6 +70,11 @@
 	</keywords>
 
 	<releases>
+		<release version="0.5.90" timestamp="1456659470">
+			<description>
+				<p>This unstable development introduces a hot-corner plugin to activate this application when the pointer is near a specific corner of the screen. It also introduce a new settings application which allows to enable and/or disable plugin as well as to configure them.</p>
+			</description>
+		</release>
 		<release version="0.5.5" timestamp="1454269066">
 			<description>
 				<p>This unstable development introduces a new search provider plugin which uses installed Gnome-Shell search providers as additional source.</p>
@@ -93,11 +98,13 @@
 		<release version="0.5.1" timestamp="1441652092">
 			<description>
 				<p>This unstable development introduces a new configurable options to speed up loading window contents in background and it shows also running applications in quicklaunch for those not being stored as favourites. As usual it also contains a lots of bug-fixes and smaller improvements.</p>
+				<p xml:lang="fr">Cette évolution instable introduit une nouvelle options configurables pour accélérer contenu de la fenêtre de chargement en arrière-plan et il montre les applications en cours d'exécution dans quicklaunch aussi pour ceux qui ne sont pas stockés en tant que favoris. Comme d'habitude il contient également un bon nombre de corrections de bugs et de petites améliorations.</p>
 			</description>
 		</release>
 		<release version="0.5.0" timestamp="1434045183">
 			<description>
 				<p>This unstable development introduces new options to workspace selector and loads the window contents in background to make the application feel smoother and faster, especially at start-up. It also contains a lots of bug-fixes and smaller improvements.</p>
+				<p xml:lang="fr">Cette évolution instable introduit de nouvelles options à sélecteur d'espace de travail et charge le contenu des fenêtres en arrière-plan pour rendre l'application plus lisse et plus rapide, surtout au démarrage. Il contient également un bon nombre de corrections de bugs et de petites améliorations.</p>
 			</description>
 		</release>
 		<release version="0.4.2" timestamp="1433008431">
