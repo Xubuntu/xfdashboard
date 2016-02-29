@@ -103,13 +103,17 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__objects_1 =
 am_xfdashboard_settings_OBJECTS = $(am__objects_1) \
+	xfdashboard_settings-general.$(OBJEXT) \
 	xfdashboard_settings-main.$(OBJEXT) \
-	xfdashboard_settings-settings.$(OBJEXT)
+	xfdashboard_settings-plugins.$(OBJEXT) \
+	xfdashboard_settings-settings.$(OBJEXT) \
+	xfdashboard_settings-themes.$(OBJEXT)
 xfdashboard_settings_OBJECTS = $(am_xfdashboard_settings_OBJECTS)
 am__DEPENDENCIES_1 =
 xfdashboard_settings_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(top_builddir)/libxfdashboard/libxfdashboard.la
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -290,6 +294,7 @@ LIBXFCONF_CFLAGS = @LIBXFCONF_CFLAGS@
 LIBXFCONF_LIBS = @LIBXFCONF_LIBS@
 LIBXFCONF_REQUIRED_VERSION = @LIBXFCONF_REQUIRED_VERSION@
 LIBXFCONF_VERSION = @LIBXFCONF_VERSION@
+LIBXFDASHBOARD_VERINFO = @LIBXFDASHBOARD_VERINFO@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -407,35 +412,46 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
-	-DG_LOG_DOMAIN=\"xfdashboard\" \
+	-DLIBXFDASHBOARD_COMPILATION=1 \
+	-DG_LOG_DOMAIN=\"xfdashboard-settings\" \
 	-DPACKAGE_DATADIR=\"$(datadir)\" \
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\" \
+	-DPACKAGE_LIBDIR=\"$(libdir)\" \
 	$(PLATFORM_CPPFLAGS)
 
 xfdashboard_settings_headers = \
-	settings.h
+	general.h \
+	plugins.h \
+	settings.h \
+	themes.h
 
 xfdashboard_settings_SOURCES = \
 	$(xfdashboard_settings_headers) \
+	general.c \
 	main.c \
-	settings.c
+	plugins.c \
+	settings.c \
+	themes.c
 
 xfdashboard_settings_CFLAGS = \
 	$(GTK_CFLAGS) \
+	$(CLUTTER_CFLAGS) \
 	$(LIBXFCONF_CFLAGS) \
 	$(LIBXFCE4UTIL_CFLAGS) \
 	$(PLATFORM_CFLAGS)
+
+xfdashboard_settings_LDADD = \
+	$(GTK_LIBS) \
+	$(CLUTTER_LIBS) \
+	$(LIBXFCONF_LIBS) \
+	$(LIBXFCE4UTIL_LIBS) \
+	$(LIBM) \
+	$(top_builddir)/libxfdashboard/libxfdashboard.la
 
 xfdashboard_settings_LDFLAGS = \
 	-export-dynamic \
 	-no-undefined \
 	$(PLATFORM_LDFLAGS)
-
-xfdashboard_settings_LDADD = \
-	$(GTK_LIBS) \
-	$(LIBXFCONF_LIBS) \
-	$(LIBXFCE4UTIL_LIBS) \
-	$(LIBM)
 
 all: all-am
 
@@ -530,8 +546,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard_settings-general.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard_settings-main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard_settings-plugins.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard_settings-settings.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfdashboard_settings-themes.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -554,6 +573,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
+xfdashboard_settings-general.o: general.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -MT xfdashboard_settings-general.o -MD -MP -MF $(DEPDIR)/xfdashboard_settings-general.Tpo -c -o xfdashboard_settings-general.o `test -f 'general.c' || echo '$(srcdir)/'`general.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard_settings-general.Tpo $(DEPDIR)/xfdashboard_settings-general.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='general.c' object='xfdashboard_settings-general.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -c -o xfdashboard_settings-general.o `test -f 'general.c' || echo '$(srcdir)/'`general.c
+
+xfdashboard_settings-general.obj: general.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -MT xfdashboard_settings-general.obj -MD -MP -MF $(DEPDIR)/xfdashboard_settings-general.Tpo -c -o xfdashboard_settings-general.obj `if test -f 'general.c'; then $(CYGPATH_W) 'general.c'; else $(CYGPATH_W) '$(srcdir)/general.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard_settings-general.Tpo $(DEPDIR)/xfdashboard_settings-general.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='general.c' object='xfdashboard_settings-general.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -c -o xfdashboard_settings-general.obj `if test -f 'general.c'; then $(CYGPATH_W) 'general.c'; else $(CYGPATH_W) '$(srcdir)/general.c'; fi`
+
 xfdashboard_settings-main.o: main.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -MT xfdashboard_settings-main.o -MD -MP -MF $(DEPDIR)/xfdashboard_settings-main.Tpo -c -o xfdashboard_settings-main.o `test -f 'main.c' || echo '$(srcdir)/'`main.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard_settings-main.Tpo $(DEPDIR)/xfdashboard_settings-main.Po
@@ -568,6 +601,20 @@ xfdashboard_settings-main.obj: main.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -c -o xfdashboard_settings-main.obj `if test -f 'main.c'; then $(CYGPATH_W) 'main.c'; else $(CYGPATH_W) '$(srcdir)/main.c'; fi`
 
+xfdashboard_settings-plugins.o: plugins.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -MT xfdashboard_settings-plugins.o -MD -MP -MF $(DEPDIR)/xfdashboard_settings-plugins.Tpo -c -o xfdashboard_settings-plugins.o `test -f 'plugins.c' || echo '$(srcdir)/'`plugins.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard_settings-plugins.Tpo $(DEPDIR)/xfdashboard_settings-plugins.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='plugins.c' object='xfdashboard_settings-plugins.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -c -o xfdashboard_settings-plugins.o `test -f 'plugins.c' || echo '$(srcdir)/'`plugins.c
+
+xfdashboard_settings-plugins.obj: plugins.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -MT xfdashboard_settings-plugins.obj -MD -MP -MF $(DEPDIR)/xfdashboard_settings-plugins.Tpo -c -o xfdashboard_settings-plugins.obj `if test -f 'plugins.c'; then $(CYGPATH_W) 'plugins.c'; else $(CYGPATH_W) '$(srcdir)/plugins.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard_settings-plugins.Tpo $(DEPDIR)/xfdashboard_settings-plugins.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='plugins.c' object='xfdashboard_settings-plugins.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -c -o xfdashboard_settings-plugins.obj `if test -f 'plugins.c'; then $(CYGPATH_W) 'plugins.c'; else $(CYGPATH_W) '$(srcdir)/plugins.c'; fi`
+
 xfdashboard_settings-settings.o: settings.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -MT xfdashboard_settings-settings.o -MD -MP -MF $(DEPDIR)/xfdashboard_settings-settings.Tpo -c -o xfdashboard_settings-settings.o `test -f 'settings.c' || echo '$(srcdir)/'`settings.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard_settings-settings.Tpo $(DEPDIR)/xfdashboard_settings-settings.Po
@@ -581,6 +628,20 @@ xfdashboard_settings-settings.obj: settings.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='settings.c' object='xfdashboard_settings-settings.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -c -o xfdashboard_settings-settings.obj `if test -f 'settings.c'; then $(CYGPATH_W) 'settings.c'; else $(CYGPATH_W) '$(srcdir)/settings.c'; fi`
+
+xfdashboard_settings-themes.o: themes.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -MT xfdashboard_settings-themes.o -MD -MP -MF $(DEPDIR)/xfdashboard_settings-themes.Tpo -c -o xfdashboard_settings-themes.o `test -f 'themes.c' || echo '$(srcdir)/'`themes.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard_settings-themes.Tpo $(DEPDIR)/xfdashboard_settings-themes.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='themes.c' object='xfdashboard_settings-themes.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -c -o xfdashboard_settings-themes.o `test -f 'themes.c' || echo '$(srcdir)/'`themes.c
+
+xfdashboard_settings-themes.obj: themes.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -MT xfdashboard_settings-themes.obj -MD -MP -MF $(DEPDIR)/xfdashboard_settings-themes.Tpo -c -o xfdashboard_settings-themes.obj `if test -f 'themes.c'; then $(CYGPATH_W) 'themes.c'; else $(CYGPATH_W) '$(srcdir)/themes.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xfdashboard_settings-themes.Tpo $(DEPDIR)/xfdashboard_settings-themes.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='themes.c' object='xfdashboard_settings-themes.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xfdashboard_settings_CFLAGS) $(CFLAGS) -c -o xfdashboard_settings-themes.obj `if test -f 'themes.c'; then $(CYGPATH_W) 'themes.c'; else $(CYGPATH_W) '$(srcdir)/themes.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

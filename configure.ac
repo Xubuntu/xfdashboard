@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [5])
-m4_define([xfdashboard_version_micro], [5])
-m4_define([xfdashboard_version_build], [ea28ea0])
+m4_define([xfdashboard_version_micro], [90])
+m4_define([xfdashboard_version_build], [577fad6])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -82,9 +82,9 @@ LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
 LT_LIB_M
 
-dnl **************************
-dnl *** Substitute version ***
-dnl **************************
+dnl **********************************
+dnl *** Substitute package version ***
+dnl **********************************
 XFDASHBOARD_VERSION=xfdashboard_version()
 XFDASHBOARD_VERSION_MAJOR=xfdashboard_version_major()
 XFDASHBOARD_VERSION_MINOR=xfdashboard_version_minor()
@@ -93,6 +93,20 @@ AC_SUBST([XFDASHBOARD_VERSION])
 AC_SUBST([XFDASHBOARD_VERSION_MAJOR])
 AC_SUBST([XFDASHBOARD_VERSION_MINOR])
 AC_SUBST([XFDASHBOARD_VERSION_MICRO])
+
+dnl **********************************
+dnl *** Substitute library version ***
+dnl **********************************
+m4_define([libxfdashboard_binary_age], [m4_eval(10000 * xfdashboard_version_major + 100 * xfdashboard_version_minor + xfdashboard_version_micro)])
+m4_define([libxfdashboard_interface_age], [xfdashboard_version_micro])
+
+m4_define([libxfdashboard_lt_current], [m4_eval(libxfdashboard_binary_age - libxfdashboard_interface_age)])
+m4_define([libxfdashboard_lt_revision], [libxfdashboard_interface_age])
+m4_define([libxfdashboard_lt_age], [m4_eval(libxfdashboard_binary_age - libxfdashboard_interface_age)])
+m4_define([libxfdashboard_verinfo], [libxfdashboard_lt_current():libxfdashboard_lt_revision():libxfdashboard_lt_age()])
+
+LIBXFDASHBOARD_VERINFO=libxfdashboard_verinfo()
+AC_SUBST([LIBXFDASHBOARD_VERINFO])
 
 dnl **********************************
 dnl *** Check for standard headers ***
@@ -262,9 +276,12 @@ data/themes/xfdashboard-dark/Makefile
 data/themes/xfdashboard-mint/Makefile
 data/themes/xfdashboard-moranga/Makefile
 data/themes/xfdashboard-wine/Makefile
+libxfdashboard/libxfdashboard.pc
+libxfdashboard/Makefile
 plugins/Makefile
 plugins/clock-view/Makefile
 plugins/gnome-shell-search-provider/Makefile
+plugins/hot-corner/Makefile
 po/Makefile.in
 settings/Makefile
 xfdashboard/Makefile
@@ -274,28 +291,32 @@ dnl ***************************
 dnl *** Print configuration ***
 dnl ***************************
 echo
-echo "Build Configuration for $PACKAGE version $VERSION revision $REVISION:"
+echo "Build configuration:"
+echo "  Package:          $PACKAGE"
+echo "  Version:          $VERSION"
+echo "  Revision:         $REVISION"
+echo "  Library version:  $LIBXFDASHBOARD_VERINFO"
 echo
 echo "Library versions used:"
-echo "  libwnck:       $LIBWNCK_VERSION"
-echo "  clutter:       $CLUTTER_VERSION"
-echo "  cogl:          $CLUTTER_COGL_VERSION"
-echo "  gtk+:          $GTK_VERSION"
-echo "  glib:          $GLIB_VERSION"
-echo "  gio:           $GIO_VERSION"
-echo "  gio-unix:      $GIO_UNIX_VERSION"
-echo "  garcon:        $GARCON_VERSION"
-echo "  libxconf:      $LIBXFCONF_VERSION"
-echo "  libxfce4ui:    $LIBXFCE4UI_VERSION"
-echo "  libxfce4util:  $LIBXFCE4UTIL_VERSION"
-echo "  dbus-glib:     $DBUS_GLIB_VERSION"
+echo "  libwnck:          $LIBWNCK_VERSION"
+echo "  clutter:          $CLUTTER_VERSION"
+echo "  cogl:             $CLUTTER_COGL_VERSION"
+echo "  gtk+:             $GTK_VERSION"
+echo "  glib:             $GLIB_VERSION"
+echo "  gio:              $GIO_VERSION"
+echo "  gio-unix:         $GIO_UNIX_VERSION"
+echo "  garcon:           $GARCON_VERSION"
+echo "  libxconf:         $LIBXFCONF_VERSION"
+echo "  libxfce4ui:       $LIBXFCE4UI_VERSION"
+echo "  libxfce4util:     $LIBXFCE4UTIL_VERSION"
+echo "  dbus-glib:        $DBUS_GLIB_VERSION"
 echo
 echo "Tools used:"
 echo "  glib-genmarshal:  $GLIB_GENMARSHAL"
 echo "  glib-mkenums:     $GLIB_MKENUMS"
 echo
 echo "Features enabled:"
-echo "  XComposite:    $enabled_x11_extension_composite"
-echo "  XDamage:       $enabled_x11_extension_damage"
-echo "  Xinerama:      $enabled_x11_extension_xinerama"
+echo "  XComposite:       $enabled_x11_extension_composite"
+echo "  XDamage:          $enabled_x11_extension_damage"
+echo "  Xinerama:         $enabled_x11_extension_xinerama"
 echo

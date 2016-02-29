@@ -1,12 +1,13 @@
 plugindir = $(libdir)/xfdashboard/plugins
+PLUGIN_ID = clock-view
 
 AM_CPPFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_srcdir) \
-	-I$(top_srcdir)/xfdashboard \
 	-DG_LOG_DOMAIN=\"xfdashboard-plugin-clock_view\" \
 	-DLIBEXECDIR=\"$(libexecdir)\" \
-	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"
+	-DPACKAGE_LOCALE_DIR=\"$(localedir)\" \
+	-DPLUGIN_ID=\"$(PLUGIN_ID)\"
 
 plugin_LTLIBRARIES = \
 	clock-view.la
@@ -14,24 +15,34 @@ plugin_LTLIBRARIES = \
 clock_view_la_SOURCES = \
 	clock-view.c \
 	clock-view.h \
+	clock-view-settings.c \
+	clock-view-settings.h \
 	plugin.c
 
 clock_view_la_CFLAGS = \
-	$(PLATFORM_CFLAGS) \
 	$(LIBXFCE4UTIL_CFLAGS) \
 	$(GTK_CFLAGS) \
-	$(CLUTTER_CFLAGS)
+	$(CLUTTER_CFLAGS) \
+	$(LIBXFCONF_CFLAGS) \
+	$(GARCON_CFLAGS) \
+	$(PLATFORM_CFLAGS)
 
 clock_view_la_LDFLAGS = \
 	-avoid-version \
 	-export-dynamic \
+	-export-symbols-regex '^plugin_init$$' \
+	-no-undefined \
 	-module \
+	-shared \
 	$(PLATFORM_LDFLAGS)
 
 clock_view_la_LIBADD = \
 	$(LIBXFCE4UTIL_LIBS) \
 	$(GTK_LIBS) \
-	$(CLUTTER_LIBS)
+	$(CLUTTER_LIBS) \
+	$(LIBXFCONF_LIBS) \
+	$(GARCON_LIBS) \
+	$(top_builddir)/libxfdashboard/libxfdashboard.la
 
 CLEANFILES = \
 	$(plugin_DATA)

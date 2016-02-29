@@ -31,8 +31,8 @@
 #include <gtk/gtk.h>
 #include <libxfce4util/libxfce4util.h>
 
-#include "application.h"
-#include "types.h"
+#include <libxfdashboard/application.h>
+#include <libxfdashboard/types.h>
 
 typedef struct _RestartData		RestartData;
 struct _RestartData
@@ -69,7 +69,7 @@ static gboolean _on_quit_timeout(gpointer inUserData)
 static gboolean _on_quit_idle(gpointer inUserData)
 {
 	/* Quit application */
-	xfdashboard_application_quit_forced();
+	xfdashboard_application_quit_forced(NULL);
 
 	/* Remove this source from main loop and prevent getting it called again */
 	return(G_SOURCE_REMOVE);
