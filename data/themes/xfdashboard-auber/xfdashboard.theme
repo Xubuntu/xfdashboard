@@ -13,5 +13,5 @@ Style=xfdashboard-auber.css
 Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Author=lacios
-Version=0.5.6git.6819d47
+Version=0.5.91git.924915a
 Screenshot=screenshot-xfdashboard-auber.png

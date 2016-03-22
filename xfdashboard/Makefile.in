@@ -106,6 +106,7 @@ xfdashboard_OBJECTS = $(am_xfdashboard_OBJECTS)
 am__DEPENDENCIES_1 =
 xfdashboard_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) \
 	$(top_builddir)/libxfdashboard/libxfdashboard.la
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -419,6 +420,7 @@ xfdashboard_CFLAGS = \
 	$(GLIB_CFLAGS) \
 	$(LIBXFCONF_CFLAGS) \
 	$(LIBXFCE4UTIL_CFLAGS) \
+	$(GTK_CFLAGS) \
 	$(PLATFORM_CFLAGS)
 
 xfdashboard_LDADD = \
@@ -426,6 +428,7 @@ xfdashboard_LDADD = \
 	$(GLIB_LIBS) \
 	$(LIBXFCONF_LIBS) \
 	$(LIBXFCE4UTIL_LIBS) \
+	$(GTK_LIBS) \
 	$(top_builddir)/libxfdashboard/libxfdashboard.la
 
 xfdashboard_LDFLAGS = \

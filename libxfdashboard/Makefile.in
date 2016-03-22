@@ -191,7 +191,7 @@ am_libxfdashboard_la_OBJECTS = $(am__objects_1) \
 	libxfdashboard_la-focus-manager.lo \
 	libxfdashboard_la-image-content.lo \
 	libxfdashboard_la-live-window.lo \
-	libxfdashboard_la-live-workspace.lo \
+	libxfdashboard_la-live-workspace.lo libxfdashboard_la-model.lo \
 	libxfdashboard_la-outline-effect.lo \
 	libxfdashboard_la-plugin.lo \
 	libxfdashboard_la-plugins-manager.lo \
@@ -558,6 +558,7 @@ libxfdashboard_la_headers = \
 	button.h \
 	click-action.h \
 	collapse-box.h \
+	compat.h \
 	css-selector.h \
 	desktop-app-info.h \
 	drag-action.h \
@@ -570,6 +571,7 @@ libxfdashboard_la_headers = \
 	image-content.h \
 	live-window.h \
 	live-workspace.h \
+	model.h \
 	outline-effect.h \
 	plugin.h \
 	plugins-manager.h \
@@ -636,6 +638,7 @@ libxfdashboard_la_SOURCES = \
 	image-content.c \
 	live-window.c \
 	live-workspace.c \
+	model.c \
 	outline-effect.c \
 	plugin.c \
 	plugins-manager.c \
@@ -820,6 +823,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-live-window.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-live-workspace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-marshal.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-model.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-outline-effect.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-plugins-manager.Plo@am__quote@
@@ -1084,6 +1088,13 @@ libxfdashboard_la-live-workspace.lo: live-workspace.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='live-workspace.c' object='libxfdashboard_la-live-workspace.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-live-workspace.lo `test -f 'live-workspace.c' || echo '$(srcdir)/'`live-workspace.c
+
+libxfdashboard_la-model.lo: model.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-model.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-model.Tpo -c -o libxfdashboard_la-model.lo `test -f 'model.c' || echo '$(srcdir)/'`model.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-model.Tpo $(DEPDIR)/libxfdashboard_la-model.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='model.c' object='libxfdashboard_la-model.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-model.lo `test -f 'model.c' || echo '$(srcdir)/'`model.c
 
 libxfdashboard_la-outline-effect.lo: outline-effect.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-outline-effect.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-outline-effect.Tpo -c -o libxfdashboard_la-outline-effect.lo `test -f 'outline-effect.c' || echo '$(srcdir)/'`outline-effect.c

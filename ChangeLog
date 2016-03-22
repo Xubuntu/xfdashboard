@@ -1,3 +1,108 @@
+commit e177d3808297a188027d0b95b10129b772f09f25
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Mar 21 07:01:40 2016 +0100
+
+    Do not only check for first items in result container (as in commit c84c7fc1ebdb4b4a3199fb2655f9533f4a6680db) but do also check for last items even if it should already be handled globally by focus manager. I just want to be safe ;9
+    
+    This commit addresses also GH #119
+
+commit c84c7fc1ebdb4b4a3199fb2655f9533f4a6680db
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Mar 20 17:20:35 2016 +0100
+
+    Fix unpredictable reselections of result items in search view when the current selection was destroyed or hidden while updating results.
+    
+    We check if the current selection is the first selectable item at the provider result container which contains the current selection _before_ updating the results. If it is the first selectable then remember the selection and the provider containing the selection. After updating the results we check if the current selection now is still the same as before updating result. If the selection has changed and we knew which provider contained the old selection then we select the first selectable item at provider's result container.
+    
+    This commit should fix GH #119
+
+commit 02cf5d2ec4b740ccb2aae487549c4fe0c83df9c5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Mar 20 15:17:12 2016 +0100
+
+    Remove ununsed enumeration XFDASHBOARD_SELECTION_TARGET_NONE
+    
+    It was only used internally to check if given function parameter is in range. This was replacable by checking if value is greater or equal to zero.
+
+commit 8c60e9d90cf893812202cf795cd9b823c3663ebd
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Mar 18 20:39:01 2016 +0100
+
+    I18n: Updated translations es, fr, he, it_IT, lt and sr
+
+commit 2de7c34c2f81eb2bd897b10e2399a801d86d97f3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Mar 18 20:30:40 2016 +0100
+
+    Add GTK_CFLAGS and GTK_LIBS to Makefile.am of xfdashboard. At least distributions derived from upcoming Ubuntu 16.04 need these two statements to compile and link xfdashboard main application successfully. Otherwise the compiler cries for missing gtk_* symbols.
+
+commit 7ee7e6490d558c216280c45bb5c4997eda69aa6a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 16 22:25:39 2016 +0100
+
+    Implement our own model class and replace ClutterModel with new XfdashboardModel because ClutterModel is deprecated since Clutter version 1.24. This new model implementation should be compatible to all Clutter version and silence compiler warnings when compiled agaist Clutter 1.24 or higher.
+    
+    This commit should finally fix for issue GH #117
+
+commit 1262a79a8330cf7bf23c78245135df5a6375e362
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Mar 11 11:23:18 2016 +0100
+
+    Silence compiler warning about using deprecated actor state access macros by using functions introduced with Clutter 1.23.4
+    
+    We update the source code to use state access functions, e.g. clutter_actor_is_visible(), instead of the old macros, e.g. CLUTTER_ACTOR_IS_VISIBLE(). But also implement a compatibility layer which "redirects" functions to macros again when compiling and linking against Clutter older than 1.23.4.
+    
+    This is the first fix for issue GH #117
+
+commit 748e6d280724391e505e3b9f7295aaf1c0a79205
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 10 22:05:13 2016 +0100
+
+    Rewrote application class and main() function to make use of main loop in g_application_run() which is needed since Glib 2.47.4+ because it will deregister application from D-BUS as soon as this function exits. So the old implementation does not "see" any running instance (regardless if running as daemon or not) anymore and cannot neither quit nor restart the running instance. So several instances can run simultaneously, e.g. two daemon instances, instead of toggling the state of application.
+    
+    This commit should fix GH #116
+
+commit 9674b21804cae82f4efc368ff8dce7d94b1d8ab3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 2 19:10:44 2016 +0100
+
+    Fix typo
+
+commit 8d923b99a7517af767f81d93d0cf85b5d1a3b79d
+Merge: 1181d65 338dc7c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 2 10:21:10 2016 +0100
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 1181d65063096e05458f6a4c18d769b1012efcf0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 2 10:19:41 2016 +0100
+
+    Do not use an uninitialized application instance.
+    
+    Fixes GH #115
+
+commit 338dc7c570427b48ce138eece202ed2a8bb9bf47
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 1 11:19:15 2016 +0100
+
+    Check if window is "visible" before trying to find the running application it belongs to in application tracker. "Visible" windows are windows that have not set 'skip-pager' or 'skip-tasklist' flags set but may be hidden or minimized.
+    
+    This commit should fix issue GH #114
+
+commit 924915a96662043b5af5efc6a40c69250bc02926
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Feb 28 12:43:29 2016 +0100
+
+    Post-release version bump to 0.5.91
+
+commit be437ea297b4863f837a73a01835bda62b1e1acf
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Feb 28 12:42:20 2016 +0100
+
+    Bump version to 0.5.90
+
 commit 577fad650088473e321505beb56159201dc12efa
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Sun Feb 28 08:55:24 2016 +0100

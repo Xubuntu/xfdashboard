@@ -38,6 +38,7 @@ libxfdashboard_la_headers = \
 	button.h \
 	click-action.h \
 	collapse-box.h \
+	compat.h \
 	css-selector.h \
 	desktop-app-info.h \
 	drag-action.h \
@@ -50,6 +51,7 @@ libxfdashboard_la_headers = \
 	image-content.h \
 	live-window.h \
 	live-workspace.h \
+	model.h \
 	outline-effect.h \
 	plugin.h \
 	plugins-manager.h \
@@ -116,6 +118,7 @@ libxfdashboard_la_SOURCES = \
 	image-content.c \
 	live-window.c \
 	live-workspace.c \
+	model.c \
 	outline-effect.c \
 	plugin.c \
 	plugins-manager.c \
