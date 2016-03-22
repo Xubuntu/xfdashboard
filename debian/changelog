@@ -1,3 +1,9 @@
+xfdashboard (0.5.91-0ubuntu1) xenial; urgency=medium
+
+  * Imported Upstream version 0.5.91
+
+ -- Unit 193 <unit193@ubuntu.com>  Tue, 22 Mar 2016 19:23:45 -0400
+
 xfdashboard (0.5.90-0ubuntu1) xenial; urgency=medium
 
   * Imported Upstream version 0.5.90
