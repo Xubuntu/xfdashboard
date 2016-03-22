@@ -37,6 +37,8 @@
 #include <libxfdashboard/marshal.h>
 #include <libxfdashboard/focus-manager.h>
 #include <libxfdashboard/application.h>
+#include <libxfdashboard/compat.h>
+
 
 /* Define this interface in GObject system */
 G_DEFINE_INTERFACE(XfdashboardFocusable,
@@ -858,8 +860,7 @@ ClutterActor* xfdashboard_focusable_find_selection(XfdashboardFocusable *self, C
 
 	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(self), NULL);
 	g_return_val_if_fail(!inSelection || CLUTTER_IS_ACTOR(inSelection), NULL);
-	g_return_val_if_fail(inDirection>XFDASHBOARD_SELECTION_TARGET_NONE, NULL);
-	g_return_val_if_fail(inDirection<=XFDASHBOARD_SELECTION_TARGET_NEXT, NULL);
+	g_return_val_if_fail(inDirection>=0 && inDirection<=XFDASHBOARD_SELECTION_TARGET_NEXT, NULL);
 
 	iface=XFDASHBOARD_FOCUSABLE_GET_IFACE(self);
 
