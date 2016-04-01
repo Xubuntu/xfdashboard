@@ -1,3 +1,59 @@
+commit 5c44cd461ae1e1b2c42db72c72120c9dc0bb5f7e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 31 20:29:39 2016 +0200
+
+    Bump version to 0.5.92
+
+commit 610ab94b032fb20d9385aebc17b362c29a6059f1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 30 20:29:32 2016 +0200
+
+    Add also a "configure" button to call the configuration dialog for the selected plugin in settings application.
+    
+    This commit fixes GH #120
+
+commit a9df0f92dc3b711a39cd47bc4d1030c15eab29df
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 29 10:15:24 2016 +0200
+
+    Add weak reference pointers to current selections at view classes to prevent accessing destroyed selections of which we are not notified by "destroy" or "hide" signals.
+    
+    Another fix for GH #123
+
+commit 0bf72ea60c669fe98813b36f617876f8ce9977d3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Mar 26 09:13:36 2016 +0100
+
+    Fixed DBUS method signatures for "ActivateResult" and "LaunchSearch"
+
+commit 59c62eefb04b371a5e92badca1b48da5644b320e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Mar 26 07:50:36 2016 +0100
+
+    Call gdk_notify_startup_complete() after GTK+ is initialized.
+    
+    I do not believe that it makes any difference but I looks like since rewriting the application object (commit 748e6d280724391e505e3b9f7295aaf1c0a79205) it doesn't work anymore.
+
+commit 564eecf58b8237bafcdf5dda98170e7efb560d19
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Mar 25 08:52:55 2016 +0100
+
+    Fixed freeing an maybe uninitialized variable in XfdashboardGnomeShellSearchProvider by initializing it with NULL.
+    
+    This should fix GH #123 (Upstream bug report from https://bugzilla.redhat.com/show_bug.cgi?id=1321186)
+
+commit e9014882db90ca5ca9fdf2c9f8ce94bd06be3112
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 22 20:03:08 2016 +0100
+
+    Post-release version bump to 0.5.92
+
+commit d322328a677693ab6516d1625e328f814e6f0f5e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 22 20:01:39 2016 +0100
+
+    Bump version to 0.5.91
+
 commit e177d3808297a188027d0b95b10129b772f09f25
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Mon Mar 21 07:01:40 2016 +0100
