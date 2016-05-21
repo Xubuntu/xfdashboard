@@ -1,3 +1,60 @@
+commit ac9fff44f52f1a11cbad9c83722afc1f542fd611
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 20 21:35:44 2016 +0200
+
+    Update AppData
+
+commit f2eb5b29e0fe60b9cb3d1b899ed49e93d3623657
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 6 22:05:06 2016 +0200
+
+    I18n: Updated translation lt
+
+commit 683f5048c1dc37af503709e3c8666efce77f6ba5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Apr 30 10:30:16 2016 +0200
+
+    Viewpad did not find a view by its internal name as it checked against the wrong expected return result :(
+    
+    This fixes GH #124 where the bug was reported that switching to a requested view on application start-up or resume does not anymore.
+
+commit b6584fa5fb990e1c203dbaf1fb7b89514e2ed16d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Apr 13 13:10:40 2016 +0200
+
+    I18n: Updated translation lt
+
+commit 08cd04c334f085b47dcf99fdc9c5869b4031cda3
+Merge: a783465 0153687
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Apr 2 10:03:57 2016 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 0153687399ad0951e8aa094f1d4996d3b2d48d65
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Apr 1 11:44:18 2016 +0200
+
+    Also support deprecated 'icon-data' in Gnome-Shell search provider when looking up icon for a result item to create an actor for.
+
+commit a783465f8a59e1893fc9c78d5c8b1c5f1a33acee
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 31 20:42:04 2016 +0200
+
+    Post-release version bump to 0.5.93
+
+commit 933e5a92f03d5ee4e366f71d3df8450644109871
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 31 20:29:39 2016 +0200
+
+    Bump version to 0.5.92
+
+commit 2a401550c26cea980e262000d6d30f16578b1ebc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 31 20:31:19 2016 +0200
+
+    Post-release version bump to 0.5.93
+
 commit 5c44cd461ae1e1b2c42db72c72120c9dc0bb5f7e
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Thu Mar 31 20:29:39 2016 +0200
