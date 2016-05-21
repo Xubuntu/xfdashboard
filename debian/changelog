@@ -1,3 +1,10 @@
+xfdashboard (0.6.0-0ubuntu1) devel; urgency=medium
+
+  * Imported Upstream version 0.6.0.
+  * Bump standards-version to 3.9.8.
+
+ -- Unit 193 <unit193@ubuntu.com>  Sat, 21 May 2016 00:09:53 -0400
+
 xfdashboard (0.5.92-0ubuntu1) xenial; urgency=medium
 
   * Imported Upstream version 0.5.92
