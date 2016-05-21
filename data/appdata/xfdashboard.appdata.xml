@@ -72,6 +72,11 @@
 	</keywords>
 
 	<releases>
+		<release version="0.6.0" timestamp="1463772864">
+			<description>
+				<p>This stable version introduces lots of new features like plugins and application tracker. It also contains a huge collection of other larger and smaller improvements.</p>
+			</description>
+		</release>
 		<release version="0.5.92" timestamp="1459448722">
 			<description>
 				<p>This unstable development fixes crashes in search view.</p>
