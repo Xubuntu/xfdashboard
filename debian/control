@@ -20,8 +20,8 @@ Build-Depends: debhelper (>= 9),
  pkg-config
 Standards-Version: 3.9.8
 Homepage: http://goodies.xfce.org/projects/applications/xfdashboard/start
-Vcs-Browser: https://bitbucket.org/xubuntu/xfdashboard/
-Vcs-Git: https://bitbucket.org/xubuntu/xfdashboard/
+Vcs-Browser: https://git.launchpad.net/~xubuntu-dev/+git/xfdashboard
+Vcs-Git: https://git.launchpad.net/~xubuntu-dev/+git/xfdashboard
 
 Package: xfdashboard
 Architecture: any
