@@ -12,7 +12,7 @@ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 	dh $@  --with autotools-dev
 
 override_dh_auto_configure:
-	dh_auto_configure -- --disable-silent-rules
+	dh_auto_configure --
 
 override_dh_installchangelogs:
 	dh_installchangelogs ChangeLog
@@ -22,7 +22,7 @@ override_dh_install:
 	dh_install --fail-missing
 
 override_dh_strip:
-	dh_strip --dbg-package=xfdashboard-dbg
+	dh_strip --dbgsym-migration='xfdashboard-dbg (<< 0.6.0-0ubuntu2~)'
 
 override_dh_makeshlibs:
 	dh_makeshlibs -X debian/xfdashboard/usr/lib/$(DEB_HOST_MULTIARCH)/xfdashboard/plugins/*.so
