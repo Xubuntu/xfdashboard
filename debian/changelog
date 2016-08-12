@@ -1,5 +1,6 @@
 xfdashboard (0.6.0-0ubuntu2) UNRELEASED; urgency=medium
 
+  [ Unit 193 / Sean Davis ]
   * Initial release (LP: #1598503)
 
  -- Sean Davis <smd.seandavis@gmail.com>  Thu, 11 Aug 2016 20:58:30 -0400
