@@ -1,3 +1,10 @@
+xfdashboard (0.6.1-0ubuntu1) devel; urgency=medium
+
+  * d/watch: Only track stable releases.
+  * Imported Upstream version 0.6.1.
+
+ -- Unit 193 <unit193@ubuntu.com>  Sat, 21 Jan 2017 19:08:16 -0500
+
 xfdashboard (0.6.0-0ubuntu2) yakkety; urgency=medium
 
   [ Unit 193 / Sean Davis ]
