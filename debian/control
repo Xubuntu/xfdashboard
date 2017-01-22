@@ -66,8 +66,8 @@ Depends: libxfdashboard0 (= ${binary:Version}),
  libclutter-1.0-dev, libcogl-dev, libdbus-glib-1-dev, libgarcon-1-0-dev,
  libglib2.0-dev, libgtk-3-dev, libwnck-3-dev, libxfce4ui-2-dev,
  libxfce4util-dev, libxfconf-0-dev, ${shlibs:Depends}, ${misc:Depends}
-Breaks: libxfdashboard0 (<< 0.6.0-0ubuntu2)
-Replaces: libxfdashboard0 (<< 0.6.0-0ubuntu2)
+Breaks: libxfdashboard0 (<< 0.6.0-0ubuntu2~)
+Replaces: libxfdashboard0 (<< 0.6.0-0ubuntu2~)
 Description: GNOME shell like dashboard for Xfce - development files
  xfdashboard provides an overview of applications currently open enabling the
  user to switch between different applications. The search feature works like
