@@ -14,5 +14,5 @@ Style=xfdashboard.css
 Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Author=Stephan Haller
-Version=0.5.91git.924915a
+Version=0.7.1git.a3d2f91
 Screenshot=screenshot-xfdashboard.png

@@ -1,3 +1,29 @@
+commit c915960a4d97aeb1c5049afe91379073b1d782df
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Dec 22 17:04:54 2016 +0100
+
+    Update AppData
+
+commit 6244f2769cb86e8762c551028df243e506d83fe2
+Author: Olivier Duchateau <duchateau.olivier@gmail.com>
+Date:   Mon Sep 12 21:34:50 2016 +0200
+
+    Fix typo in defaultApplications array
+    
+    Fixes bug #12842
+
+commit ba328eb5ea5aefcaf00f97872dc2df6ddb7e787b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 20 21:41:15 2016 +0200
+
+    Post-release version bump to 0.6.1
+
+commit 130aea9f8c777fc6cda3f94fe357154d0fd7742e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 20 21:37:00 2016 +0200
+
+    Bump version to 0.6.0
+
 commit ac9fff44f52f1a11cbad9c83722afc1f542fd611
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Fri May 20 21:35:44 2016 +0200
@@ -4346,8 +4372,8 @@ Date:   Sat Jun 7 19:39:24 2014 +0200
     0.2.0
     
     Conflicts:
-    	ChangeLog
-    	configure.ac.in
+            ChangeLog
+            configure.ac.in
 
 commit f3d0d331a32ffbdb891a83b52dae8059294df775
 Author: Stephan Haller <nomad@froevel.de>
