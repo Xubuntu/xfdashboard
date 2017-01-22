@@ -72,6 +72,16 @@
 	</keywords>
 
 	<releases>
+		<release version="0.6.1" timestamp="1482422594">
+			<description>
+				<p>This stable version fixes a bug setting the correct default applications at first use.</p>
+			</description>
+		</release>
+		<release version="0.7.0" timestamp="1473183039">
+			<description>
+				<p>This unstable development fixes introduces pop-up menus.</p>
+			</description>
+		</release>
 		<release version="0.6.0" timestamp="1463772864">
 			<description>
 				<p>This stable version introduces lots of new features like plugins and application tracker. It also contains a huge collection of other larger and smaller improvements.</p>
