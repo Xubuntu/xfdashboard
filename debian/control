@@ -18,7 +18,7 @@ Build-Depends: debhelper (>= 11),
  libxfconf-0-dev,
  pkg-config,
  xfce4-dev-tools
-Standards-Version: 3.9.8
+Standards-Version: 4.1.4
 Homepage: https://goodies.xfce.org/projects/applications/xfdashboard/start
 Vcs-Browser: https://git.launchpad.net/~xubuntu-dev/+git/xfdashboard
 Vcs-Git: https://git.launchpad.net/~xubuntu-dev/+git/xfdashboard
