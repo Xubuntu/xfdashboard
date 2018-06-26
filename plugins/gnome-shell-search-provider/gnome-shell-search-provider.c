@@ -2,7 +2,7 @@
  * gnome-shell-search-provider: A search provider using GnomeShell
  *                              search providers
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -809,13 +809,13 @@ static ClutterActor* _xfdashboard_gnome_shell_search_provider_create_result_acto
 
 		if(icon)
 		{
-			xfdashboard_button_set_style(XFDASHBOARD_BUTTON(actor), XFDASHBOARD_BUTTON_STYLE_BOTH);
-			xfdashboard_button_set_gicon(XFDASHBOARD_BUTTON(actor), icon);
+			xfdashboard_label_set_style(XFDASHBOARD_LABEL(actor), XFDASHBOARD_LABEL_STYLE_BOTH);
+			xfdashboard_label_set_gicon(XFDASHBOARD_LABEL(actor), icon);
 		}
 			else if(iconImage)
 			{
-				xfdashboard_button_set_style(XFDASHBOARD_BUTTON(actor), XFDASHBOARD_BUTTON_STYLE_BOTH);
-				xfdashboard_button_set_icon_image(XFDASHBOARD_BUTTON(actor), CLUTTER_IMAGE(iconImage));
+				xfdashboard_label_set_style(XFDASHBOARD_LABEL(actor), XFDASHBOARD_LABEL_STYLE_BOTH);
+				xfdashboard_label_set_icon_image(XFDASHBOARD_LABEL(actor), CLUTTER_IMAGE(iconImage));
 			}
 
 		clutter_actor_show(actor);

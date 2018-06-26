@@ -5,7 +5,7 @@
  *                      child actors) and scaled to fit the allocation
  *                      of the actor holding all child actors.
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ typedef struct _XfdashboardScaledTableLayoutClass		XfdashboardScaledTableLayoutC
 
 struct _XfdashboardScaledTableLayout
 {
+	/*< private >*/
 	/* Parent instance */
 	ClutterLayoutManager 				parent_instance;
 

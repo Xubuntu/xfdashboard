@@ -1,7 +1,7 @@
 /*
  * utils: Common functions, helpers and definitions
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,24 +21,6 @@
  * 
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <libxfdashboard/utils.h>
-
-#include <glib/gi18n-lib.h>
-#include <clutter/clutter.h>
-#include <gtk/gtk.h>
-#include <dbus/dbus-glib.h>
-#include <gio/gdesktopappinfo.h>
-
-#include <libxfdashboard/stage.h>
-#include <libxfdashboard/stage-interface.h>
-#include <libxfdashboard/window-tracker.h>
-#include <libxfdashboard/compat.h>
-
-
 /**
  * SECTION:utils
  * @title: Utilities
@@ -48,6 +30,28 @@
  * Utility functions to ease some common tasks.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <libxfdashboard/utils.h>
+
+#include <glib/gi18n-lib.h>
+#include <clutter/clutter.h>
+#include <gtk/gtk.h>
+#ifdef XFCONF_LEGACY
+#include <dbus/dbus-glib.h>
+#endif
+#include <gio/gdesktopappinfo.h>
+
+#include <libxfdashboard/stage.h>
+#include <libxfdashboard/stage-interface.h>
+#include <libxfdashboard/window-tracker.h>
+#include <libxfdashboard/application.h>
+#include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
+
+
 /* Gobject type for pointer arrays (GPtrArray) */
 GType xfdashboard_pointer_array_get_type(void)
 {
@@ -56,11 +60,45 @@ GType xfdashboard_pointer_array_get_type(void)
 
 	if(g_once_init_enter(&type__volatile))
 	{
+#ifdef XFCONF_LEGACY
 		type=dbus_g_type_get_collection("GPtrArray", G_TYPE_VALUE);
+#else
+		type=G_TYPE_PTR_ARRAY;
+#endif
 		g_once_init_leave(&type__volatile, type);
 	}
 
 	return(type__volatile);
+}
+
+/* Callback function for xfdashboard_traverse_actor() to find stage interface
+ * used in xfdashboard_notify().
+ */
+static gboolean _xfdashboard_notify_traverse_callback(ClutterActor *inActor, gpointer inUserData)
+{
+	XfdashboardStage					**outStageInterface;
+	XfdashboardWindowTrackerMonitor		*stageMonitor;
+
+	g_return_val_if_fail(CLUTTER_IS_ACTOR(inActor), XFDASHBOARD_TRAVERSAL_CONTINUE);
+	g_return_val_if_fail(inUserData, XFDASHBOARD_TRAVERSAL_CONTINUE);
+
+	outStageInterface=(XfdashboardStage**)inUserData;
+
+	/* If actor currently traverse is a stage interface then store
+	 * the actor in user-data and stop further traversal.
+	 */
+	if(XFDASHBOARD_IS_STAGE_INTERFACE(inActor))
+	{
+		stageMonitor=xfdashboard_stage_interface_get_monitor(XFDASHBOARD_STAGE_INTERFACE(inActor));
+		if(xfdashboard_window_tracker_monitor_is_primary(stageMonitor))
+		{
+			*outStageInterface=XFDASHBOARD_STAGE(clutter_actor_get_stage(inActor));
+			return(XFDASHBOARD_TRAVERSAL_STOP);
+		}
+	}
+
+	/* If we get here a stage interface was not found so continue traversal */
+	return(XFDASHBOARD_TRAVERSAL_CONTINUE);
 }
 
 /**
@@ -83,7 +121,6 @@ void xfdashboard_notify(ClutterActor *inSender,
 							const gchar *inFormat, ...)
 {
 	XfdashboardStage					*stage;
-	ClutterStageManager					*stageManager;
 	va_list								args;
 	gchar								*text;
 
@@ -102,55 +139,12 @@ void xfdashboard_notify(ClutterActor *inSender,
 	/* No sending actor specified or no stage found so get default stage */
 	if(!stage)
 	{
-		const GSList					*stages;
-		const GSList					*stagesIter;
-		ClutterActorIter				interfaceIter;
-		ClutterActor					*child;
-		XfdashboardWindowTrackerMonitor	*stageMonitor;
+		XfdashboardCssSelector			*selector;
 
-		/* Get stage manager to iterate through stages to find the one
-		 * for primary monitor or at least the first stage.
-		 */
-		stageManager=clutter_stage_manager_get_default();
-
-		/* Find stage for primary monitor and if we cannot find it
-		 * use first stage.
-		 */
-		if(stageManager &&
-			CLUTTER_IS_STAGE_MANAGER(stageManager))
-		{
-			/* Get list of all stages */
-			stages=clutter_stage_manager_peek_stages(stageManager);
-
-			/* Iterate through list of all stage and lookup the one for
-			 * primary monitor.
-			 */
-			for(stagesIter=stages; stagesIter && !stage; stagesIter=stagesIter->next)
-			{
-				/* Skip this stage if it is not a XfdashboardStage */
-				if(!XFDASHBOARD_IS_STAGE(stagesIter->data)) continue;
-
-				/* Iterate through stage's children and lookup stage interfaces */
-				clutter_actor_iter_init(&interfaceIter, CLUTTER_ACTOR(stagesIter->data));
-				while(clutter_actor_iter_next(&interfaceIter, &child))
-				{
-					if(XFDASHBOARD_IS_STAGE_INTERFACE(child))
-					{
-						stageMonitor=xfdashboard_stage_interface_get_monitor(XFDASHBOARD_STAGE_INTERFACE(child));
-						if(xfdashboard_window_tracker_monitor_is_primary(stageMonitor))
-						{
-							stage=XFDASHBOARD_STAGE(clutter_actor_get_stage(child));
-						}
-					}
-				}
-			}
-
-			/* If we did not get stage for primary monitor use first stage */
-			if(!stage && stages)
-			{
-				stage=XFDASHBOARD_STAGE(stages->data);
-			}
-		}
+		/* Traverse through actors to find stage */
+		selector=xfdashboard_css_selector_new_from_string("XfdashboardStageInterface");
+		xfdashboard_traverse_actor(NULL, selector, _xfdashboard_notify_traverse_callback, &stage);
+		g_object_unref(selector);
 
 		/* If we still do not have found a stage to show notification
 		 * stop further processing and show notification text as a critical
@@ -174,12 +168,18 @@ void xfdashboard_notify(ClutterActor *inSender,
  * xfdashboard_create_app_context:
  * @inWorkspace: The workspace where to place application windows on or %NULL
  *
- * Returns a #GAppLaunchContext suitable for launching applications on the given display and workspace by GIO.
+ * Returns a #GAppLaunchContext suitable for launching applications on the
+ * given display and workspace by GIO.
  *
- * If @inWorkspace is specified it sets workspace on which applications will be launched when using this context when running under a window manager that supports multiple workspaces.
- * When the workspace is not specified it is up to the window manager to pick one, typically it will be the current workspace.
+ * If @inWorkspace is specified it sets workspace on which applications will
+ * be launched when using this context when running under a window manager
+ * that supports multiple workspaces.
  *
- * Return value: (transfer full): the newly created #GAppLaunchContext or %NULL in case of an error. Use g_object_unref() to free return value.
+ * When the workspace is not specified it is up to the window manager to pick
+ * one, typically it will be the current workspace.
+ *
+ * Return value: (transfer full): the newly created #GAppLaunchContext or %NULL
+ *   in case of an error. Use g_object_unref() to free return value.
  */
 GAppLaunchContext* xfdashboard_create_app_context(XfdashboardWindowTrackerWorkspace *inWorkspace)
 {
@@ -296,8 +296,10 @@ static void _xfdashboard_gvalue_transform_string_enum(const GValue *inSourceValu
 		else
 		{
 			ioDestValue->data[0].v_int=0;
-			g_debug("Cannot get value for unknown enum '%s' for type %s",
-						value, g_type_name(G_VALUE_TYPE(ioDestValue)));
+			XFDASHBOARD_DEBUG(NULL, MISC,
+								"Cannot get value for unknown enum '%s' for type %s",
+								value,
+								g_type_name(G_VALUE_TYPE(ioDestValue)));
 		}
 
 	/* Release allocated resources */
@@ -332,8 +334,10 @@ static void _xfdashboard_gvalue_transform_string_flags(const GValue *inSourceVal
 		if(flagsValue) finalValue|=flagsValue->value;
 			else
 			{
-				g_debug("Cannot get value for unknown flag '%s' for type %s",
-							*entry, g_type_name(G_VALUE_TYPE(ioDestValue)));
+				XFDASHBOARD_DEBUG(NULL, MISC,
+									"Cannot get value for unknown flag '%s' for type %s",
+									*entry,
+									g_type_name(G_VALUE_TYPE(ioDestValue)));
 			}
 
 		/* Continue with next entry */
@@ -379,7 +383,7 @@ void xfdashboard_register_gvalue_transformation_funcs(void)
  * the child having the name as specified at @inName.
  *
  * Return value: (transfer none): The #ClutterActor matching the name
- *               to lookup or %NULL if none was found.
+ *   to lookup or %NULL if none was found.
  */
 ClutterActor* xfdashboard_find_actor_by_name(ClutterActor *inActor, const gchar *inName)
 {
@@ -405,6 +409,102 @@ ClutterActor* xfdashboard_find_actor_by_name(ClutterActor *inActor, const gchar 
 	return(NULL);
 }
 
+/* Internal function to traverse an actor which can be call recursively */
+static gboolean _xfdashboard_traverse_actor_internal(ClutterActor *inActor,
+														XfdashboardCssSelector *inSelector,
+														XfdashboardTraversalCallback inCallback,
+														gpointer inUserData)
+{
+	ClutterActorIter	iter;
+	ClutterActor		*child;
+	gint				score;
+	gboolean			doContinueTraversal;
+
+	g_return_val_if_fail(CLUTTER_IS_ACTOR(inActor), XFDASHBOARD_TRAVERSAL_CONTINUE);
+	g_return_val_if_fail(XFDASHBOARD_IS_CSS_SELECTOR(inSelector), XFDASHBOARD_TRAVERSAL_CONTINUE);
+	g_return_val_if_fail(inCallback, XFDASHBOARD_TRAVERSAL_CONTINUE);
+
+	/* Check if given actor matches selector if a selector is provided
+	 * otherwise each child will match. Call callback for matching children.
+	 */
+	if(XFDASHBOARD_IS_STYLABLE(inActor))
+	{
+		score=xfdashboard_css_selector_score(inSelector, XFDASHBOARD_STYLABLE(inActor));
+		if(score>=0)
+		{
+			doContinueTraversal=(inCallback)(inActor, inUserData);
+			if(!doContinueTraversal) return(doContinueTraversal);
+		}
+	}
+
+	/* For each child of actor call ourselve recursive */
+	clutter_actor_iter_init(&iter, inActor);
+	while(clutter_actor_iter_next(&iter, &child))
+	{
+		doContinueTraversal=_xfdashboard_traverse_actor_internal(child, inSelector, inCallback, inUserData);
+		if(!doContinueTraversal) return(doContinueTraversal);
+	}
+
+	/* If we get here return and continue traversal */
+	return(XFDASHBOARD_TRAVERSAL_CONTINUE);
+}
+
+/**
+ * xfdashboard_traverse_actor:
+ * @inRootActor: The root #ClutterActor where to begin traversing
+ * @inSelector: A #XfdashboardCssSelector to filter actors while traversing or
+ *   %NULL to disable filterting
+ * @inCallback: Function to call on matching children
+ * @inUserData: Data to pass to callback function
+ *
+ * Iterates through all children of @inRootActor recursively beginning at
+ * @inRootActor and for each child matching the selector @inSelector it calls the
+ * callback function @inCallback with the matching child and the user-data at
+ * @inUserData.
+ *
+ * If @inRootActor is %NULL it begins at the global stage.
+ *
+ * If the selector @inSelector is %NULL all children will match and the callback
+ * function @inCallback is called for all children.
+ */
+void xfdashboard_traverse_actor(ClutterActor *inRootActor,
+								XfdashboardCssSelector *inSelector,
+								XfdashboardTraversalCallback inCallback,
+								gpointer inUserData)
+{
+	g_return_if_fail(!inRootActor || CLUTTER_IS_ACTOR(inRootActor));
+	g_return_if_fail(!inSelector || XFDASHBOARD_IS_CSS_SELECTOR(inSelector));
+	g_return_if_fail(inCallback);
+
+	/* If root actor where begin traversal is NULL then begin at stage */
+	if(!inRootActor)
+	{
+		inRootActor=CLUTTER_ACTOR(xfdashboard_application_get_stage(NULL));
+
+		/* If root actor is still NULL then no stage was found and we cannot
+		 * start the traversal.
+		 */
+		if(!inRootActor)
+		{
+			XFDASHBOARD_DEBUG(NULL, MISC, "No root actor to begin traversal at was provided and no stage available");
+			return;
+		}
+	}
+
+	/* If no selector is provider create a seletor matching all actors.
+	 * Otherwise take an extra ref on provided selector to prevent
+	 * destruction when we unref it later.
+	 */
+	if(!inSelector) inSelector=xfdashboard_css_selector_new_from_string("*");
+		else g_object_ref(inSelector);
+
+	/* Do traversal */
+	_xfdashboard_traverse_actor_internal(inRootActor, inSelector, inCallback, inUserData);
+
+	/* Release reference on selector */
+	g_object_unref(inSelector);
+}
+
 /**
  * xfdashboard_get_stage_of_actor:
  * @inActor: The #ClutterActor for which to find the stage
@@ -413,7 +513,7 @@ ClutterActor* xfdashboard_find_actor_by_name(ClutterActor *inActor, const gchar 
  * @inActor belongs to.
  *
  * Return value: (transfer none): The #XfdashboardStageInterface
- *               found or %NULL if none was found.
+ *   found or %NULL if none was found.
  */
 XfdashboardStageInterface* xfdashboard_get_stage_of_actor(ClutterActor *inActor)
 {
@@ -444,43 +544,6 @@ XfdashboardStageInterface* xfdashboard_get_stage_of_actor(ClutterActor *inActor)
 }
 
 /**
- * xfdashboard_get_global_stage_of_actor:
- * @inActor: The #ClutterActor for which to find the global stage
- *
- * Gets the main #XfdashboardStage where @inActor belongs to.
- *
- * Return value: (transfer none): The #XfdashboardStage found
- *               or %NULL if none was found.
- */
-XfdashboardStage* xfdashboard_get_global_stage_of_actor(ClutterActor *inActor)
-{
-	ClutterActor		*parent;
-
-	g_return_val_if_fail(CLUTTER_IS_ACTOR(inActor), NULL);
-
-	/* Iterate through parents and return first XfdashboardStage
-	 * found. That's the main global and all monitors spanning
-	 * stage where the requested actor belongs to.
-	 */
-	parent=clutter_actor_get_parent(inActor);
-	while(parent)
-	{
-		/* Check if current iterated parent is a XfdashboardStage.
-		 * If it is return it.
-		 */
-		if(XFDASHBOARD_IS_STAGE(parent)) return(XFDASHBOARD_STAGE(parent));
-
-		/* Continue with next parent */
-		parent=clutter_actor_get_parent(parent);
-	}
-
-	/* If we get here we did not find the global stage the actor
-	 * belongs to, so return NULL.
-	 */
-	return(NULL);
-}
-
-/**
  * xfdashboard_split_string:
  * @inString: The string to split
  * @inDelimiters: A string containg the delimiters
@@ -490,7 +553,7 @@ XfdashboardStage* xfdashboard_get_global_stage_of_actor(ClutterActor *inActor)
  * and end of each token. Empty tokens will not be added to list.
  *
  * Return value: A newly-allocated %NULL-terminated array of strings or %NULL
- *               in case of an error. Use g_strfreev() to free it.
+ *   in case of an error. Use g_strfreev() to free it.
  */
 gchar** xfdashboard_split_string(const gchar *inString, const gchar *inDelimiters)
 {
@@ -688,29 +751,54 @@ gchar* xfdashboard_get_enum_value_name(GType inEnumClass, gint inValue)
 }
 
 /* Dump actors */
-static void _xfdashboard_dump_actor_internal(ClutterActor *inActor, gint inLevel)
+static void _xfdashboard_dump_actor_print(ClutterActor *inActor, gint inLevel)
 {
-	ClutterActorIter	iter;
-	ClutterActor		*child;
-	gint				i;
+	XfdashboardStylable		*stylable;
+	ClutterActorBox			allocation;
+	gint					i;
 
 	g_return_if_fail(CLUTTER_IS_ACTOR(inActor));
 	g_return_if_fail(inLevel>=0);
 
+	/* Check if actor is stylable to retrieve style configuration */
+	stylable=NULL;
+	if(XFDASHBOARD_IS_STYLABLE(inActor)) stylable=XFDASHBOARD_STYLABLE(inActor);
+
+	/* Dump actor */
+	for(i=0; i<inLevel; i++) g_print("  ");
+	clutter_actor_get_allocation_box(inActor, &allocation);
+	g_print("+- %s@%p [%s%s%s%s%s%s] - geometry: %.2f,%.2f [%.2fx%.2f], mapped: %s, visible: %s, layout: %s, children: %d\n",
+				G_OBJECT_TYPE_NAME(inActor), inActor,
+				clutter_actor_get_name(inActor) ? " #" : "",
+				clutter_actor_get_name(inActor) ? clutter_actor_get_name(inActor) : "",
+				stylable && xfdashboard_stylable_get_classes(stylable) ? "." : "",
+				stylable && xfdashboard_stylable_get_classes(stylable) ? xfdashboard_stylable_get_classes(stylable) : "",
+				stylable && xfdashboard_stylable_get_pseudo_classes(stylable) ? ":" : "",
+				stylable && xfdashboard_stylable_get_pseudo_classes(stylable) ? xfdashboard_stylable_get_pseudo_classes(stylable) : "",
+				allocation.x1,
+				allocation.y1,
+				allocation.x2-allocation.x1,
+				allocation.y2-allocation.y1,
+				clutter_actor_is_mapped(inActor) ? "yes" : "no",
+				clutter_actor_is_visible(inActor) ? "yes" : "no",
+				clutter_actor_get_layout_manager(inActor) ? G_OBJECT_TYPE_NAME(clutter_actor_get_layout_manager(inActor)) : "none",
+				clutter_actor_get_n_children(inActor));
+
+}
+
+static void _xfdashboard_dump_actor_internal(ClutterActor *inActor, gint inLevel)
+{
+	ClutterActorIter		iter;
+	ClutterActor			*child;
+
+	g_return_if_fail(CLUTTER_IS_ACTOR(inActor));
+	g_return_if_fail(inLevel>0);
+
+	/* Dump children */
 	clutter_actor_iter_init(&iter, CLUTTER_ACTOR(inActor));
 	while(clutter_actor_iter_next(&iter, &child))
 	{
-		for(i=0; i<inLevel; i++) g_print("  ");
-		g_print("+- %s@%p - name: %s - geometry: %.2f,%.2f [%.2fx%.2f], mapped: %s, visible: %s, children: %d\n",
-					G_OBJECT_TYPE_NAME(child), child,
-					clutter_actor_get_name(child),
-					clutter_actor_get_x(child),
-					clutter_actor_get_y(child),
-					clutter_actor_get_width(child),
-					clutter_actor_get_height(child),
-					clutter_actor_is_mapped(child) ? "yes" : "no",
-					clutter_actor_is_visible(child) ? "yes" : "no",
-					clutter_actor_get_n_children(child));
+		_xfdashboard_dump_actor_print(child, inLevel);
 		if(clutter_actor_get_n_children(child)>0) _xfdashboard_dump_actor_internal(child, inLevel+1);
 	}
 }
@@ -730,5 +818,13 @@ static void _xfdashboard_dump_actor_internal(ClutterActor *inActor, gint inLevel
  */
 void xfdashboard_dump_actor(ClutterActor *inActor)
 {
-	_xfdashboard_dump_actor_internal(inActor, 0);
+	g_return_if_fail(CLUTTER_IS_ACTOR(inActor));
+
+	/* Dump the requested top-level actor */
+	_xfdashboard_dump_actor_print(inActor, 0);
+
+	/* Dump children of top-level actor which calls itself recursive
+	 * if any child has children.
+	 */
+	_xfdashboard_dump_actor_internal(inActor, 1);
 }

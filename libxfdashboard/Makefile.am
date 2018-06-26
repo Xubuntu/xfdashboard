@@ -1,3 +1,5 @@
+AUTOMAKE_OPTIONS = subdir-objects
+
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-DLIBXFDASHBOARD_COMPILATION=1 \
@@ -5,6 +7,7 @@ AM_CPPFLAGS = \
 	-DPACKAGE_DATADIR=\"$(datadir)\" \
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\" \
 	-DPACKAGE_LIBDIR=\"$(libdir)\" \
+	$(XFDASHBOARD_DEBUG_CFLAGS) \
 	$(PLATFORM_CPPFLAGS)
 
 pkgconfigdir = $(libdir)/pkgconfig
@@ -19,7 +22,8 @@ libxfdashboard_la_built_sources = \
 	enums.h \
 	enums.c \
 	marshal.h \
-	marshal.c
+	marshal.c \
+	version.h
 
 libxfdashboard_la_headers = \
 	action-button.h \
@@ -40,6 +44,7 @@ libxfdashboard_la_headers = \
 	collapse-box.h \
 	compat.h \
 	css-selector.h \
+	debug.h \
 	desktop-app-info.h \
 	drag-action.h \
 	drop-action.h \
@@ -49,12 +54,18 @@ libxfdashboard_la_headers = \
 	focusable.h \
 	focus-manager.h \
 	image-content.h \
+	label.h \
 	live-window.h \
+	live-window-simple.h \
 	live-workspace.h \
 	model.h \
 	outline-effect.h \
 	plugin.h \
 	plugins-manager.h \
+	popup-menu.h \
+	popup-menu-item.h \
+	popup-menu-item-button.h \
+	popup-menu-item-separator.h \
 	quicklaunch.h \
 	scaled-table-layout.h \
 	scrollbar.h \
@@ -81,6 +92,7 @@ libxfdashboard_la_headers = \
 	viewpad.h \
 	window-content.h \
 	window-tracker.h \
+	window-tracker-backend.h \
 	window-tracker-monitor.h \
 	window-tracker-window.h \
 	window-tracker-workspace.h \
@@ -107,6 +119,7 @@ libxfdashboard_la_SOURCES = \
 	click-action.c \
 	collapse-box.c \
 	css-selector.c \
+	debug.c \
 	desktop-app-info.c \
 	drag-action.c \
 	drop-action.c \
@@ -116,12 +129,18 @@ libxfdashboard_la_SOURCES = \
 	focusable.c \
 	focus-manager.c \
 	image-content.c \
+	label.c \
 	live-window.c \
+	live-window-simple.c \
 	live-workspace.c \
 	model.c \
 	outline-effect.c \
 	plugin.c \
 	plugins-manager.c \
+	popup-menu.c \
+	popup-menu-item.c \
+	popup-menu-item-button.c \
+	popup-menu-item-separator.c \
 	quicklaunch.c \
 	scaled-table-layout.c \
 	scrollbar.c \
@@ -147,6 +166,7 @@ libxfdashboard_la_SOURCES = \
 	viewpad.c \
 	window-content.c \
 	window-tracker.c \
+	window-tracker-backend.c \
 	window-tracker-monitor.c \
 	window-tracker-window.c \
 	window-tracker-workspace.c \
@@ -164,7 +184,6 @@ libxfdashboard_la_CFLAGS = \
 	$(LIBXFCONF_CFLAGS) \
 	$(LIBXFCE4UTIL_CFLAGS) \
 	$(LIBXFCE4UI_CFLAGS) \
-	$(DBUS_GLIB_CFLAGS) \
 	$(PLATFORM_CFLAGS)
 
 libxfdashboard_la_LIBADD = \
@@ -178,14 +197,40 @@ libxfdashboard_la_LIBADD = \
 	$(LIBXFCONF_LIBS) \
 	$(LIBXFCE4UTIL_LIBS) \
 	$(LIBXFCE4UI_LIBS) \
-	$(DBUS_GLIB_LIBS) \
 	$(LIBM)
+
+if DBUS_GLIB
+libxfdashboard_la_CFLAGS += \
+	$(DBUS_GLIB_CFLAGS)
+
+libxfdashboard_la_LIBADD += \
+	$(DBUS_GLIB_LIBS)
+endif
 
 libxfdashboard_la_LDFLAGS = \
 	-export-dynamic \
 	-version-info $(LIBXFDASHBOARD_VERINFO) \
 	-export-symbols-regex "^[^_].*" \
 	-no-undefined
+
+x11_headers = \
+	x11/window-content-x11.h \
+	x11/window-tracker-x11.h \
+	x11/window-tracker-backend-x11.h \
+	x11/window-tracker-monitor-x11.h \
+	x11/window-tracker-window-x11.h \
+	x11/window-tracker-workspace-x11.h
+
+x11_sources = \
+	x11/window-content-x11.c \
+	x11/window-tracker-x11.c \
+	x11/window-tracker-backend-x11.c \
+	x11/window-tracker-monitor-x11.c \
+	x11/window-tracker-window-x11.c \
+	x11/window-tracker-workspace-x11.c
+
+libxfdashboard_la_headers += $(x11_headers)
+libxfdashboard_la_SOURCES += $(x11_sources)
 
 if XFDASHBOARD_BUILD_WITH_XCOMPOSITE
 libxfdashboard_la_CFLAGS += \
@@ -209,6 +254,24 @@ libxfdashboard_la_CFLAGS += \
 
 libxfdashboard_la_LIBADD += \
 	$(XINERAMA_LIBS)
+endif
+
+if XFDASHBOARD_BUILD_WITH_BACKEND_GDK
+gdk_headers = \
+	gdk/window-tracker-backend-gdk.h
+
+libxfdashboard_la_headers += $(gdk_headers)
+
+gdk_sources = \
+	gdk/window-tracker-backend-gdk.c
+
+libxfdashboard_la_SOURCES += $(gdk_sources)
+
+libxfdashboard_la_CFLAGS += \
+	$(CLUTTER_GDK_CFLAGS)
+
+libxfdashboard_la_LIBADD += \
+	$(CLUTTER_GDK_LIBS)
 endif
 
 libxfdashboard_la_includedir = \
@@ -257,6 +320,12 @@ marshal.c: marshal.list Makefile
 		&& rm -f xgen-xmc \
 	)
 
+version.h: version.h.in Makefile
+	$(AM_V_GEN) sed -e "s|@LIBXFDASHBOARD_MAJOR_VERSION[@]|$(XFDASHBOARD_VERSION_MAJOR)|" \
+		-e "s|@LIBXFDASHBOARD_MINOR_VERSION[@]|$(XFDASHBOARD_VERSION_MINOR)|" \
+		-e "s|@LIBXFDASHBOARD_MICRO_VERSION[@]|$(XFDASHBOARD_VERSION_MICRO)|" \
+		$< > $@ || rm $@
+
 DISTCLEANFILES = \
 	$(libxfdashboard_la_built_sources)
 
@@ -268,4 +337,5 @@ endif
 EXTRA_DIST = \
 	enums.h.template \
 	enums.c.template \
-	marshal.list
+	marshal.list \
+	version.h.in

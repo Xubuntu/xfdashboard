@@ -2,7 +2,7 @@
  * focus-manager: Single-instance managing focusable actors
  *                for keyboard navigation
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ typedef struct _XfdashboardFocusManagerPrivate		XfdashboardFocusManagerPrivate;
 
 struct _XfdashboardFocusManager
 {
+	/*< private >*/
 	/* Parent instance */
 	GObject							parent_instance;
 
@@ -71,6 +72,14 @@ struct _XfdashboardFocusManagerClass
 						XfdashboardFocusable *newActor);
 
 	/* Binding actions */
+	gboolean (*focus_move_first)(XfdashboardFocusManager *self,
+									XfdashboardFocusable *inSource,
+									const gchar *inAction,
+									ClutterEvent *inEvent);
+	gboolean (*focus_move_last)(XfdashboardFocusManager *self,
+								XfdashboardFocusable *inSource,
+								const gchar *inAction,
+								ClutterEvent *inEvent);
 	gboolean (*focus_move_next)(XfdashboardFocusManager *self,
 									XfdashboardFocusable *inSource,
 									const gchar *inAction,
@@ -103,7 +112,14 @@ XfdashboardFocusable* xfdashboard_focus_manager_get_next_focusable(XfdashboardFo
 XfdashboardFocusable* xfdashboard_focus_manager_get_previous_focusable(XfdashboardFocusManager *self,
 																		XfdashboardFocusable *inBeginFocusable);
 
-gboolean xfdashboard_focus_manager_handle_key_event(XfdashboardFocusManager *self, const ClutterEvent *inEvent, XfdashboardFocusable *inFocusable);
+gboolean xfdashboard_focus_manager_get_event_targets_and_action(XfdashboardFocusManager *self,
+																const ClutterEvent *inEvent,
+																XfdashboardFocusable *inFocusable,
+																GSList **outTargets,
+																const gchar **outAction);
+gboolean xfdashboard_focus_manager_handle_key_event(XfdashboardFocusManager *self,
+													const ClutterEvent *inEvent,
+													XfdashboardFocusable *inFocusable);
 
 G_END_DECLS
 

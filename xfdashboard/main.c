@@ -1,7 +1,7 @@
 /*
  * main: Common functions, shared data and main entry point of application
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,13 +26,15 @@
 #endif
 
 #include <glib/gi18n-lib.h>
-#include <clutter/clutter.h>
-#include <clutter/x11/clutter-x11.h>
 #include <gtk/gtk.h>
+#include <clutter/clutter.h>
+#ifdef CLUTTER_WINDOWING_X11
+#include <clutter/x11/clutter-x11.h>
+#endif
 #include <libxfce4util/libxfce4util.h>
-
 #include <libxfdashboard/application.h>
-#include <libxfdashboard/types.h>
+#include <libxfdashboard/window-tracker-backend.h>
+
 
 typedef struct _RestartData		RestartData;
 struct _RestartData
@@ -186,6 +188,9 @@ int main(int argc, char **argv)
 {
 	XfdashboardApplication		*app=NULL;
 	gint						status;
+#if CLUTTER_CHECK_VERSION(1, 16, 0)
+	const gchar					*backend;
+#endif
 
 #ifdef ENABLE_NLS
 	/* Set up localization */
@@ -198,14 +203,32 @@ int main(int argc, char **argv)
 #endif
 
 #if CLUTTER_CHECK_VERSION(1, 16, 0)
-	/* Enforce X11 backend in Clutter. This function must be called before any
-	 * other Clutter API function.
+	/* Enforce X11 backend in Clutter if no specific backend was requested via
+	 * the XFDASHBOARD_BACKEND environment variable. If this environment variable
+	 * is set, enforce this backend.
+	 *
+	 * This function must be called before any API function call at libxfdashboard
+	 * or other library API function like the one of Clutter, GTK+ etc.
 	 */
-	clutter_set_windowing_backend("x11");
+	backend=g_getenv("XFDASHBOARD_BACKEND");
+	if(backend)
+	{
+		xfdashboard_window_tracker_backend_set_backend(backend);
+		g_debug("Setting backend to '%s'", backend);
+	}
+		else
+		{
+			clutter_set_windowing_backend("x11");
+			g_debug("Enforcing X11 backend");
+		}
 #endif
 
-	/* Tell clutter to try to initialize an RGBA visual */
+#ifdef CLUTTER_WINDOWING_X11
+	/* Tell clutter to try to initialize an RGBA visual if the X11 backend is
+	 * used before fallback to default and use RGB visual without alpha channel.
+	 */
 	clutter_x11_set_use_argb_visual(TRUE);
+#endif
 
 	/* Initialize GTK+ and Clutter */
 	gtk_init(&argc, &argv);

@@ -1,7 +1,7 @@
 /*
  * general: General settings of application
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,7 @@ struct _XfdashboardSettingsGeneralPrivate
 	GtkWidget		*widgetShowAllApps;
 	GtkWidget		*widgetScrollEventChangesWorkspace;
 	GtkWidget		*widgetDelaySearchTimeout;
+	GtkWidget		*widgetAllowSubwindows;
 };
 
 /* Properties */
@@ -103,6 +104,9 @@ static GParamSpec* XfdashboardSettingsGeneralProperties[PROP_LAST]={ 0, };
 #define WINDOW_CONTENT_CREATION_PRIORITY_XFCONF_PROP		"/window-content-creation-priority"
 #define DEFAULT_WINDOW_CONTENT_CREATION_PRIORITY			"immediate"
 
+#define ALLOW_SUBWINDOWS_XFCONF_PROP						"/allow-subwindows"
+#define DEFAULT_ALLOW_SUBWINDOWS							TRUE
+
 
 typedef struct _XfdashboardSettingsGeneralNameValuePair		XfdashboardSettingsGeneralNameValuePair;
 struct _XfdashboardSettingsGeneralNameValuePair
@@ -113,9 +117,9 @@ struct _XfdashboardSettingsGeneralNameValuePair
 
 static XfdashboardSettingsGeneralNameValuePair				_xfdashboard_settings_general_resumable_views_values[]=
 {
-	{ N_("Do nothing"), "" },
-	{ N_("Windows view"), "windows" },
-	{ N_("Applications view"), "applications" },
+	{ N_("Do nothing"), NULL },
+	{ N_("Windows view"), "builtin.windows" },
+	{ N_("Applications view"), "builtin.applications" },
 	{ NULL, NULL }
 };
 
@@ -149,7 +153,14 @@ static void _xfdashboard_settings_general_switch_to_view_on_resume_changed_by_wi
 	gtk_tree_model_get(model, &iter, 1, &value, -1);
 
 	/* Set value at xfconf property */
-	xfconf_channel_set_string(priv->xfconfChannel, SWITCH_TO_VIEW_ON_RESUME_XFCONF_PROP, value);
+	if(value)
+	{
+		xfconf_channel_set_string(priv->xfconfChannel, SWITCH_TO_VIEW_ON_RESUME_XFCONF_PROP, value);
+	}
+		else
+		{
+			xfconf_channel_reset_property(priv->xfconfChannel, SWITCH_TO_VIEW_ON_RESUME_XFCONF_PROP, FALSE);
+		}
 
 	/* Release allocated resources */
 	if(value) g_free(value);
@@ -173,7 +184,7 @@ static void _xfdashboard_settings_general_switch_to_view_on_resume_changed_by_xf
 	priv=self->priv;
 
 	/* Get new value to lookup and set at combo box */
-	if(G_UNLIKELY(G_VALUE_TYPE(inValue)!=G_TYPE_STRING)) newValue="";
+	if(G_UNLIKELY(G_VALUE_TYPE(inValue)!=G_TYPE_STRING)) newValue=NULL;
 		else newValue=g_value_get_string(inValue);
 
 	/* Iterate through combo box value and set new value if match is found */
@@ -183,7 +194,8 @@ static void _xfdashboard_settings_general_switch_to_view_on_resume_changed_by_xf
 		do
 		{
 			gtk_tree_model_get(model, &iter, 1, &value, -1);
-			if(G_UNLIKELY(g_str_equal(value, newValue)))
+			if(G_UNLIKELY((!newValue && !value)) ||
+				G_UNLIKELY(!g_strcmp0(value, newValue)))
 			{
 				g_free(value);
 				gtk_combo_box_set_active_iter(GTK_COMBO_BOX(priv->widgetSwitchToViewOnResume), &iter);
@@ -411,7 +423,6 @@ static void _xfdashboard_settings_general_set_builder(XfdashboardSettingsGeneral
 
 		/* Get default value from settings */
 		defaultValue=xfconf_channel_get_string(priv->xfconfChannel, SWITCH_TO_VIEW_ON_RESUME_XFCONF_PROP, DEFAULT_SWITCH_TO_VIEW_ON_RESUME);
-		if(!defaultValue) defaultValue=g_strdup("");
 
 		/* Clear combo box */
 		gtk_cell_layout_clear(GTK_CELL_LAYOUT(priv->widgetSwitchToViewOnResume));
@@ -428,7 +439,8 @@ static void _xfdashboard_settings_general_set_builder(XfdashboardSettingsGeneral
 		{
 			gtk_list_store_append(listStore, &listStoreIter);
 			gtk_list_store_set(listStore, &listStoreIter, 0, _(iter->displayName), 1, iter->value, -1);
-			if(!g_strcmp0(iter->value, defaultValue))
+			if((!defaultValue && !iter->value) ||
+				!g_strcmp0(iter->value, defaultValue))
 			{
 				defaultListStoreIter=gtk_tree_iter_copy(&listStoreIter);
 			}
@@ -610,6 +622,14 @@ static void _xfdashboard_settings_general_set_builder(XfdashboardSettingsGeneral
 		/* Release allocated resources */
 		if(defaultValue) g_free(defaultValue);
 	}
+
+	priv->widgetAllowSubwindows=GTK_WIDGET(gtk_builder_get_object(priv->builder, "allow-subwindows"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->widgetAllowSubwindows), DEFAULT_ALLOW_SUBWINDOWS);
+	xfconf_g_property_bind(priv->xfconfChannel,
+							ALLOW_SUBWINDOWS_XFCONF_PROP,
+							G_TYPE_BOOLEAN,
+							priv->widgetAllowSubwindows,
+							"active");
 }
 
 /* IMPLEMENTATION: GObject */

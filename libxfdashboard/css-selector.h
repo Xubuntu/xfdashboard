@@ -1,7 +1,7 @@
 /*
  * css-selector: A CSS simple selector class
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ typedef struct _XfdashboardCssSelectorClass			XfdashboardCssSelectorClass;
 
 struct _XfdashboardCssSelector
 {
+	/*< private >*/
 	/* Parent instance */
 	GObject							parent_instance;
 
@@ -91,7 +92,7 @@ XfdashboardCssSelector* xfdashboard_css_selector_new_from_scanner_with_priority(
 
 gchar* xfdashboard_css_selector_to_string(XfdashboardCssSelector *self);
 
-gint xfdashboard_css_selector_score_matching_stylable_node(XfdashboardCssSelector *self, XfdashboardStylable *inStylable);
+gint xfdashboard_css_selector_score(XfdashboardCssSelector *self, XfdashboardStylable *inStylable);
 
 void xfdashboard_css_selector_adjust_to_offset(XfdashboardCssSelector *self, gint inLine, gint inPosition);
 

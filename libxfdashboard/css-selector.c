@@ -1,7 +1,7 @@
 /*
  * css-selector: A CSS simple selector class
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include <glib/gi18n-lib.h>
 
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -233,7 +234,7 @@ static gboolean _xfdashboard_css_selector_list_contains(const gchar *inNeedle,
 /* Check and score this selector against stylable node.
  * A score below 0 means that they did not match.
  */
-static gint _xfdashboard_css_selector_score_matching_node(XfdashboardCssSelectorRule *inRule,
+static gint _xfdashboard_css_selector_score_node(XfdashboardCssSelectorRule *inRule,
 															XfdashboardStylable *inStylable)
 {
 	gint					score;
@@ -405,7 +406,7 @@ static gint _xfdashboard_css_selector_score_matching_node(XfdashboardCssSelector
 		if(!parent || !XFDASHBOARD_IS_STYLABLE(parent)) return(-1);
 
 		/* Check if there are matching parents. If not return immediately. */
-		parentScore=_xfdashboard_css_selector_score_matching_node(inRule->parentRule, parent);
+		parentScore=_xfdashboard_css_selector_score_node(inRule->parentRule, parent);
 		if(parentScore<0) return(-1);
 
 		/* Score matching parents */
@@ -436,7 +437,7 @@ static gint _xfdashboard_css_selector_score_matching_node(XfdashboardCssSelector
 			/* Get number of matches for ancestor and if at least one matches,
 			 * stop search and score
 			 */
-			ancestorScore=_xfdashboard_css_selector_score_matching_node(inRule->parentRule, ancestor);
+			ancestorScore=_xfdashboard_css_selector_score_node(inRule->parentRule, ancestor);
 			if(ancestorScore>=0)
 			{
 				c+=ancestorScore;
@@ -539,7 +540,13 @@ static GTokenType _xfdashboard_css_selector_parse_css_simple_selector(Xfdashboar
 				/* Return immediately if ID was already set because it should be a new child but print a debug message */
 				if(ioRule->id)
 				{
-					g_debug("Unexpected new ID '%s' at rule %p for previous ID '%s' at line %d and position %d", inScanner->value.v_identifier, ioRule, ioRule->id, g_scanner_cur_line(inScanner), g_scanner_cur_position(inScanner));
+					XFDASHBOARD_DEBUG(self, STYLE,
+										"Unexpected new ID '%s' at rule %p for previous ID '%s' at line %d and position %d",
+										inScanner->value.v_identifier,
+										ioRule,
+										ioRule->id,
+										g_scanner_cur_line(inScanner),
+										g_scanner_cur_position(inScanner));
 					return(G_TOKEN_NONE);
 				}
 
@@ -1048,13 +1055,13 @@ gchar* xfdashboard_css_selector_to_string(XfdashboardCssSelector *self)
 /* Check and score this selector against a stylable node.
  * A score below 0 means that they did not match.
  */
-gint xfdashboard_css_selector_score_matching_stylable_node(XfdashboardCssSelector *self, XfdashboardStylable *inStylable)
+gint xfdashboard_css_selector_score(XfdashboardCssSelector *self, XfdashboardStylable *inStylable)
 {
 	g_return_val_if_fail(XFDASHBOARD_IS_CSS_SELECTOR(self), -1);
 	g_return_val_if_fail(XFDASHBOARD_IS_STYLABLE(inStylable), -1);
 
 	/* Check and score rules */
-	return(_xfdashboard_css_selector_score_matching_node(self->priv->rule, inStylable));
+	return(_xfdashboard_css_selector_score_node(self->priv->rule, inStylable));
 }
 
 /* Adjust source line and position of this selector to an offset */

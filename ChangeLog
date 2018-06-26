@@ -1,10 +1,1090 @@
-commit c915960a4d97aeb1c5049afe91379073b1d782df
+commit 85080c9c9f6c40ea55d60eecae047e9a91ba5d4b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 19 06:53:02 2017 +0200
+
+    Update AppData
+
+commit 62701e9054c5d2bd535a83a64bdd941f25fd8536
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 19 06:45:21 2017 +0200
+
+    I18n: Updated translations tr
+
+commit 1fb678329b4aeff5e8cabb7458eefa7e3670a0ca
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Sep 18 16:15:07 2017 +0200
+
+    Fix building list of libraries depending on when checking for Clutter version and its supported backend
+    
+    Fixes bug #13860
+
+commit 2bbd63888036782f5fb84519eb1f4d7f643391ed
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Sep 15 10:57:58 2017 +0200
+
+    Add compile-time checked support for xfconf version 4.12.x (called legacy here) and xfconf 4.13.x.
+    
+    When using newer xfconf 4.13.x string arrays could not be retrieved anymore via a GPtrArray provided by dbus-glib but native GPtrArray gtype can be used. That means in addition that - when using xfconf 4.13.x - we can get rid of dbus-glib. So make dbus-glib optional and check for it only if xfconf 4.12.x was found and used in configure script
+    
+    Thanks to Olivier Duchateau for the initial patch.
+    
+    Fixes bug #13824
+
+commit 003f345967c3b17004213a3289e2b68339d6221b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Sep 15 10:45:35 2017 +0200
+
+    Additional check for Clutter backend
+    
+    Added additional check for Clutter backends, i.e. GDK backend. These check are needed because at least FreeBSD (and maybe NetBSD) do not have this Clutter backend. These checks will automatically recognize if this backend is available and will enable support for it in xfdashboard.
+    
+    Thanks to Olivier Duchateau for the initial patch.
+    
+    Fixes bug #13766
+
+commit 0c0025ccc6c81a558d0acf173e0f9f368ef24ab1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Sep 13 18:04:45 2017 +0200
+
+    I'm even too stupid to use "tx" - the transifex tool. So I did only update the translations already includes in "po" subdir but I did not fetch any new translation available at transifex.
+    
+    So a note to myself: Instead of "tx pull" (like "git pull") I have to use "tx pull -a" to fetch also new translations.
+    
+    Fixes issue GH #155
+
+commit 021bf6b1c2a90805f60c3dff0bfde07b7b4eb551
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jul 31 07:44:23 2017 +0200
+
+    Fix a compile issue at x11/window-tracker-x11.c when GTK+ prior to version 3.22 is installed.
+    
+    One access to priv->needScreenSizeUpdate was not wrapped into #ifdef to handle the code path for GTK+ < 3.22
+    
+    This commit fixes GH #153
+
+commit d1a8f3cdc2c8e268b0ff1765b4a0f91ea2294e4b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jul 10 09:38:05 2017 +0200
+
+    Post-release version bump to 0.7.4
+
+commit c330c5ea16d4c77a0134a350e3d91d6340c6d5f6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jul 7 08:36:08 2017 +0200
+
+    Bump to version 0.7.3
+
+commit 3c0d4c2702994ee879753b57674ec6cdf6fd207b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 16 10:48:17 2017 +0200
+
+    Improve handling of requesting a specific backend
+    
+    Enhancement for issue GH #129
+
+commit bf0f5730d500e5c9afc81cd421a5a3b2ab0cc954
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 16 09:40:25 2017 +0200
+
+    Update single header inclusion file libxfdashboard.h to include all neccessary and new header files
+    
+    Addresses issue GH #129
+
+commit 7a62c8afa95cb9eda2ee53cbdba95d734d46ed6f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 16 09:35:28 2017 +0200
+
+    Fix code layout
+    
+    Addresses issue GH #129
+
+commit c88b5ffb5d72fc454b96027b8c30e723ab65b679
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 16 09:18:16 2017 +0200
+
+    Select window tracker backend based on Clutter backend in use.
+    
+    Enhancement for issue GH #129
+
+commit 2af8d7f7e1a15cfa958e86090660cd8aca32719c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jun 14 10:57:12 2017 +0200
+
+    Add missing code to unreference backend in API documentation
+    
+    Fix for issue GH #129
+
+commit 3eaf5ecc5893f511e4f4ecd69aea96001edba0e7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jun 14 09:49:15 2017 +0200
+
+    Fix code path for use with GDK backend
+    
+    Fix for issue GH #129
+
+commit 8ff041cb49b60822e80a9d739c9d9a8d91266b8f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 13 18:06:46 2017 +0200
+
+    Remove API doc for removed virtual function
+    
+    Fix for issue GH #129
+
+commit efeb27f754841161060e1b475ec99393b2aea023
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 13 17:51:09 2017 +0200
+
+    Remove unneeded files for GDK backend
+    
+    Enhancement for issue GH #129
+
+commit f581aab0e790a6c89002200699aa4369bac04497
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 13 17:24:50 2017 +0200
+
+    Fix applying correct user-data when connecting signals to stage window in X11 window tracker backend.
+    
+    Fix for issue GH #129
+
+commit 0b1b99259751dfcc99c7581ee04f944651b0a30e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 13 17:06:14 2017 +0200
+
+    Move virtual function get_stage_window() of XfdashboardWindowTrackerWindow to new window tracker backend and redirect moved virtual function to new ones in window tracker backend.
+    
+    Enhancement for issue GH #129
+
+commit 2a7233dc8e9e75d5196368c62e724fe4d2d0cadc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 13 15:35:40 2017 +0200
+
+    Add API documentation for new virtual function of last commit
+    
+    Fix for issue GH #129
+
+commit d36cf6bbbeb7f163addd8692dfb831ec8792babe
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 13 12:32:23 2017 +0200
+
+    Move virtual function get_stage() of XfdashboardWindowTrackerWindow to new window tracker backend and redirect moved virtual function to new ones in window tracker backend.
+    
+    Enhancement for issue GH #129
+
+commit 71a592cec469b42a6d0e2672d87cce0f25346ec4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 13 09:36:00 2017 +0200
+
+    Redirect interface functions show_stage() and hide_stage() of XfdashboardWindowTrackerWindow to virtual functions of new window tracker backend interface.
+    
+    Enhancement for issue GH #129
+
+commit 34c55e2eeea7fb0546068d5da8195ace942dfb21
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 13 08:30:18 2017 +0200
+
+    Redirect xfdashboard_window_tracker_get_default() to accessor function of new window tracker backend interface.
+    
+    Enhancement for issue GH #129
+
+commit 39081904ed894c78eb6893c5f5968b064b37d28a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 13 08:00:37 2017 +0200
+
+    Fix interface type accessor function at XfdashboardWindowTrackerBackend
+    
+    Enhancement for issue GH #129
+
+commit d863cede633e18fc55b209dfa4c21b720ff363a9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 13 07:41:24 2017 +0200
+
+    Now as the window tracker backends for X11 and GDK exists, remove comments to include them in window tracker backend interface.
+    
+    Further enhancement for issue GH #129
+
+commit 2adf25ead816b302001360ce541a9f5f26add783
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 13 07:37:54 2017 +0200
+
+    Added GDK (for X11) window tracker backend
+    
+    Enhancement for issue GH #129
+
+commit 02c921a6a87ed7cc46e35fa12c008c5fb7f31384
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 13 07:36:41 2017 +0200
+
+    Added X11 window tracker backend
+    
+    Enhancement for issue GH #129
+
+commit 4eb70f05b132a067bf179f33a2893e97da31a02f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 13 07:33:51 2017 +0200
+
+    Adding window tracker backend interface
+    
+    Enhancement for issue GH #129
+
+commit 7be223df1fc3378691ee851dc7fcc0de3ea312d7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jun 7 11:48:45 2017 +0200
+
+    Allow user to override CSS files of theme to apply user's favourites settings.
+    
+    Changed the way and order how CSS files of themes are loaded:
+    
+    - First the CSS resources define in theme's theme file (xfdashboard.theme) are loaded
+    - Then user's global stylesheet ($HOME/.config/xfdashboard/themes/global.css) is loaded if it exists
+    - At last user's theme related stylesheet ($HOME/.config/xfdashboard/themes/user-[THEME_NAME].css) is loaded if it exists
+    
+    This commit addresses issue GH #152 to make user's changes to one or all themes more convienient.
+
+commit 43e675d75c5857dc2a8b8ba7c773eec4dc3db2ec
+Merge: ad53595 1e28628
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 6 12:03:49 2017 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit ad5359538f7001c1a160aa96362f5024d079d8a7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 6 12:03:11 2017 +0200
+
+    Use generic should_show() function of GAppInfo to determine if a menu item should be shown and remove unneeded functions
+    
+    Fixes issue GH #151
+
+commit 7d860e93628feff42485206ca40d6671a165128f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 6 11:56:38 2017 +0200
+
+    Use garcon_menu_element_get_visible() in virtual function should_show() of GAppInfo overriden by XfdashboardDesktopAppInfo as Garcon will perform all checks needed to determine if menu item is visible and could be shown, e.g. correct environment, is not hidden, installed at all by checking TryExec keyword etc.
+    
+    Fixes issue GH #151
+
+commit 1e28628f7d32f4aa3ee28f8ee7b6ef03efbc5036
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 2 10:12:38 2017 +0200
+
+    Implement simple and stupid switch between x11 and new experimental GDK backend. It can be controlled via environment variable XFDASHBOARD_BACKEND which can be set to "x11" or "gdk". If this environment variable is missed the old behaviour (enforcing X11 backend) is used.
+    
+    Affect enhancement for GH #129
+
+commit 05b4a05268a50e2c8b63d459823f71e578f02d43
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 2 08:36:42 2017 +0200
+
+    The commit 2200acb50cc72545547f1911616a3125b82d3711 to fix issue GH #141 seems to break some clients which worked before. So we try to use both methods the last one implemented as most preferred one and the old behaviour as fallback if getting window width or height is zero with first method.
+    
+    Hopefully fixes issue GH #149
+
+commit 404d782bc2888135885736a2d5e54097eb38bf40
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 2 08:21:36 2017 +0200
+
+    Added experimental GDK backend
+    
+    Enhancement for GH #129
+
+commit 6456f050fac55657b43a583e5615fa6374405a27
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu May 18 09:38:58 2017 +0200
+
+    Do not rely on clutter_x11_has_composite_extension() to check for Composite extension at X server
+
+commit 7b9f1344732ce08c37b061517c63a2f8b1ee0320
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon May 15 07:36:33 2017 +0200
+
+    Post-release version bump to 0.7.3
+
+commit 0bf9a3b408cf223c6ab85f7b7e57ea30bc9d47c6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon May 15 07:34:33 2017 +0200
+
+    Bump to version 0.7.2
+
+commit b0e093ddb8413b70d06bac8d014377f0b4c8c7b8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon May 15 07:33:44 2017 +0200
+
+    Updated POTFILES.in
+
+commit 3ac8569f4094caa3264cb738ab65ebc0b0aec14c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon May 15 07:30:48 2017 +0200
+
+    Updated AppData
+
+commit a9807b421b3e7f6c1e78d7f3c65765765b8a947f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon May 15 07:23:57 2017 +0200
+
+    Revert "Revert the reversion "Add workarounds for known window managers having problems with default implementation""
+    
+    This reverts commit 1b240ff21e31c788c9a74438e2e04621db0f26ce.
+    
+    The workaround will not work regardless what I try. I do not know if I could blame the X11 backend of Clutter but it is strange that a second call to clutter_actor_show() will never show the stage in fullscreen although the size of the window seems to be correct for fullscreen.
+    
+    I think other window managers have to wait for a GDK backend at xfdashboard. :(
+
+commit 3944dab757d257b3ad8c7a24f656d4bcbb803d99
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 12 09:33:38 2017 +0200
+
+    Complete documentation annotations for XfdashboardWindowTrackerWindowX11
+
+commit 2d20f1cf2ac44a778569cb6f3f9d9d346ee28501
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 12 09:32:08 2017 +0200
+
+    Complete documentation annotations for XfdashboardWindowTrackerWorkspaceX11
+
+commit 3fe11225a459e5ad523b7937348136c46f9d4ea5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 12 08:37:51 2017 +0200
+
+    Add annotation for API documentation of XfdashboardWindowTracker
+
+commit 1b240ff21e31c788c9a74438e2e04621db0f26ce
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 12 07:18:07 2017 +0200
+
+    Revert the reversion "Add workarounds for known window managers having problems with default implementation"
+    
+    This reverts the commits ffb4044c287474e73d77b19e12672b861eb45491 and 33b12877c2d073525cb8c478f7d68f4c0ca77f61
+    
+    Should now work with commmit 370f1060c201acc4ccb33fc54939594a3e3d65ba
+
+commit 370f1060c201acc4ccb33fc54939594a3e3d65ba
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 12 07:15:16 2017 +0200
+
+    Revert commit 2e676ddf96b378ad758fe2724c9830359529044f and add signal handler which also tracks if the stage window was closed to reconnect the signal handler for "window-opened" to find new stage window. This way the XfdashboardStage object should always know its window regardless if just hidden or destroyed and recreated.
+
+commit 33b12877c2d073525cb8c478f7d68f4c0ca77f61
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu May 11 17:40:17 2017 +0200
+
+    Revert "Add workarounds for known window managers having problems with default implementation"
+    
+    This reverts commit ffb4044c287474e73d77b19e12672b861eb45491.
+    
+    Does not work because the window representing the stage will be destroyed and gets invalid so a second call to *_show_stage() will fail with an assertion about an invalid XfdashboardWindowTrackerWindow object. :(
+
+commit ffb4044c287474e73d77b19e12672b861eb45491
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu May 11 15:12:38 2017 +0200
+
+    Add workarounds for known window managers having problems with default implementation
+
+commit 2e676ddf96b378ad758fe2724c9830359529044f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu May 11 14:41:13 2017 +0200
+
+    Set fullscreen only once at stage when stage object instance is created.
+
+commit c57eee718d15d6ef13a807f10bba784be4ea17f7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed May 10 16:09:40 2017 +0200
+
+    Instead of window functions which just turn a window into stage window, it should handle it completely from setting it up to showing it. In addition the function to "unmake" a stage window should also hide the window directly. Because of this change in functionality the function were renamed.
+
+commit daffb4f2f00c938421ed94491112f165e5eee549
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed May 10 15:40:16 2017 +0200
+
+    Turn signal XfdashboardWindowTracker::screen-size-changed into a simple notification signal without additional data
+
+commit c1ec759379d37b099afd8318c4716fd81beb2484
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed May 10 11:09:05 2017 +0200
+
+    Add signal and access function to get window manager name
+
+commit 80457d3b54a4fbd3292d8a00deecf63aa829f557
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon May 8 06:43:04 2017 +0200
+
+    The view to switch to on application resume should always be applied, i.e. at start-up in non-daemon mode or on resume (also initial resume) of application in daemon mode. It should also always respect the view specified via --view command-line parameter first and then the configure one in the setting in all cases.
+
+commit be2ac2e02f235f43bdbc68afdc06b5e44bad30fa
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon May 8 06:24:10 2017 +0200
+
+    Fix typo
+
+commit 8e3f8529045376189f9e8453aafd3ee08d7cb20f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 5 08:49:16 2017 +0200
+
+    Allow user to configure if the pre-selected focus (as specified by the used theme) should always be re-selected each time the stage is shown (at application start-up or if application is resumed after it was suspended)
+    
+    This commit fixes issue GH #144
+
+commit 00f81bbc91f2c396c9c68a5f7064ef4bb189db8d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 5 07:22:04 2017 +0200
+
+    Missed to also prefix IDs used at settings application at 'switch-to-view-when-resumed' with 'builtin.' as it was introduced with commit 8539ae3b7172e9f1ff8ff20396d3906b7a06da06
+    
+    This commit fixes issue GH #147
+
+commit 6e15cc20a26c1c114d01d1996ed9a6bf202a4164
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu May 4 09:04:04 2017 +0200
+
+    Do not allow to daemonize when a temporary new instance of xfdashboard should be spawned (enviroment variable XFDASHBOARD_FORCE_NEW_INSTANCE is set to anything)
+
+commit 796d62017edc74c92e19d61ab0e99d74f4cdd72a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu May 4 07:54:50 2017 +0200
+
+    Remove window content cache because since XfdashboardWindowTrackerWindow is a real object (and not a pseudo-object sharing the same GType as WnckWindow) we have a "content cache" for each object instance via private variables.
+
+commit ac664362576318d0171a1c9ab34b5541c3222249
+Merge: 9295801 eeb02a2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed May 3 08:20:45 2017 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 9295801e08fb574d291c0dcd1e00e46910b5f305
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed May 3 07:08:36 2017 +0200
+
+    Do not assume that each XfdashboardWindowTrackerMonitorX11 object instance created is valid and will represent the first monitor connected. Instead assume it is invalid with a negative monitor index and set up as soon as a valid monitor index was set.
+
+commit eeb02a22410c9b9ba7370ae9b43a17cd3a5f171e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed May 3 07:08:36 2017 +0200
+
+    Do not assume that each XfdashboardWindowTrackerMonitorX11 object instance created is valid and will represent the first monitor connected. Instead assume it is invalid with a negative monitor index and set up as soon as a valid monitor index was set.
+
+commit 5e2a06b337f3c42bd043276dc1611421e8d38c28
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed May 3 07:02:55 2017 +0200
+
+    Fix getting primary state of a monitor when compiling against GTK+/GDK version 3.22 and above. This bug has set the primary state to true for *all* monitors :(
+
+commit 43da9ce3a45785dc848342d19c910888f1d11204
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue May 2 17:36:53 2017 +0200
+
+    Fix order of newly created window actor at XfdashboardLiveWorkspace by iterating the window stacking order in reversed order to find the index to place new window actor at. This fixes the issue that a moved window from another workspace to a new workspace will not show the window as it will place it above the first window which has an actor at the target XfdashboardLiveWorkspace actor but not above the last window actor as the comment said so it was invisible although the window is above all other windows in real.
+
+commit 6e1f9a9f36d0487aa02af1cc29caee3e90a1a85f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue May 2 16:55:18 2017 +0200
+
+    Allow and handle dragging window from XfdashboardLiveWorkspace to XfdashboardWindowsView
+    
+    This commit fixes finally the long-lating issue GH #79
+
+commit c0ef54d3c5e36bc2c591b4e040636e5cb62e2578
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue May 2 16:42:11 2017 +0200
+
+    Remove action when actor is disposed because adding it does not make any sense ;)
+
+commit 99bdeab12f1a082591ef4e2b757fffb8b2632942
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue May 2 16:40:59 2017 +0200
+
+    Allow and handle dragging window from XfdashboardLiveWorkspace to XfdashboardWindowsView
+    
+    This commit is also part of fixing issue GH #79
+
+commit d37e0aa26677054902b39941931d5c04f6faf898
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue May 2 10:47:36 2017 +0200
+
+    Make window at workspaces draggable like windows in windows view
+    
+    This commit is part of fixing issue GH #79
+
+commit 5932b6e0ae325a604fd635cb438f95f447b52c10
+Merge: 43db331 e678d99
+Author: gmc-holle <nomad@froevel.de>
+Date:   Tue May 2 08:50:04 2017 +0200
+
+    Merge pull request #146 from DanieleDaccurso/DanieleDaccurso-patch-readme-glib2
+    
+    Fix debian apt-get library name for glib2
+
+commit e678d9940afe73382ad5d374f828583f5f2f45f6
+Author: Daniele D'Accurso <daccurda@gmail.com>
+Date:   Fri Apr 28 16:12:25 2017 +0200
+
+    Fix debian apt-get library name for glib2
+
+commit 43db3312293055ba4e684990603d054100bf506a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Apr 28 10:39:54 2017 +0200
+
+    Do not use deprecated GTK+/GDK functions and silence compiler warning when compiling again GTK+ version 3.22 or later
+
+commit 097a6b9af7104bafd2dbefde6fe13b4cf05ee9e0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Apr 28 08:24:20 2017 +0200
+
+    Use new scoring functions of XfdashboardCssSelector in plugins
+
+commit a1303f2f21723140b4a038108731b07489f4561d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Apr 28 08:20:34 2017 +0200
+
+    Rename scoring functions in XfdashboardCssSelector (the function names were kept when splitting selector function from XfdashboardThemeCss into XfdashboardCssSelector class)
+
+commit 1787f82e77d3ce853a419a979c3e09a7d306fca1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Apr 27 09:39:52 2017 +0200
+
+    Implement actions to move focus to any registered focusable actor (focus-move-to).
+    
+    This is useful at key bindings file to create a keyboard shortcut to focus a specific actor like the quicklaunch: <key code="<Ctrl>-q" source="XfdashboardFocusable" target="XfdashboardQuicklaunch" when="released">focus-move-to</key>
+    
+    This commit fixes issue GH #145
+
+commit 717fd4f43082426bc7262d2fd01f8261369d84a4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Apr 25 16:00:57 2017 +0200
+
+    Implement actions to move focus to first focusable actor (focus-move-first) or last one (focus-move-last).
+    
+    This commit addresses issue GH #144
+
+commit 0c1fa61833a40976170c5caa881e610563a83427
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Apr 21 19:04:15 2017 +0200
+
+    Implement also actions to move selection to next (selection-move-next) or previous (selection-move-previous) one.
+    
+    This commit addresses isseu GH #144
+
+commit 20920e77061d71ea82dd2ccea03c71b8e4a9f784
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Apr 21 09:42:14 2017 +0200
+
+    Implemented enhancements to layout xml file to specify which actor of the focusable ones should be selected on theme load. The following changes were applied:
+    
+    - Added a new optional attribute to <focus>, a sub-node of <focusables>, in layout xml files called "selected". This attribute "selected" is a boolean attribute and expects to be set to either "true" or "false". If set to "true" this actor will be selected instead of the search box. If set to "false" it has no impact and handled as this attribute does not exist.
+    - The new optional attribute "selected" of <focus> is optional. If not used at all the old behaviour, selecting the search box by default, applies.
+    - The new optional attribute "selected" of <focus> should only be used once over all layout xml files. A warning will be printed if it used more than once but the theme will load successfully.
+    - Removed unfocuable actor "view-selector" from primary stage interface layout
+    - Improved code at XfdashboardStage to use weak references instead of connecting signal which get called when actor is destroyed to set reference pointers to NULL
+    - Modified packaged theme to use new theme possibilities
+    - Fixed typos
+    
+    This commit addresses issue GH #144
+
+commit c780ef10476adc7326244f39e08b618eaf67c607
+Merge: b957cbd 306930c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Apr 20 20:39:05 2017 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit b957cbd380aa024177db5397e161dbcac08dd1c8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Apr 20 20:36:47 2017 +0200
+
+    Do not begin traversal at NULL pointer if no root actor was provided and no stage actor could be retrieved.
+
+commit 306930cd8e267be44c97fc74882414a93f3f9e84
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Apr 18 10:30:27 2017 +0200
+
+    Only show notification if a notification box is known where the notification could be shown at
+
+commit 0c1b74b9c2856836dc5ed17a082e94ec9d04a3fe
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Apr 14 18:07:40 2017 +0200
+
+    It seems that newer Glib version do better check marshal parameters and now recognize that I have specified the wrong type of G_TYPE_OBJECT at signal actions for the event parameter. ClutterEvent is a boxed type (G_TYPE_BOXED) and therefore the marshal parameter must be corrected to it.
+
+commit 4a5361d46f6dcf7d0563637d363ebf045a1439e9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Apr 13 15:16:34 2017 +0200
+
+    Implement missing function to retrieve windows in stacked order at new window tracker for X11 (XfdashboardWindowTrackerX11)
+    
+    This fixes a visual error at live workspace in the workspace selector because the windows were shown in wrong order (and maybe the desktop window always on top) without a sorted list of windows in stacked order.
+
+commit dfd62458aa274ff394a412b87743415f84c8d5d7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Apr 12 10:57:28 2017 +0200
+
+    Add detection of indefinite recursion while resolving an @-constant in CSS file.
+    
+    Finally fixes issue GH #143
+
+commit c63d267bac0f412bdaae644c9bb1f874dbf9cf23
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Apr 12 09:19:09 2017 +0200
+
+    Add call depth counter for function resolving CSS @-identifier to detect possible indefinite recursion and stop parsing CSS file because it is handled as an error.
+    
+    This commit fixes GH #143
+
+commit a3adac4cdb1d66a6ca92d5b21b589fe30777a9c4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Apr 4 18:41:10 2017 +0200
+
+    Adjust existing plugins to new window tracker interfaces
+    
+    Preparation work to support multiple backends is now done. But as before only X11 backend is supported yet.
+
+commit f862004f8601fbf86e9cfbcc262559d7960b13d5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Apr 4 18:31:47 2017 +0200
+
+    Adjust existing code to new window tracker interfaces
+
+commit 11e927dc7b387cc24fa193b3e84907130508e691
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Apr 4 17:55:59 2017 +0200
+
+    Add marshal function for signals 'state-changed' and 'actions-changed' at XfdashboardWindowTracker interface
+
+commit c6d5f32165c6b8de161ea2a9b2fecb1ae6acdfab
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Apr 4 17:39:01 2017 +0200
+
+    Ignore .dirstamp files created from autotools
+
+commit 68b91878e23d791929f35b97c5b29add5d450ca5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Apr 4 17:37:32 2017 +0200
+
+    Revert usage of singleton in XfdashboardWindowTrackerX11 as access to singleton is not possible and throws compiler error
+
+commit 5d16deb516563006c72c393ed3dc9fb3c25c4234
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Apr 4 17:36:48 2017 +0200
+
+    Add sub-directory "x11" with X11 specific window tracker and window content code to build system to get it compiled
+
+commit 54b1d7a5320f2a5268b8f52acd358b8a0e7fa9ff
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Apr 4 17:31:08 2017 +0200
+
+    Remove window tracker and window content with new interface classes to support multiple backends like X11, GDK and later maybe wayland. At the moment only X11 is supported as before.
+
+commit db70887e50f7cec64f45ed6a5d6924738f33a625
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Apr 4 17:25:26 2017 +0200
+
+    Add new X11 specific window tracker and window content classes
+
+commit 137bac53cac4b041717548d7f69aecb7cc43bb46
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Apr 4 12:18:44 2017 +0200
+
+    Remove unneeded marshal functions and clean-up messages printed on application start-up.
+
+commit ffe08a931ecf85a08185bb82decd28135a29f03e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 28 14:23:06 2017 +0200
+
+    Fix compiler warnings about unused variables
+
+commit d6c48d5ad00c265ff81a2bb26c5a035b76ee4af9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 28 07:32:50 2017 +0200
+
+    Where possible replace NULL in XFDASHBOARD_DEBUG() macro with singleton object
+
+commit 056ec94f0987e00213648078b7200f7efbef2094
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 28 07:24:21 2017 +0200
+
+    Fixed using the correct marshal for signal emission of XfdashboardApplicationDatabase
+
+commit 2200acb50cc72545547f1911616a3125b82d3711
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 23 10:01:06 2017 +0100
+
+    Use new experimental code to determine preferred size of XfdashboardLiveWindowSimple which will ask the window directly for its size and not the window content (XfdashboardWindowContent).
+    
+    This commit fixes issue GH #141
+
+commit 65b9231b4f83587502537c92c3b6dcefffc74664
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 23 09:28:12 2017 +0100
+
+    Improve application help shown when xfdashboard is launched with "--help" in command-line
+
+commit 6071b997e6ce4d8053c30a9489000e12abb9f76c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 23 09:10:20 2017 +0100
+
+    Experimental new code to determine preferred size of XfdashboardLiveWindowSimple. The new code will not check the size of window content (XfdashboardWindowContent) anymore but ask the window directly for its size.
+    
+    Experimental new code for issue GH #141
+
+commit 94f19189ddec10e6fe73b7bf6cbc40a6a7cbc5fa
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 22 18:31:45 2017 +0100
+
+    Add fine-grained controllable debug system
+    
+    If debug is enabled in configure script the user can use the environment variable XFDASHBOARD_DEBUG to enable categories to debug. But also classes like XfdashboardActor can be set in this environment variable to debug a specific class. Classes are case-sensitive and must be in camel-case. You can mix categories and classes in enviroment variable. You can set multiple categories and/or classes to debug by separating them by commas.
+
+commit 2f0d8edc15b957919f40019c7258a9fa2dc7d370
+Merge: 9133a6c ef42558
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 16 11:09:13 2017 +0100
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 9133a6cebd574c6c496353a4ba95815c59a99305
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 16 10:35:13 2017 +0100
+
+    XfdashboardLabel does not need to be smart anymore when to load images because XfdashboardImageContent is now smart enough to do this job everywhere it is used.
+
+commit 4f4750abfffc68568e3c502a30e80f94b8c5f400
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 16 10:15:41 2017 +0100
+
+    Use new function _xfdashboard_image_content_load() when missing-icon property is changed instead calling a signal handler
+
+commit 21a3debbac28adb39dc4fa7317a79c7dcbb4a59f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 16 08:54:30 2017 +0100
+
+    Add debug messages about which images are still in cache and not released to XfdashboardImageContent
+
+commit 8e4482b34e8dd73b5b765598bb5b6ba21498faf3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 16 08:49:40 2017 +0100
+
+    Only load images at XfdashboardImageContent if actor to which this content is attached is mapped.
+    
+    If it is not mapped defer loading image until the actor is mapped. As the content could be attached to more than one actor the first known actor being mapped will trigger loading the image and disconnecting signal handlers from all other actors.
+
+commit ef425582f326f7529528fc864cd992c2da6495d7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Mar 6 10:34:49 2017 +0100
+
+    Post-release version bump to 0.7.2
+
+commit 7eb9210267de3943a1d1e27e16398f8bbc570ba1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Mar 6 10:31:29 2017 +0100
+
+    Bump version to 0.7.1
+
+commit 46df23f06851af4617f04108afa33e950f3ac50d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Mar 6 10:29:47 2017 +0100
+
+    Updated AppData
+
+commit fc943ac88b19b560e5cd52e848fd1b20180403b1
+Merge: 7a2f756 111a6cd
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Mar 6 07:08:51 2017 +0100
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 111a6cd8c5d9659b511e01dff4c61589b189c810
+Merge: f7f4824 19320d4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 28 11:17:45 2017 +0100
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit f7f48246dc25a6b27dd889bd8f76f8b869c0bbfa
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Feb 10 10:35:38 2017 +0100
+
+    Add options in settings to allow or disallow sub-windows in XfdashboardLiveWindow. This is interesting at slower machines as it should increase the performace if lesser window live previews are tracked, displayed and updated.
+    
+    This commit closes issue GH #132 finally.
+
+commit 7a2f7560ba7fd8994a0ba54f9bc368fa4432e6c9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 21 07:47:23 2017 +0100
+
+    Update POTFILES.in
+
+commit 19320d496d0914319f10cb6f8d03a0ebb3c157cf
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 14 07:03:53 2017 +0100
+
+    Fix warning of scan-build about garbage values at _xfdashboard_label_get_preferred_(width|height), i.e. use of uninitialized variables
+
+commit dec55421ca297fb3c9b857953022843bb645607b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Feb 10 10:35:38 2017 +0100
+
+    Add options in settings to allow or disallow sub-windows in XfdashboardLiveWindow. This is interesting at slower machines as it should increase the performace if lesser window live previews are tracked, displayed and updated.
+
+commit 4e09ec5214daf9c90fcfd81aa565fbfd7e113631
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 7 08:31:06 2017 +0100
+
+    Added missing generation for version.h from version.h.in in Makefile
+
+commit 1d2b06cefa3c48001ff4cfc9b26c1460e137a7a9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 7 08:20:17 2017 +0100
+
+    Wrong Xfconf property used to disable sub-windows as it not part of windows view only but a general setting. So move setting to top-level of xfdashboard's Xfconf channel.
+
+commit 2fed8d26f84433477bdd40f6f359a4a00c9148f6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 6 18:43:14 2017 +0100
+
+    Fix plugin 'middle-click-window-close' to use new XfdashboardLiveWindowSimple actors to retrieve window to close
+
+commit 134a1ecb4efe8b567a84b93c53261569dd2402cc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 6 18:40:56 2017 +0100
+
+    Allow user to disable live previews of sub-windows, e.g. for performance reasons. Disabling live previews of sub-windows means to disable them at all regardless what the theme requests.
+
+commit 26733cb572950d6e8d4a14c7cd60588fbe594d31
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 6 12:04:34 2017 +0100
+
+    Add version macros for compile-time version checks. This is useful for plugins.
+
+commit fe179d12a525b8fd0a596b085952f19337330247
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 6 08:00:50 2017 +0100
+
+    Make showing sub-windows at XfdashboardLiveWindow themable
+
+commit af97b4484f9a6058a3f2a061b16c406380f0e3b1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Feb 3 13:12:50 2017 +0100
+
+    Add support to show sub-windows of main windows at XfdashboardLiveWindow as they are used in windows view (XfdashboardWindowsView).
+
+commit a813174a210b9f6918f237790707f329ec1a7c32
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Feb 2 16:24:20 2017 +0100
+
+    Remove stupid "shortcut" functions xfdashboard_window_tracker_window_is_visible_on_workspace() and xfdashboard_window_tracker_window_is_visible_on_monitor() as they lead to false assumption and it should not harm anyone to call two functions, i.e. xfdashboard_window_tracker_window_is_visible() followed or preceeded by xfdashboard_window_tracker_window_is_on_workspace().
+
+commit 53dcfd77b59eeb4bc71d87c0b4c0632206e75256
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 23 18:42:08 2017 +0100
+
+    Remove functions xfdashboard_live_workspace_get_show_window_content() and xfdashboard_live_workspace_set_show_window_content() from XfdashboardLiveWorkspace because it needed to be themed before via 'show-window-content' property and can now be themed via 'display-type' property of XfdashboardLiveWindowSimple.
+    
+    Just replace the following CSS:
+    
+    XfdashboardLiveWorkspace
+    {
+      show-window-content: <true or false>;
+    }
+    
+    with
+    
+    XfdashboardLiveWorkspace XfdashboardLiveWindowSimple
+    {
+      display-type: <icon or live-preview>;
+    }
+
+commit 5552bdc0cf37c0dca9b4835d687407ab35d57743
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 23 18:39:24 2017 +0100
+
+    Make XfdashboardLiveWindowSimple themable if a live window preview should be shown or just only the window's icon
+
+commit e5a615da7c2304f01b3716be62127cb66c85fcdc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 23 10:50:53 2017 +0100
+
+    Make use of new simple live window actor (XfdashboardLiveWindowSimple) at live workspace actor (XfdashboardLiveWorkspace)
+
+commit 38626c0fa6f1b5454f5264146fca77acda1f7198
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jan 20 10:04:50 2017 +0100
+
+    Move controls, title and icon of XfdashboardLiveWindow into a container, the controls layer to group them and to enforce them all to be the top most actors always.
+
+commit 86727ab4d86f9af52733b799b8eb8909d0d698c9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jan 20 08:26:04 2017 +0100
+
+    Remove redundant code by deriving XfdashboardLiveWindow from newly created XfdashboardLiveWindowSimple and add controls, title and icon to it
+
+commit 8d6a0f3c50a095765e0cdb8ffdb6a581badc8918
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jan 20 07:25:41 2017 +0100
+
+    Remove TODO marked code lines
+
+commit d7cc6c2732a8dbb562e7cc07954f2e9843982e33
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 19 11:33:35 2017 +0100
+
+    Add missing header files in libxfdashboard.h
+
+commit 173ec3c77210b3ff2fad3440c1cb7b325e42ab38
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 19 11:30:42 2017 +0100
+
+    Create simpler version of XfdashboardLiveWindow as new class XfdashboardLiveWindowSimple which just shows the preview of a window but without controls or title actors
+
+commit aca83c5e6a737794f1024e22727fc21b665f6ba7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 18 10:11:38 2017 +0100
+
+    Add function to XfdashboardWindowTrackerWindow to get the parent window of a window if there is any.
+
+commit d48ccff055ae9e23944f1256f23b7224c3a02adc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 17 17:29:36 2017 +0100
+
+    Fix compiler warning about unused variable in XfdashboardPopupMenuItem
+
+commit 14d5fc2abe6217afca76fac3a365989af91eac57
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 17 09:49:58 2017 +0100
+
+    Remove "enabled" property from interface XfdashboardPopupMenuItem and implement functions at actors (implementing this interface) to get/set enable state.
+
+commit 90a6f548859fdafebd92dd8278b5a821253b291d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 17 08:59:25 2017 +0100
+
+    Allow pop-up menu items to be enabled or disabled. At the moment only the item "activation" function checks if the pop-up menu item is enabled before activating it.
+
+commit ebf92e86d9cbe10c70e186eaa0f20d58c4ae5774
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 17 08:27:20 2017 +0100
+
+    Also properties should only be defined once in interfaces
+
+commit f73963b97d1e1fc969bf831cf1e3838f7a108355
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 16 06:59:53 2017 +0100
+
+    Add missing section for API documentation at XfdashboardPopupMenuItemSeparator
+
+commit dd0e14681b58eb5b9320754cacba4285f54793c5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jan 11 17:59:24 2017 +0100
+
+    Turn XfdashboardPopupMenuItemSeparator into a more powerful and themable pop-up menu item
+
+commit 7d3aff45c3daa959cd29ff137500c29ef02a9593
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jan 10 06:22:56 2017 +0100
+
+    Derive XfdashboardPopupMenuItemSeparator from XfdashboardBackground instead of XfdashboardActor to make it more stylable
+
+commit 275da9a9c4ce3eefcdf37fa21c0c6224461a1d1c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 5 12:02:39 2017 +0100
+
+    Happy new year :)
+    
+    Updating to new year 2017
+
+commit 3f0c75c3be49347cd34648e1a1c2e0c9c7d5f0c5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 5 11:56:50 2017 +0100
+
+    Fix compiler warning about using NULL as unsigned int parameter
+
+commit 720f677e5802561c2e6d67c4457b813a0c10c59b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jan 5 11:54:20 2017 +0100
+
+    Add a yet very simple menu item separator via class XfdashboardPopupMenuItemSeparator
+
+commit d9865e3e779e3d1f0dced4c9519653205efde88f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Dec 23 11:38:13 2016 +0100
+
+    Replace XfdashboardPopupMenuItemMeta with an interface called XfdashboardPopupMenuItem which each actor used as pop-up menu item must implement. It is not allowed anymore to use "normal" actors as menu items.
+    
+    XfdashboardPopupMenuItemButton is the first menu item class which can be used and replaces the "normal" actors used in quicklaunch so far.
+
+commit a396addba20c8e9fdb078159b3ea5d842f1c514f
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Thu Dec 22 17:04:54 2016 +0100
 
     Update AppData
 
-commit 6244f2769cb86e8762c551028df243e506d83fe2
+commit 12000ff1358c6d234bd7d4b28552e3cea7a01f65
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Dec 21 18:17:25 2016 +0100
+
+    Move more code to new GDK API when GTK+ 3.20 or newer is installed to avoid deprecation warnings.
+
+commit 954a9250f40533fcdaf5c59eec4ec428142a6678
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Dec 21 18:12:59 2016 +0100
+
+    Move to new GDK API when GTK+ 3.20 or newer is installed to avoid deprecation warnings.
+
+commit 984a111ad6576ff285cadfd330abd0125107e0db
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Dec 21 18:00:55 2016 +0100
+
+    Add or remove CSS class "primary-monitor" to XfdashboardStageInterface depending on the primary state of associated monitor. With this CSS class the stage interface of the primary monitor could be themed different as the others non-primary or secondary ones.
+
+commit 2aa3f0159ff7a84995ee11d9495b7c884611dd5e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Dec 7 17:57:14 2016 +0100
+
+    Make "button-style" used in themes to set style of XfdashboardButton work again after XfdashboardButton was refactored into a button and a label called XfdashboardLabel.
+
+commit d22ed42a21109602963d583688aa0a2c55c8eb2a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Dec 7 11:46:28 2016 +0100
+
+    Refactor XfdashboardButton into XfdashboardLabel and make XfdashboardButton a sub-class of it.
+    
+    XfdashboardLabel is like the previous XfdashboardButton but without "click" signal and XfdashboardButton is now a sub-class of it which just handles the additional "click" signal.
+
+commit 37441ba3dbcb19eae4a6add8e7df745fabddbf0e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Nov 3 13:02:42 2016 +0100
+
+    Hopefully a better explaination of command-line option "--toggle".
+    
+    See GH #137
+
+commit 865de47780e370f4cd627c837a59cf4ba9e7ef0e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Oct 5 12:10:41 2016 +0200
+
+    Fix typos in command to install requirements at Debian
+
+commit a3d2f9189d67cd180c76e56cec9000cc3ee8276d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 4 18:33:49 2016 +0200
+
+    Fix Makefile generation by autotools
+    
+    Simply renaming README to README.md was not a good idea. So reverting renaming.
+
+commit baf55c08c59e9a0722b552d3c919e3e61bc86efa
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Oct 3 17:24:08 2016 +0200
+
+    Revert commit with blank lines from last pull request
+
+commit f7560cf5b85a240f97df2573bab8ec1630b0e4e4
+Merge: 781d1ff d305d8a
+Author: gmc-holle <nomad@froevel.de>
+Date:   Mon Oct 3 17:07:05 2016 +0200
+
+    Merge pull request #134 from Pablohn26/master
+    
+    Add debian requirements installation and change README to markdown
+
+commit 781d1ff3ece3b2ac03c09af25977a2fb45d2a2e7
 Author: Olivier Duchateau <duchateau.olivier@gmail.com>
 Date:   Mon Sep 12 21:34:50 2016 +0200
 
@@ -12,11 +1092,552 @@ Date:   Mon Sep 12 21:34:50 2016 +0200
     
     Fixes bug #12842
 
-commit ba328eb5ea5aefcaf00f97872dc2df6ddb7e787b
+commit 042e92f0f7e2d65573cdb13a5ec5e82e20591c95
 Author: Stephan Haller <nomad@froevel.de>
-Date:   Fri May 20 21:41:15 2016 +0200
+Date:   Tue Sep 6 19:36:30 2016 +0200
 
-    Post-release version bump to 0.6.1
+    Post-release version bump to 0.7.1
+
+commit e42b7323bdb00c7e6fa1334ce6becd17e1e76de5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 6 19:34:42 2016 +0200
+
+    Bump version to 0.7.0
+
+commit 6d6ad6c9222e226ab2b075e22c9a9f1ce334fdea
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 6 19:33:50 2016 +0200
+
+    Update Appdata
+
+commit aea63aed26d796571cfa52f5b2e19876843ea9cd
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 6 19:29:53 2016 +0200
+
+    Updated POTFILES.in
+
+commit 930770a3c56d7ce331ee5dba2b06cb181125c635
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 6 19:24:15 2016 +0200
+
+    Revert "Next attempt to allow overriding draw function of background borders and corner, e.g. interesting for popup-menus to draw an arrow on any side of outline"
+    
+    This reverts commit fc1c520bccbf0eb4d98a5f6abecd2be64db9b9c9.
+    
+    It is not the solution I wanted although it works ... somehow.
+
+commit 9142af7a684fec30bea44d762dd944533e6538e5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 6 19:23:57 2016 +0200
+
+    Revert "Remove parameter for target actor in signal handler to draw outline at XfdashboardBackground as the target is this actor ;)"
+    
+    This reverts commit ee0d7d43fe55d4a538f485b6805935eb5a615ec5.
+    
+    It is not the solution I wanted although it works ... somehow.
+
+commit 57e17bc92f6263dc5b719590b8ddfcd182bf10ed
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 6 19:23:34 2016 +0200
+
+    Revert "Next attempt to allow overriding draw function of background borders and corner, e.g. interesting for popup-menus to draw an arrow on any side of background"
+    
+    This reverts commit dc2bbb4ec4ac5487177ef3b001df185e79a476c3.
+    
+    It is not the solution I wanted although it works ... somehow.
+
+commit 30459223f8dacf2b1c95eb1bc24f6b9f95cf653d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 6 19:22:53 2016 +0200
+
+    Revert "Aloow to get default background drawing function of XfdashboardBackground get called if a custom function at virtual function (*draw_background) of XfdashboardBackground was set and FALSE or CLUTTER_EVENT_PROPAGATE was returned by this custom function."
+    
+    This reverts commit 2c0376b9cf760d70d3963a27ade76c3d46efa4e9.
+    
+    It is not the solution I wanted although it works ... somehow.
+
+commit 2c0376b9cf760d70d3963a27ade76c3d46efa4e9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Aug 26 13:35:57 2016 +0200
+
+    Aloow to get default background drawing function of XfdashboardBackground get called if a custom function at virtual function (*draw_background) of XfdashboardBackground was set and FALSE or CLUTTER_EVENT_PROPAGATE was returned by this custom function.
+
+commit dc2bbb4ec4ac5487177ef3b001df185e79a476c3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Aug 26 13:00:26 2016 +0200
+
+    Next attempt to allow overriding draw function of background borders and corner, e.g. interesting for popup-menus to draw an arrow on any side of background
+    
+    This time XfdashboardBackground connects to "draw" signal of ClutterCanvas used to draw background (filled with a color and with rounded or not) and proxies this signal through itself. It also provides a virtual function (*draw_background) which will be called if set. That function has to return TRUE if it handled the painting of background canvas and FALSE if not. If no virtual function was set, XfdashboardBackground will return FALSE to get the next signal handler to draw the outline getting called (which is usually the default signal handler of XfdashboardBackground with the original code).
+    
+    Also typos were fixed :)
+
+commit ee0d7d43fe55d4a538f485b6805935eb5a615ec5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Aug 26 12:41:20 2016 +0200
+
+    Remove parameter for target actor in signal handler to draw outline at XfdashboardBackground as the target is this actor ;)
+
+commit fc1c520bccbf0eb4d98a5f6abecd2be64db9b9c9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Aug 26 12:34:15 2016 +0200
+
+    Next attempt to allow overriding draw function of background borders and corner, e.g. interesting for popup-menus to draw an arrow on any side of outline
+    
+    This time the XfdashboardOutlineEffect provides a "draw" signal to paint the outline because the original code is the default signal handler.
+    
+    Next XfdashboardBackground connects to this new signal of XfdashboardOutlineEffect to proxy this signal through itself. It also provides a virtual function (*draw_outline) which will be called if set. That function has to return TRUE if it handled the painting of outline and FALSE if not. If no virtual function was set, XfdashboardBackground will return FALSE to get the next signal handler to draw the outline getting called (usually the default signal handler of XfdashboardOutlineEffect).
+
+commit 4af8d57f5da3bf825d2c1554dadb1c44ea3aa757
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 23 13:54:26 2016 +0200
+
+    Revert "Allow overriding draw function of background borders and corner, e.g. interesting for popup-menus to draw an arrow on any side of background."
+    
+    This reverts commit 387eb45962eb05a18a50b2bd227dc300744922cd.
+
+commit 8ff46fdf4bd3c5fe94aaf213edf47155691cc2ff
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 23 13:54:11 2016 +0200
+
+    Revert "Allow overriding draw function of background borders and corner, e.g. interesting for popup-menus to draw an arrow on any side of outline"
+    
+    This reverts commit 30745d685e119b9e5d4f254f2bc7991d6b418e19.
+
+commit 30745d685e119b9e5d4f254f2bc7991d6b418e19
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 23 13:42:21 2016 +0200
+
+    Allow overriding draw function of background borders and corner, e.g. interesting for popup-menus to draw an arrow on any side of outline
+
+commit 387eb45962eb05a18a50b2bd227dc300744922cd
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Aug 21 21:04:58 2016 +0200
+
+    Allow overriding draw function of background borders and corner, e.g. interesting for popup-menus to draw an arrow on any side of background.
+
+commit 864192fceaa33c756774dbcf571601578ad25676
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Aug 15 21:33:02 2016 +0200
+
+    I18n: Updated translations fr,lt
+
+commit d305d8a9cb1a387611dee568d74cdd4cab703b69
+Author: Pablo Hinojosa <pablohn6@gmail.com>
+Date:   Fri Aug 5 02:52:10 2016 +0200
+
+    Fix README.md syntax to look better
+
+commit c4c77438c4029b86919a265ead145cb77cd7f287
+Author: Pablo Hinojosa <pablohn6@gmail.com>
+Date:   Fri Aug 5 02:50:47 2016 +0200
+
+    Change readme to .md to markdown support
+
+commit 6066588638b36428a87f03d50c1b84976fa64dcc
+Author: Pablo Hinojosa <pablohn6@gmail.com>
+Date:   Fri Aug 5 02:49:49 2016 +0200
+
+    Add debian requeriments installation
+
+commit 8c35a0dd335d2403092e78b03a8eb4811204886b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 2 13:21:05 2016 +0200
+
+    Get rid of deprecated Cogl functions in XfdashboardEmblemEffect
+
+commit 07df9736012cf052cb3f8d5cf66bebc1e821ffef
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 2 09:02:41 2016 +0200
+
+    Make use of new pop-up menu in quicklaunch
+
+commit 8390f0676e43f5ecae94a100f0e381389d9ca9d7
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 2 09:02:05 2016 +0200
+
+    Implement pop-up menu
+
+commit 4096082587582c7d048e42066377ec5c4df25b77
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jul 29 09:31:00 2016 +0200
+
+    Do not restart application via session management when it crashed but was started as force new instance (via environment variable XFDASHBOARD_FORCE_NEW_INSTANCE which is used for debugging purposes).
+
+commit c08d8c52137b66958a257b72b5c591d4f28f8aed
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jul 29 09:24:40 2016 +0200
+
+    Do not restart application via session management if application object was disposed which is the usual and clean way and not a crash which could require a restart.
+
+commit abed645b2df8ad76436b5efa5eb5e24d82424740
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jul 29 08:52:26 2016 +0200
+
+    Fix typos
+
+commit 029207b57163db43254a2315c2f75544f9d4cf5b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jul 28 16:18:03 2016 +0200
+
+    Remove weak pointer with g_object_remove_weak_pointer() from selected item to prevent GObject system setting a variable to NULL which is not available anymore so this memory access will cause a segmentation fault.
+    It shoud not happen that this weak pointer still exists but you never know ....
+
+commit f30963f7f6420fcb4d37f84a8f3177772967f9df
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jul 25 14:03:23 2016 +0200
+
+    Make properties 'margin-top', 'margin-bottom', 'margin-left' and 'margin-right' of ClutterActor themable via XfdashboardActor
+
+commit d011b5b658a099bd6f47656863bdcd13ddb95a06
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jul 25 13:45:58 2016 +0200
+
+    Fix setting pseudo-class ":insensitive" on actor's reactive state (it was wrongly added when reactive and vice versa)
+
+commit 8ffcfa0a19fa21d93b2ab8dbf69a8746780f7b4e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jul 25 13:32:51 2016 +0200
+
+    Fix selecting next selectable actor in windows view
+
+commit a5507d17d0f3e7536c8b4f017670f5db417a7adc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jul 25 13:17:09 2016 +0200
+
+    Better debug messages by using textual representation of enum value
+
+commit 5be93a1d2ac2d9e56eeea4f66bd96eb1df760915
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jul 25 10:50:08 2016 +0200
+
+    Add utility function to retrieve list of target actors and the action to perform from focus manager
+
+commit 11a50bd5fe2c40fb6db8de17499aa2095380f250
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jul 25 10:49:08 2016 +0200
+
+    Fix moving focus backwards when pressing <Shift>-Tab in default bindings.xml
+
+commit c30ef0d0e3c4a0b889f701fef18f5a237880cbdc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jul 25 10:48:44 2016 +0200
+
+    Fix typos
+
+commit e6e6d49fa2e799939091e7b0842b29705c3c7c2d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jul 21 10:04:30 2016 +0200
+
+    Use correct macro to return value even if both macros define the same value
+
+commit 03e18fa015ecc869180f0b0237c2e2a2c04d44e1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jul 21 09:57:53 2016 +0200
+
+    Fix documentation annotations
+
+commit 88f6dfaa7f4144a0e87b7c78fb7193e46e75bc12
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jul 20 08:32:29 2016 +0200
+
+    Better dump information for xfdashboard_dump_actor()
+
+commit b189c943ac11c25ce61cc9f6e1759dccd1159806
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jul 20 08:18:16 2016 +0200
+
+    Add utility function to check if a position is a specific monitor
+
+commit e481c2ebe819dadc2b6c8a48ffcc7dfe3695a9f9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jul 14 09:07:35 2016 +0200
+
+    Add annotation for API documentation of XfdashboardSearchView
+
+commit 6f0ae43ba8324af0e3d60b97b584d8ce584a46e4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jul 13 08:31:55 2016 +0200
+
+    Hopefully a better description of XfdashboardBoxLayout
+
+commit 43e124bea65e07954622abd49d72fc5f984457bf
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jul 13 08:29:46 2016 +0200
+
+    Add missing annotation for private structure fields in header files
+
+commit 21ad77ee339589d14f540e694c600bdb775ef221
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 30 10:02:08 2016 +0200
+
+    Split loading theme into seperate signals. So rename signal "theme-changing" to "theme-loading" and add new signal "theme-loaded" to application which is emitted after loading theme is complete but not yet applied. It is the last chance for a plugin to load additional resources (CSS etc.), e.g. to override theme's CSS.
+
+commit 0adfc89f46fad18204444aef357fb5f5453e6145
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 30 09:56:31 2016 +0200
+
+    Set up theme object basically to have it in a basic operational state and can be used when "theme-changing" signal is emitted.
+
+commit aa39a749cf653b10ac06f39ea72607c6508412cb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 30 08:14:44 2016 +0200
+
+    Set new theme object instance in "theme-changing" signal parameter instead of current theme instance. Also set new theme name in application property only if loading new theme succeeded.
+
+commit 2ff8fb6db412c5af6a8ff0ad1cda1e3d4d11a9c1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 30 08:08:16 2016 +0200
+
+    Implement new signal "theme-changing" at XfdashboardApplication that is emitted before a new theme is going to loaded and to be changed to.
+
+commit e55140615fc4de5472bf6697eccd116b3a8a3978
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jun 27 12:27:49 2016 +0200
+
+    Add annotation for API documentation of XfdashboardPluginsManager
+
+commit 20e768fb2376de69091996e475f1a3785b5dd256
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jun 25 21:12:46 2016 +0200
+
+    I18n: Add new localization (ca, el)
+
+commit 5eacc7fad94391f1bd9c8b0b061b6a477728cfa0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 24 18:51:38 2016 +0200
+
+    Even more documentation fix
+
+commit 6e76e6e3a2c84010640250219b9af08b5726f0c3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 24 18:50:55 2016 +0200
+
+    Fix more documentation
+
+commit 693015676dcf8298fef5d503b1dcb37175d429b8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 24 18:49:32 2016 +0200
+
+    Fix documentation
+
+commit dba3ab05a5c556451ebfc7f3da2cdefdb90e9145
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 24 18:44:30 2016 +0200
+
+    Fix documentation
+
+commit 1fedffbcace536c40798fafda9878fd43b736101
+Merge: 22b671e 4148f3f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 24 18:43:02 2016 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 4148f3f6343aee0a090e4707a5491438866f8a87
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 24 15:27:48 2016 +0200
+
+    Add annotation for API documentation of XfdashboardActionButton
+
+commit 22b671ed641ab27f1fa34ea2e1538f1d505688c1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jun 22 19:11:31 2016 +0200
+
+    Fix documentation annotations
+
+commit dfdbeba49634eabda24d2118a47291f02668712d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jun 22 19:05:17 2016 +0200
+
+    Add missing documentation for signal 'exit' at XfdashboardApplication
+
+commit f0310c98592b13087176c070e04b9fc550fd1c8a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jun 22 16:11:35 2016 +0200
+
+    Add function xfdashboard_toggle_button_toggle() to XfdashboardToggleButton to change between "on" and "off" state easily. Its a convinient function when click actions are handled on its own - automatic toggle mode is disabled (FALSE).
+
+commit 8669f34b96a45e35a6f32d4d906c5bd38999394a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jun 22 16:07:15 2016 +0200
+
+    Because XfdashboardToggleButton is derived from XfdashboardButton it should have the same creation functions.
+
+commit 5b27397e45456bd40b3770d392b30f6af8745a90
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Jun 22 15:37:28 2016 +0200
+
+    Add annotation for API documentation of XfdashboardToggleButton
+
+commit aed3c5498ed73b8978d4fbd72fb705aaf31051c6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 21 14:14:36 2016 +0200
+
+    Add new plugin 'middle-click-window-close' which (when enabled) allows the user to close windows in windows view with a middle click. This plugin is not configurable.
+    
+    This commit addresses GH #128
+
+commit 3074048e3d527515c41accb8abfade3987283c5d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 21 14:11:40 2016 +0200
+
+    Reorder emitting "quit" signal of application before the stage is destroyed so plugin which rely on the stage being still accessible can still access the stage on shut-down of application.
+    
+    This is the consequence of "initialized" signal on which plugin can rely on to be sure that the stage exists on start-up.
+
+commit 867d48154ba9d0a4e3f5b0ad49c51eec00a1b64a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 21 12:52:02 2016 +0200
+
+    Add missing annotation for API documentation to files already documented
+
+commit 42c5ee3e8b36f8045f1a06080792d1e7244621f6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 21 12:47:24 2016 +0200
+
+    Add annotation for API documentation of XfdashboardClickAction and replace hard-coded numbers for checking button pressed with macros
+
+commit 03d90d3b9078be7a20557364538f2418b3ca01c0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 21 10:41:08 2016 +0200
+
+    Fix typos and I changed a wrong signal handler (reverted it)
+
+commit 405f0dcf9dbf3f5be8ffcf1e070b6de70d67e469
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 21 10:37:27 2016 +0200
+
+    Change signal handlers for 'clicked' signals emitted by XfdashboardClickAction to check also for left-button pressed.
+
+commit a8ad339609a8453a6784cd9a7e29b95bb149da65
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 21 10:17:18 2016 +0200
+
+    Revert "Differ between "clicked" which is usually associated to a left-click and a "click" with any other button at XfdashboardClickAction."
+    
+    This reverts commit db21a8ddc3a449ff968d3743029f94ec912e3720.
+    
+    It does not make sense. It is better to extend the 'clicked' signal handlers to check if left-button was pressed. It is more work but cleaner.
+
+commit 7be5e4d63dcfbf0b2c56609757077b52130036a5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 21 09:56:26 2016 +0200
+
+    Fix debug message (one item per line - forgot to add new-line)
+
+commit db21a8ddc3a449ff968d3743029f94ec912e3720
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 21 09:46:39 2016 +0200
+
+    Differ between "clicked" which is usually associated to a left-click and a "click" with any other button at XfdashboardClickAction.
+    
+    Therefore the signals "clicked" and "long-press" at XfdashboardClickAction are only emitted if the click was done with the left button. To get clicks with any other the new signals "button-clicked" and "long-button-press" are emitted (also for left-clicks) which tranfer also the button which was clicked.
+    
+    This changes the default behaviour of XfdashboardClickAction but should interfer with the current behaviour as left-clicks were assumed so far.
+
+commit 6847725570a2789d1c9166bc950549771ae4dd04
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jun 20 09:45:42 2016 +0200
+
+    Add flags to XfdashboardPlugin to define behaviours of plugin which can only be set once via xfdashboard_plugin_set_info() and only while loading.
+    
+    Currently only early initialization of plugin can be requested so the plugin gets enabled on load, that means before theme is loaded and application's stage is created and set up. The default behaviour of plugins now is to get enabled after stage was created and set up.
+
+commit f70f3f4ccdfc69fb613e7eb7246b1fe4bbce148b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jun 20 08:54:44 2016 +0200
+
+    Initialize plugin manager as last component when all other components are available and initialized but before the theme is loaded and the stage created.
+
+commit 444e5be4438eb4d3932c0f92bac9d10426d62540
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jun 20 08:53:14 2016 +0200
+
+    Load theme later in initialization process just before the stage is created. Doing it later will give plugins the possibility to define new actors which can be used in themes.
+
+commit 5ba19f79c3f3af2c141988cb985ce8a8fd935a46
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jun 20 08:36:16 2016 +0200
+
+    Emit new signal "initialized" in XfdashboardApplication if it is the primary instance and fully initialized, that means all managers and the stage were set up successfully.
+    
+    The main purpose for this signal is for plugin which need to initialize after application is fully initialized and all components are available, initialized and ready for use.
+
+commit 16315e13ef0a95e5e9c9ec961785620a903c24ca
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jun 12 22:06:17 2016 +0200
+
+    Clean up xfdashboard_notify() not to iterate through all actors by itself and supporting multiple stages (as only one stage exists) but use new xfdashboard_traverse_actor() function.
+    
+    Ideally we could even stop using xfdashboard_traverse_actor() function as one stage exists so we could use xfdashboard_application_get_stage() directly. But maybe sometime we use XfdashboardStageInterface (which exists for each monitor) to send notifications so it is easier to modify this code instead of re-implementing it.
+
+commit ce1738a897fce473adbe79d4514c191e9fae65ac
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jun 12 21:42:41 2016 +0200
+
+    Make use of new function xfdashboard_application_get_stage() in xfdashboard_traverse_actor() to get root actor (the stage) if NULL was given.
+
+commit 316898ddb116d0c00e74894adf88be0d9625592f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jun 12 12:48:35 2016 +0200
+
+    Remove utility function xfdashboard_get_global_stage_of_actor() as the code to handle and manage multiple stages was also removed. There is only one stage and this can access via xfdashboard_application_get_stage().
+
+commit a87e16ee4bbeca7402d8da2ab49a2fc0420aae36
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Jun 12 12:41:56 2016 +0200
+
+    Remove handling and managing code for multiple stages as only one stage is created by application. Add an access function xfdashboard_application_get_stage() to XfdashboardApplication to get the global stage.
+    
+    Also add annotation for API documentation of XfdashboardApplication.
+
+commit 91e4eb81196271f2d5e0d2c4f7352bd1940b0a9e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat Jun 11 15:01:16 2016 +0200
+
+    Implemented xfdashboard_traverse_actor() utility function which iterates through all children beginning at a provided actor. For each child matching the provided selector it calls a callback function.
+    
+    This function is mainly useful for plugin which need to find actors to modify them when this plugin was enabled specially after a long the application has already run and stage was setup.
+
+commit fed1c35ed456427c7f3db027bde4e3bb862a895e
+Merge: 1c70ab8 653b38b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 10 11:57:16 2016 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 1c70ab8cf29930b8ca91ea94460a56ee0810df87
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jun 10 11:52:23 2016 +0200
+
+    Emit signal 'actor-created' at stage where a newly created actor was placed on.
+    
+    This signal is emitted for the very first time a new actor gets its parent set and so it is the first time the actor belongs to UI and - from point of view of application - it exists now / was created. The main purpose of this signal is for plugins to react on newly created actor to filter and/or modify them and/or to connect signals. E.g. a plugin wants to connect a signal to each XfdashboardButton in XfdashboardQuicklaunch, so it has to listen for 'actor-created' signals at stage, then filter all actors for XfdashboardButtons whose parent is XfdashboardQuicklaunch. Then it can go on with its work.
+
+commit 653b38b95f7281691f42f8c9fb6e9171e9e50db5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 9 08:45:54 2016 +0200
+
+    Move to workspace where the window to activate (by clicking it in windows view) is placed on if it is on a different workspace than the active one.
+    
+    This only happens in windows view if 'filter-workspace-windows' is set to FALSE. The default value is TRUE so this code path is usually not run.
+    
+    This commit addresses issue GH #126
+
+commit 6b11d475af8f868d0c85fc9e1338be4627931e2a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sat May 28 12:30:49 2016 +0200
+
+    Allow windows view not only to filter windows which are only on current monitor (via themable property 'filter-monitor-windows') but also for windows on current workspace via a new themable property called 'filter-workspace-windows'. This new option is set to TRUE by default so that all themes will still work as they did before.
+    
+    This commit addresses issue GH #126
+
+commit 0b4fa87587fc927862e0225c2f1052c8253e31bf
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 20 21:40:07 2016 +0200
+
+    Post-release version bump to 0.7.0
 
 commit 130aea9f8c777fc6cda3f94fe357154d0fd7742e
 Author: Stephan Haller <nomad@froevel.de>

@@ -1,7 +1,7 @@
 /*
  * workspace-selector: Workspace selector box
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@
 #include <libxfdashboard/focusable.h>
 #include <libxfdashboard/stage-interface.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -306,13 +307,25 @@ static gboolean _xfdashboard_workspace_selector_on_drop_begin(XfdashboardLiveWor
 	dragSource=xfdashboard_drag_action_get_source(inDragAction);
 	draggedActor=xfdashboard_drag_action_get_actor(inDragAction);
 
-	/* Check if we can handle dragged actor from given source */
+	/* We can handle dragged actor if it is a live window and its source
+	 * is windows view.
+	 */
 	if(XFDASHBOARD_IS_WINDOWS_VIEW(dragSource) &&
 		XFDASHBOARD_IS_LIVE_WINDOW(draggedActor))
 	{
 		canHandle=TRUE;
 	}
 
+	/* We can handle dragged actor if it is a live window and its source
+	 * is a live workspace
+	 */
+	if(XFDASHBOARD_IS_LIVE_WORKSPACE(dragSource) &&
+		XFDASHBOARD_IS_LIVE_WINDOW_SIMPLE(draggedActor))
+	{
+		canHandle=TRUE;
+	}
+
+	/* We can handle dragged actor if it is an application button */
 	if(XFDASHBOARD_IS_APPLICATION_BUTTON(draggedActor))
 	{
 		canHandle=TRUE;
@@ -341,12 +354,12 @@ static void _xfdashboard_workspace_selector_on_drop_drop(XfdashboardLiveWorkspac
 	draggedActor=xfdashboard_drag_action_get_actor(inDragAction);
 
 	/* Check if dragged actor is a window so move window to workspace */
-	if(XFDASHBOARD_IS_LIVE_WINDOW(draggedActor))
+	if(XFDASHBOARD_IS_LIVE_WINDOW_SIMPLE(draggedActor))
 	{
 		XfdashboardWindowTrackerWindow	*window;
 
 		/* Get window */
-		window=xfdashboard_live_window_get_window(XFDASHBOARD_LIVE_WINDOW(draggedActor));
+		window=xfdashboard_live_window_simple_get_window(XFDASHBOARD_LIVE_WINDOW_SIMPLE(draggedActor));
 		g_return_if_fail(window);
 
 		/* Move window to workspace */
@@ -512,9 +525,10 @@ static gboolean _xfdashboard_workspace_selector_on_scroll_event(ClutterActor *in
 
 		/* Unhandled directions */
 		default:
-			g_debug("Cannot handle scroll direction %d in %s",
-						clutter_event_get_scroll_direction(inEvent),
-						G_OBJECT_TYPE_NAME(self));
+			XFDASHBOARD_DEBUG(self, ACTOR,
+								"Cannot handle scroll direction %d in %s",
+								clutter_event_get_scroll_direction(inEvent),
+								G_OBJECT_TYPE_NAME(self));
 			return(CLUTTER_EVENT_PROPAGATE);
 	}
 
@@ -919,6 +933,7 @@ static ClutterActor* _xfdashboard_workspace_selector_focusable_find_selection(Xf
 	XfdashboardWorkspaceSelectorPrivate		*priv;
 	XfdashboardLiveWorkspace				*selection;
 	ClutterActor							*newSelection;
+	gchar									*valueName;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(inFocusable), NULL);
 	g_return_val_if_fail(XFDASHBOARD_IS_WORKSPACE_SELECTOR(inFocusable), NULL);
@@ -941,10 +956,13 @@ static ClutterActor* _xfdashboard_workspace_selector_focusable_find_selection(Xf
 	 */
 	if(!inSelection)
 	{
-		g_debug("No selection at %s, so select first child %s for direction %u",
-				G_OBJECT_TYPE_NAME(self),
-				selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
-				inDirection);
+		valueName=xfdashboard_get_enum_value_name(XFDASHBOARD_TYPE_SELECTION_TARGET, inDirection);
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"No selection at %s, so select first child %s for direction %s",
+							G_OBJECT_TYPE_NAME(self),
+							selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
+							valueName);
+		g_free(valueName);
 
 		return(CLUTTER_ACTOR(selection));
 	}
@@ -1023,8 +1041,6 @@ static ClutterActor* _xfdashboard_workspace_selector_focusable_find_selection(Xf
 
 		default:
 			{
-				gchar					*valueName;
-
 				valueName=xfdashboard_get_enum_value_name(XFDASHBOARD_TYPE_SELECTION_TARGET, inDirection);
 				g_critical(_("Focusable object %s does not handle selection direction of type %s."),
 							G_OBJECT_TYPE_NAME(self),
@@ -1041,11 +1057,12 @@ static ClutterActor* _xfdashboard_workspace_selector_focusable_find_selection(Xf
 	}
 
 	/* Return new selection found */
-	g_debug("Selecting %s at %s for current selection %s in direction %u",
-			selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
-			G_OBJECT_TYPE_NAME(self),
-			inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
-			inDirection);
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Selecting %s at %s for current selection %s in direction %u",
+						selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
+						G_OBJECT_TYPE_NAME(self),
+						inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
+						inDirection);
 
 	return(CLUTTER_ACTOR(selection));
 }

@@ -1,7 +1,7 @@
 /*
  * action-button: A button representing an action to execute when clicked
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,8 +43,15 @@ typedef struct _XfdashboardActionButton				XfdashboardActionButton;
 typedef struct _XfdashboardActionButtonClass		XfdashboardActionButtonClass;
 typedef struct _XfdashboardActionButtonPrivate		XfdashboardActionButtonPrivate;
 
+/**
+ * XfdashboardActionButton:
+ *
+ * The #XfdashboardActionButton structure contains only private data and
+ * should be accessed using the provided API
+ */
 struct _XfdashboardActionButton
 {
+	/*< private >*/
 	/* Parent instance */
 	XfdashboardButton						parent_instance;
 
@@ -52,6 +59,11 @@ struct _XfdashboardActionButton
 	XfdashboardActionButtonPrivate			*priv;
 };
 
+/**
+ * XfdashboardActionButtonClass:
+ *
+ * The #XfdashboardActionButtonClass structure contains only private data
+ */
 struct _XfdashboardActionButtonClass
 {
 	/*< private >*/

@@ -2,7 +2,7 @@
  * textbox: An actor representing an editable or read-only text-box
  *          with optional icons 
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1574,7 +1574,7 @@ void xfdashboard_text_box_set_primary_icon(XfdashboardTextBox *self, const gchar
 		{
 			/* Load and set new icon */
 			priv->primaryIconName=g_strdup(inIconName);
-			xfdashboard_button_set_icon_name(XFDASHBOARD_BUTTON(priv->actorPrimaryIcon), priv->primaryIconName);
+			xfdashboard_label_set_icon_name(XFDASHBOARD_LABEL(priv->actorPrimaryIcon), priv->primaryIconName);
 
 			/* Show icon */
 			priv->showPrimaryIcon=TRUE;
@@ -1625,7 +1625,7 @@ void xfdashboard_text_box_set_secondary_icon(XfdashboardTextBox *self, const gch
 		{
 			/* Load and set new icon */
 			priv->secondaryIconName=g_strdup(inIconName);
-			xfdashboard_button_set_icon_name(XFDASHBOARD_BUTTON(priv->actorSecondaryIcon), priv->secondaryIconName);
+			xfdashboard_label_set_icon_name(XFDASHBOARD_LABEL(priv->actorSecondaryIcon), priv->secondaryIconName);
 
 			/* Show icon */
 			priv->showSecondaryIcon=TRUE;

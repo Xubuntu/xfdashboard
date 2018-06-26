@@ -1,7 +1,7 @@
 /*
  * image-content: An asynchronous loaded and cached image content
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ typedef struct _XfdashboardImageContentPrivate		XfdashboardImageContentPrivate;
 
 struct _XfdashboardImageContent
 {
+	/*< private >*/
 	/* Parent instance */
 	ClutterImage						parent_instance;
 
@@ -82,9 +83,6 @@ ClutterContent* xfdashboard_image_content_new_for_pixbuf(GdkPixbuf *inPixbuf);
 
 const gchar* xfdashboard_image_content_get_missing_icon_name(XfdashboardImageContent *self);
 void xfdashboard_image_content_set_missing_icon_name(XfdashboardImageContent *self, const gchar *inMissingIconName);
-
-gint xfdashboard_image_content_get_size(XfdashboardImageContent *self);
-void xfdashboard_image_content_get_real_size(XfdashboardImageContent *self, gint *outWidth, gint *outHeight);
 
 XfdashboardImageContentLoadingState xfdashboard_image_content_get_state(XfdashboardImageContent *self);
 

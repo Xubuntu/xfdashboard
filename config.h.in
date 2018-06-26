@@ -12,6 +12,9 @@
 /* Name of default gettext domain */
 #undef GETTEXT_PACKAGE
 
+/* Define if GDK backend is available */
+#undef HAVE_BACKEND_GDK
+
 /* Define to 1 if you have the `bind_textdomain_codeset' function. */
 #undef HAVE_BIND_TEXTDOMAIN_CODESET
 
@@ -144,6 +147,9 @@
 
 /* Version number of package */
 #undef VERSION
+
+/* Use xfconf < 4.13 to obtain array type */
+#undef XFCONF_LEGACY
 
 /* Define to 1 if the X Window System is missing or not being used. */
 #undef X_DISPLAY_MISSING

@@ -3,7 +3,7 @@
  *             text direction and enforcing left-to-right layout in
  *             horizontal orientation
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,12 +44,24 @@ G_BEGIN_DECLS
 typedef struct _XfdashboardBoxLayout			XfdashboardBoxLayout;
 typedef struct _XfdashboardBoxLayoutClass		XfdashboardBoxLayoutClass;
 
+/**
+ * XfdashboardBoxLayout:
+ *
+ * The #XfdashboardBoxLayout structure contains only private data and
+ * should be accessed using the provided API
+ */
 struct _XfdashboardBoxLayout
 {
+	/*< private >*/
 	/* Parent instance */
 	ClutterBoxLayout 				parent_instance;
 };
 
+/**
+ * XfdashboardBoxLayoutClass:
+ *
+ * The #XfdashboardBoxLayoutClass structure contains only private data
+ */
 struct _XfdashboardBoxLayoutClass
 {
 	/*< private >*/

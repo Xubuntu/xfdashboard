@@ -1,7 +1,7 @@
 /*
  * search-provider: Abstract class for search providers
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 #include <libxfdashboard/actor.h>
 #include <libxfdashboard/text-box.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -68,9 +69,10 @@ static GParamSpec* XfdashboardSearchProviderProperties[PROP_LAST]={ 0, };
 				vfunc);
 
 #define XFDASHBOARD_SEARCH_PROVIDER_NOTE_NOT_IMPLEMENTED(self, vfunc) \
-	g_debug("Search provider of type %s does not implement virtual function XfdashboardSearchProvider::%s", \
-				G_OBJECT_TYPE_NAME(self), \
-				vfunc);
+	XFDASHBOARD_DEBUG(self, MISC,                                              \
+						"Search provider of type %s does not implement virtual function XfdashboardSearchProvider::%s",\
+						G_OBJECT_TYPE_NAME(self),                              \
+						vfunc);
 
 /* Set search provider ID */
 static void _xfdashboard_search_provider_set_id(XfdashboardSearchProvider *self, const gchar *inID)

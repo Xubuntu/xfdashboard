@@ -1,7 +1,7 @@
 /*
  * applications-view: A view showing all installed applications as menu
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@
 #include <libxfdashboard/desktop-app-info.h>
 #include <libxfdashboard/application-database.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -396,11 +397,11 @@ static void _xfdashboard_applications_view_on_all_applications_menu_clicked(Xfda
 	/* Create parent menu item */
 	actor=xfdashboard_button_new();
 
-	if(priv->parentMenuIcon) xfdashboard_button_set_icon_name(XFDASHBOARD_BUTTON(actor), priv->parentMenuIcon);
+	if(priv->parentMenuIcon) xfdashboard_label_set_icon_name(XFDASHBOARD_LABEL(actor), priv->parentMenuIcon);
 
 	if(priv->viewMode==XFDASHBOARD_VIEW_MODE_LIST) actorText=g_markup_printf_escaped(priv->formatTitleDescription, _("Back"), _("Go back to previous menu"));
 		else actorText=g_markup_printf_escaped(priv->formatTitleOnly, _("Back"));
-	xfdashboard_button_set_text(XFDASHBOARD_BUTTON(actor), actorText);
+	xfdashboard_label_set_text(XFDASHBOARD_LABEL(actor), actorText);
 	g_free(actorText);
 
 	/* Add to view and layout */
@@ -431,8 +432,7 @@ static void _xfdashboard_applications_view_on_all_applications_menu_clicked(Xfda
 		appInfo=XFDASHBOARD_DESKTOP_APP_INFO(iter->data);
 
 		/* If desktop app info should be hidden then continue with next one */
-		if(xfdashboard_desktop_app_info_get_hidden(appInfo) ||
-			xfdashboard_desktop_app_info_get_nodisplay(appInfo))
+		if(!g_app_info_should_show(G_APP_INFO(appInfo)))
 		{
 			continue;
 		}
@@ -502,11 +502,11 @@ static void _xfdashboard_applications_view_on_filter_changed(XfdashboardApplicat
 		/* Create and adjust of "parent menu" button to application buttons */
 		actor=xfdashboard_button_new();
 
-		if(priv->parentMenuIcon) xfdashboard_button_set_icon_name(XFDASHBOARD_BUTTON(actor), priv->parentMenuIcon);
+		if(priv->parentMenuIcon) xfdashboard_label_set_icon_name(XFDASHBOARD_LABEL(actor), priv->parentMenuIcon);
 
 		if(priv->viewMode==XFDASHBOARD_VIEW_MODE_LIST) actorText=g_markup_printf_escaped(priv->formatTitleDescription, _("Back"), _("Go back to previous menu"));
 			else actorText=g_markup_printf_escaped(priv->formatTitleOnly, _("Back"));
-		xfdashboard_button_set_text(XFDASHBOARD_BUTTON(actor), actorText);
+		xfdashboard_label_set_text(XFDASHBOARD_LABEL(actor), actorText);
 		g_free(actorText);
 
 		/* Add to view and layout */
@@ -530,11 +530,11 @@ static void _xfdashboard_applications_view_on_filter_changed(XfdashboardApplicat
 
 		/* Create and adjust of "parent menu" button to application buttons */
 		actor=xfdashboard_button_new();
-		xfdashboard_button_set_icon_name(XFDASHBOARD_BUTTON(actor), ALL_APPLICATIONS_MENU_ICON);
+		xfdashboard_label_set_icon_name(XFDASHBOARD_LABEL(actor), ALL_APPLICATIONS_MENU_ICON);
 
 		if(priv->viewMode==XFDASHBOARD_VIEW_MODE_LIST) actorText=g_markup_printf_escaped(priv->formatTitleDescription, _("All applications"), _("List of all installed applications"));
 			else actorText=g_markup_printf_escaped(priv->formatTitleOnly, _("All applications"));
-		xfdashboard_button_set_text(XFDASHBOARD_BUTTON(actor), actorText);
+		xfdashboard_label_set_text(XFDASHBOARD_LABEL(actor), actorText);
 		g_free(actorText);
 
 		/* Add to view and layout */
@@ -589,7 +589,7 @@ static void _xfdashboard_applications_view_on_filter_changed(XfdashboardApplicat
 					actor=xfdashboard_button_new();
 
 					iconName=garcon_menu_element_get_icon_name(menuElement);
-					if(iconName) xfdashboard_button_set_icon_name(XFDASHBOARD_BUTTON(actor), iconName);
+					if(iconName) xfdashboard_label_set_icon_name(XFDASHBOARD_LABEL(actor), iconName);
 
 					title=garcon_menu_element_get_name(menuElement);
 					description=garcon_menu_element_get_comment(menuElement);
@@ -605,7 +605,7 @@ static void _xfdashboard_applications_view_on_filter_changed(XfdashboardApplicat
 							actorText=g_markup_printf_escaped(priv->formatTitleOnly,
 																title ? title : "");
 						}
-					xfdashboard_button_set_text(XFDASHBOARD_BUTTON(actor), actorText);
+					xfdashboard_label_set_text(XFDASHBOARD_LABEL(actor), actorText);
 					g_free(actorText);
 
 					g_signal_connect(actor, "clicked", G_CALLBACK(_xfdashboard_applications_view_on_menu_clicked), menuElement);
@@ -762,12 +762,14 @@ static gboolean _xfdashboard_applications_view_focusable_set_selection(Xfdashboa
 
 	/* Set new selection */
 	priv->selectedItem=inSelection;
+	if(priv->selectedItem)
+	{
+		/* Add weak reference at new selection */
+		g_object_add_weak_pointer(G_OBJECT(priv->selectedItem), &priv->selectedItem);
 
-	/* Add weak reference at new selection */
-	g_object_add_weak_pointer(G_OBJECT(priv->selectedItem), &priv->selectedItem);
-
-	/* Ensure new selection is visible */
-	if(inSelection) xfdashboard_view_child_ensure_visible(XFDASHBOARD_VIEW(self), inSelection);
+		/* Ensure new selection is visible */
+		xfdashboard_view_child_ensure_visible(XFDASHBOARD_VIEW(self), priv->selectedItem);
+	}
 
 	/* New selection was set successfully */
 	return(TRUE);
@@ -905,11 +907,12 @@ static ClutterActor* xfdashboard_applications_view_get_selection_from_icon_mode(
 	if(newSelection) selection=newSelection;
 
 	/* Return new selection */
-	g_debug("Selecting %s at %s for current selection %s in direction %u",
-			selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
-			G_OBJECT_TYPE_NAME(self),
-			inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
-			inDirection);
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Selecting %s at %s for current selection %s in direction %u",
+						selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
+						G_OBJECT_TYPE_NAME(self),
+						inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
+						inDirection);
 	return(selection);
 }
 
@@ -1025,11 +1028,12 @@ static ClutterActor* xfdashboard_applications_view_get_selection_from_list_mode(
 	if(newSelection) selection=newSelection;
 
 	/* Return new selection */
-	g_debug("Selecting %s at %s for current selection %s in direction %u",
-			selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
-			G_OBJECT_TYPE_NAME(self),
-			inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
-			inDirection);
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Selecting %s at %s for current selection %s in direction %u",
+						selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
+						G_OBJECT_TYPE_NAME(self),
+						inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
+						inDirection);
 	return(selection);
 }
 
@@ -1041,6 +1045,7 @@ static ClutterActor* _xfdashboard_applications_view_focusable_find_selection(Xfd
 	XfdashboardApplicationsViewPrivate		*priv;
 	ClutterActor							*selection;
 	ClutterActor							*newSelection;
+	gchar									*valueName;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(inFocusable), NULL);
 	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATIONS_VIEW(inFocusable), NULL);
@@ -1056,10 +1061,14 @@ static ClutterActor* _xfdashboard_applications_view_focusable_find_selection(Xfd
 	if(!inSelection)
 	{
 		newSelection=clutter_actor_get_first_child(CLUTTER_ACTOR(self));
-		g_debug("No selection at %s, so select first child %s for direction %u",
-				G_OBJECT_TYPE_NAME(self),
-				newSelection ? G_OBJECT_TYPE_NAME(newSelection) : "<nil>",
-				inDirection);
+
+		valueName=xfdashboard_get_enum_value_name(XFDASHBOARD_TYPE_SELECTION_TARGET, inDirection);
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"No selection at %s, so select first child %s for direction %s",
+							G_OBJECT_TYPE_NAME(self),
+							newSelection ? G_OBJECT_TYPE_NAME(newSelection) : "<nil>",
+							valueName);
+		g_free(valueName);
 
 		return(newSelection);
 	}
@@ -1114,8 +1123,6 @@ static ClutterActor* _xfdashboard_applications_view_focusable_find_selection(Xfd
 
 		default:
 			{
-				gchar					*valueName;
-
 				valueName=xfdashboard_get_enum_value_name(XFDASHBOARD_TYPE_SELECTION_TARGET, inDirection);
 				g_critical(_("Focusable object %s does not handle selection direction of type %s."),
 							G_OBJECT_TYPE_NAME(self),
@@ -1129,11 +1136,12 @@ static ClutterActor* _xfdashboard_applications_view_focusable_find_selection(Xfd
 	if(newSelection) selection=newSelection;
 
 	/* Return new selection found */
-	g_debug("Selecting %s at %s for current selection %s in direction %u",
-			selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
-			G_OBJECT_TYPE_NAME(self),
-			inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
-			inDirection);
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Selecting %s at %s for current selection %s in direction %u",
+						selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
+						G_OBJECT_TYPE_NAME(self),
+						inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
+						inDirection);
 
 	return(selection);
 }
@@ -1193,9 +1201,21 @@ static void _xfdashboard_applications_view_dispose(GObject *inObject)
 	XfdashboardApplicationsViewPrivate	*priv=self->priv;
 
 	/* Release allocated resources */
-	if(priv->xfconfChannel) priv->xfconfChannel=NULL;
+	if(priv->selectedItem)
+	{
+		g_object_remove_weak_pointer(G_OBJECT(priv->selectedItem), &priv->selectedItem);
+		priv->selectedItem=NULL;
+	}
 
-	if(priv->layout) priv->layout=NULL;
+	if(priv->xfconfChannel)
+	{
+		priv->xfconfChannel=NULL;
+	}
+
+	if(priv->layout)
+	{
+		priv->layout=NULL;
+	}
 
 	if(priv->xfconfShowAllAppsMenuBindingID)
 	{

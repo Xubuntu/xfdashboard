@@ -1,7 +1,7 @@
 /*
  * compat: Compatibility layer for various libraries and versions
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,21 @@ G_BEGIN_DECLS
 #define clutter_actor_is_mapped(actor)		CLUTTER_ACTOR_IS_MAPPED( (actor) )
 #define clutter_actor_is_realized(actor)	CLUTTER_ACTOR_IS_REALIZED( (actor) )
 #define clutter_actor_get_reactive(actor)	CLUTTER_ACTOR_IS_REACTIVE( (actor) )
+#endif
+
+#if !GLIB_CHECK_VERSION(2, 44, 0)
+inline static gboolean g_strv_contains(const gchar * const *inStringList, const gchar *inString)
+{
+	g_return_val_if_fail(inStringList, FALSE);
+	g_return_val_if_fail(inString, FALSE);
+
+	for(; *inStringList; inStringList++)
+	{
+		if(g_str_equal(inString, *inStringList)) return(TRUE);
+	}
+
+	return(FALSE);
+}
 #endif
 
 G_END_DECLS

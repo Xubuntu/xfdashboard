@@ -1,18 +1,25 @@
 [Xfdashboard Theme]
 Name=xfdashboard
-Name[es]=xfdashboard
+Name[ca]=xfdashboard
+Name[de]=xfdashboard
+Name[el]=xfdashboard
+Name[es]=Xfdashboard
 Name[fr]=xfdashboard
 Name[lt]=xfdashboard
+Name[pl]=xfdashboard
 Name[sr]=полетник иксфцеа
 Comment=Default theme for xfdashboard
+Comment[ca]=El tema predeterminat per a xfdashboard
+Comment[el]=Προεπιλεγμένο θέμα του xfdashboard
 Comment[es]=Tema predeterminado para Xfdashboard
 Comment[fr]=Thème par défaut pour xfdashboard
 Comment[he]=ערכת נושא ברירת מחדל עבור xfdashboard
 Comment[lt]=Numatytoji xfdashboard tema
+Comment[pl]=Domyślny motyw Xfdashboard
 Comment[sr]=Подразумевана тема полетника
 Style=xfdashboard.css
 Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Author=Stephan Haller
-Version=0.7.1git.a3d2f91
+Version=0.7.4git.021bf6b
 Screenshot=screenshot-xfdashboard.png

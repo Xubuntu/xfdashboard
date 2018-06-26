@@ -2,7 +2,7 @@
  * search-result-container: An container for results from a search provider
  *                          which has a header and container for items
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@
 #include <libxfdashboard/drag-action.h>
 #include <libxfdashboard/marshal.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -392,8 +393,12 @@ static void _xfdashboard_search_result_container_on_result_item_actor_clicked(Xf
 
 	self=XFDASHBOARD_SEARCH_RESULT_CONTAINER(inUserData);
 
-	/* Activate result item by actor clicked */
-	_xfdashboard_search_result_container_activate_result_item_by_actor(self, inActor);
+	/* Only emit signal if click was perform with left button */
+	if(xfdashboard_click_action_get_button(inAction)==XFDASHBOARD_CLICK_ACTION_LEFT_BUTTON)
+	{
+		/* Activate result item by actor clicked */
+		_xfdashboard_search_result_container_activate_result_item_by_actor(self, inActor);
+	}
 }
 
 /* Get and set up actor for result item from search provider */
@@ -661,7 +666,7 @@ static void _xfdashboard_search_result_container_update_result_items(Xfdashboard
 			labelText=g_strdup_printf(_("Show %d more results..."), moreCount);
 
 			/* Set text at "more"-label */
-			xfdashboard_button_set_text(XFDASHBOARD_BUTTON(priv->moreResultsLabelActor), labelText);
+			xfdashboard_label_set_text(XFDASHBOARD_LABEL(priv->moreResultsLabelActor), labelText);
 
 			/* Release allocated resources */
 			if(labelText) g_free(labelText);
@@ -669,7 +674,7 @@ static void _xfdashboard_search_result_container_update_result_items(Xfdashboard
 			else
 			{
 				/* Set empty text at "more"-label */
-				xfdashboard_button_set_text(XFDASHBOARD_BUTTON(priv->moreResultsLabelActor), NULL);
+				xfdashboard_label_set_text(XFDASHBOARD_LABEL(priv->moreResultsLabelActor), NULL);
 			}
 
 		/* If we have more result items in result set than result items actors shown
@@ -683,7 +688,7 @@ static void _xfdashboard_search_result_container_update_result_items(Xfdashboard
 			labelText=g_strdup_printf(_("Show all %d results..."), allItemsCount);
 
 			/* Set text at "all"-label */
-			xfdashboard_button_set_text(XFDASHBOARD_BUTTON(priv->allResultsLabelActor), labelText);
+			xfdashboard_label_set_text(XFDASHBOARD_LABEL(priv->allResultsLabelActor), labelText);
 
 			/* Release allocated resources */
 			if(labelText) g_free(labelText);
@@ -691,7 +696,7 @@ static void _xfdashboard_search_result_container_update_result_items(Xfdashboard
 			else
 			{
 				/* Set empty text at "all"-label */
-				xfdashboard_button_set_text(XFDASHBOARD_BUTTON(priv->allResultsLabelActor), NULL);
+				xfdashboard_label_set_text(XFDASHBOARD_LABEL(priv->allResultsLabelActor), NULL);
 			}
 	}
 
@@ -907,13 +912,14 @@ static ClutterActor* _xfdashboard_search_result_container_find_selection_from_ic
 	if(selection && needsWrap && !inAllowWrap) selection=NULL;
 
 	/* Return new selection */
-	g_debug("Selecting %s in icon mode at %s for current selection %s in direction %u with wrapping %s and wrapping %s",
-			selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
-			G_OBJECT_TYPE_NAME(self),
-			inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
-			inDirection,
-			inAllowWrap ? "allowed" : "denied",
-			needsWrap ? "needed" : "not needed");
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Selecting %s in icon mode at %s for current selection %s in direction %u with wrapping %s and wrapping %s",
+						selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
+						G_OBJECT_TYPE_NAME(self),
+						inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
+						inDirection,
+						inAllowWrap ? "allowed" : "denied",
+						needsWrap ? "needed" : "not needed");
 
 	return(selection);
 }
@@ -1057,13 +1063,14 @@ static ClutterActor* _xfdashboard_search_result_container_find_selection_from_li
 	if(selection && needsWrap && !inAllowWrap) selection=NULL;
 
 	/* Return new selection */
-	g_debug("Selecting %s in list mode at %s for current selection %s in direction %u with wrapping %s and wrapping %s",
-			selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
-			G_OBJECT_TYPE_NAME(self),
-			inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
-			inDirection,
-			inAllowWrap ? "allowed" : "denied",
-			needsWrap ? "needed" : "not needed");
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Selecting %s in list mode at %s for current selection %s in direction %u with wrapping %s and wrapping %s",
+						selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
+						G_OBJECT_TYPE_NAME(self),
+						inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
+						inDirection,
+						inAllowWrap ? "allowed" : "denied",
+						needsWrap ? "needed" : "not needed");
 
 	return(selection);
 }
@@ -1078,6 +1085,12 @@ static void _xfdashboard_search_result_container_dispose(GObject *inObject)
 
 	/* Release allocated variables */
 	_xfdashboard_search_result_container_update_selection(self, NULL);
+
+	if(priv->selectedItem)
+	{
+		g_object_remove_weak_pointer(G_OBJECT(priv->selectedItem), &priv->selectedItem);
+		priv->selectedItem=NULL;
+	}
 
 	if(priv->provider)
 	{
@@ -1381,13 +1394,13 @@ static void xfdashboard_search_result_container_init(XfdashboardSearchResultCont
 
 	priv->moreResultsLabelActor=xfdashboard_button_new();
 	clutter_actor_set_x_expand(priv->moreResultsLabelActor, TRUE);
-	xfdashboard_button_set_style(XFDASHBOARD_BUTTON(priv->moreResultsLabelActor), XFDASHBOARD_BUTTON_STYLE_TEXT);
+	xfdashboard_label_set_style(XFDASHBOARD_LABEL(priv->moreResultsLabelActor), XFDASHBOARD_LABEL_STYLE_TEXT);
 	xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(priv->moreResultsLabelActor), "more-results");
 
 	priv->allResultsLabelActor=xfdashboard_button_new();
 	clutter_actor_set_x_expand(priv->allResultsLabelActor, TRUE);
 	clutter_actor_set_x_align(priv->allResultsLabelActor, CLUTTER_ACTOR_ALIGN_END);
-	xfdashboard_button_set_style(XFDASHBOARD_BUTTON(priv->allResultsLabelActor), XFDASHBOARD_BUTTON_STYLE_TEXT);
+	xfdashboard_label_set_style(XFDASHBOARD_LABEL(priv->allResultsLabelActor), XFDASHBOARD_LABEL_STYLE_TEXT);
 	xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(priv->allResultsLabelActor), "all-results");
 
 	layout=clutter_box_layout_new();
@@ -1724,7 +1737,7 @@ void xfdashboard_search_result_container_set_more_result_size(XfdashboardSearchR
 		moreCount=MIN(allResultsCount-currentResultsCount, priv->moreResultsCount);
 
 		labelText=g_strdup_printf(_("Show %d more results..."), moreCount);
-		xfdashboard_button_set_text(XFDASHBOARD_BUTTON(priv->moreResultsLabelActor), labelText);
+		xfdashboard_label_set_text(XFDASHBOARD_LABEL(priv->moreResultsLabelActor), labelText);
 		if(labelText) g_free(labelText);
 
 		/* Notify about property change */
@@ -1811,9 +1824,10 @@ ClutterActor* xfdashboard_search_result_container_find_selection(XfdashboardSear
 	if(!inSelection)
 	{
 		newSelection=clutter_actor_get_first_child(priv->itemsContainer);
-		g_debug("No selection for %s, so select first child of result container for provider %s",
-				G_OBJECT_TYPE_NAME(self),
-				priv->provider ? G_OBJECT_TYPE_NAME(priv->provider) : "<unknown provider>");
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"No selection for %s, so select first child of result container for provider %s",
+							G_OBJECT_TYPE_NAME(self),
+							priv->provider ? G_OBJECT_TYPE_NAME(priv->provider) : "<unknown provider>");
 
 		return(newSelection);
 	}
@@ -1883,12 +1897,13 @@ ClutterActor* xfdashboard_search_result_container_find_selection(XfdashboardSear
 	if(newSelection) selection=newSelection;
 
 	/* Return new selection found */
-	g_debug("Selecting %s at %s for current selection %s in direction %u with wrapping %s",
-			selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
-			G_OBJECT_TYPE_NAME(self),
-			inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
-			inDirection,
-			inAllowWrap ? "allowed" : "denied");
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Selecting %s at %s for current selection %s in direction %u with wrapping %s",
+						selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
+						G_OBJECT_TYPE_NAME(self),
+						inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
+						inDirection,
+						inAllowWrap ? "allowed" : "denied");
 
 	return(selection);
 }

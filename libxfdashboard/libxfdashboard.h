@@ -1,7 +1,7 @@
 /*
  * libxfdashboard: Maybe a Gnome shell like dashboard for Xfce
  *
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,12 +52,18 @@
 #include <libxfdashboard/focusable.h>
 #include <libxfdashboard/focus-manager.h>
 #include <libxfdashboard/image-content.h>
-#include <libxfdashboard/libxfdashboard.h>
+#include <libxfdashboard/label.h>
 #include <libxfdashboard/live-window.h>
+#include <libxfdashboard/live-window-simple.h>
 #include <libxfdashboard/live-workspace.h>
+#include <libxfdashboard/model.h>
 #include <libxfdashboard/outline-effect.h>
 #include <libxfdashboard/plugin.h>
 #include <libxfdashboard/plugins-manager.h>
+#include <libxfdashboard/popup-menu.h>
+#include <libxfdashboard/popup-menu-item-button.h>
+#include <libxfdashboard/popup-menu-item.h>
+#include <libxfdashboard/popup-menu-item-separator.h>
 #include <libxfdashboard/quicklaunch.h>
 #include <libxfdashboard/scaled-table-layout.h>
 #include <libxfdashboard/scrollbar.h>
@@ -78,12 +84,14 @@
 #include <libxfdashboard/tooltip-action.h>
 #include <libxfdashboard/types.h>
 #include <libxfdashboard/utils.h>
+#include <libxfdashboard/version.h>
 #include <libxfdashboard/view.h>
 #include <libxfdashboard/view-manager.h>
 #include <libxfdashboard/viewpad.h>
 #include <libxfdashboard/view-selector.h>
 #include <libxfdashboard/window-content.h>
 #include <libxfdashboard/windows-view.h>
+#include <libxfdashboard/window-tracker-backend.h>
 #include <libxfdashboard/window-tracker.h>
 #include <libxfdashboard/window-tracker-monitor.h>
 #include <libxfdashboard/window-tracker-window.h>

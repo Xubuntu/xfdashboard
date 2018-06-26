@@ -4,7 +4,7 @@
 /*
  * enums: Definitions of enumerations and flags used in GObject objects
  * 
- * Copyrigt 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,31 +131,6 @@ GType xfdashboard_bindings_pool_error_enum_get_type(void)
 }
 
 
-/* enumerations from "button.h" */
-#include "button.h"
-
-GType xfdashboard_button_style_get_type(void)
-{
-	static volatile gsize	g_define_type_id__volatile=0;
-
-	if(g_once_init_enter(&g_define_type_id__volatile))
-	{
-		static const GEnumValue values[]=
-		{
-			{ XFDASHBOARD_BUTTON_STYLE_TEXT, "XFDASHBOARD_BUTTON_STYLE_TEXT", "text" },
-			{ XFDASHBOARD_BUTTON_STYLE_ICON, "XFDASHBOARD_BUTTON_STYLE_ICON", "icon" },
-			{ XFDASHBOARD_BUTTON_STYLE_BOTH, "XFDASHBOARD_BUTTON_STYLE_BOTH", "both" },
-			{ 0, NULL, NULL }
-		};
-
-		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardButtonStyle"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
-	}
-
-	return(g_define_type_id__volatile);
-}
-
-
 /* enumerations from "image-content.h" */
 #include "image-content.h"
 
@@ -182,8 +157,77 @@ GType xfdashboard_image_content_loading_state_get_type(void)
 }
 
 
+/* enumerations from "label.h" */
+#include "label.h"
+
+GType xfdashboard_label_style_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GEnumValue values[]=
+		{
+			{ XFDASHBOARD_LABEL_STYLE_TEXT, "XFDASHBOARD_LABEL_STYLE_TEXT", "text" },
+			{ XFDASHBOARD_LABEL_STYLE_ICON, "XFDASHBOARD_LABEL_STYLE_ICON", "icon" },
+			{ XFDASHBOARD_LABEL_STYLE_BOTH, "XFDASHBOARD_LABEL_STYLE_BOTH", "both" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardLabelStyle"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
+
+
+/* enumerations from "live-window-simple.h" */
+#include "live-window-simple.h"
+
+GType xfdashboard_live_window_simple_display_type_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GEnumValue values[]=
+		{
+			{ XFDASHBOARD_LIVE_WINDOW_SIMPLE_DISPLAY_TYPE_LIVE_PREVIEW, "XFDASHBOARD_LIVE_WINDOW_SIMPLE_DISPLAY_TYPE_LIVE_PREVIEW", "live-preview" },
+			{ XFDASHBOARD_LIVE_WINDOW_SIMPLE_DISPLAY_TYPE_ICON, "XFDASHBOARD_LIVE_WINDOW_SIMPLE_DISPLAY_TYPE_ICON", "icon" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardLiveWindowSimpleDisplayType"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
+
+
 /* enumerations from "plugin.h" */
 #include "plugin.h"
+
+GType xfdashboard_plugin_flag_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GFlagsValue values[]=
+		{
+			{ XFDASHBOARD_PLUGIN_FLAG_NONE, "XFDASHBOARD_PLUGIN_FLAG_NONE", "none" },
+			{ XFDASHBOARD_PLUGIN_FLAG_EARLY_INITIALIZATION, "XFDASHBOARD_PLUGIN_FLAG_EARLY_INITIALIZATION", "early-initialization" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardPluginFlag"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
 
 GType xfdashboard_plugin_error_enum_get_type(void)
 {
@@ -217,11 +261,8 @@ GType xfdashboard_theme_error_enum_get_type(void)
 	{
 		static const GEnumValue values[]=
 		{
-			{ XFDASHBOARD_THEME_ERROR_GENERAL_ERROR, "XFDASHBOARD_THEME_ERROR_GENERAL_ERROR", "general-error" },
-			{ XFDASHBOARD_THEME_ERROR_ALREADY_LOADED, "XFDASHBOARD_THEME_ERROR_ALREADY_LOADED", "already-loaded" },
 			{ XFDASHBOARD_THEME_ERROR_THEME_NOT_FOUND, "XFDASHBOARD_THEME_ERROR_THEME_NOT_FOUND", "theme-not-found" },
-			{ XFDASHBOARD_THEME_ERROR_INVALID_THEME_FILE, "XFDASHBOARD_THEME_ERROR_INVALID_THEME_FILE", "invalid-theme-file" },
-			{ XFDASHBOARD_THEME_ERROR_RESOURCE_NOT_FOUND, "XFDASHBOARD_THEME_ERROR_RESOURCE_NOT_FOUND", "resource-not-found" },
+			{ XFDASHBOARD_THEME_ERROR_ALREADY_LOADED, "XFDASHBOARD_THEME_ERROR_ALREADY_LOADED", "already-loaded" },
 			{ 0, NULL, NULL }
 		};
 
@@ -285,6 +326,26 @@ GType xfdashboard_theme_effects_error_enum_get_type(void)
 
 /* enumerations from "theme-layout.h" */
 #include "theme-layout.h"
+
+GType xfdashboard_theme_layout_build_get_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GEnumValue values[]=
+		{
+			{ XFDASHBOARD_THEME_LAYOUT_BUILD_GET_FOCUSABLES, "XFDASHBOARD_THEME_LAYOUT_BUILD_GET_FOCUSABLES", "focusables" },
+			{ XFDASHBOARD_THEME_LAYOUT_BUILD_GET_SELECTED_FOCUS, "XFDASHBOARD_THEME_LAYOUT_BUILD_GET_SELECTED_FOCUS", "selected-focus" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeLayoutBuildGet"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
 
 GType xfdashboard_theme_layout_error_enum_get_type(void)
 {
@@ -522,6 +583,55 @@ GType xfdashboard_view_fit_mode_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardViewFitMode"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
+
+
+/* enumerations from "window-tracker-window.h" */
+#include "window-tracker-window.h"
+
+GType xfdashboard_window_tracker_window_state_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GFlagsValue values[]=
+		{
+			{ XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_HIDDEN, "XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_HIDDEN", "hidden" },
+			{ XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_MINIMIZED, "XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_MINIMIZED", "minimized" },
+			{ XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_MAXIMIZED, "XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_MAXIMIZED", "maximized" },
+			{ XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_FULLSCREEN, "XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_FULLSCREEN", "fullscreen" },
+			{ XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_SKIP_PAGER, "XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_SKIP_PAGER", "skip-pager" },
+			{ XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_SKIP_TASKLIST, "XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_SKIP_TASKLIST", "skip-tasklist" },
+			{ XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_PINNED, "XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_PINNED", "pinned" },
+			{ XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_URGENT, "XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_URGENT", "urgent" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardWindowTrackerWindowState"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
+
+GType xfdashboard_window_tracker_window_action_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GFlagsValue values[]=
+		{
+			{ XFDASHBOARD_WINDOW_TRACKER_WINDOW_ACTION_CLOSE, "XFDASHBOARD_WINDOW_TRACKER_WINDOW_ACTION_CLOSE", "close" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardWindowTrackerWindowAction"), values);
 		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
 	}
 

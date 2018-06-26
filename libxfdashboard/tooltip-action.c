@@ -2,7 +2,7 @@
  * tooltip-action: An action to display a tooltip after a short timeout
  *                 without movement at the referred actor
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -161,7 +161,7 @@ static gboolean _xfdashboard_tooltip_action_on_captured_event_after_tooltip(Xfda
 {
 	gboolean		doHide;
 
-	g_return_val_if_fail(XFDASHBOARD_IS_TOOLTIP_ACTION(self), G_SOURCE_REMOVE);
+	g_return_val_if_fail(XFDASHBOARD_IS_TOOLTIP_ACTION(self), CLUTTER_EVENT_PROPAGATE);
 	g_return_val_if_fail(XFDASHBOARD_IS_STAGE(inUserData), CLUTTER_EVENT_PROPAGATE);
 
 	/* Check if tooltip should be hidden depending on event type */

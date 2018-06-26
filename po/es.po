@@ -4,14 +4,15 @@
 # 
 # Translators:
 # Miguel Hernández <michelangelo93@gmail.com>, 2015
-# Pablo Roberto Francisco Lezaeta Reyes <prflr88@gmail.com>, 2015
+# Pablo Lezaeta Reyes [pˈaβ̞lo lˌe̞θaˈeta rˈejɛ] <prflr88@gmail.com>, 2015
+# Pablo Lezaeta Reyes [pˈaβ̞lo lˌe̞θaˈeta rˈejɛ] <prflr88@gmail.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: xfdashboard\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-02 19:11+0100\n"
-"PO-Revision-Date: 2016-03-02 18:12+0000\n"
-"Last-Translator: Stephan Haller <nomad@froevel.de>\n"
+"PO-Revision-Date: 2017-07-27 06:19+0000\n"
+"Last-Translator: Pablo Lezaeta Reyes [pˈaβ̞lo lˌe̞θaˈeta rˈejɛ] <prflr88@gmail.com>\n"
 "Language-Team: Spanish (http://www.transifex.com/xfdashboard/xfdashboard/language/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -69,25 +70,25 @@ msgid ""
 "application when the pointer is near a specific corner of the screen. It "
 "also introduce a new settings application which allows to enable and/or "
 "disable plugin as well as to configure them."
-msgstr ""
+msgstr "Esta versión de desarrollo inestable introduce un complemento de esquina activa para activar esta aplicación cuando el puntero está cerca de una esquina específica de la pantalla. También introduce una nueva aplicación de configuración que permite habilitar y/o deshabilitar el complemento así como configurarlos."
 
 #: ../data/appdata/xfdashboard.appdata.xml.in.h:7
 msgid ""
 "This unstable development introduces a new search provider plugin which uses"
 " installed Gnome-Shell search providers as additional source."
-msgstr ""
+msgstr "Esta versión de desarrollo inestable introduce un nuevo complemento de proveedor de búsqueda que utiliza los proveedores de búsqueda de Gnome-Shell instalados como fuente adicional."
 
 #: ../data/appdata/xfdashboard.appdata.xml.in.h:8
 msgid ""
 "This unstable development introduces a new optional configuration to themes "
 "about defining which elements can be focused and in which order."
-msgstr ""
+msgstr "Esta versión de desarrollo inestable introduce una nueva configuración opcional a los temas sobre la definición de los elementos que se pueden enfocar y en qué orden."
 
 #: ../data/appdata/xfdashboard.appdata.xml.in.h:9
 msgid ""
 "This unstable development introduces a basic and simple plugin system as "
 "well as a sample plugin adding a new view showing a clock."
-msgstr ""
+msgstr "Esta versión de desarrollo inestable introduce un sistema de complementos básicos y simples, así como un complemento de ejemplo que añade una nueva vista que muestra un reloj."
 
 #: ../data/appdata/xfdashboard.appdata.xml.in.h:10
 msgid ""
@@ -95,7 +96,7 @@ msgid ""
 "start a new instance of an application or to activate the current window. It"
 " also improves the detection of running application as well as bug-fixes and"
 " other smaller improvements."
-msgstr ""
+msgstr "Esta versión de desarrollo inestable introduce nuevas opciones configurables que permiten iniciar una nueva instancia de una aplicación o activar la ventana actual. También mejora la detección de aplicaciones en ejecución, así como correcciones de errores y otras mejoras más pequeñas."
 
 #: ../data/appdata/xfdashboard.appdata.xml.in.h:11
 msgid ""
@@ -103,7 +104,7 @@ msgid ""
 "loading window contents in background and it shows also running applications"
 " in quicklaunch for those not being stored as favourites. As usual it also "
 "contains a lots of bug-fixes and smaller improvements."
-msgstr ""
+msgstr "Esta versión de desarrollo inestable introduce nuevas opciones configurables para acelerar el contenido de la ventana de carga en segundo plano y también muestra las aplicaciones en ejecución en el lanzador rápido para aquellas que no se han almacenado como favoritas. Como de costumbre, también contiene un montón de correcciones de errores y mejoras más pequeñas."
 
 #: ../data/appdata/xfdashboard.appdata.xml.in.h:12
 msgid ""
@@ -111,7 +112,7 @@ msgid ""
 "loads the window contents in background to make the application feel "
 "smoother and faster, especially at start-up. It also contains a lots of bug-"
 "fixes and smaller improvements."
-msgstr ""
+msgstr "Esta versión de desarrollo inestable introduce nuevas opciones al selector de espacio de trabajo y carga el contenido de la ventana en segundo plano para hacer que la aplicación se sienta más suave y más rápida, especialmente en la puesta en marcha. También contiene un montón de correcciones de errores y mejoras más pequeñas."
 
 #: ../data/appdata/xfdashboard.appdata.xml.in.h:13
 msgid ""
@@ -138,7 +139,7 @@ msgid ""
 "This unstable development introduces a new box layout fixing layout of "
 "children when using right-to-left language. Also support for localization "
 "was fixed and other smaller bug-fixes and improvements."
-msgstr ""
+msgstr "Esta versión de desarrollo inestable introduce una nueva disposición de la caja de la disposición de hijos al usar lenguas de derecha a izquierda. También se solucionó la compatibilidad con la localización y otras mejoras y correcciones de errores menores."
 
 #: ../data/appdata/xfdashboard.appdata.xml.in.h:17
 msgid ""
@@ -190,7 +191,7 @@ msgstr ""
 
 #: ../data/appdata/xfdashboard.appdata.xml.in.h:25
 msgid "This unstable development introduces effects."
-msgstr "Esta versión de desarrollo introduce efectos."
+msgstr "Esta versión de desarrollo inestable introduce efectos."
 
 #: ../data/appdata/xfdashboard.appdata.xml.in.h:26
 msgid ""
@@ -232,17 +233,17 @@ msgstr "Primera versión."
 
 #: ../data/data/preferences.ui.h:1
 msgid "<span size=\"large\"><b>Xfdashboard settings</b></span>"
-msgstr ""
+msgstr "<span size=\"large\"><b>Configuraciones de Xfdashboard</b></span>"
 
 #: ../data/data/preferences.ui.h:2
 msgid "Configure plugin"
-msgstr ""
+msgstr "Configurar complemento"
 
 #: ../data/data/preferences.ui.h:3
 msgid ""
 "<span size=\"large\"><b>Xfdashboard settings</b></span>\n"
 "Configure xfdashboard"
-msgstr ""
+msgstr "<span size=\"large\"><b>Configuraciones de Xfdashboard</b></span>\nConfigure Xfdashboard"
 
 #: ../data/data/preferences.ui.h:5
 msgid "<b>General settings:</b>"
@@ -257,14 +258,14 @@ msgid ""
 "If enabled the search view will be resetted when xfdashboard is resumed. That means the active view is switched back to last view active before last search was started and search box will be emptied.\n"
 "\n"
 "<b>NOTE:</b> This setting only takes effect if xfdashboard is running in daemon mode. "
-msgstr ""
+msgstr "Si está activada, la vista de búsqueda se reiniciará cuando se reinicie Xfdashboard. Esto significa que la vista activa se cambia a la última vista activa antes de que se inicie la última búsqueda y se vacíe el cuadro de búsqueda.\n\n<b>NOTA:</b> Esta configuración solamente tiene efecto si Xfdashboard se ejecuta en modo demonio."
 
 #: ../data/data/preferences.ui.h:10
 msgid ""
 "When xfdashboard resumes the selected view will be activated.\n"
 "\n"
 "<b>NOTE:</b> This setting only takes effect if xfdashboard is running in daemon mode."
-msgstr ""
+msgstr "Cuando Xfdashboard se reanude, la vista seleccionada se activará.\n\n<b>NOTA:</b> Esta configuración solamente tiene efecto si Xfdashboard se ejecuta en modo demonio."
 
 #: ../data/data/preferences.ui.h:13
 msgid "Switch to view when resumed:"
@@ -297,7 +298,7 @@ msgid ""
 "This value defines how fast the window content should be created. While the value 'immediate' tells xfdashboard to create the window content at the time it is requested, all other values will set up a queue and value defines how fast the queue will be processed.\n"
 "\n"
 "<b>NOTE:</b> Only change this value from 'immediate' to other value if your graphics card, driver or system is too slow to create the window contents immediately. You have to try each value to find the one fitting your system."
-msgstr ""
+msgstr "Este valor define la rapidez con que se debe crear el contenido de la ventana. Mientras que el valor «inmediato» indica a Xfdashboard que cree el contenido de la ventana en el momento en que se solicite, todos los demás valores establecerán una cola y el valor definirá la velocidad de procesamiento de la cola.\n\n<b>NOTA:</b> Solamente cambie este valor de «inmediato» a otro valor si su tarjeta gráfica, controlador o sistema es demasiado lento para crear el contenido de la ventana inmediatamente. Debe de probar cada valor para encontrar el que se adapte a su sistema."
 
 #: ../data/data/preferences.ui.h:25
 msgid "Priority of window content creation"
@@ -305,7 +306,7 @@ msgstr ""
 
 #: ../data/data/preferences.ui.h:26
 msgid "Always start a new instance for application"
-msgstr ""
+msgstr "Siempre iniciar una nueva instancia por aplicación"
 
 #: ../data/data/preferences.ui.h:27
 msgid ""
@@ -387,11 +388,11 @@ msgstr ""
 
 #: ../data/data/preferences.ui.h:46
 msgid "Plugins"
-msgstr ""
+msgstr "Complementos"
 
 #: ../data/themes/xfdashboard/xfdashboard.theme.in.in.h:1
 msgid "xfdashboard"
-msgstr "xfdashboard"
+msgstr "Xfdashboard"
 
 #: ../data/themes/xfdashboard/xfdashboard.theme.in.in.h:2
 msgid "Default theme for xfdashboard"
@@ -399,51 +400,51 @@ msgstr "Tema predeterminado para Xfdashboard"
 
 #: ../data/themes/xfdashboard-auber/xfdashboard.theme.in.in.h:1
 msgid "xfdashboard-auber"
-msgstr "xfdashboard-auber"
+msgstr "Xfdashboard auber"
 
 #: ../data/themes/xfdashboard-auber/xfdashboard.theme.in.in.h:2
 msgid "Aubergine theme for xfdashboard"
-msgstr "Tema de color berenjena para xfdashboard"
+msgstr "Tema de color berenjena para Xfdashboard"
 
 #: ../data/themes/xfdashboard-blue/xfdashboard.theme.in.in.h:1
 msgid "xfdashboard-blue"
-msgstr "xfdashboard-blue"
+msgstr "Xfdashboard azul"
 
 #: ../data/themes/xfdashboard-blue/xfdashboard.theme.in.in.h:2
 msgid "Blue theme for xfdashboard"
-msgstr "Tema de color azul para xfdashboard"
+msgstr "Tema de color azul para Xfdashboard"
 
 #: ../data/themes/xfdashboard-dark/xfdashboard.theme.in.in.h:1
 msgid "xfdashboard-dark"
-msgstr "xfdashboard-dark"
+msgstr "Xfdashboard oscuro"
 
 #: ../data/themes/xfdashboard-dark/xfdashboard.theme.in.in.h:2
 msgid "Dark theme for xfdashboard"
-msgstr "Tema de color oscuro para el xfdashboard"
+msgstr "Tema de color oscuro para el Xfdashboard"
 
 #: ../data/themes/xfdashboard-mint/xfdashboard.theme.in.in.h:1
 msgid "xfdashboard-mint"
-msgstr "xfdashboard-mint"
+msgstr "Xfdashboard menta"
 
 #: ../data/themes/xfdashboard-mint/xfdashboard.theme.in.in.h:2
 msgid "Fresh-green flavored theme for xfdashboard"
-msgstr "Tema con sabor a verde fresco para xfdashboard"
+msgstr "Tema con sabor a verde fresco para Xfdashboard"
 
 #: ../data/themes/xfdashboard-moranga/xfdashboard.theme.in.in.h:1
 msgid "xfdashboard-moranga"
-msgstr "xfdashboard-moranga"
+msgstr "Xfdashboard moronga"
 
 #: ../data/themes/xfdashboard-moranga/xfdashboard.theme.in.in.h:2
 msgid "Moranga theme for xfdashboard"
-msgstr "Tema de color calabaza para xfdashboard"
+msgstr "Tema de color calabaza para Xfdashboard"
 
 #: ../data/themes/xfdashboard-wine/xfdashboard.theme.in.in.h:1
 msgid "xfdashboard-wine"
-msgstr "xfdashboard-wine"
+msgstr "Xfdashboard vino"
 
 #: ../data/themes/xfdashboard-wine/xfdashboard.theme.in.in.h:2
 msgid "Red wine theme for xfdashboard"
-msgstr "Tema de color vino para el xfdashboard"
+msgstr "Tema de color vino para el Xfdashboard"
 
 #: ../libxfdashboard/action-button.c:109 ../libxfdashboard/focus-manager.c:930
 #, c-format
@@ -3021,11 +3022,11 @@ msgstr ""
 
 #: ../libxfdashboard/tooltip-action.c:525
 msgid "Tooltip text"
-msgstr ""
+msgstr "Texto de herramienta"
 
 #: ../libxfdashboard/tooltip-action.c:526
 msgid "The text to display in a tooltip"
-msgstr ""
+msgstr "El texto que se mostrará en una descripción de herramienta"
 
 #: ../libxfdashboard/utils.c:160
 #, c-format
@@ -3034,43 +3035,43 @@ msgstr ""
 
 #: ../libxfdashboard/view.c:368
 msgid "View ID"
-msgstr ""
+msgstr "Ver Id"
 
 #: ../libxfdashboard/view.c:369
 msgid "The internal ID used to register this type of view"
-msgstr ""
+msgstr "El Id interno utilizado para registrar este tipo de vista"
 
 #: ../libxfdashboard/view.c:375
 msgid "View name"
-msgstr ""
+msgstr "Ver nombre"
 
 #: ../libxfdashboard/view.c:376
 msgid "Name of view used to display"
-msgstr ""
+msgstr "Nombre de la vista utilizada para mostrar"
 
 #: ../libxfdashboard/view.c:382
 msgid "View icon"
-msgstr ""
+msgstr "Ver icono"
 
 #: ../libxfdashboard/view.c:383
 msgid ""
 "Icon of view used to display. Icon name can be a themed icon name or file "
 "name"
-msgstr ""
+msgstr "Icono de vista utilizado para mostrar. El nombre del icono puede ser un nombre de icono o un  icono temado"
 
 #: ../libxfdashboard/view.c:389
 msgid "View fit mode"
-msgstr ""
+msgstr "Ver modo compacto"
 
 #: ../libxfdashboard/view.c:390
 msgid ""
 "Defines if view should be fit into viewpad and in which directions it should"
 " fit into it"
-msgstr ""
+msgstr "Define si la vista debe encajar en visor y en qué direcciones debe encajar"
 
 #: ../libxfdashboard/view.c:397
 msgid "Enabled"
-msgstr ""
+msgstr "Habilitado"
 
 #: ../libxfdashboard/view.c:398
 msgid "This flag indicates if is view is enabled and activable"
@@ -3131,7 +3132,7 @@ msgstr ""
 
 #: ../libxfdashboard/viewpad.c:1230
 msgid "Active view"
-msgstr ""
+msgstr "Vista activa"
 
 #: ../libxfdashboard/viewpad.c:1231
 msgid "The current active view in viewpad"
@@ -3517,7 +3518,7 @@ msgstr ""
 
 #: ../plugins/clock-view/clock-view-settings.c:233
 msgid "Hour color"
-msgstr ""
+msgstr "Color de la hora"
 
 #: ../plugins/clock-view/clock-view-settings.c:234
 msgid "Color to draw the hour hand with"
@@ -3525,7 +3526,7 @@ msgstr ""
 
 #: ../plugins/clock-view/clock-view-settings.c:240
 msgid "Minute color"
-msgstr ""
+msgstr "Color del minuto"
 
 #: ../plugins/clock-view/clock-view-settings.c:241
 msgid "Color to draw the minute hand with"
@@ -3533,7 +3534,7 @@ msgstr ""
 
 #: ../plugins/clock-view/clock-view-settings.c:247
 msgid "Second color"
-msgstr ""
+msgstr "Color del segundo"
 
 #: ../plugins/clock-view/clock-view-settings.c:248
 msgid "Color to draw the second hand with"
@@ -3550,7 +3551,7 @@ msgstr ""
 #. Add widget to choose hour color
 #: ../plugins/clock-view/plugin.c:208
 msgid "Hour color:"
-msgstr ""
+msgstr "Color de la hora:"
 
 #: ../plugins/clock-view/plugin.c:218
 msgid "Choose color for hour hand"
@@ -3559,7 +3560,7 @@ msgstr ""
 #. Add widget to choose minute color
 #: ../plugins/clock-view/plugin.c:223
 msgid "Minute color:"
-msgstr ""
+msgstr "Color del minuto:"
 
 #: ../plugins/clock-view/plugin.c:233
 msgid "Choose color for minute hand"
@@ -3568,7 +3569,7 @@ msgstr ""
 #. Add widget to choose second color
 #: ../plugins/clock-view/plugin.c:238
 msgid "Second color:"
-msgstr ""
+msgstr "Color del segundo:"
 
 #: ../plugins/clock-view/plugin.c:248
 msgid "Choose color for second hand"
@@ -3577,7 +3578,7 @@ msgstr ""
 #. Add widget to choose minute color
 #: ../plugins/clock-view/plugin.c:253
 msgid "Background color:"
-msgstr ""
+msgstr "Color de fondo:"
 
 #: ../plugins/clock-view/plugin.c:263
 msgid "Choose color for background of second hand"
@@ -3751,7 +3752,7 @@ msgstr ""
 
 #: ../plugins/hot-corner/plugin.c:268
 msgid "s"
-msgstr ""
+msgstr "s"
 
 #: ../plugins/hot-corner/plugin.c:272 ../settings/general.c:367
 msgid "ms"
@@ -3760,7 +3761,7 @@ msgstr "ms"
 #: ../plugins/hot-corner/plugin.c:276 ../settings/general.c:124
 #: ../settings/general.c:371
 msgid "Immediately"
-msgstr "Inmediatamente"
+msgstr "Inmediato"
 
 #. Add widget to choose activation corner
 #: ../plugins/hot-corner/plugin.c:304
@@ -3779,13 +3780,13 @@ msgstr ""
 
 #: ../plugins/hot-corner/plugin.c:418
 msgid "Hot corner"
-msgstr ""
+msgstr "Esquina activa"
 
 #: ../plugins/hot-corner/plugin.c:419
 msgid ""
 "Activates xfdashboard when pointer is moved to a configured corner of "
 "monitor"
-msgstr ""
+msgstr "Activa Xfdashboard cuando el puntero se mueve a una esquina configurada del monitor"
 
 #: ../settings/general.c:116
 msgid "Do nothing"
@@ -3818,7 +3819,7 @@ msgstr "segundos"
 #: ../settings/general.c:707 ../settings/plugins.c:1112
 #: ../settings/themes.c:913
 msgid "Builder"
-msgstr ""
+msgstr "Constructor"
 
 #: ../settings/general.c:708 ../settings/plugins.c:1113
 #: ../settings/themes.c:914
@@ -3828,17 +3829,17 @@ msgstr ""
 #: ../settings/plugins.c:223
 #, c-format
 msgid "Configure plugin: %s"
-msgstr ""
+msgstr "Configurar complemento: %s"
 
 #: ../settings/plugins.c:531
 msgid "Could not set list of enabled plugins!"
-msgstr ""
+msgstr "No se pudo establecer la lista de complementos habilitados."
 
 #. Show error message
 #: ../settings/plugins.c:746
 #, c-format
 msgid "Could not load plugin '%s' from '%s': %s"
-msgstr ""
+msgstr "No se pudo cargar el complemento «%s» desde «%s»: %s"
 
 #. Create error message to store in list
 #: ../settings/plugins.c:752
@@ -3847,11 +3848,11 @@ msgid ""
 "<b>Plugin could not be loaded.</b>\n"
 "\n"
 "%s"
-msgstr ""
+msgstr "<b>No se pudo cargar el complemento.</b>\n\n%s"
 
 #: ../settings/plugins.c:958
 msgid "Name"
-msgstr ""
+msgstr "Nombre"
 
 #: ../settings/themes.c:784
 msgid "Theme"

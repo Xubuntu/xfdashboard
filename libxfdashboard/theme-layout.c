@@ -1,7 +1,7 @@
 /*
  * theme-layout: A theme used for build and layout objects by XML files
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,14 +31,23 @@
 #include <glib.h>
 #include <gio/gio.h>
 
+#include <libxfdashboard/enums.h>
 #include <libxfdashboard/utils.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
 G_DEFINE_TYPE(XfdashboardThemeLayout,
 				xfdashboard_theme_layout,
 				G_TYPE_OBJECT)
+
+/* Forward declaration */
+typedef struct _XfdashboardThemeLayoutTagData				XfdashboardThemeLayoutTagData;
+typedef struct _XfdashboardThemeLayoutParsedObject			XfdashboardThemeLayoutParsedObject;
+typedef struct _XfdashboardThemeLayoutParserData			XfdashboardThemeLayoutParserData;
+typedef struct _XfdashboardThemeLayoutUnresolvedBuildID		XfdashboardThemeLayoutUnresolvedBuildID;
+typedef struct _XfdashboardThemeLayoutCheckRefID			XfdashboardThemeLayoutCheckRefID;
 
 /* Private structure - access only by public API if needed */
 #define XFDASHBOARD_THEME_LAYOUT_GET_PRIVATE(obj) \
@@ -47,7 +56,9 @@ G_DEFINE_TYPE(XfdashboardThemeLayout,
 struct _XfdashboardThemeLayoutPrivate
 {
 	/* Instance related */
-	GSList			*interfaces;
+	GSList								*interfaces;
+
+	XfdashboardThemeLayoutTagData		*focusSelected;
 };
 
 /* IMPLEMENTATION: Private variables and methods */
@@ -64,7 +75,6 @@ enum
 	TAG_FOCUS
 };
 
-typedef struct _XfdashboardThemeLayoutTagData			XfdashboardThemeLayoutTagData;
 struct _XfdashboardThemeLayoutTagData
 {
 	gint								refCount;
@@ -90,11 +100,11 @@ struct _XfdashboardThemeLayoutTagData
 		struct
 		{
 			gchar						*refID;
+			gboolean					selected;
 		} focus;
 	} tag;
 };
 
-typedef struct _XfdashboardThemeLayoutParsedObject		XfdashboardThemeLayoutParsedObject;
 struct _XfdashboardThemeLayoutParsedObject
 {
 	gint								refCount;
@@ -108,7 +118,6 @@ struct _XfdashboardThemeLayoutParsedObject
 	GPtrArray							*focusables;	/* 0, 1 or more entries of XfdashboardThemeLayoutTagData (only used at <interface>) */
 };
 
-typedef struct _XfdashboardThemeLayoutParserData		XfdashboardThemeLayoutParserData;
 struct _XfdashboardThemeLayoutParserData
 {
 	XfdashboardThemeLayout				*self;
@@ -121,14 +130,20 @@ struct _XfdashboardThemeLayoutParserData
 	gint								lastLine;
 	gint								lastPosition;
 	gint								currentLine;
-	gint								currentPostition;;
+	gint								currentPostition;
+	const gchar							*currentPath;
 };
 
-typedef struct _XfdashboardThemeLayoutUnresolvedBuildID		XfdashboardThemeLayoutUnresolvedBuildID;
 struct _XfdashboardThemeLayoutUnresolvedBuildID
 {
 	GObject								*targetObject;
 	XfdashboardThemeLayoutTagData		*property;
+};
+
+struct _XfdashboardThemeLayoutCheckRefID
+{
+	XfdashboardThemeLayout				*self;
+	GHashTable							*ids;
 };
 
 /* Forward declarations */
@@ -249,7 +264,8 @@ static void _xfdashboard_theme_layout_parse_set_error(XfdashboardThemeLayoutPars
 	if(inParserData)
 	{
 		g_prefix_error(&tempError,
-						_("Error on line %d char %d: "),
+						_("File %s - Error on line %d char %d: "),
+						inParserData->currentPath,
 						inParserData->lastLine,
 						inParserData->lastPosition);
 	}
@@ -553,15 +569,22 @@ static void _xfdashboard_theme_layout_create_object_free_unresolved(gpointer inD
  */
 static void _xfdashboard_theme_layout_create_object_resolve_unresolved(XfdashboardThemeLayout *self,
 																		GHashTable *inIDs,
-																		GSList *inUnresolvedIDs)
+																		GSList *inUnresolvedIDs,
+																		va_list inArgs)
 {
 	GSList										*iter;
 	XfdashboardThemeLayoutUnresolvedBuildID		*unresolvedID;
 	GObject										*refObject;
 	GPtrArray									*focusTable;
+	ClutterActor								*focusSelected;
+	gint										extraDataID;
+	gpointer									*extraDataStorage;
 
 	g_return_if_fail(XFDASHBOARD_IS_THEME_LAYOUT(self));
 	g_return_if_fail(inIDs);
+
+	focusTable=NULL;
+	focusSelected=NULL;
 
 	/* Return if no list of unresolved IDs is provided */
 	if(!inUnresolvedIDs) return;
@@ -587,41 +610,96 @@ static void _xfdashboard_theme_layout_create_object_resolve_unresolved(Xfdashboa
 								unresolvedID->property->tag.property.name,
 								refObject,
 								NULL);
-				g_debug("Set previously unresolved object %s with ID '%s' at target object %s at property '%s'",
-							refObject ? G_OBJECT_TYPE_NAME(refObject) : "<unknown object>",
-							unresolvedID->property->tag.property.refID,
-							unresolvedID->targetObject ? G_OBJECT_TYPE_NAME(unresolvedID->targetObject) : "<unknown object>",
-							unresolvedID->property->tag.property.name);
+				XFDASHBOARD_DEBUG(self, THEME,
+									"Set previously unresolved object %s with ID '%s' at target object %s at property '%s'",
+									refObject ? G_OBJECT_TYPE_NAME(refObject) : "<unknown object>",
+									unresolvedID->property->tag.property.refID,
+									unresolvedID->targetObject ? G_OBJECT_TYPE_NAME(unresolvedID->targetObject) : "<unknown object>",
+									unresolvedID->property->tag.property.name);
 				break;
 
 			case TAG_FOCUS:
 				/* Get referenced object */
 				refObject=g_hash_table_lookup(inIDs, unresolvedID->property->tag.focus.refID);
 
-				/* Get current focus table from object */
-				focusTable=g_object_get_qdata(unresolvedID->targetObject, XFDASHBOARD_THEME_LAYOUT_FOCUS_TABLE_DATA);
-				if(!focusTable)
-				{
-					focusTable=g_ptr_array_new();
-					g_object_set_qdata_full(unresolvedID->targetObject,
-											XFDASHBOARD_THEME_LAYOUT_FOCUS_TABLE_DATA,
-											focusTable,
-											(GDestroyNotify)g_ptr_array_unref);
-				}
+				/* Store reference object in list of focusable actors */
+				if(!focusTable) focusTable=g_ptr_array_new();
 				g_ptr_array_add(focusTable, refObject);
 
-				g_debug("Added resolved focusable actor %s with reference ID '%s' to focusable list at target object %s ",
-							refObject ? G_OBJECT_TYPE_NAME(refObject) : "<unknown object>",
-							unresolvedID->property->tag.focus.refID,
-							unresolvedID->targetObject ? G_OBJECT_TYPE_NAME(unresolvedID->targetObject) : "<unknown object>");
+				XFDASHBOARD_DEBUG(self, THEME,
+									"Added resolved focusable actor %s with reference ID '%s' to focusable list at target object %s ",
+									refObject ? G_OBJECT_TYPE_NAME(refObject) : "<unknown object>",
+									unresolvedID->property->tag.focus.refID,
+									unresolvedID->targetObject ? G_OBJECT_TYPE_NAME(unresolvedID->targetObject) : "<unknown object>");
+
+				/* If focusable actor is pre-selected and no other pre-selected
+				 * one was seen so far, remember it now.
+				 */
+				if(!focusSelected && unresolvedID->property->tag.focus.selected)
+				{
+					focusSelected=g_object_ref(refObject);
+
+					XFDASHBOARD_DEBUG(self, THEME,
+										"Remember resolved focusable actor %s with reference ID '%s' as pre-selected actor at target object %s ",
+										refObject ? G_OBJECT_TYPE_NAME(refObject) : "<unknown object>",
+										unresolvedID->property->tag.focus.refID,
+										unresolvedID->targetObject ? G_OBJECT_TYPE_NAME(unresolvedID->targetObject) : "<unknown object>");
+				}
 				break;
 
 			default:
 				g_critical(_("Unsupported tag type '%s' to resolve ID"),
 							_xfdashboard_theme_layout_get_tag_by_id(unresolvedID->property->tagType));
-				break;;
+				break;
 		}
 	}
+
+	/* Iterate through extra data ID and pointer where to store the value (the
+	 * resolved object(s)) until end of list (marked with -1) is reached.
+	 */
+	extraDataID=va_arg(inArgs, gint);
+	while(extraDataID!=-1)
+	{
+		/* Get generic pointer to storage as it will be casted as necessary
+		 * when determining which extra data is requested.
+		 */
+		extraDataStorage=va_arg(inArgs, gpointer*);
+		if(!extraDataStorage)
+		{
+			gchar *valueName;
+
+			valueName=xfdashboard_get_enum_value_name(XFDASHBOARD_TYPE_THEME_LAYOUT_BUILD_GET, extraDataID);
+			g_warning(_("No storage pointer provided to store value of %s"),
+						valueName);
+			g_free(valueName);
+			break;
+		}
+
+		/* Check which extra data is requested and store value at pointer */
+		switch(extraDataID)
+		{
+			case XFDASHBOARD_THEME_LAYOUT_BUILD_GET_FOCUSABLES:
+				if(focusTable) *((GPtrArray**)extraDataStorage)=g_ptr_array_ref(focusTable);
+					else *extraDataStorage=NULL;
+				break;
+
+			case XFDASHBOARD_THEME_LAYOUT_BUILD_GET_SELECTED_FOCUS:
+				if(focusSelected) *extraDataStorage=g_object_ref(focusSelected);
+					else *extraDataStorage=NULL;
+				break;
+
+			default:
+				g_assert_not_reached();
+				break;
+		}
+
+		/* Continue with next extra data ID and storage pointer */
+		extraDataID=va_arg(inArgs, gint);
+	}
+
+	/* Release allocated resources */
+	if(focusTable) g_ptr_array_unref(focusTable);
+	if(focusSelected) g_object_unref(focusSelected);
 }
 
 /* Create object with all its constraints, layout and children recursively.
@@ -685,13 +763,19 @@ static GObject* _xfdashboard_theme_layout_create_object(XfdashboardThemeLayout *
 
 	if(!object)
 	{
-		g_debug("Failed to create object of type %s with %d properties to set", g_type_name(inObjectData->classType), usedProperties);
+		XFDASHBOARD_DEBUG(self, THEME,
+							"Failed to create object of type %s with %d properties to set",
+							g_type_name(inObjectData->classType),
+							usedProperties);
 
 		/* Return NULL indicating error */
 		return(NULL);
 	}
 
-	g_debug("Created object %p of type %s", object, G_OBJECT_TYPE_NAME(object));
+	XFDASHBOARD_DEBUG(self, THEME,
+						"Created object %p of type %s",
+						object,
+						G_OBJECT_TYPE_NAME(object));
 
 	/* If object created has an ID and is derived from ClutterActor
 	 * then set ID as name of actor if name was not set by any property.
@@ -707,9 +791,10 @@ static GObject* _xfdashboard_theme_layout_create_object(XfdashboardThemeLayout *
 			if(!name || strlen(name)==0)
 			{
 				g_object_set(object, "name", inObjectData->id, NULL);
-				g_debug("Object %s has ID but no name, setting ID '%s' as name",
-							G_OBJECT_TYPE_NAME(object),
-							inObjectData->id);
+				XFDASHBOARD_DEBUG(self, THEME,
+									"Object %s has ID but no name, setting ID '%s' as name",
+									G_OBJECT_TYPE_NAME(object),
+									inObjectData->id);
 			}
 			if(name) g_free(name);
 		}
@@ -731,13 +816,16 @@ static GObject* _xfdashboard_theme_layout_create_object(XfdashboardThemeLayout *
 		{
 			if(child)
 			{
-				g_debug("Child %s is not an actor and cannot be added to actor %s",
-							G_OBJECT_TYPE_NAME(child),
-							G_OBJECT_TYPE_NAME(object));
+				XFDASHBOARD_DEBUG(self, THEME,
+									"Child %s is not an actor and cannot be added to actor %s",
+									G_OBJECT_TYPE_NAME(child),
+									G_OBJECT_TYPE_NAME(object));
 			}
 				else
 				{
-					g_debug("Failed to create child for actor %s", G_OBJECT_TYPE_NAME(object));
+					XFDASHBOARD_DEBUG(self, THEME,
+										"Failed to create child for actor %s",
+										G_OBJECT_TYPE_NAME(object));
 				}
 
 			/* Release allocated resources */
@@ -751,9 +839,10 @@ static GObject* _xfdashboard_theme_layout_create_object(XfdashboardThemeLayout *
 		/* Add successfully created child actor to this actor */
 		if(childObjectData->id) g_hash_table_insert(ioIDs, g_strdup(childObjectData->id), child);
 		clutter_actor_add_child(CLUTTER_ACTOR(object), CLUTTER_ACTOR(child));
-		g_debug("Created child %s and added to object %s",
-					G_OBJECT_TYPE_NAME(child),
-					G_OBJECT_TYPE_NAME(object));
+		XFDASHBOARD_DEBUG(self, THEME,
+							"Created child %s and added to object %s",
+							G_OBJECT_TYPE_NAME(child),
+							G_OBJECT_TYPE_NAME(object));
 	}
 
 	/* Create layout */
@@ -770,13 +859,16 @@ static GObject* _xfdashboard_theme_layout_create_object(XfdashboardThemeLayout *
 		{
 			if(layout)
 			{
-				g_debug("Layout %s is not a layout manager and cannot be set at actor %s",
-							G_OBJECT_TYPE_NAME(layout),
-							G_OBJECT_TYPE_NAME(object));
+				XFDASHBOARD_DEBUG(self, THEME,
+									"Layout %s is not a layout manager and cannot be set at actor %s",
+									G_OBJECT_TYPE_NAME(layout),
+									G_OBJECT_TYPE_NAME(object));
 			}
 				else
 				{
-					g_debug("Failed to create layout manager for actor %s", G_OBJECT_TYPE_NAME(object));
+					XFDASHBOARD_DEBUG(self, THEME,
+										"Failed to create layout manager for actor %s",
+										G_OBJECT_TYPE_NAME(object));
 				}
 
 			/* Release allocated resources */
@@ -790,9 +882,10 @@ static GObject* _xfdashboard_theme_layout_create_object(XfdashboardThemeLayout *
 		/* Add successfully created child actor to this actor */
 		if(layoutObjectData->id) g_hash_table_insert(ioIDs, g_strdup(layoutObjectData->id), layout);
 		clutter_actor_set_layout_manager(CLUTTER_ACTOR(object), CLUTTER_LAYOUT_MANAGER(layout));
-		g_debug("Created layout manager %s and set at object %s",
-					G_OBJECT_TYPE_NAME(layout),
-					G_OBJECT_TYPE_NAME(object));
+		XFDASHBOARD_DEBUG(self, THEME,
+							"Created layout manager %s and set at object %s",
+							G_OBJECT_TYPE_NAME(layout),
+							G_OBJECT_TYPE_NAME(object));
 	}
 
 	/* Create constraints */
@@ -809,13 +902,16 @@ static GObject* _xfdashboard_theme_layout_create_object(XfdashboardThemeLayout *
 		{
 			if(constraint)
 			{
-				g_debug("Constraint %s is not a constraint and cannot be added to actor %s",
-							G_OBJECT_TYPE_NAME(constraint),
-							G_OBJECT_TYPE_NAME(object));
+				XFDASHBOARD_DEBUG(self, THEME,
+									"Constraint %s is not a constraint and cannot be added to actor %s",
+									G_OBJECT_TYPE_NAME(constraint),
+									G_OBJECT_TYPE_NAME(object));
 			}
 				else
 				{
-					g_debug("Failed to create constraint for actor %s", G_OBJECT_TYPE_NAME(object));
+					XFDASHBOARD_DEBUG(self, THEME,
+										"Failed to create constraint for actor %s",
+										G_OBJECT_TYPE_NAME(object));
 				}
 
 			/* Release allocated resources */
@@ -829,9 +925,10 @@ static GObject* _xfdashboard_theme_layout_create_object(XfdashboardThemeLayout *
 		/* Add successfully created constraint to this actor */
 		if(constraintObjectData->id) g_hash_table_insert(ioIDs, g_strdup(constraintObjectData->id), constraint);
 		clutter_actor_add_constraint(CLUTTER_ACTOR(object), CLUTTER_CONSTRAINT(constraint));
-		g_debug("Created constraint %s and added to object %s",
-					G_OBJECT_TYPE_NAME(constraint),
-					G_OBJECT_TYPE_NAME(object));
+		XFDASHBOARD_DEBUG(self, THEME,
+							"Created constraint %s and added to object %s",
+							G_OBJECT_TYPE_NAME(constraint),
+							G_OBJECT_TYPE_NAME(object));
 	}
 
 	/* Set up properties which do reference other objects */
@@ -1379,6 +1476,9 @@ static void _xfdashboard_theme_layout_parse_general_start(GMarkupParseContext *i
 											G_MARKUP_COLLECT_STRDUP,
 											"ref",
 											&tagData->tag.focus.refID,
+											G_MARKUP_COLLECT_BOOLEAN | G_MARKUP_COLLECT_OPTIONAL,
+											"selected",
+											&tagData->tag.focus.selected,
 											G_MARKUP_COLLECT_INVALID))
 		{
 			g_propagate_error(outError, error);
@@ -1507,11 +1607,12 @@ static void _xfdashboard_theme_layout_parse_general_end(GMarkupParseContext *inC
 		/* Add property to object */
 		objectData=(XfdashboardThemeLayoutParsedObject*)g_queue_peek_tail(data->stackObjects);
 		objectData->properties=g_slist_append(objectData->properties, _xfdashboard_theme_layout_tag_data_ref(subTagData));
-		g_debug("Adding property '%s' with %s '%s' to object %s",
-					subTagData->tag.property.name,
-					subTagData->tag.property.refID ? "referenced object of ID" : "value",
-					subTagData->tag.property.refID ? subTagData->tag.property.refID : subTagData->tag.property.value,
-					g_type_name(objectData->classType));
+		XFDASHBOARD_DEBUG(data->self, THEME,
+							"Adding property '%s' with %s '%s' to object %s",
+							subTagData->tag.property.name,
+							subTagData->tag.property.refID ? "referenced object of ID" : "value",
+							subTagData->tag.property.refID ? subTagData->tag.property.refID : subTagData->tag.property.value,
+							g_type_name(objectData->classType));
 
 		/* Restore previous parser context */
 		g_markup_parse_context_pop(inContext);
@@ -1520,12 +1621,47 @@ static void _xfdashboard_theme_layout_parse_general_end(GMarkupParseContext *inC
 	/* Handle end of element <focus> */
 	if(subTagData->tagType==TAG_FOCUS)
 	{
+
 		g_assert(data->focusables);
+
+		/* Check if an actor was already marked as selected and print a warning
+		 * if now multiple actors are marked as selected.
+		 */
+		if(subTagData->tag.focus.selected)
+		{
+			XfdashboardThemeLayoutPrivate		*priv;
+
+			priv=data->self->priv;
+
+			/* Check if any focus was already set and print a warning */
+			if(priv->focusSelected)
+			{
+				g_warning(_("File %s - Warning on line %d char %d: At interface '%s' the ID '%s' should get focus but the ID '%s' was selected already"),
+							data->currentPath,
+							data->lastLine,
+							data->lastPosition,
+							data->interface->id,
+							subTagData->tag.focus.refID,
+							priv->focusSelected->tag.focus.refID);
+				XFDASHBOARD_DEBUG(data->self, THEME,
+									"In file '%s' at interface '%s' the ID '%s' should get focus but the ID '%s' was selected already",
+									data->currentPath,
+									data->interface->id,
+									subTagData->tag.focus.refID,
+									priv->focusSelected->tag.focus.refID);
+			}
+				/* Remember actor as pre-selected focus */
+				else
+				{
+					priv->focusSelected=_xfdashboard_theme_layout_tag_data_ref(subTagData);
+				}
+		}
 
 		/* Add focusable actor to parser data */
 		g_ptr_array_add(data->focusables, _xfdashboard_theme_layout_tag_data_ref(subTagData));
-		g_debug("Adding focusable actor referenced by ID '%s' to parser data",
-					subTagData->tag.focus.refID);
+		XFDASHBOARD_DEBUG(data->self, THEME,
+							"Adding focusable actor referenced by ID '%s' to parser data",
+							subTagData->tag.focus.refID);
 	}
 
 	/* Handle end of element <interface> */
@@ -1538,9 +1674,10 @@ static void _xfdashboard_theme_layout_parse_general_end(GMarkupParseContext *inC
 			g_assert(!data->interface->focusables);
 
 			data->interface->focusables=g_ptr_array_ref(data->focusables);
-			g_debug("Will resolve %d focusable actor IDs to interface '%s'",
-						data->interface->focusables->len,
-						data->interface->id);
+			XFDASHBOARD_DEBUG(data->self, THEME,
+								"Will resolve %d focusable actor IDs to interface '%s'",
+								data->interface->focusables->len,
+								data->interface->id);
 		}
 	}
 
@@ -1552,7 +1689,7 @@ static void _xfdashboard_theme_layout_parse_general_end(GMarkupParseContext *inC
 static void _xfdashboard_theme_layout_check_refids(gpointer inData, gpointer inUserData)
 {
 	XfdashboardThemeLayoutParsedObject	*object;
-	GHashTable							*ids;
+	XfdashboardThemeLayoutCheckRefID	*checkRefID;
 	gpointer							value;
 	GSList								*entry;
 	XfdashboardThemeLayoutTagData		*property;
@@ -1561,7 +1698,7 @@ static void _xfdashboard_theme_layout_check_refids(gpointer inData, gpointer inU
 	g_return_if_fail(inUserData);
 
 	object=(XfdashboardThemeLayoutParsedObject*)inData;
-	ids=(GHashTable*)inUserData;
+	checkRefID=(XfdashboardThemeLayoutCheckRefID*)inUserData;
 
 	/* Iterate through properties and check referenced IDs */
 	for(entry=object->properties; entry; entry=g_slist_next(entry))
@@ -1573,14 +1710,18 @@ static void _xfdashboard_theme_layout_check_refids(gpointer inData, gpointer inU
 		 * If found do nothing (keep value at zero).
 		 */
 		if(property->tag.property.refID &&
-			!g_hash_table_lookup_extended(ids, property->tag.property.refID, NULL, &value))
+			!g_hash_table_lookup_extended(checkRefID->ids, property->tag.property.refID, NULL, &value))
 		{
-			g_hash_table_insert(ids, property->tag.property.refID, GINT_TO_POINTER(1));
-			g_debug("Could not resolve referenced ID '%s', set counter to 1", property->tag.property.refID);
+			g_hash_table_insert(checkRefID->ids, property->tag.property.refID, GINT_TO_POINTER(1));
+			XFDASHBOARD_DEBUG(checkRefID->self, THEME,
+								"Could not resolve referenced ID '%s', set counter to 1",
+								property->tag.property.refID);
 		}
 			else if(property->tag.property.refID)
 			{
-				g_debug("Referenced ID '%s' resolved successfully", property->tag.property.refID);
+				XFDASHBOARD_DEBUG(checkRefID->self, THEME,
+									"Referenced ID '%s' resolved successfully",
+									property->tag.property.refID);
 			}
 	}
 
@@ -1597,14 +1738,14 @@ static void _xfdashboard_theme_layout_check_refids(gpointer inData, gpointer inU
 static void _xfdashboard_theme_layout_check_ids(gpointer inData, gpointer inUserData)
 {
 	XfdashboardThemeLayoutParsedObject	*object;
-	GHashTable							*ids;
+	XfdashboardThemeLayoutCheckRefID	*checkRefID;
 	gpointer							value;
 
 	g_return_if_fail(inData);
 	g_return_if_fail(inUserData);
 
 	object=(XfdashboardThemeLayoutParsedObject*)inData;
-	ids=(GHashTable*)inUserData;
+	checkRefID=(XfdashboardThemeLayoutCheckRefID*)inUserData;
 
 	/* If ID at object is set then lookup key in hashtable.
 	 * If not found create key with ID and value of 1.
@@ -1613,10 +1754,12 @@ static void _xfdashboard_theme_layout_check_ids(gpointer inData, gpointer inUser
 	if(object->id)
 	{
 		/* If key does not exist create it with value of 1 ... */
-		if(!g_hash_table_lookup_extended(ids, object->id, NULL, &value))
+		if(!g_hash_table_lookup_extended(checkRefID->ids, object->id, NULL, &value))
 		{
-			g_hash_table_insert(ids, object->id, GINT_TO_POINTER(1));
-			g_debug("First occurence of ID '%s', set counter to 1", object->id);
+			g_hash_table_insert(checkRefID->ids, object->id, GINT_TO_POINTER(1));
+			XFDASHBOARD_DEBUG(checkRefID->self, THEME,
+								"First occurence of ID '%s', set counter to 1",
+								object->id);
 		}
 			/* ... otherwise increase value of key */
 			else
@@ -1625,8 +1768,11 @@ static void _xfdashboard_theme_layout_check_ids(gpointer inData, gpointer inUser
 
 				count=GPOINTER_TO_INT(value);
 				count++;
-				g_hash_table_replace(ids, object->id, GINT_TO_POINTER(count));
-				g_debug("Found ID '%s' and increased counter to %d", object->id, count);
+				g_hash_table_replace(checkRefID->ids, object->id, GINT_TO_POINTER(count));
+				XFDASHBOARD_DEBUG(checkRefID->self, THEME,
+									"Found ID '%s' and increased counter to %d",
+									object->id,
+									count);
 			}
 	}
 
@@ -1644,10 +1790,10 @@ static gboolean _xfdashboard_theme_layout_check_ids_and_refids(XfdashboardThemeL
 																XfdashboardThemeLayoutParsedObject *inInterfaceObject,
 																GError **outError)
 {
-	gboolean			success;
-	GHashTable			*ids;
-	GHashTableIter		iter;
-	gpointer			key, value;
+	gboolean							success;
+	GHashTableIter						iter;
+	gpointer							key, value;
+	XfdashboardThemeLayoutCheckRefID	checkRefID;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_THEME_LAYOUT(self), FALSE);
 	g_return_val_if_fail(inInterfaceObject, FALSE);
@@ -1660,8 +1806,8 @@ static gboolean _xfdashboard_theme_layout_check_ids_and_refids(XfdashboardThemeL
 	 * of a hashtable which uses the ID as key and the value indicates
 	 * check results.
 	 */
-	g_object_ref(self);
-	ids=g_hash_table_new(g_str_hash, g_str_equal);
+	checkRefID.self=g_object_ref(self);
+	checkRefID.ids=g_hash_table_new(g_str_hash, g_str_equal);
 
 	/* Step one: Iterate through all objects and their contraints, layouts
 	 * and children recursively beginning at interface object. For each ID
@@ -1669,13 +1815,13 @@ static gboolean _xfdashboard_theme_layout_check_ids_and_refids(XfdashboardThemeL
 	 * increase counter (which is an error because ID is used more than once)
 	 * or create key with integer value 1.
 	 */
-	_xfdashboard_theme_layout_check_ids(inInterfaceObject, ids);
+	_xfdashboard_theme_layout_check_ids(inInterfaceObject, &checkRefID);
 
 	/* Check if any key in hashtable has a value greater than one which means
 	 * that this ID is used more than once and is an error. Reset each key
 	 * check successfully to zero.
 	 */
-	g_hash_table_iter_init(&iter, ids);
+	g_hash_table_iter_init(&iter, checkRefID.ids);
 	while(success && g_hash_table_iter_next(&iter, &key, &value)) 
 	{
 		if(GPOINTER_TO_INT(value)>1)
@@ -1699,14 +1845,14 @@ static gboolean _xfdashboard_theme_layout_check_ids_and_refids(XfdashboardThemeL
 	 * key (containing ID) in hashtable. If found do nothing and if was
 	 * not found create key with integer value 1.
 	 */
-	if(success) _xfdashboard_theme_layout_check_refids(inInterfaceObject, ids);
+	if(success) _xfdashboard_theme_layout_check_refids(inInterfaceObject, &checkRefID);
 
 	/* Check if any key in hashtable has a value greater than zero which
 	 * means that this referenced ID could not be resolved and is an error.
 	 */
 	if(success)
 	{
-		g_hash_table_iter_init(&iter, ids);
+		g_hash_table_iter_init(&iter, checkRefID.ids);
 		while(success && g_hash_table_iter_next(&iter, &key, &value)) 
 		{
 			if(GPOINTER_TO_INT(value)>0)
@@ -1722,8 +1868,8 @@ static gboolean _xfdashboard_theme_layout_check_ids_and_refids(XfdashboardThemeL
 	}
 
 	/* Release allocated resources */
-	g_hash_table_destroy(ids);
-	g_object_unref(self);
+	g_hash_table_destroy(checkRefID.ids);
+	g_object_unref(checkRefID.self);
 
 	/* Return result of checks */
 	return(success);
@@ -1796,6 +1942,7 @@ static gboolean _xfdashboard_theme_layout_parse_xml(XfdashboardThemeLayout *self
 	data->lastPosition=1;
 	data->currentLine=1;
 	data->currentPostition=1;
+	data->currentPath=inPath;
 
 	/* Parse XML string */
 	if(success && !g_markup_parse_context_parse(context, inContents, -1, &error))
@@ -1806,6 +1953,9 @@ static gboolean _xfdashboard_theme_layout_parse_xml(XfdashboardThemeLayout *self
 
 	if(success && !g_markup_parse_context_end_parse(context, &error))
 	{
+		g_prefix_error(&error,
+						_("File %s - "),
+						inPath);
 		g_propagate_error(outError, error);
 		success=FALSE;
 	}
@@ -1872,7 +2022,9 @@ static gboolean _xfdashboard_theme_layout_parse_xml(XfdashboardThemeLayout *self
 	if(!success)
 	{
 		g_slist_foreach(priv->interfaces, (GFunc)_xfdashboard_theme_layout_print_parsed_objects, "Interface:");
-		g_debug("PARSER ERROR: %s", outError ? (*outError)->message : "unknown error");
+		XFDASHBOARD_DEBUG(self, THEME,
+							"PARSER ERROR: %s",
+							outError ? (*outError)->message : "unknown error");
 	}
 #endif
 
@@ -1888,6 +2040,12 @@ static void _xfdashboard_theme_layout_dispose(GObject *inObject)
 	XfdashboardThemeLayoutPrivate		*priv=self->priv;
 
 	/* Release allocated resources */
+	if(priv->focusSelected)
+	{
+		_xfdashboard_theme_layout_tag_data_unref(priv->focusSelected);
+		priv->focusSelected=NULL;
+	}
+
 	if(priv->interfaces)
 	{
 		g_slist_foreach(priv->interfaces, _xfdashboard_theme_layout_object_data_free_foreach_callback, NULL);
@@ -1925,6 +2083,7 @@ void xfdashboard_theme_layout_init(XfdashboardThemeLayout *self)
 
 	/* Set default values */
 	priv->interfaces=NULL;
+	priv->focusSelected=NULL;
 }
 
 /* IMPLEMENTATION: Errors */
@@ -1982,12 +2141,13 @@ gboolean xfdashboard_theme_layout_add_file(XfdashboardThemeLayout *self,
 
 /* Build requested interface */
 ClutterActor* xfdashboard_theme_layout_build_interface(XfdashboardThemeLayout *self,
-														const gchar *inID)
+														const gchar *inID,
+														...)
 {
 	XfdashboardThemeLayoutPrivate				*priv;
 	GSList										*iter;
 	XfdashboardThemeLayoutParsedObject			*interfaceData;
-	ClutterActor								*actor;
+	GObject										*actor;
 	GHashTable									*ids;
 	GSList										*unresolved;
 
@@ -2018,7 +2178,9 @@ ClutterActor* xfdashboard_theme_layout_build_interface(XfdashboardThemeLayout *s
 	 */
 	if(!interfaceData)
 	{
-		g_debug("Could not find object data for interface '%s'", inID);
+		XFDASHBOARD_DEBUG(self, THEME,
+							"Could not find object data for interface '%s'",
+							inID);
 		return(NULL);
 	}
 
@@ -2034,15 +2196,43 @@ ClutterActor* xfdashboard_theme_layout_build_interface(XfdashboardThemeLayout *s
 	unresolved=NULL;
 
 	/* Create actor */
-	actor=CLUTTER_ACTOR(_xfdashboard_theme_layout_create_object(self, interfaceData, ids, &unresolved));
+	actor=_xfdashboard_theme_layout_create_object(self, interfaceData, ids, &unresolved);
 	if(actor)
 	{
-		g_debug("Created actor %s for interface '%s'", G_OBJECT_TYPE_NAME(actor), inID);
+		/* Check if really an actor was created */
+		if(CLUTTER_IS_ACTOR(actor))
+		{
+			va_list								args;
 
-		/* Resolved unresolved properties of newly created object */
-		_xfdashboard_theme_layout_create_object_resolve_unresolved(self, ids, unresolved);
+			XFDASHBOARD_DEBUG(self, THEME,
+								"Created actor %s for interface '%s'",
+								G_OBJECT_TYPE_NAME(actor),
+								inID);
+
+			/* Resolved unresolved properties of newly created object */
+			va_start(args, inID);
+			_xfdashboard_theme_layout_create_object_resolve_unresolved(self, ids, unresolved, args);
+			va_end(args);
+		}
+			else
+			{
+				XFDASHBOARD_DEBUG(self, THEME,
+									"Failed to create actor for interface '%s' because object of type %s is not derived from %s",
+									inID,
+									G_OBJECT_TYPE_NAME(actor),
+									g_type_name(CLUTTER_TYPE_ACTOR));
+
+				/* Release object which is not an actor */
+				g_object_unref(actor);
+				actor=NULL;
+			}
 	}
-		else g_debug("Failed to create actor for interface '%s'", inID);
+		else
+		{
+			XFDASHBOARD_DEBUG(self, THEME,
+								"Failed to create actor for interface '%s'",
+								inID);
+		}
 
 	/* Release allocated resources */
 	if(ids) g_hash_table_destroy(ids);
@@ -2052,13 +2242,5 @@ ClutterActor* xfdashboard_theme_layout_build_interface(XfdashboardThemeLayout *s
 	_xfdashboard_theme_layout_object_data_unref(interfaceData);
 
 	/* Return created actor */
-	return(actor);
-}
-
-/* Quark for accessing focus table data (a GPtrArray) at an actor
- * with g_object_get_qdata() created by xfdashboard_theme_layout_build_interface().
- */
-GQuark xfdashboard_theme_layout_focus_table_quark(void)
-{
-	return(g_quark_from_static_string("xfdashboard-theme-layout-focus-table-quark"));
+	return(actor ? CLUTTER_ACTOR(actor) : NULL);
 }

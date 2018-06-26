@@ -90,23 +90,37 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@am__append_1 = \
+@DBUS_GLIB_TRUE@am__append_1 = \
+@DBUS_GLIB_TRUE@	$(DBUS_GLIB_CFLAGS)
+
+@DBUS_GLIB_TRUE@am__append_2 = \
+@DBUS_GLIB_TRUE@	$(DBUS_GLIB_LIBS)
+
+@XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@am__append_3 = \
 @XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@	$(XCOMPOSITE_CFLAGS)
 
-@XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@am__append_2 = \
+@XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@am__append_4 = \
 @XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@	$(XCOMPOSITE_LIBS)
 
-@XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@am__append_3 = \
+@XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@am__append_5 = \
 @XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@	$(XDAMAGE_CFLAGS)
 
-@XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@am__append_4 = \
+@XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@am__append_6 = \
 @XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@	$(XDAMAGE_LIBS)
 
-@XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@am__append_5 = \
+@XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@am__append_7 = \
 @XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@	$(XINERAMA_CFLAGS)
 
-@XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@am__append_6 = \
+@XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@am__append_8 = \
 @XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@	$(XINERAMA_LIBS)
+
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@am__append_9 = $(gdk_headers)
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@am__append_10 = $(gdk_sources)
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@am__append_11 = \
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@	$(CLUTTER_GDK_CFLAGS)
+
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@am__append_12 = \
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@	$(CLUTTER_GDK_LIBS)
 
 subdir = libxfdashboard
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -114,7 +128,8 @@ am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am \
-	$(libxfdashboard_la_include_HEADERS) $(am__DIST_COMMON)
+	$(am__libxfdashboard_la_include_HEADERS_DIST) \
+	$(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = libxfdashboard.pc
@@ -150,22 +165,64 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgconfigdir)" \
 	"$(DESTDIR)$(libxfdashboard_la_includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
-@XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@am__DEPENDENCIES_2 =  \
+@DBUS_GLIB_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1)
+@XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@am__DEPENDENCIES_3 =  \
 @XFDASHBOARD_BUILD_WITH_XCOMPOSITE_TRUE@	$(am__DEPENDENCIES_1)
-@XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@am__DEPENDENCIES_3 =  \
+@XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@am__DEPENDENCIES_4 =  \
 @XFDASHBOARD_BUILD_WITH_XDAMAGE_TRUE@	$(am__DEPENDENCIES_1)
-@XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@am__DEPENDENCIES_4 =  \
+@XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@am__DEPENDENCIES_5 =  \
 @XFDASHBOARD_BUILD_WITH_XINERAMA_TRUE@	$(am__DEPENDENCIES_1)
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@am__DEPENDENCIES_6 = $(am__DEPENDENCIES_1)
 libxfdashboard_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4) $(am__DEPENDENCIES_5) \
+	$(am__DEPENDENCIES_6)
+am__libxfdashboard_la_SOURCES_DIST = enums.h enums.c marshal.h \
+	marshal.c version.h action-button.c actor.c application.c \
+	application-button.c application-database.c \
+	application-tracker.c applications-menu-model.c \
+	applications-search-provider.c applications-view.c \
+	background.c binding.c bindings-pool.c box-layout.c button.c \
+	click-action.c collapse-box.c css-selector.c debug.c \
+	desktop-app-info.c drag-action.c drop-action.c \
+	dynamic-table-layout.c emblem-effect.c fill-box-layout.c \
+	focusable.c focus-manager.c image-content.c label.c \
+	live-window.c live-window-simple.c live-workspace.c model.c \
+	outline-effect.c plugin.c plugins-manager.c popup-menu.c \
+	popup-menu-item.c popup-menu-item-button.c \
+	popup-menu-item-separator.c quicklaunch.c \
+	scaled-table-layout.c scrollbar.c search-manager.c \
+	search-provider.c search-result-container.c \
+	search-result-set.c search-view.c stage.c stage-interface.c \
+	stylable.c text-box.c theme.c theme-css.c theme-effects.c \
+	theme-layout.c toggle-button.c tooltip-action.c utils.c view.c \
+	view-manager.c view-selector.c viewpad.c window-content.c \
+	window-tracker.c window-tracker-backend.c \
+	window-tracker-monitor.c window-tracker-window.c \
+	window-tracker-workspace.c windows-view.c workspace-selector.c \
+	x11/window-content-x11.c x11/window-tracker-x11.c \
+	x11/window-tracker-backend-x11.c \
+	x11/window-tracker-monitor-x11.c \
+	x11/window-tracker-window-x11.c \
+	x11/window-tracker-workspace-x11.c \
+	gdk/window-tracker-backend-gdk.c
 am__objects_1 = libxfdashboard_la-enums.lo \
 	libxfdashboard_la-marshal.lo
+am__dirstamp = $(am__leading_dot)dirstamp
+am__objects_2 = x11/libxfdashboard_la-window-content-x11.lo \
+	x11/libxfdashboard_la-window-tracker-x11.lo \
+	x11/libxfdashboard_la-window-tracker-backend-x11.lo \
+	x11/libxfdashboard_la-window-tracker-monitor-x11.lo \
+	x11/libxfdashboard_la-window-tracker-window-x11.lo \
+	x11/libxfdashboard_la-window-tracker-workspace-x11.lo
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@am__objects_3 = gdk/libxfdashboard_la-window-tracker-backend-gdk.lo
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@am__objects_4 =  \
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@	$(am__objects_3)
 am_libxfdashboard_la_OBJECTS = $(am__objects_1) \
 	libxfdashboard_la-action-button.lo libxfdashboard_la-actor.lo \
 	libxfdashboard_la-application.lo \
@@ -180,7 +237,7 @@ am_libxfdashboard_la_OBJECTS = $(am__objects_1) \
 	libxfdashboard_la-box-layout.lo libxfdashboard_la-button.lo \
 	libxfdashboard_la-click-action.lo \
 	libxfdashboard_la-collapse-box.lo \
-	libxfdashboard_la-css-selector.lo \
+	libxfdashboard_la-css-selector.lo libxfdashboard_la-debug.lo \
 	libxfdashboard_la-desktop-app-info.lo \
 	libxfdashboard_la-drag-action.lo \
 	libxfdashboard_la-drop-action.lo \
@@ -189,12 +246,17 @@ am_libxfdashboard_la_OBJECTS = $(am__objects_1) \
 	libxfdashboard_la-fill-box-layout.lo \
 	libxfdashboard_la-focusable.lo \
 	libxfdashboard_la-focus-manager.lo \
-	libxfdashboard_la-image-content.lo \
+	libxfdashboard_la-image-content.lo libxfdashboard_la-label.lo \
 	libxfdashboard_la-live-window.lo \
+	libxfdashboard_la-live-window-simple.lo \
 	libxfdashboard_la-live-workspace.lo libxfdashboard_la-model.lo \
 	libxfdashboard_la-outline-effect.lo \
 	libxfdashboard_la-plugin.lo \
 	libxfdashboard_la-plugins-manager.lo \
+	libxfdashboard_la-popup-menu.lo \
+	libxfdashboard_la-popup-menu-item.lo \
+	libxfdashboard_la-popup-menu-item-button.lo \
+	libxfdashboard_la-popup-menu-item-separator.lo \
 	libxfdashboard_la-quicklaunch.lo \
 	libxfdashboard_la-scaled-table-layout.lo \
 	libxfdashboard_la-scrollbar.lo \
@@ -215,11 +277,13 @@ am_libxfdashboard_la_OBJECTS = $(am__objects_1) \
 	libxfdashboard_la-viewpad.lo \
 	libxfdashboard_la-window-content.lo \
 	libxfdashboard_la-window-tracker.lo \
+	libxfdashboard_la-window-tracker-backend.lo \
 	libxfdashboard_la-window-tracker-monitor.lo \
 	libxfdashboard_la-window-tracker-window.lo \
 	libxfdashboard_la-window-tracker-workspace.lo \
 	libxfdashboard_la-windows-view.lo \
-	libxfdashboard_la-workspace-selector.lo
+	libxfdashboard_la-workspace-selector.lo $(am__objects_2) \
+	$(am__objects_4)
 libxfdashboard_la_OBJECTS = $(am_libxfdashboard_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -264,13 +328,41 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libxfdashboard_la_SOURCES)
-DIST_SOURCES = $(libxfdashboard_la_SOURCES)
+DIST_SOURCES = $(am__libxfdashboard_la_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
 DATA = $(pkgconfig_DATA)
+am__libxfdashboard_la_include_HEADERS_DIST = action-button.h actor.h \
+	application.h application-button.h application-database.h \
+	application-tracker.h applications-menu-model.h \
+	applications-search-provider.h applications-view.h \
+	background.h binding.h bindings-pool.h box-layout.h button.h \
+	click-action.h collapse-box.h compat.h css-selector.h debug.h \
+	desktop-app-info.h drag-action.h drop-action.h \
+	dynamic-table-layout.h emblem-effect.h fill-box-layout.h \
+	focusable.h focus-manager.h image-content.h label.h \
+	live-window.h live-window-simple.h live-workspace.h model.h \
+	outline-effect.h plugin.h plugins-manager.h popup-menu.h \
+	popup-menu-item.h popup-menu-item-button.h \
+	popup-menu-item-separator.h quicklaunch.h \
+	scaled-table-layout.h scrollbar.h search-manager.h \
+	search-provider.h search-result-container.h \
+	search-result-set.h search-view.h stage.h stage-interface.h \
+	stylable.h text-box.h theme.h theme-css.h theme-effects.h \
+	theme-layout.h toggle-button.h tooltip-action.h types.h \
+	utils.h view.h view-manager.h view-selector.h viewpad.h \
+	window-content.h window-tracker.h window-tracker-backend.h \
+	window-tracker-monitor.h window-tracker-window.h \
+	window-tracker-workspace.h windows-view.h workspace-selector.h \
+	x11/window-content-x11.h x11/window-tracker-x11.h \
+	x11/window-tracker-backend-x11.h \
+	x11/window-tracker-monitor-x11.h \
+	x11/window-tracker-window-x11.h \
+	x11/window-tracker-workspace-x11.h \
+	gdk/window-tracker-backend-gdk.h libxfdashboard.h
 HEADERS = $(libxfdashboard_la_include_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
@@ -313,6 +405,10 @@ CLUTTER_COGL_CFLAGS = @CLUTTER_COGL_CFLAGS@
 CLUTTER_COGL_LIBS = @CLUTTER_COGL_LIBS@
 CLUTTER_COGL_REQUIRED_VERSION = @CLUTTER_COGL_REQUIRED_VERSION@
 CLUTTER_COGL_VERSION = @CLUTTER_COGL_VERSION@
+CLUTTER_GDK_CFLAGS = @CLUTTER_GDK_CFLAGS@
+CLUTTER_GDK_LIBS = @CLUTTER_GDK_LIBS@
+CLUTTER_GDK_REQUIRED_VERSION = @CLUTTER_GDK_REQUIRED_VERSION@
+CLUTTER_GDK_VERSION = @CLUTTER_GDK_VERSION@
 CLUTTER_LIBS = @CLUTTER_LIBS@
 CLUTTER_REQUIRED_VERSION = @CLUTTER_REQUIRED_VERSION@
 CLUTTER_VERSION = @CLUTTER_VERSION@
@@ -361,6 +457,7 @@ GTK_CFLAGS = @GTK_CFLAGS@
 GTK_LIBS = @GTK_LIBS@
 GTK_REQUIRED_VERSION = @GTK_REQUIRED_VERSION@
 GTK_VERSION = @GTK_VERSION@
+HAVE_BACKEND_GDK = @HAVE_BACKEND_GDK@
 HAVE_XCOMPOSITE = @HAVE_XCOMPOSITE@
 HAVE_XDAMAGE = @HAVE_XDAMAGE@
 HAVE_XINERAMA = @HAVE_XINERAMA@
@@ -453,6 +550,8 @@ XCOMPOSITE_CFLAGS = @XCOMPOSITE_CFLAGS@
 XCOMPOSITE_LIBS = @XCOMPOSITE_LIBS@
 XDAMAGE_CFLAGS = @XDAMAGE_CFLAGS@
 XDAMAGE_LIBS = @XDAMAGE_LIBS@
+XFDASHBOARD_DEBUG_CFLAGS = @XFDASHBOARD_DEBUG_CFLAGS@
+XFDASHBOARD_REQUIRES = @XFDASHBOARD_REQUIRES@
 XFDASHBOARD_VERSION = @XFDASHBOARD_VERSION@
 XFDASHBOARD_VERSION_MAJOR = @XFDASHBOARD_VERSION_MAJOR@
 XFDASHBOARD_VERSION_MICRO = @XFDASHBOARD_VERSION_MICRO@
@@ -520,6 +619,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+AUTOMAKE_OPTIONS = subdir-objects
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-DLIBXFDASHBOARD_COMPILATION=1 \
@@ -527,6 +627,7 @@ AM_CPPFLAGS = \
 	-DPACKAGE_DATADIR=\"$(datadir)\" \
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\" \
 	-DPACKAGE_LIBDIR=\"$(libdir)\" \
+	$(XFDASHBOARD_DEBUG_CFLAGS) \
 	$(PLATFORM_CPPFLAGS)
 
 pkgconfigdir = $(libdir)/pkgconfig
@@ -539,156 +640,94 @@ libxfdashboard_la_built_sources = \
 	enums.h \
 	enums.c \
 	marshal.h \
-	marshal.c
+	marshal.c \
+	version.h
 
-libxfdashboard_la_headers = \
-	action-button.h \
-	actor.h \
-	application.h \
-	application-button.h \
-	application-database.h \
-	application-tracker.h \
-	applications-menu-model.h \
-	applications-search-provider.h \
-	applications-view.h \
-	background.h \
-	binding.h \
-	bindings-pool.h \
-	box-layout.h \
-	button.h \
-	click-action.h \
-	collapse-box.h \
-	compat.h \
-	css-selector.h \
-	desktop-app-info.h \
-	drag-action.h \
-	drop-action.h \
-	dynamic-table-layout.h \
-	emblem-effect.h \
-	fill-box-layout.h \
-	focusable.h \
-	focus-manager.h \
-	image-content.h \
-	live-window.h \
-	live-workspace.h \
-	model.h \
-	outline-effect.h \
-	plugin.h \
-	plugins-manager.h \
-	quicklaunch.h \
-	scaled-table-layout.h \
-	scrollbar.h \
-	search-manager.h \
-	search-provider.h \
-	search-result-container.h \
-	search-result-set.h \
-	search-view.h \
-	stage.h \
-	stage-interface.h \
-	stylable.h \
-	text-box.h \
-	theme.h \
-	theme-css.h \
-	theme-effects.h \
-	theme-layout.h \
-	toggle-button.h \
-	tooltip-action.h \
-	types.h \
-	utils.h \
-	view.h \
-	view-manager.h \
-	view-selector.h \
-	viewpad.h \
-	window-content.h \
-	window-tracker.h \
-	window-tracker-monitor.h \
-	window-tracker-window.h \
-	window-tracker-workspace.h \
-	windows-view.h \
-	workspace-selector.h
-
-libxfdashboard_la_SOURCES = \
-	$(libxfdashboard_la_built_sources) \
-	$(xfdashboard_headers) \
-	action-button.c \
-	actor.c \
-	application.c \
-	application-button.c \
-	application-database.c \
-	application-tracker.c \
-	applications-menu-model.c \
-	applications-search-provider.c \
-	applications-view.c \
-	background.c \
-	binding.c \
-	bindings-pool.c \
-	box-layout.c \
-	button.c \
-	click-action.c \
-	collapse-box.c \
-	css-selector.c \
-	desktop-app-info.c \
-	drag-action.c \
-	drop-action.c \
-	dynamic-table-layout.c \
-	emblem-effect.c \
-	fill-box-layout.c \
-	focusable.c \
-	focus-manager.c \
-	image-content.c \
-	live-window.c \
-	live-workspace.c \
-	model.c \
-	outline-effect.c \
-	plugin.c \
-	plugins-manager.c \
-	quicklaunch.c \
-	scaled-table-layout.c \
-	scrollbar.c \
-	search-manager.c \
-	search-provider.c \
-	search-result-container.c \
-	search-result-set.c \
-	search-view.c \
-	stage.c \
-	stage-interface.c \
-	stylable.c \
-	text-box.c \
-	theme.c \
-	theme-css.c \
-	theme-effects.c \
-	theme-layout.c \
-	toggle-button.c \
-	tooltip-action.c \
-	utils.c \
-	view.c \
-	view-manager.c \
-	view-selector.c \
-	viewpad.c \
-	window-content.c \
-	window-tracker.c \
-	window-tracker-monitor.c \
-	window-tracker-window.c \
-	window-tracker-workspace.c \
-	windows-view.c \
-	workspace-selector.c
-
+libxfdashboard_la_headers = action-button.h actor.h application.h \
+	application-button.h application-database.h \
+	application-tracker.h applications-menu-model.h \
+	applications-search-provider.h applications-view.h \
+	background.h binding.h bindings-pool.h box-layout.h button.h \
+	click-action.h collapse-box.h compat.h css-selector.h debug.h \
+	desktop-app-info.h drag-action.h drop-action.h \
+	dynamic-table-layout.h emblem-effect.h fill-box-layout.h \
+	focusable.h focus-manager.h image-content.h label.h \
+	live-window.h live-window-simple.h live-workspace.h model.h \
+	outline-effect.h plugin.h plugins-manager.h popup-menu.h \
+	popup-menu-item.h popup-menu-item-button.h \
+	popup-menu-item-separator.h quicklaunch.h \
+	scaled-table-layout.h scrollbar.h search-manager.h \
+	search-provider.h search-result-container.h \
+	search-result-set.h search-view.h stage.h stage-interface.h \
+	stylable.h text-box.h theme.h theme-css.h theme-effects.h \
+	theme-layout.h toggle-button.h tooltip-action.h types.h \
+	utils.h view.h view-manager.h view-selector.h viewpad.h \
+	window-content.h window-tracker.h window-tracker-backend.h \
+	window-tracker-monitor.h window-tracker-window.h \
+	window-tracker-workspace.h windows-view.h workspace-selector.h \
+	$(x11_headers) $(am__append_9)
+libxfdashboard_la_SOURCES = $(libxfdashboard_la_built_sources) \
+	$(xfdashboard_headers) action-button.c actor.c application.c \
+	application-button.c application-database.c \
+	application-tracker.c applications-menu-model.c \
+	applications-search-provider.c applications-view.c \
+	background.c binding.c bindings-pool.c box-layout.c button.c \
+	click-action.c collapse-box.c css-selector.c debug.c \
+	desktop-app-info.c drag-action.c drop-action.c \
+	dynamic-table-layout.c emblem-effect.c fill-box-layout.c \
+	focusable.c focus-manager.c image-content.c label.c \
+	live-window.c live-window-simple.c live-workspace.c model.c \
+	outline-effect.c plugin.c plugins-manager.c popup-menu.c \
+	popup-menu-item.c popup-menu-item-button.c \
+	popup-menu-item-separator.c quicklaunch.c \
+	scaled-table-layout.c scrollbar.c search-manager.c \
+	search-provider.c search-result-container.c \
+	search-result-set.c search-view.c stage.c stage-interface.c \
+	stylable.c text-box.c theme.c theme-css.c theme-effects.c \
+	theme-layout.c toggle-button.c tooltip-action.c utils.c view.c \
+	view-manager.c view-selector.c viewpad.c window-content.c \
+	window-tracker.c window-tracker-backend.c \
+	window-tracker-monitor.c window-tracker-window.c \
+	window-tracker-workspace.c windows-view.c workspace-selector.c \
+	$(x11_sources) $(am__append_10)
 libxfdashboard_la_CFLAGS = $(LIBWNCK_CFLAGS) $(CLUTTER_CFLAGS) \
 	$(CLUTTER_COGL_CFLAGS) $(GLIB_CFLAGS) $(GIO_CFLAGS) \
 	$(GIO_UNIX_CFLAGS) $(GARCON_CFLAGS) $(LIBXFCONF_CFLAGS) \
-	$(LIBXFCE4UTIL_CFLAGS) $(LIBXFCE4UI_CFLAGS) \
-	$(DBUS_GLIB_CFLAGS) $(PLATFORM_CFLAGS) $(am__append_1) \
-	$(am__append_3) $(am__append_5)
+	$(LIBXFCE4UTIL_CFLAGS) $(LIBXFCE4UI_CFLAGS) $(PLATFORM_CFLAGS) \
+	$(am__append_1) $(am__append_3) $(am__append_5) \
+	$(am__append_7) $(am__append_11)
 libxfdashboard_la_LIBADD = $(LIBWNCK_LIBS) $(CLUTTER_LIBS) \
 	$(CLUTTER_COGL_LIBS) $(GLIB_LIBS) $(GIO_LIBS) $(GIO_UNIX_LIBS) \
 	$(GARCON_LIBS) $(LIBXFCONF_LIBS) $(LIBXFCE4UTIL_LIBS) \
-	$(LIBXFCE4UI_LIBS) $(DBUS_GLIB_LIBS) $(LIBM) $(am__append_2) \
-	$(am__append_4) $(am__append_6)
+	$(LIBXFCE4UI_LIBS) $(LIBM) $(am__append_2) $(am__append_4) \
+	$(am__append_6) $(am__append_8) $(am__append_12)
 libxfdashboard_la_LDFLAGS = \
 	-export-dynamic \
 	-version-info $(LIBXFDASHBOARD_VERINFO) \
 	-export-symbols-regex "^[^_].*" \
 	-no-undefined
+
+x11_headers = \
+	x11/window-content-x11.h \
+	x11/window-tracker-x11.h \
+	x11/window-tracker-backend-x11.h \
+	x11/window-tracker-monitor-x11.h \
+	x11/window-tracker-window-x11.h \
+	x11/window-tracker-workspace-x11.h
+
+x11_sources = \
+	x11/window-content-x11.c \
+	x11/window-tracker-x11.c \
+	x11/window-tracker-backend-x11.c \
+	x11/window-tracker-monitor-x11.c \
+	x11/window-tracker-window-x11.c \
+	x11/window-tracker-workspace-x11.c
+
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@gdk_headers = \
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@	gdk/window-tracker-backend-gdk.h
+
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@gdk_sources = \
+@XFDASHBOARD_BUILD_WITH_BACKEND_GDK_TRUE@	gdk/window-tracker-backend-gdk.c
 
 libxfdashboard_la_includedir = \
 	$(includedir)/xfdashboard/libxfdashboard
@@ -710,7 +749,8 @@ libxfdashboard_la_include_HEADERS = \
 EXTRA_DIST = \
 	enums.h.template \
 	enums.c.template \
-	marshal.list
+	marshal.list \
+	version.h.in
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -783,12 +823,42 @@ clean-libLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
+x11/$(am__dirstamp):
+	@$(MKDIR_P) x11
+	@: > x11/$(am__dirstamp)
+x11/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) x11/$(DEPDIR)
+	@: > x11/$(DEPDIR)/$(am__dirstamp)
+x11/libxfdashboard_la-window-content-x11.lo: x11/$(am__dirstamp) \
+	x11/$(DEPDIR)/$(am__dirstamp)
+x11/libxfdashboard_la-window-tracker-x11.lo: x11/$(am__dirstamp) \
+	x11/$(DEPDIR)/$(am__dirstamp)
+x11/libxfdashboard_la-window-tracker-backend-x11.lo:  \
+	x11/$(am__dirstamp) x11/$(DEPDIR)/$(am__dirstamp)
+x11/libxfdashboard_la-window-tracker-monitor-x11.lo:  \
+	x11/$(am__dirstamp) x11/$(DEPDIR)/$(am__dirstamp)
+x11/libxfdashboard_la-window-tracker-window-x11.lo:  \
+	x11/$(am__dirstamp) x11/$(DEPDIR)/$(am__dirstamp)
+x11/libxfdashboard_la-window-tracker-workspace-x11.lo:  \
+	x11/$(am__dirstamp) x11/$(DEPDIR)/$(am__dirstamp)
+gdk/$(am__dirstamp):
+	@$(MKDIR_P) gdk
+	@: > gdk/$(am__dirstamp)
+gdk/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) gdk/$(DEPDIR)
+	@: > gdk/$(DEPDIR)/$(am__dirstamp)
+gdk/libxfdashboard_la-window-tracker-backend-gdk.lo:  \
+	gdk/$(am__dirstamp) gdk/$(DEPDIR)/$(am__dirstamp)
 
 libxfdashboard.la: $(libxfdashboard_la_OBJECTS) $(libxfdashboard_la_DEPENDENCIES) $(EXTRA_libxfdashboard_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libxfdashboard_la_LINK) -rpath $(libdir) $(libxfdashboard_la_OBJECTS) $(libxfdashboard_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f gdk/*.$(OBJEXT)
+	-rm -f gdk/*.lo
+	-rm -f x11/*.$(OBJEXT)
+	-rm -f x11/*.lo
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -810,6 +880,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-click-action.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-collapse-box.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-css-selector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-debug.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-desktop-app-info.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-drag-action.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-drop-action.Plo@am__quote@
@@ -820,6 +891,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-focus-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-focusable.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-image-content.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-label.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-live-window-simple.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-live-window.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-live-workspace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-marshal.Plo@am__quote@
@@ -827,6 +900,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-outline-effect.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-plugins-manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-popup-menu-item-button.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-popup-menu-item-separator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-popup-menu-item.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-popup-menu.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-quicklaunch.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-scaled-table-layout.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-scrollbar.Plo@am__quote@
@@ -851,30 +928,41 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-view.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-viewpad.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-window-content.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-window-tracker-backend.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-window-tracker-monitor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-window-tracker-window.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-window-tracker-workspace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-window-tracker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-windows-view.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libxfdashboard_la-workspace-selector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@gdk/$(DEPDIR)/libxfdashboard_la-window-tracker-backend-gdk.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@x11/$(DEPDIR)/libxfdashboard_la-window-content-x11.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@x11/$(DEPDIR)/libxfdashboard_la-window-tracker-backend-x11.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@x11/$(DEPDIR)/libxfdashboard_la-window-tracker-monitor-x11.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@x11/$(DEPDIR)/libxfdashboard_la-window-tracker-window-x11.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@x11/$(DEPDIR)/libxfdashboard_la-window-tracker-workspace-x11.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@x11/$(DEPDIR)/libxfdashboard_la-window-tracker-x11.Plo@am__quote@
 
 .c.o:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
@@ -1012,6 +1100,13 @@ libxfdashboard_la-css-selector.lo: css-selector.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-css-selector.lo `test -f 'css-selector.c' || echo '$(srcdir)/'`css-selector.c
 
+libxfdashboard_la-debug.lo: debug.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-debug.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-debug.Tpo -c -o libxfdashboard_la-debug.lo `test -f 'debug.c' || echo '$(srcdir)/'`debug.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-debug.Tpo $(DEPDIR)/libxfdashboard_la-debug.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='debug.c' object='libxfdashboard_la-debug.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-debug.lo `test -f 'debug.c' || echo '$(srcdir)/'`debug.c
+
 libxfdashboard_la-desktop-app-info.lo: desktop-app-info.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-desktop-app-info.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-desktop-app-info.Tpo -c -o libxfdashboard_la-desktop-app-info.lo `test -f 'desktop-app-info.c' || echo '$(srcdir)/'`desktop-app-info.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-desktop-app-info.Tpo $(DEPDIR)/libxfdashboard_la-desktop-app-info.Plo
@@ -1075,12 +1170,26 @@ libxfdashboard_la-image-content.lo: image-content.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-image-content.lo `test -f 'image-content.c' || echo '$(srcdir)/'`image-content.c
 
+libxfdashboard_la-label.lo: label.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-label.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-label.Tpo -c -o libxfdashboard_la-label.lo `test -f 'label.c' || echo '$(srcdir)/'`label.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-label.Tpo $(DEPDIR)/libxfdashboard_la-label.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='label.c' object='libxfdashboard_la-label.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-label.lo `test -f 'label.c' || echo '$(srcdir)/'`label.c
+
 libxfdashboard_la-live-window.lo: live-window.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-live-window.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-live-window.Tpo -c -o libxfdashboard_la-live-window.lo `test -f 'live-window.c' || echo '$(srcdir)/'`live-window.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-live-window.Tpo $(DEPDIR)/libxfdashboard_la-live-window.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='live-window.c' object='libxfdashboard_la-live-window.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-live-window.lo `test -f 'live-window.c' || echo '$(srcdir)/'`live-window.c
+
+libxfdashboard_la-live-window-simple.lo: live-window-simple.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-live-window-simple.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-live-window-simple.Tpo -c -o libxfdashboard_la-live-window-simple.lo `test -f 'live-window-simple.c' || echo '$(srcdir)/'`live-window-simple.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-live-window-simple.Tpo $(DEPDIR)/libxfdashboard_la-live-window-simple.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='live-window-simple.c' object='libxfdashboard_la-live-window-simple.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-live-window-simple.lo `test -f 'live-window-simple.c' || echo '$(srcdir)/'`live-window-simple.c
 
 libxfdashboard_la-live-workspace.lo: live-workspace.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-live-workspace.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-live-workspace.Tpo -c -o libxfdashboard_la-live-workspace.lo `test -f 'live-workspace.c' || echo '$(srcdir)/'`live-workspace.c
@@ -1116,6 +1225,34 @@ libxfdashboard_la-plugins-manager.lo: plugins-manager.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='plugins-manager.c' object='libxfdashboard_la-plugins-manager.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-plugins-manager.lo `test -f 'plugins-manager.c' || echo '$(srcdir)/'`plugins-manager.c
+
+libxfdashboard_la-popup-menu.lo: popup-menu.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-popup-menu.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-popup-menu.Tpo -c -o libxfdashboard_la-popup-menu.lo `test -f 'popup-menu.c' || echo '$(srcdir)/'`popup-menu.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-popup-menu.Tpo $(DEPDIR)/libxfdashboard_la-popup-menu.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='popup-menu.c' object='libxfdashboard_la-popup-menu.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-popup-menu.lo `test -f 'popup-menu.c' || echo '$(srcdir)/'`popup-menu.c
+
+libxfdashboard_la-popup-menu-item.lo: popup-menu-item.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-popup-menu-item.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-popup-menu-item.Tpo -c -o libxfdashboard_la-popup-menu-item.lo `test -f 'popup-menu-item.c' || echo '$(srcdir)/'`popup-menu-item.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-popup-menu-item.Tpo $(DEPDIR)/libxfdashboard_la-popup-menu-item.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='popup-menu-item.c' object='libxfdashboard_la-popup-menu-item.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-popup-menu-item.lo `test -f 'popup-menu-item.c' || echo '$(srcdir)/'`popup-menu-item.c
+
+libxfdashboard_la-popup-menu-item-button.lo: popup-menu-item-button.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-popup-menu-item-button.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-popup-menu-item-button.Tpo -c -o libxfdashboard_la-popup-menu-item-button.lo `test -f 'popup-menu-item-button.c' || echo '$(srcdir)/'`popup-menu-item-button.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-popup-menu-item-button.Tpo $(DEPDIR)/libxfdashboard_la-popup-menu-item-button.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='popup-menu-item-button.c' object='libxfdashboard_la-popup-menu-item-button.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-popup-menu-item-button.lo `test -f 'popup-menu-item-button.c' || echo '$(srcdir)/'`popup-menu-item-button.c
+
+libxfdashboard_la-popup-menu-item-separator.lo: popup-menu-item-separator.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-popup-menu-item-separator.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-popup-menu-item-separator.Tpo -c -o libxfdashboard_la-popup-menu-item-separator.lo `test -f 'popup-menu-item-separator.c' || echo '$(srcdir)/'`popup-menu-item-separator.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-popup-menu-item-separator.Tpo $(DEPDIR)/libxfdashboard_la-popup-menu-item-separator.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='popup-menu-item-separator.c' object='libxfdashboard_la-popup-menu-item-separator.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-popup-menu-item-separator.lo `test -f 'popup-menu-item-separator.c' || echo '$(srcdir)/'`popup-menu-item-separator.c
 
 libxfdashboard_la-quicklaunch.lo: quicklaunch.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-quicklaunch.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-quicklaunch.Tpo -c -o libxfdashboard_la-quicklaunch.lo `test -f 'quicklaunch.c' || echo '$(srcdir)/'`quicklaunch.c
@@ -1292,6 +1429,13 @@ libxfdashboard_la-window-tracker.lo: window-tracker.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-window-tracker.lo `test -f 'window-tracker.c' || echo '$(srcdir)/'`window-tracker.c
 
+libxfdashboard_la-window-tracker-backend.lo: window-tracker-backend.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-window-tracker-backend.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-window-tracker-backend.Tpo -c -o libxfdashboard_la-window-tracker-backend.lo `test -f 'window-tracker-backend.c' || echo '$(srcdir)/'`window-tracker-backend.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-window-tracker-backend.Tpo $(DEPDIR)/libxfdashboard_la-window-tracker-backend.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='window-tracker-backend.c' object='libxfdashboard_la-window-tracker-backend.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-window-tracker-backend.lo `test -f 'window-tracker-backend.c' || echo '$(srcdir)/'`window-tracker-backend.c
+
 libxfdashboard_la-window-tracker-monitor.lo: window-tracker-monitor.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT libxfdashboard_la-window-tracker-monitor.lo -MD -MP -MF $(DEPDIR)/libxfdashboard_la-window-tracker-monitor.Tpo -c -o libxfdashboard_la-window-tracker-monitor.lo `test -f 'window-tracker-monitor.c' || echo '$(srcdir)/'`window-tracker-monitor.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libxfdashboard_la-window-tracker-monitor.Tpo $(DEPDIR)/libxfdashboard_la-window-tracker-monitor.Plo
@@ -1327,11 +1471,62 @@ libxfdashboard_la-workspace-selector.lo: workspace-selector.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o libxfdashboard_la-workspace-selector.lo `test -f 'workspace-selector.c' || echo '$(srcdir)/'`workspace-selector.c
 
+x11/libxfdashboard_la-window-content-x11.lo: x11/window-content-x11.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT x11/libxfdashboard_la-window-content-x11.lo -MD -MP -MF x11/$(DEPDIR)/libxfdashboard_la-window-content-x11.Tpo -c -o x11/libxfdashboard_la-window-content-x11.lo `test -f 'x11/window-content-x11.c' || echo '$(srcdir)/'`x11/window-content-x11.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) x11/$(DEPDIR)/libxfdashboard_la-window-content-x11.Tpo x11/$(DEPDIR)/libxfdashboard_la-window-content-x11.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='x11/window-content-x11.c' object='x11/libxfdashboard_la-window-content-x11.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o x11/libxfdashboard_la-window-content-x11.lo `test -f 'x11/window-content-x11.c' || echo '$(srcdir)/'`x11/window-content-x11.c
+
+x11/libxfdashboard_la-window-tracker-x11.lo: x11/window-tracker-x11.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT x11/libxfdashboard_la-window-tracker-x11.lo -MD -MP -MF x11/$(DEPDIR)/libxfdashboard_la-window-tracker-x11.Tpo -c -o x11/libxfdashboard_la-window-tracker-x11.lo `test -f 'x11/window-tracker-x11.c' || echo '$(srcdir)/'`x11/window-tracker-x11.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) x11/$(DEPDIR)/libxfdashboard_la-window-tracker-x11.Tpo x11/$(DEPDIR)/libxfdashboard_la-window-tracker-x11.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='x11/window-tracker-x11.c' object='x11/libxfdashboard_la-window-tracker-x11.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o x11/libxfdashboard_la-window-tracker-x11.lo `test -f 'x11/window-tracker-x11.c' || echo '$(srcdir)/'`x11/window-tracker-x11.c
+
+x11/libxfdashboard_la-window-tracker-backend-x11.lo: x11/window-tracker-backend-x11.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT x11/libxfdashboard_la-window-tracker-backend-x11.lo -MD -MP -MF x11/$(DEPDIR)/libxfdashboard_la-window-tracker-backend-x11.Tpo -c -o x11/libxfdashboard_la-window-tracker-backend-x11.lo `test -f 'x11/window-tracker-backend-x11.c' || echo '$(srcdir)/'`x11/window-tracker-backend-x11.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) x11/$(DEPDIR)/libxfdashboard_la-window-tracker-backend-x11.Tpo x11/$(DEPDIR)/libxfdashboard_la-window-tracker-backend-x11.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='x11/window-tracker-backend-x11.c' object='x11/libxfdashboard_la-window-tracker-backend-x11.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o x11/libxfdashboard_la-window-tracker-backend-x11.lo `test -f 'x11/window-tracker-backend-x11.c' || echo '$(srcdir)/'`x11/window-tracker-backend-x11.c
+
+x11/libxfdashboard_la-window-tracker-monitor-x11.lo: x11/window-tracker-monitor-x11.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT x11/libxfdashboard_la-window-tracker-monitor-x11.lo -MD -MP -MF x11/$(DEPDIR)/libxfdashboard_la-window-tracker-monitor-x11.Tpo -c -o x11/libxfdashboard_la-window-tracker-monitor-x11.lo `test -f 'x11/window-tracker-monitor-x11.c' || echo '$(srcdir)/'`x11/window-tracker-monitor-x11.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) x11/$(DEPDIR)/libxfdashboard_la-window-tracker-monitor-x11.Tpo x11/$(DEPDIR)/libxfdashboard_la-window-tracker-monitor-x11.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='x11/window-tracker-monitor-x11.c' object='x11/libxfdashboard_la-window-tracker-monitor-x11.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o x11/libxfdashboard_la-window-tracker-monitor-x11.lo `test -f 'x11/window-tracker-monitor-x11.c' || echo '$(srcdir)/'`x11/window-tracker-monitor-x11.c
+
+x11/libxfdashboard_la-window-tracker-window-x11.lo: x11/window-tracker-window-x11.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT x11/libxfdashboard_la-window-tracker-window-x11.lo -MD -MP -MF x11/$(DEPDIR)/libxfdashboard_la-window-tracker-window-x11.Tpo -c -o x11/libxfdashboard_la-window-tracker-window-x11.lo `test -f 'x11/window-tracker-window-x11.c' || echo '$(srcdir)/'`x11/window-tracker-window-x11.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) x11/$(DEPDIR)/libxfdashboard_la-window-tracker-window-x11.Tpo x11/$(DEPDIR)/libxfdashboard_la-window-tracker-window-x11.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='x11/window-tracker-window-x11.c' object='x11/libxfdashboard_la-window-tracker-window-x11.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o x11/libxfdashboard_la-window-tracker-window-x11.lo `test -f 'x11/window-tracker-window-x11.c' || echo '$(srcdir)/'`x11/window-tracker-window-x11.c
+
+x11/libxfdashboard_la-window-tracker-workspace-x11.lo: x11/window-tracker-workspace-x11.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT x11/libxfdashboard_la-window-tracker-workspace-x11.lo -MD -MP -MF x11/$(DEPDIR)/libxfdashboard_la-window-tracker-workspace-x11.Tpo -c -o x11/libxfdashboard_la-window-tracker-workspace-x11.lo `test -f 'x11/window-tracker-workspace-x11.c' || echo '$(srcdir)/'`x11/window-tracker-workspace-x11.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) x11/$(DEPDIR)/libxfdashboard_la-window-tracker-workspace-x11.Tpo x11/$(DEPDIR)/libxfdashboard_la-window-tracker-workspace-x11.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='x11/window-tracker-workspace-x11.c' object='x11/libxfdashboard_la-window-tracker-workspace-x11.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o x11/libxfdashboard_la-window-tracker-workspace-x11.lo `test -f 'x11/window-tracker-workspace-x11.c' || echo '$(srcdir)/'`x11/window-tracker-workspace-x11.c
+
+gdk/libxfdashboard_la-window-tracker-backend-gdk.lo: gdk/window-tracker-backend-gdk.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -MT gdk/libxfdashboard_la-window-tracker-backend-gdk.lo -MD -MP -MF gdk/$(DEPDIR)/libxfdashboard_la-window-tracker-backend-gdk.Tpo -c -o gdk/libxfdashboard_la-window-tracker-backend-gdk.lo `test -f 'gdk/window-tracker-backend-gdk.c' || echo '$(srcdir)/'`gdk/window-tracker-backend-gdk.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) gdk/$(DEPDIR)/libxfdashboard_la-window-tracker-backend-gdk.Tpo gdk/$(DEPDIR)/libxfdashboard_la-window-tracker-backend-gdk.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gdk/window-tracker-backend-gdk.c' object='gdk/libxfdashboard_la-window-tracker-backend-gdk.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libxfdashboard_la_CFLAGS) $(CFLAGS) -c -o gdk/libxfdashboard_la-window-tracker-backend-gdk.lo `test -f 'gdk/window-tracker-backend-gdk.c' || echo '$(srcdir)/'`gdk/window-tracker-backend-gdk.c
+
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
+	-rm -rf gdk/.libs gdk/_libs
+	-rm -rf x11/.libs x11/_libs
 install-pkgconfigDATA: $(pkgconfig_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(pkgconfig_DATA)'; test -n "$(pkgconfigdir)" || list=; \
@@ -1493,6 +1688,10 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f gdk/$(DEPDIR)/$(am__dirstamp)
+	-rm -f gdk/$(am__dirstamp)
+	-rm -f x11/$(DEPDIR)/$(am__dirstamp)
+	-rm -f x11/$(am__dirstamp)
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
@@ -1505,7 +1704,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR)
+	-rm -rf ./$(DEPDIR) gdk/$(DEPDIR) x11/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -1552,7 +1751,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR)
+	-rm -rf ./$(DEPDIR) gdk/$(DEPDIR) x11/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -1628,6 +1827,12 @@ uninstall-am: uninstall-libLTLIBRARIES \
 @MAINTAINER_MODE_TRUE@		&& cp xgen-xmc marshal.c \
 @MAINTAINER_MODE_TRUE@		&& rm -f xgen-xmc \
 @MAINTAINER_MODE_TRUE@	)
+
+@MAINTAINER_MODE_TRUE@version.h: version.h.in Makefile
+@MAINTAINER_MODE_TRUE@	$(AM_V_GEN) sed -e "s|@LIBXFDASHBOARD_MAJOR_VERSION[@]|$(XFDASHBOARD_VERSION_MAJOR)|" \
+@MAINTAINER_MODE_TRUE@		-e "s|@LIBXFDASHBOARD_MINOR_VERSION[@]|$(XFDASHBOARD_VERSION_MINOR)|" \
+@MAINTAINER_MODE_TRUE@		-e "s|@LIBXFDASHBOARD_MICRO_VERSION[@]|$(XFDASHBOARD_VERSION_MICRO)|" \
+@MAINTAINER_MODE_TRUE@		$< > $@ || rm $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

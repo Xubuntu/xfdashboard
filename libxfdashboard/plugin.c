@@ -2,7 +2,7 @@
  * plugin: A plugin class managing loading the shared object as well as
  *         initializing and setting up extensions to this application
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,10 @@
 
 #include <glib/gi18n-lib.h>
 
+#include <libxfdashboard/enums.h>
 #include <libxfdashboard/marshal.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Forward declaration */
@@ -56,6 +58,7 @@ struct _XfdashboardPluginPrivate
 {
 	/* Properties related */
 	gchar						*id;
+	XfdashboardPluginFlag		flags;
 	gchar						*name;
 	gchar						*description;
 	gchar						*author;
@@ -83,6 +86,7 @@ enum
 	PROP_FILENAME,
 
 	PROP_ID,
+	PROP_FLAGS,
 	PROP_NAME,
 	PROP_DESCRIPTION,
 	PROP_AUTHOR,
@@ -249,6 +253,28 @@ static void _xfdashboard_plugin_set_id(XfdashboardPlugin *self, const gchar *inI
 
 		/* When ID changes then also paths of this plugin change */
 		_xfdashboard_plugin_update_special_paths(self);
+	}
+}
+
+/* Set flags for plugin */
+static void _xfdashboard_plugin_set_flags(XfdashboardPlugin *self, XfdashboardPluginFlag inFlags)
+{
+	XfdashboardPluginPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_PLUGIN(self));
+	g_return_if_fail(self->priv->flags==XFDASHBOARD_PLUGIN_FLAG_NONE);
+	g_return_if_fail(self->priv->state==XFDASHBOARD_PLUGIN_STATE_NONE);
+
+	priv=self->priv;
+
+	/* Set value if changed */
+	if(priv->flags!=inFlags)
+	{
+		/* Set value */
+		priv->flags=inFlags;
+
+		/* Notify about property change */
+		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardPluginProperties[PROP_FLAGS]);
 	}
 }
 
@@ -516,14 +542,15 @@ static gboolean _xfdashboard_plugin_load(GTypeModule *inModule)
 	priv->state=XFDASHBOARD_PLUGIN_STATE_INITIALIZED;
 
 	/* If we get here then loading and initializing plugin was successful */
-	g_debug("Loaded plugin '%s' successfully:\n  File: %s\n  Name: %s\n  Description: %s\n  Author: %s\n  Copyright: %s\n  License: %s",
-				priv->id,
-				priv->filename,
-				priv->name ? priv->name : "",
-				priv->description ? priv->description : "",
-				priv->author ? priv->author : "",
-				priv->copyright ? priv->copyright : "",
-				priv->license ? priv->license : "");
+	XFDASHBOARD_DEBUG(self, PLUGINS,
+						"Loaded plugin '%s' successfully:\n  File: %s\n  Name: %s\n  Description: %s\n  Author: %s\n  Copyright: %s\n  License: %s",
+						priv->id,
+						priv->filename,
+						priv->name ? priv->name : "",
+						priv->description ? priv->description : "",
+						priv->author ? priv->author : "",
+						priv->copyright ? priv->copyright : "",
+						priv->license ? priv->license : "");
 
 	return(TRUE);
 }
@@ -543,7 +570,9 @@ static void _xfdashboard_plugin_unload(GTypeModule *inModule)
 	/* Disable plugin if it is still enabled */
 	if(priv->state==XFDASHBOARD_PLUGIN_STATE_ENABLED)
 	{
-		g_debug("Disabing plugin '%s' before unloading module", priv->id);
+		XFDASHBOARD_DEBUG(self, PLUGINS,
+							"Disabing plugin '%s' before unloading module",
+							priv->id);
 		xfdashboard_plugin_disable(self);
 	}
 
@@ -668,6 +697,10 @@ static void _xfdashboard_plugin_set_property(GObject *inObject,
 			_xfdashboard_plugin_set_id(self, g_value_get_string(inValue));
 			break;
 
+		case PROP_FLAGS:
+			_xfdashboard_plugin_set_flags(self, g_value_get_flags(inValue));
+			break;
+
 		case PROP_NAME:
 			_xfdashboard_plugin_set_name(self, g_value_get_string(inValue));
 			break;
@@ -710,6 +743,10 @@ static void _xfdashboard_plugin_get_property(GObject *inObject,
 
 		case PROP_ID:
 			g_value_set_string(outValue, priv->id);
+			break;
+
+		case PROP_FLAGS:
+			g_value_set_flags(outValue, priv->flags);
 			break;
 
 		case PROP_NAME:
@@ -784,6 +821,14 @@ static void xfdashboard_plugin_class_init(XfdashboardPluginClass *klass)
 							_("The unique ID for this plugin"),
 							NULL,
 							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT_ONLY);
+
+	XfdashboardPluginProperties[PROP_FLAGS]=
+		g_param_spec_flags("flags",
+							_("Flags"),
+							_("Flags defining behaviour of this plugin"),
+							XFDASHBOARD_TYPE_PLUGIN_FLAG,
+							XFDASHBOARD_PLUGIN_FLAG_NONE,
+							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	XfdashboardPluginProperties[PROP_NAME]=
 		g_param_spec_string("name",
@@ -895,6 +940,7 @@ static void xfdashboard_plugin_init(XfdashboardPlugin *self)
 	priv->lastLoadingError=NULL;
 
 	priv->id=NULL;
+	priv->flags=XFDASHBOARD_PLUGIN_FLAG_NONE;
 	priv->name=NULL;
 	priv->description=NULL;
 	priv->author=NULL;
@@ -1012,6 +1058,14 @@ const gchar* xfdashboard_plugin_get_id(XfdashboardPlugin *self)
 	return(self->priv->id);
 }
 
+/* Get flags of plugin */
+XfdashboardPluginFlag xfdashboard_plugin_get_flags(XfdashboardPlugin *self)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_PLUGIN(self), XFDASHBOARD_PLUGIN_FLAG_NONE);
+
+	return(self->priv->flags);
+}
+
 /* Set plugin information */
 void xfdashboard_plugin_set_info(XfdashboardPlugin *self,
 									const gchar *inFirstPropertyName, ...)
@@ -1068,7 +1122,9 @@ void xfdashboard_plugin_enable(XfdashboardPlugin *self)
 	/* Do nothing and return immediately if plugin is enabled already */
 	if(priv->state==XFDASHBOARD_PLUGIN_STATE_ENABLED)
 	{
-		g_debug("Plugin '%s' is already enabled", priv->id);
+		XFDASHBOARD_DEBUG(self, PLUGINS,
+							"Plugin '%s' is already enabled",
+							priv->id);
 		return;
 	}
 
@@ -1084,7 +1140,9 @@ void xfdashboard_plugin_enable(XfdashboardPlugin *self)
 
 	/* Emit signal action 'enable' to enable plugin */
 	g_signal_emit(self, XfdashboardPluginSignals[ACTION_ENABLE], 0, &result);
-	g_debug("Plugin '%s' enabled", priv->id);
+	XFDASHBOARD_DEBUG(self, PLUGINS,
+						"Plugin '%s' enabled",
+						priv->id);
 
 	/* Set enabled state */
 	priv->state=XFDASHBOARD_PLUGIN_STATE_ENABLED;
@@ -1103,13 +1161,17 @@ void xfdashboard_plugin_disable(XfdashboardPlugin *self)
 	/* Do nothing and return immediately if plugin is not enabled */
 	if(priv->state!=XFDASHBOARD_PLUGIN_STATE_ENABLED)
 	{
-		g_debug("Plugin '%s' is already disabled", priv->id);
+		XFDASHBOARD_DEBUG(self, PLUGINS,
+							"Plugin '%s' is already disabled",
+							priv->id);
 		return;
 	}
 
 	/* Emit signal action 'disable' to disable plugin */
 	g_signal_emit(self, XfdashboardPluginSignals[ACTION_DISABLE], 0, &result);
-	g_debug("Plugin '%s' disabled", priv->id);
+	XFDASHBOARD_DEBUG(self, PLUGINS,
+						"Plugin '%s' disabled",
+						priv->id);
 
 	/* Set disabled state, i.e. revert to initialized state */
 	priv->state=XFDASHBOARD_PLUGIN_STATE_INITIALIZED;

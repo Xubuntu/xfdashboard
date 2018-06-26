@@ -4,7 +4,7 @@
 /*
  * enums: Definitions of enumerations and flags used in GObject objects
  * 
- * Copyrigt 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,15 +47,21 @@ GType xfdashboard_binding_flags_get_type(void) G_GNUC_CONST;
 GType xfdashboard_bindings_pool_error_enum_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_BINDINGS_POOL_ERROR_ENUM	(xfdashboard_bindings_pool_error_enum_get_type())
 
-/* enumerations from "button.h" */
-GType xfdashboard_button_style_get_type(void) G_GNUC_CONST;
-#define XFDASHBOARD_TYPE_BUTTON_STYLE	(xfdashboard_button_style_get_type())
-
 /* enumerations from "image-content.h" */
 GType xfdashboard_image_content_loading_state_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_IMAGE_CONTENT_LOADING_STATE	(xfdashboard_image_content_loading_state_get_type())
 
+/* enumerations from "label.h" */
+GType xfdashboard_label_style_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_LABEL_STYLE	(xfdashboard_label_style_get_type())
+
+/* enumerations from "live-window-simple.h" */
+GType xfdashboard_live_window_simple_display_type_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_LIVE_WINDOW_SIMPLE_DISPLAY_TYPE	(xfdashboard_live_window_simple_display_type_get_type())
+
 /* enumerations from "plugin.h" */
+GType xfdashboard_plugin_flag_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_PLUGIN_FLAG	(xfdashboard_plugin_flag_get_type())
 GType xfdashboard_plugin_error_enum_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_PLUGIN_ERROR_ENUM	(xfdashboard_plugin_error_enum_get_type())
 
@@ -72,6 +78,8 @@ GType xfdashboard_theme_effects_error_enum_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_THEME_EFFECTS_ERROR_ENUM	(xfdashboard_theme_effects_error_enum_get_type())
 
 /* enumerations from "theme-layout.h" */
+GType xfdashboard_theme_layout_build_get_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_THEME_LAYOUT_BUILD_GET	(xfdashboard_theme_layout_build_get_get_type())
 GType xfdashboard_theme_layout_error_enum_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_THEME_LAYOUT_ERROR_ENUM	(xfdashboard_theme_layout_error_enum_get_type())
 
@@ -96,6 +104,12 @@ GType xfdashboard_anchor_point_get_type(void) G_GNUC_CONST;
 /* enumerations from "view.h" */
 GType xfdashboard_view_fit_mode_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_VIEW_FIT_MODE	(xfdashboard_view_fit_mode_get_type())
+
+/* enumerations from "window-tracker-window.h" */
+GType xfdashboard_window_tracker_window_state_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_WINDOW_TRACKER_WINDOW_STATE	(xfdashboard_window_tracker_window_state_get_type())
+GType xfdashboard_window_tracker_window_action_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_WINDOW_TRACKER_WINDOW_ACTION	(xfdashboard_window_tracker_window_action_get_type())
 G_END_DECLS
 
 #endif

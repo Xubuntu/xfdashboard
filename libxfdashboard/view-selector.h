@@ -1,7 +1,7 @@
 /*
  * view-selector: A selector for registered views
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,8 +47,15 @@ typedef struct _XfdashboardViewSelector				XfdashboardViewSelector;
 typedef struct _XfdashboardViewSelectorPrivate		XfdashboardViewSelectorPrivate;
 typedef struct _XfdashboardViewSelectorClass		XfdashboardViewSelectorClass;
 
+/**
+ * XfdashboardViewSelector:
+ *
+ * The #XfdashboardViewSelector structure contains only private data and
+ * should be accessed using the provided API
+ */
 struct _XfdashboardViewSelector
 {
+	/*< private >*/
 	/* Parent instance */
 	XfdashboardActor				parent_instance;
 
@@ -56,6 +63,12 @@ struct _XfdashboardViewSelector
 	XfdashboardViewSelectorPrivate	*priv;
 };
 
+/**
+ * XfdashboardViewSelectorClass:
+ * @state_changed: Class handler for the #XfdashboardViewSelectorClass::state_changed signal
+ *
+ * The #XfdashboardViewSelectorClass structure contains only private data
+ */
 struct _XfdashboardViewSelectorClass
 {
 	/*< private >*/

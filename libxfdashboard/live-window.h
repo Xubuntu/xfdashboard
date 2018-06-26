@@ -3,7 +3,7 @@
  *              be updated if changed and visible on active workspace.
  *              It also provides controls to manipulate it.
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,7 @@
 
 #include <clutter/clutter.h>
 
-#include <libxfdashboard/background.h>
-#include <libxfdashboard/button.h>
+#include <libxfdashboard/live-window-simple.h>
 #include <libxfdashboard/window-tracker.h>
 
 G_BEGIN_DECLS
@@ -51,26 +50,24 @@ typedef struct _XfdashboardLiveWindowPrivate		XfdashboardLiveWindowPrivate;
 
 struct _XfdashboardLiveWindow
 {
+	/*< private >*/
 	/* Parent instance */
-	XfdashboardBackground			parent_instance;
+	XfdashboardLiveWindowSimple			parent_instance;
 
 	/* Private structure */
-	XfdashboardLiveWindowPrivate	*priv;
+	XfdashboardLiveWindowPrivate		*priv;
 };
 
 struct _XfdashboardLiveWindowClass
 {
 	/*< private >*/
 	/* Parent class */
-	XfdashboardBackgroundClass		parent_class;
+	XfdashboardLiveWindowSimpleClass	parent_class;
 
 	/*< public >*/
 	/* Virtual functions */
 	void (*clicked)(XfdashboardLiveWindow *self);
 	void (*close)(XfdashboardLiveWindow *self);
-	void (*geometry_changed)(XfdashboardLiveWindow *self);
-	void (*visibility_changed)(XfdashboardLiveWindow *self, gboolean inVisible);
-	void (*workspace_changed)(XfdashboardLiveWindow *self);
 };
 
 /* Public API */
@@ -79,14 +76,17 @@ GType xfdashboard_live_window_get_type(void) G_GNUC_CONST;
 ClutterActor* xfdashboard_live_window_new(void);
 ClutterActor* xfdashboard_live_window_new_for_window(XfdashboardWindowTrackerWindow *inWindow);
 
-XfdashboardWindowTrackerWindow* xfdashboard_live_window_get_window(XfdashboardLiveWindow *self);
-void xfdashboard_live_window_set_window(XfdashboardLiveWindow *self, XfdashboardWindowTrackerWindow *inWindow);
-
 gfloat xfdashboard_live_window_get_title_actor_padding(XfdashboardLiveWindow *self);
 void xfdashboard_live_window_set_title_actor_padding(XfdashboardLiveWindow *self, gfloat inPadding);
 
 gfloat xfdashboard_live_window_get_close_button_padding(XfdashboardLiveWindow *self);
 void xfdashboard_live_window_set_close_button_padding(XfdashboardLiveWindow *self, gfloat inPadding);
+
+gboolean xfdashboard_live_window_get_show_subwindows(XfdashboardLiveWindow *self);
+void xfdashboard_live_window_set_show_subwindows(XfdashboardLiveWindow *self, gboolean inShowSubwindows);
+
+gboolean xfdashboard_live_window_get_allow_subwindows(XfdashboardLiveWindow *self);
+void xfdashboard_live_window_set_allow_subwindows(XfdashboardLiveWindow *self, gboolean inAllowSubwindows);
 
 G_END_DECLS
 
