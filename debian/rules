@@ -11,6 +11,10 @@ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 %:
 	dh $@
 
+override_dh_autoreconf:
+	mkdir -p m4
+	dh_autoreconf
+
 override_dh_installchangelogs:
 	dh_installchangelogs ChangeLog
 
