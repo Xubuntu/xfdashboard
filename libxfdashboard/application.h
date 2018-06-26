@@ -2,7 +2,7 @@
  * application: Single-instance managing application and single-instance
  *              objects like window manager and so on.
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 
 #include <libxfdashboard/theme.h>
 #include <libxfdashboard/focusable.h>
+#include <libxfdashboard/stage.h>
 
 G_BEGIN_DECLS
 
@@ -68,8 +69,15 @@ typedef struct _XfdashboardApplication				XfdashboardApplication;
 typedef struct _XfdashboardApplicationClass			XfdashboardApplicationClass;
 typedef struct _XfdashboardApplicationPrivate		XfdashboardApplicationPrivate;
 
+/**
+ * XfdashboardApplication:
+ *
+ * The #XfdashboardApplication structure contains only private data and
+ * should be accessed using the provided API
+ */
 struct _XfdashboardApplication
 {
+	/*< private >*/
 	/* Parent instance */
 	GApplication					parent_instance;
 
@@ -77,6 +85,19 @@ struct _XfdashboardApplication
 	XfdashboardApplicationPrivate	*priv;
 };
 
+/**
+ * XfdashboardApplicationClass:
+ * @initialized: Class handler for the #XfdashboardApplicationClass::initialized signal
+ * @suspend: Class handler for the #XfdashboardApplicationClass::suspend signal
+ * @resume: Class handler for the #XfdashboardApplicationClass::resume signal
+ * @quit: Class handler for the #XfdashboardApplicationClass::quit signal
+ * @shutdown_final: Class handler for the #XfdashboardApplicationClass::shutdown_final signal
+ * @theme_changed: Class handler for the #XfdashboardApplicationClass::theme_changed signal
+ * @application_launched: Class handler for the #XfdashboardApplicationClass::application_launched signal
+ * @exit: Class handler for the #XfdashboardApplicationClass::exit signal
+ *
+ * The #XfdashboardApplicationClass structure contains only private data
+ */
 struct _XfdashboardApplicationClass
 {
 	/*< private >*/
@@ -85,12 +106,16 @@ struct _XfdashboardApplicationClass
 
 	/*< public >*/
 	/* Virtual functions */
+	void (*initialized)(XfdashboardApplication *self);
+
 	void (*suspend)(XfdashboardApplication *self);
 	void (*resume)(XfdashboardApplication *self);
 
 	void (*quit)(XfdashboardApplication *self);
 	void (*shutdown_final)(XfdashboardApplication *self);
 
+	void (*theme_loading)(XfdashboardApplication *self, XfdashboardTheme *inTheme);
+	void (*theme_loaded)(XfdashboardApplication *self, XfdashboardTheme *inTheme);
 	void (*theme_changed)(XfdashboardApplication *self, XfdashboardTheme *inTheme);
 
 	void (*application_launched)(XfdashboardApplication *self, GAppInfo *inAppInfo);
@@ -106,6 +131,7 @@ struct _XfdashboardApplicationClass
 /* Public API */
 GType xfdashboard_application_get_type(void) G_GNUC_CONST;
 
+gboolean xfdashboard_application_has_default(void);
 XfdashboardApplication* xfdashboard_application_get_default(void);
 
 gboolean xfdashboard_application_is_daemonized(XfdashboardApplication *self);
@@ -116,9 +142,10 @@ void xfdashboard_application_resume(XfdashboardApplication *self);
 void xfdashboard_application_suspend_or_quit(XfdashboardApplication *self);
 void xfdashboard_application_quit_forced(XfdashboardApplication *self);
 
-XfconfChannel* xfdashboard_application_get_xfconf_channel(XfdashboardApplication *self);
-
+XfdashboardStage* xfdashboard_application_get_stage(XfdashboardApplication *self);
 XfdashboardTheme* xfdashboard_application_get_theme(XfdashboardApplication *self);
+
+XfconfChannel* xfdashboard_application_get_xfconf_channel(XfdashboardApplication *self);
 
 G_END_DECLS
 

@@ -2,7 +2,7 @@
  * theme: Top-level theme object (parses key file and manages loading
  *        resources like css style files, xml layout files etc.)
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 #include <gio/gio.h>
 
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -54,9 +55,14 @@ struct _XfdashboardThemePrivate
 	gchar						*themeComment;
 
 	/* Instance related */
+	gboolean					loaded;
+
 	XfdashboardThemeCSS			*styling;
 	XfdashboardThemeLayout		*layout;
 	XfdashboardThemeEffects		*effects;
+
+	gchar						*userThemeStyleFile;
+	gchar						*userGlobalStyleFile;
 };
 
 /* Properties */
@@ -79,67 +85,10 @@ static GParamSpec* XfdashboardThemeProperties[PROP_LAST]={ 0, };
 #define XFDASHBOARD_THEME_SUBPATH						"xfdashboard-1.0"
 #define XFDASHBOARD_THEME_FILE							"xfdashboard.theme"
 #define XFDASHBOARD_THEME_GROUP							"Xfdashboard Theme"
-
-/* Release allocated resources in theme instance */
-static void _xfdashboard_theme_clean(XfdashboardTheme *self)
-{
-	XfdashboardThemePrivate		*priv;
-
-	g_return_if_fail(XFDASHBOARD_IS_THEME(self));
-
-	priv=self->priv;
-
-	/* Release allocated resources */
-	if(priv->themeName)
-	{
-		g_free(priv->themeName);
-		priv->themeName=NULL;
-		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardThemeProperties[PROP_NAME]);
-	}
-
-	if(priv->themePath)
-	{
-		g_free(priv->themePath);
-		priv->themePath=NULL;
-		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardThemeProperties[PROP_PATH]);
-	}
-
-	if(priv->themeDisplayName)
-	{
-		g_free(priv->themeDisplayName);
-		priv->themeDisplayName=NULL;
-		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardThemeProperties[PROP_DISPLAY_NAME]);
-	}
-
-	if(priv->themeComment)
-	{
-		g_free(priv->themeComment);
-		priv->themeComment=NULL;
-		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardThemeProperties[PROP_COMMENT]);
-	}
-
-	if(priv->styling)
-	{
-		g_object_unref(priv->styling);
-		priv->styling=NULL;
-	}
-
-	if(priv->layout)
-	{
-		g_object_unref(priv->layout);
-		priv->layout=NULL;
-	}
-
-	if(priv->effects)
-	{
-		g_object_unref(priv->effects);
-		priv->effects=NULL;
-	}
-}
+#define XFDASHBOARD_USER_GLOBAL_CSS_FILE				"global.css"
 
 /* Load theme file and all listed resources in this file */
 static gboolean _xfdashboard_theme_load_resources(XfdashboardTheme *self,
-													const gchar *inThemePath,
 													GError **outError)
 {
 	XfdashboardThemePrivate		*priv;
@@ -151,14 +100,27 @@ static gboolean _xfdashboard_theme_load_resources(XfdashboardTheme *self,
 	gint						counter;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_THEME(self), FALSE);
-	g_return_val_if_fail(inThemePath!=NULL && *inThemePath!=0, FALSE);
 	g_return_val_if_fail(outError==NULL || *outError==NULL, FALSE);
 
 	priv=self->priv;
 	error=NULL;
 
+	/* Check that theme was found */
+	if(!priv->themePath)
+	{
+		/* Set error */
+		g_set_error(outError,
+					XFDASHBOARD_THEME_ERROR,
+					XFDASHBOARD_THEME_ERROR_THEME_NOT_FOUND,
+					_("Theme '%s' not found"),
+					priv->themeName);
+
+		/* Return FALSE to indicate error */
+		return(FALSE);
+	}
+
 	/* Load theme file */
-	themeFile=g_build_filename(inThemePath, XFDASHBOARD_THEME_FILE, NULL);
+	themeFile=g_build_filename(priv->themePath, XFDASHBOARD_THEME_FILE, NULL);
 
 	themeKeyFile=g_key_file_new();
 	if(!g_key_file_load_from_file(themeKeyFile,
@@ -170,8 +132,6 @@ static gboolean _xfdashboard_theme_load_resources(XfdashboardTheme *self,
 		g_propagate_error(outError, error);
 
 		/* Release allocated resources */
-		_xfdashboard_theme_clean(self);
-
 		if(themeFile) g_free(themeFile);
 		if(themeKeyFile) g_key_file_free(themeKeyFile);
 
@@ -195,8 +155,6 @@ static gboolean _xfdashboard_theme_load_resources(XfdashboardTheme *self,
 		g_propagate_error(outError, error);
 
 		/* Release allocated resources */
-		_xfdashboard_theme_clean(self);
-
 		if(themeKeyFile) g_key_file_free(themeKeyFile);
 
 		/* Return FALSE to indicate error */
@@ -217,15 +175,16 @@ static gboolean _xfdashboard_theme_load_resources(XfdashboardTheme *self,
 		g_propagate_error(outError, error);
 
 		/* Release allocated resources */
-		_xfdashboard_theme_clean(self);
-
 		if(themeKeyFile) g_key_file_free(themeKeyFile);
 
 		/* Return FALSE to indicate error */
 		return(FALSE);
 	}
 
-	/* Create CSS parser and load style resources */
+	/* Create CSS parser, load style resources first and user stylesheets (theme
+	 * unrelated "global.css" and theme related "user-[THEME_NAME].css" in this
+	 * order) at last to allow user to override theme styles.
+	 */
 	resources=g_key_file_get_string_list(themeKeyFile,
 											XFDASHBOARD_THEME_GROUP,
 											"Style",
@@ -237,31 +196,32 @@ static gboolean _xfdashboard_theme_load_resources(XfdashboardTheme *self,
 		g_propagate_error(outError, error);
 
 		/* Release allocated resources */
-		_xfdashboard_theme_clean(self);
-
 		if(themeKeyFile) g_key_file_free(themeKeyFile);
 
 		/* Return FALSE to indicate error */
 		return(FALSE);
 	}
 
-	priv->styling=xfdashboard_theme_css_new(inThemePath);
 	counter=0;
 	resource=resources;
 	while(*resource)
 	{
 		/* Get path and file for style resource */
-		resourceFile=g_build_filename(inThemePath, *resource, NULL);
+		resourceFile=g_build_filename(priv->themePath, *resource, NULL);
 
 		/* Try to load style resource */
+		XFDASHBOARD_DEBUG(self, THEME,
+							"Loading CSS file %s for theme %s with priority %d",
+							resourceFile,
+							priv->themeName,
+							counter);
+
 		if(!xfdashboard_theme_css_add_file(priv->styling, resourceFile, counter, &error))
 		{
 			/* Set error */
 			g_propagate_error(outError, error);
 
 			/* Release allocated resources */
-			_xfdashboard_theme_clean(self);
-
 			if(resources) g_strfreev(resources);
 			if(resourceFile) g_free(resourceFile);
 			if(themeKeyFile) g_key_file_free(themeKeyFile);
@@ -279,6 +239,56 @@ static gboolean _xfdashboard_theme_load_resources(XfdashboardTheme *self,
 	}
 	g_strfreev(resources);
 
+	if(priv->userGlobalStyleFile)
+	{
+		XFDASHBOARD_DEBUG(self, THEME,
+							"Loading user's global CSS file %s for theme %s with priority %d",
+							priv->userGlobalStyleFile,
+							priv->themeName,
+							counter);
+
+		/* Load user's theme unrelated (global) stylesheet as it exists */
+		if(!xfdashboard_theme_css_add_file(priv->styling, priv->userGlobalStyleFile, counter, &error))
+		{
+			/* Set error */
+			g_propagate_error(outError, error);
+
+			/* Release allocated resources */
+			if(themeKeyFile) g_key_file_free(themeKeyFile);
+
+			/* Return FALSE to indicate error */
+			return(FALSE);
+		}
+
+		/* Increase counter used for CSS priority for next user CSS file */
+		counter++;
+	}
+
+	if(priv->userThemeStyleFile)
+	{
+		XFDASHBOARD_DEBUG(self, THEME,
+							"Loading user's theme CSS file %s for theme %s with priority %d",
+							priv->userThemeStyleFile,
+							priv->themeName,
+							counter);
+
+		/* Load user's theme related stylesheet as it exists */
+		if(!xfdashboard_theme_css_add_file(priv->styling, priv->userThemeStyleFile, counter, &error))
+		{
+			/* Set error */
+			g_propagate_error(outError, error);
+
+			/* Release allocated resources */
+			if(themeKeyFile) g_key_file_free(themeKeyFile);
+
+			/* Return FALSE to indicate error */
+			return(FALSE);
+		}
+
+		/* Increase counter used for CSS priority for next user CSS file */
+		counter++;
+	}
+
 	/* Create XML parser and load layout resources */
 	resources=g_key_file_get_string_list(themeKeyFile,
 											XFDASHBOARD_THEME_GROUP,
@@ -291,30 +301,30 @@ static gboolean _xfdashboard_theme_load_resources(XfdashboardTheme *self,
 		g_propagate_error(outError, error);
 
 		/* Release allocated resources */
-		_xfdashboard_theme_clean(self);
-
 		if(themeKeyFile) g_key_file_free(themeKeyFile);
 
 		/* Return FALSE to indicate error */
 		return(FALSE);
 	}
 
-	priv->layout=xfdashboard_theme_layout_new();
 	resource=resources;
 	while(*resource)
 	{
 		/* Get path and file for style resource */
-		resourceFile=g_build_filename(inThemePath, *resource, NULL);
+		resourceFile=g_build_filename(priv->themePath, *resource, NULL);
 
-		/* Try to load style resource */
+		/* Try to load layout resource */
+		XFDASHBOARD_DEBUG(self, THEME,
+							"Loading XML layout file %s for theme %s",
+							resourceFile,
+							priv->themeName);
+
 		if(!xfdashboard_theme_layout_add_file(priv->layout, resourceFile, &error))
 		{
 			/* Set error */
 			g_propagate_error(outError, error);
 
 			/* Release allocated resources */
-			_xfdashboard_theme_clean(self);
-
 			if(resources) g_strfreev(resources);
 			if(resourceFile) g_free(resourceFile);
 			if(themeKeyFile) g_key_file_free(themeKeyFile);
@@ -349,30 +359,30 @@ static gboolean _xfdashboard_theme_load_resources(XfdashboardTheme *self,
 			g_propagate_error(outError, error);
 
 			/* Release allocated resources */
-			_xfdashboard_theme_clean(self);
-
 			if(themeKeyFile) g_key_file_free(themeKeyFile);
 
 			/* Return FALSE to indicate error */
 			return(FALSE);
 		}
 
-		priv->effects=xfdashboard_theme_effects_new();
 		resource=resources;
 		while(*resource)
 		{
-			/* Get path and file for style resource */
-			resourceFile=g_build_filename(inThemePath, *resource, NULL);
+			/* Get path and file for effect resource */
+			resourceFile=g_build_filename(priv->themePath, *resource, NULL);
 
 			/* Try to load style resource */
+			XFDASHBOARD_DEBUG(self, THEME,
+								"Loading XML effects file %s for theme %s",
+								resourceFile,
+								priv->themeName);
+
 			if(!xfdashboard_theme_effects_add_file(priv->effects, resourceFile, &error))
 			{
 				/* Set error */
 				g_propagate_error(outError, error);
 
 				/* Release allocated resources */
-				_xfdashboard_theme_clean(self);
-
 				if(resources) g_strfreev(resources);
 				if(resourceFile) g_free(resourceFile);
 				if(themeKeyFile) g_key_file_free(themeKeyFile);
@@ -390,7 +400,6 @@ static gboolean _xfdashboard_theme_load_resources(XfdashboardTheme *self,
 		}
 		g_strfreev(resources);
 	}
-
 
 	/* Release allocated resources */
 	if(themeKeyFile) g_key_file_free(themeKeyFile);
@@ -425,7 +434,9 @@ static gchar* _xfdashboard_theme_lookup_path_for_theme(XfdashboardTheme *self,
 		if(envPath)
 		{
 			themeFile=g_build_filename(envPath, XFDASHBOARD_THEME_FILE, NULL);
-			g_debug("Trying theme file: %s", themeFile);
+			XFDASHBOARD_DEBUG(self, THEME,
+								"Trying theme file: %s",
+								themeFile);
 			if(!g_file_test(themeFile, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
 			{
 				g_free(themeFile);
@@ -438,7 +449,9 @@ static gchar* _xfdashboard_theme_lookup_path_for_theme(XfdashboardTheme *self,
 	if(!themeFile)
 	{
 		themeFile=g_build_filename(g_get_user_data_dir(), "themes", inThemeName, XFDASHBOARD_THEME_SUBPATH, XFDASHBOARD_THEME_FILE, NULL);
-		g_debug("Trying theme file: %s", themeFile);
+		XFDASHBOARD_DEBUG(self, THEME,
+							"Trying theme file: %s",
+							themeFile);
 		if(!g_file_test(themeFile, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
 		{
 			g_free(themeFile);
@@ -455,7 +468,9 @@ static gchar* _xfdashboard_theme_lookup_path_for_theme(XfdashboardTheme *self,
 		if(homeDirectory)
 		{
 			themeFile=g_build_filename(homeDirectory, ".themes", inThemeName, XFDASHBOARD_THEME_SUBPATH, XFDASHBOARD_THEME_FILE, NULL);
-			g_debug("Trying theme file: %s", themeFile);
+			XFDASHBOARD_DEBUG(self, THEME,
+								"Trying theme file: %s",
+								themeFile);
 			if(!g_file_test(themeFile, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
 			{
 				g_free(themeFile);
@@ -468,7 +483,9 @@ static gchar* _xfdashboard_theme_lookup_path_for_theme(XfdashboardTheme *self,
 	if(!themeFile)
 	{
 		themeFile=g_build_filename(PACKAGE_DATADIR, "themes", inThemeName, XFDASHBOARD_THEME_SUBPATH, XFDASHBOARD_THEME_FILE, NULL);
-		g_debug("Trying theme file: %s", themeFile);
+		XFDASHBOARD_DEBUG(self, THEME,
+							"Trying theme file: %s",
+							themeFile);
 		if(!g_file_test(themeFile, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
 		{
 			g_free(themeFile);
@@ -491,15 +508,152 @@ static gchar* _xfdashboard_theme_lookup_path_for_theme(XfdashboardTheme *self,
 	return(NULL);
 }
 
+/* Theme's name was set so lookup pathes and initialize but do not load resources */
+static void _xfdashboard_theme_set_theme_name(XfdashboardTheme *self, const gchar *inThemeName)
+{
+	XfdashboardThemePrivate		*priv;
+	gchar						*themePath;
+	gchar						*resourceFile;
+	gchar						*userThemeStylesheet;
+
+	g_return_if_fail(XFDASHBOARD_IS_THEME(self));
+	g_return_if_fail(inThemeName && *inThemeName);
+
+	priv=self->priv;
+
+	/* The theme name must not be set already */
+	if(priv->themeName)
+	{
+		/* Show error message */
+		g_critical(_("Cannot change theme name to '%s' because it is already set to '%s'"),
+					inThemeName,
+					priv->themeName);
+
+		return;
+	}
+
+	/* Lookup path of theme by lookup at all possible paths for theme file */
+	themePath=_xfdashboard_theme_lookup_path_for_theme(self, inThemeName);
+	if(!themePath)
+	{
+		g_critical(_("Theme '%s' not found"), inThemeName);
+
+		/* Return here because looking up path failed */
+		return;
+	}
+
+	/* Set up internal variable and notify about property changes */
+	priv->themeName=g_strdup(inThemeName);
+	g_object_notify_by_pspec(G_OBJECT(self), XfdashboardThemeProperties[PROP_NAME]);
+
+	priv->themePath=g_strdup(themePath);
+	g_object_notify_by_pspec(G_OBJECT(self), XfdashboardThemeProperties[PROP_PATH]);
+
+	/* Initialize theme resources */
+	priv->styling=xfdashboard_theme_css_new(priv->themePath);
+	priv->layout=xfdashboard_theme_layout_new();
+	priv->effects=xfdashboard_theme_effects_new();
+
+	/* Check for user resource files */
+	resourceFile=g_build_filename(g_get_user_config_dir(), "xfdashboard", "themes", XFDASHBOARD_USER_GLOBAL_CSS_FILE, NULL);
+	if(g_file_test(resourceFile, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
+	{
+		priv->userGlobalStyleFile=g_strdup(resourceFile);
+	}
+		else
+		{
+			XFDASHBOARD_DEBUG(self, THEME,
+								"No user global stylesheet found at %s for theme %s - skipping",
+								resourceFile,
+								priv->themeName);
+		}
+	g_free(resourceFile);
+
+	userThemeStylesheet=g_strdup_printf("user-%s.css", priv->themeName);
+	resourceFile=g_build_filename(g_get_user_config_dir(), "xfdashboard", "themes", userThemeStylesheet, NULL);
+	if(g_file_test(resourceFile, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
+	{
+		priv->userThemeStyleFile=g_strdup(resourceFile);
+	}
+		else
+		{
+			XFDASHBOARD_DEBUG(self, THEME,
+								"No user theme stylesheet found at %s for theme %s - skipping",
+								resourceFile,
+								priv->themeName);
+		}
+	g_free(resourceFile);
+
+	/* Release allocated resources */
+	if(themePath) g_free(themePath);
+}
+
 /* IMPLEMENTATION: GObject */
 
 /* Dispose this object */
 static void _xfdashboard_theme_dispose(GObject *inObject)
 {
 	XfdashboardTheme			*self=XFDASHBOARD_THEME(inObject);
+	XfdashboardThemePrivate		*priv=self->priv;
 
 	/* Release allocated resources */
-	_xfdashboard_theme_clean(self);
+	if(priv->themeName)
+	{
+		g_free(priv->themeName);
+		priv->themeName=NULL;
+		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardThemeProperties[PROP_NAME]);
+	}
+
+	if(priv->themePath)
+	{
+		g_free(priv->themePath);
+		priv->themePath=NULL;
+		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardThemeProperties[PROP_PATH]);
+	}
+
+	if(priv->themeDisplayName)
+	{
+		g_free(priv->themeDisplayName);
+		priv->themeDisplayName=NULL;
+		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardThemeProperties[PROP_DISPLAY_NAME]);
+	}
+
+	if(priv->themeComment)
+	{
+		g_free(priv->themeComment);
+		priv->themeComment=NULL;
+		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardThemeProperties[PROP_COMMENT]);
+	}
+
+	if(priv->userThemeStyleFile)
+	{
+		g_free(priv->userThemeStyleFile);
+		priv->userThemeStyleFile=NULL;
+	}
+
+	if(priv->userGlobalStyleFile)
+	{
+		g_free(priv->userGlobalStyleFile);
+		priv->userGlobalStyleFile=NULL;
+	}
+
+	if(priv->styling)
+	{
+		g_object_unref(priv->styling);
+		priv->styling=NULL;
+	}
+
+	if(priv->layout)
+	{
+		g_object_unref(priv->layout);
+		priv->layout=NULL;
+	}
+
+	if(priv->effects)
+	{
+		g_object_unref(priv->effects);
+		priv->effects=NULL;
+	}
 
 	/* Call parent's class dispose method */
 	G_OBJECT_CLASS(xfdashboard_theme_parent_class)->dispose(inObject);
@@ -511,8 +665,14 @@ static void _xfdashboard_theme_set_property(GObject *inObject,
 											const GValue *inValue,
 											GParamSpec *inSpec)
 {
+	XfdashboardTheme			*self=XFDASHBOARD_THEME(inObject);
+
 	switch(inPropID)
 	{
+		case PROP_NAME:
+			_xfdashboard_theme_set_theme_name(self, g_value_get_string(inValue));
+			break;
+
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(inObject, inPropID, inSpec);
 			break;
@@ -568,17 +728,17 @@ void xfdashboard_theme_class_init(XfdashboardThemeClass *klass)
 	g_type_class_add_private(klass, sizeof(XfdashboardThemePrivate));
 
 	/* Define properties */
-	XfdashboardThemeProperties[PROP_PATH]=
-		g_param_spec_string("theme-path",
-							_("Theme path"),
-							_("Path where theme was found and loaded from"),
-							NULL,
-							G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
-
 	XfdashboardThemeProperties[PROP_NAME]=
 		g_param_spec_string("theme-name",
 							_("Theme name"),
 							_("Short name of theme which was used to lookup theme and folder name where theme is stored in"),
+							NULL,
+							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT_ONLY);
+
+	XfdashboardThemeProperties[PROP_PATH]=
+		g_param_spec_string("theme-path",
+							_("Theme path"),
+							_("Path where theme was found and loaded from"),
 							NULL,
 							G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
@@ -609,10 +769,13 @@ void xfdashboard_theme_init(XfdashboardTheme *self)
 	priv=self->priv=XFDASHBOARD_THEME_GET_PRIVATE(self);
 
 	/* Set default values */
+	priv->loaded=FALSE;
 	priv->themeName=NULL;
 	priv->themePath=NULL;
 	priv->themeDisplayName=NULL;
 	priv->themeComment=NULL;
+	priv->userThemeStyleFile=NULL;
+	priv->userGlobalStyleFile=NULL;
 	priv->styling=NULL;
 	priv->layout=NULL;
 	priv->effects=NULL;
@@ -628,9 +791,11 @@ GQuark xfdashboard_theme_error_quark(void)
 /* IMPLEMENTATION: Public API */
 
 /* Create new instance */
-XfdashboardTheme* xfdashboard_theme_new(void)
+XfdashboardTheme* xfdashboard_theme_new(const gchar *inThemeName)
 {
-	return(XFDASHBOARD_THEME(g_object_new(XFDASHBOARD_TYPE_THEME, NULL)));
+	return(XFDASHBOARD_THEME(g_object_new(XFDASHBOARD_TYPE_THEME,
+											"theme-name", inThemeName,
+											NULL)));
 }
 
 /* Get path where this theme was found and loaded from */
@@ -667,86 +832,44 @@ const gchar* xfdashboard_theme_get_comment(XfdashboardTheme *self)
 
 /* Lookup named theme and load resources */
 gboolean xfdashboard_theme_load(XfdashboardTheme *self,
-								const gchar *inThemeName,
 								GError **outError)
 {
 	XfdashboardThemePrivate		*priv;
 	GError						*error;
-	gchar						*themePath;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_THEME(self), FALSE);
-	g_return_val_if_fail(inThemeName!=NULL && *inThemeName!=0, FALSE);
 	g_return_val_if_fail(outError==NULL || *outError==NULL, FALSE);
 
 	priv=self->priv;
 	error=NULL;
 
-	/* Freeze notifications about property changes and collect them */
-	g_object_freeze_notify(G_OBJECT(self));
-
 	/* Check if a theme was already loaded */
-	if(priv->themeName)
+	if(priv->loaded)
 	{
 		g_set_error(outError,
 					XFDASHBOARD_THEME_ERROR,
 					XFDASHBOARD_THEME_ERROR_ALREADY_LOADED,
-					_("Theme '%s' requested but '%s' was already loaded"),
-					inThemeName,
+					_("Theme '%s' was already loaded"),
 					priv->themeName);
 
-		/* Thaw notifications and send them now */
-		g_object_thaw_notify(G_OBJECT(self));
-
 		return(FALSE);
 	}
 
-	/* Lookup path of theme by lookup at all possible paths for theme file */
-	themePath=_xfdashboard_theme_lookup_path_for_theme(self, inThemeName);
-	if(!themePath)
-	{
-		g_set_error(outError,
-					XFDASHBOARD_THEME_ERROR,
-					XFDASHBOARD_THEME_ERROR_THEME_NOT_FOUND,
-					_("Theme '%s' not found"),
-					inThemeName);
-
-		/* Thaw notifications and send them now */
-		g_object_thaw_notify(G_OBJECT(self));
-
-		/* Return FALSE to indicate error */
-		return(FALSE);
-	}
+	/* We set the loaded flag regardless if loading will be successful or not
+	 * because if loading theme fails this object is in undefined state for
+	 * re-using it to load theme again.
+	 */
+	priv->loaded=TRUE;
 
 	/* Load theme key file */
-	if(!_xfdashboard_theme_load_resources(self, themePath, &error))
+	if(!_xfdashboard_theme_load_resources(self, &error))
 	{
 		/* Set returned error */
 		g_propagate_error(outError, error);
 
-		/* Release allocated resources */
-		if(themePath) g_free(themePath);
-
-		/* Thaw notifications and send them now */
-		g_object_thaw_notify(G_OBJECT(self));
-
 		/* Return FALSE to indicate error */
 		return(FALSE);
 	}
-
-	/* Set up internal variables because theme was loaded successfully
-	 * and notify about property changes
-	 */
-	priv->themePath=g_strdup(themePath);
-	g_object_notify_by_pspec(G_OBJECT(self), XfdashboardThemeProperties[PROP_PATH]);
-
-	priv->themeName=g_strdup(inThemeName);
-	g_object_notify_by_pspec(G_OBJECT(self), XfdashboardThemeProperties[PROP_NAME]);
-
-	/* Release allocated resources */
-	if(themePath) g_free(themePath);
-
-	/* Thaw notifications and send them now */
-	g_object_thaw_notify(G_OBJECT(self));
 
 	/* If we found named themed and could load all resources successfully */
 	return(TRUE);

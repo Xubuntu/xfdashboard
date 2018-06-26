@@ -1,7 +1,7 @@
 /*
  * quicklaunch: Quicklaunch box
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include "config.h"
 #endif
 
+
 #include <libxfdashboard/quicklaunch.h>
 
 #include <glib/gi18n-lib.h>
@@ -38,15 +39,21 @@
 #include <libxfdashboard/drag-action.h>
 #include <libxfdashboard/drop-action.h>
 #include <libxfdashboard/applications-view.h>
-#include <libxfdashboard/utils.h>
 #include <libxfdashboard/tooltip-action.h>
 #include <libxfdashboard/focusable.h>
 #include <libxfdashboard/marshal.h>
 #include <libxfdashboard/desktop-app-info.h>
 #include <libxfdashboard/application-database.h>
 #include <libxfdashboard/application-tracker.h>
+#include <libxfdashboard/window-tracker.h>
 #include <libxfdashboard/window-tracker-window.h>
+#include <libxfdashboard/click-action.h>
+#include <libxfdashboard/popup-menu.h>
+#include <libxfdashboard/popup-menu-item-button.h>
+#include <libxfdashboard/popup-menu-item-separator.h>
+#include <libxfdashboard/utils.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -128,6 +135,7 @@ enum
 
 static guint XfdashboardQuicklaunchSignals[SIGNAL_LAST]={ 0, };
 
+
 /* IMPLEMENTATION: Private variables and methods */
 #define FAVOURITES_XFCONF_PROP				"/favourites"
 
@@ -171,10 +179,11 @@ static ClutterActor* _xfdashboard_quicklaunch_get_actor_for_appinfo(XfdashboardQ
 	 */
 	if(!XFDASHBOARD_IS_DESKTOP_APP_INFO(inAppInfo))
 	{
-		g_debug("%s is derived from %s but not derived %s",
-					G_OBJECT_TYPE_NAME(inAppInfo),
-					g_type_name(G_TYPE_APP_INFO),
-					g_type_name(XFDASHBOARD_TYPE_DESKTOP_APP_INFO));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"%s is derived from %s but not derived %s",
+							G_OBJECT_TYPE_NAME(inAppInfo),
+							g_type_name(G_TYPE_APP_INFO),
+							g_type_name(XFDASHBOARD_TYPE_DESKTOP_APP_INFO));
 		return(NULL);
 	}
 
@@ -233,10 +242,11 @@ static gboolean _xfdashboard_quicklaunch_has_favourite_appinfo(XfdashboardQuickl
 	 */
 	if(!XFDASHBOARD_IS_DESKTOP_APP_INFO(inAppInfo))
 	{
-		g_debug("%s is derived from %s but not derived %s",
-					G_OBJECT_TYPE_NAME(inAppInfo),
-					g_type_name(G_TYPE_APP_INFO),
-					g_type_name(XFDASHBOARD_TYPE_DESKTOP_APP_INFO));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"%s is derived from %s but not derived %s",
+							G_OBJECT_TYPE_NAME(inAppInfo),
+							g_type_name(G_TYPE_APP_INFO),
+							g_type_name(XFDASHBOARD_TYPE_DESKTOP_APP_INFO));
 		return(TRUE);
 	}
 
@@ -411,6 +421,417 @@ static void _xfdashboard_quicklaunch_on_favourite_clicked(XfdashboardQuicklaunch
 	}
 }
 
+/* User selected to activate a window at pop-up menu */
+static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_activate_window(XfdashboardPopupMenuItem *inMenuItem,
+																					gpointer inUserData)
+{
+	XfdashboardWindowTrackerWindow		*window;
+
+	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU_ITEM(inMenuItem));
+	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inUserData));
+
+	window=XFDASHBOARD_WINDOW_TRACKER_WINDOW(inUserData);
+
+	/* Activate window */
+	xfdashboard_window_tracker_window_activate(window);
+
+	/* Quit application */
+	xfdashboard_application_suspend_or_quit(NULL);
+}
+
+/* User selected to open a new window or to launch that application at pop-up menu */
+static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_launch(XfdashboardPopupMenu *inPopupMenu,
+																			XfdashboardPopupMenuItem *inMenuItem,
+																			gpointer inUserData)
+{
+	GAppInfo							*appInfo;
+	XfdashboardApplicationTracker		*appTracker;
+	GIcon								*gicon;
+	const gchar							*iconName;
+
+	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU(inPopupMenu));
+	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU_ITEM(inMenuItem));
+	g_return_if_fail(G_IS_APP_INFO(inUserData));
+
+	appInfo=G_APP_INFO(inUserData);
+	iconName=NULL;
+
+	/* Get icon of application */
+	gicon=g_app_info_get_icon(appInfo);
+	if(gicon) iconName=g_icon_to_string(gicon);
+
+	/* Check if we should launch that application or to open a new window */
+	appTracker=xfdashboard_application_tracker_get_default();
+	if(!xfdashboard_application_tracker_is_running_by_app_info(appTracker, appInfo))
+	{
+		GAppLaunchContext			*context;
+		GError						*error;
+
+		/* Create context to start application at */
+		context=xfdashboard_create_app_context(NULL);
+
+		/* Try to launch application */
+		error=NULL;
+		if(!g_app_info_launch(appInfo, NULL, context, &error))
+		{
+			/* Show notification about failed application launch */
+			xfdashboard_notify(CLUTTER_ACTOR(inPopupMenu),
+								iconName,
+								_("Launching application '%s' failed: %s"),
+								g_app_info_get_display_name(appInfo),
+								(error && error->message) ? error->message : _("unknown error"));
+			g_warning(_("Launching application '%s' failed: %s"),
+						g_app_info_get_display_name(appInfo),
+						(error && error->message) ? error->message : _("unknown error"));
+			if(error) g_error_free(error);
+		}
+			else
+			{
+				/* Show notification about successful application launch */
+				xfdashboard_notify(CLUTTER_ACTOR(inPopupMenu),
+									iconName,
+									_("Application '%s' launched"),
+									g_app_info_get_display_name(appInfo));
+
+				/* Emit signal for successful application launch */
+				g_signal_emit_by_name(xfdashboard_application_get_default(), "application-launched", appInfo);
+
+				/* Quit application */
+				xfdashboard_application_suspend_or_quit(NULL);
+			}
+
+		/* Release allocated resources */
+		g_object_unref(context);
+	}
+
+	/* Release allocated resources */
+	g_object_unref(appTracker);
+	g_object_unref(gicon);
+}
+
+/* User selected to remove application from favourites via pop-up menu */
+static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_remove_from_favourite(XfdashboardPopupMenu *inPopupMenu,
+																						XfdashboardPopupMenuItem *inMenuItem,
+																						gpointer inUserData)
+{
+	XfdashboardApplicationButton		*appButton;
+	GAppInfo							*appInfo;
+	ClutterActor						*actor;
+	XfdashboardQuicklaunch				*self;
+	XfdashboardQuicklaunchPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU(inPopupMenu));
+	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU_ITEM(inMenuItem));
+	g_return_if_fail(XFDASHBOARD_IS_APPLICATION_BUTTON(inUserData));
+
+	appButton=XFDASHBOARD_APPLICATION_BUTTON(inUserData);
+
+	/* Find quicklaunch for application button */
+	actor=CLUTTER_ACTOR(appButton);
+	do
+	{
+		actor=clutter_actor_get_parent(actor);
+	}
+	while(actor && !XFDASHBOARD_IS_QUICKLAUNCH(actor));
+
+	if(!actor)
+	{
+		g_critical(_("Cannot find quicklaunch for application button."));
+		return;
+	}
+
+	self=XFDASHBOARD_QUICKLAUNCH(actor);
+	priv=self->priv;
+
+	/* Notify about removal of favourite icon */
+	xfdashboard_notify(CLUTTER_ACTOR(self),
+						xfdashboard_application_button_get_icon_name(appButton),
+						_("Favourite '%s' removed"),
+						xfdashboard_application_button_get_display_name(appButton));
+
+	/* Emit signal and re-add removed favourite as dynamically added
+	 * application button for non-favourites apps when it is still running.
+	 */
+	appInfo=xfdashboard_application_button_get_app_info(appButton);
+	if(appInfo)
+	{
+		/* Emit signal */
+		g_signal_emit(self, XfdashboardQuicklaunchSignals[SIGNAL_FAVOURITE_REMOVED], 0, appInfo);
+
+		/* Re-add removed favourite as dynamically added application button
+		 * for non-favourites apps when it is still running.
+		 */
+		if(xfdashboard_application_tracker_is_running_by_app_info(priv->appTracker, appInfo))
+		{
+			ClutterActor				*newAppButton;
+
+			newAppButton=_xfdashboard_quicklaunch_create_dynamic_actor(self, appInfo);
+			clutter_actor_show(newAppButton);
+			clutter_actor_add_child(CLUTTER_ACTOR(self), newAppButton);
+		}
+	}
+
+	/* Destroy favourite icon before updating property */
+	clutter_actor_destroy(CLUTTER_ACTOR(appButton));
+
+	/* Update favourites from icon order */
+	_xfdashboard_quicklaunch_update_property_from_icons(self);
+}
+
+/* User selected to add application to favourites via pop-up menu */
+static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_add_to_favourite(XfdashboardPopupMenu *inPopupMenu,
+																					XfdashboardPopupMenuItem *inMenuItem,
+																					gpointer inUserData)
+{
+	XfdashboardApplicationButton		*appButton;
+	GAppInfo							*appInfo;
+	ClutterActor						*actor;
+	XfdashboardQuicklaunch				*self;
+	XfdashboardQuicklaunchPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU(inPopupMenu));
+	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU_ITEM(inMenuItem));
+	g_return_if_fail(XFDASHBOARD_IS_APPLICATION_BUTTON(inUserData));
+
+	appButton=XFDASHBOARD_APPLICATION_BUTTON(inUserData);
+
+	/* Find quicklaunch for application button */
+	actor=CLUTTER_ACTOR(appButton);
+	do
+	{
+		actor=clutter_actor_get_parent(actor);
+	}
+	while(actor && !XFDASHBOARD_IS_QUICKLAUNCH(actor));
+
+	if(!actor)
+	{
+		g_critical(_("Cannot find quicklaunch for application button."));
+		return;
+	}
+
+	self=XFDASHBOARD_QUICKLAUNCH(actor);
+	priv=self->priv;
+
+	/* Check if application button provides all information needed to add favourite
+	 * and also check for duplicates.
+	 */
+	appInfo=xfdashboard_application_button_get_app_info(XFDASHBOARD_APPLICATION_BUTTON(appButton));
+	if(appInfo &&
+		!_xfdashboard_quicklaunch_has_favourite_appinfo(self, appInfo))
+	{
+		ClutterActor					*favouriteActor;
+
+		/* If an actor for current selection to add to favourites already exists,
+		 * destroy and remove it regardless if it an actor or a favourite app or
+		 * dynamic non-favourite app. It will be re-added later.
+		 */
+		favouriteActor=_xfdashboard_quicklaunch_get_actor_for_appinfo(self, appInfo);
+		if(favouriteActor)
+		{
+			/* Remove existing actor from this quicklaunch */
+			clutter_actor_destroy(favouriteActor);
+		}
+
+		/* Now (re-)add current selection to favourites but hidden as
+		 * it will become visible and properly set up when function
+		 * _xfdashboard_quicklaunch_update_property_from_icons is called.
+		 */
+		favouriteActor=xfdashboard_application_button_new_from_app_info(appInfo);
+		clutter_actor_hide(favouriteActor);
+		xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(favouriteActor), "favourite-app");
+		clutter_actor_insert_child_below(CLUTTER_ACTOR(self), favouriteActor, priv->separatorFavouritesToDynamic);
+
+		/* Update favourites from icon order */
+		_xfdashboard_quicklaunch_update_property_from_icons(self);
+
+		/* Notify about new favourite */
+		xfdashboard_notify(CLUTTER_ACTOR(self),
+							xfdashboard_application_button_get_icon_name(XFDASHBOARD_APPLICATION_BUTTON(favouriteActor)),
+							_("Favourite '%s' added"),
+							xfdashboard_application_button_get_display_name(XFDASHBOARD_APPLICATION_BUTTON(favouriteActor)));
+
+		g_signal_emit(self, XfdashboardQuicklaunchSignals[SIGNAL_FAVOURITE_ADDED], 0, appInfo);
+	}
+}
+
+/* A right-click might have happened on an application icon (favourite) in quicklaunch */
+static void _xfdashboard_quicklaunch_on_favourite_popup_menu(XfdashboardQuicklaunch *self,
+																ClutterActor *inActor,
+																gpointer inUserData)
+{
+	XfdashboardQuicklaunchPrivate				*priv;
+	XfdashboardApplicationButton				*appButton;
+	XfdashboardClickAction						*action;
+
+	g_return_if_fail(XFDASHBOARD_IS_QUICKLAUNCH(self));
+	g_return_if_fail(XFDASHBOARD_IS_APPLICATION_BUTTON(inActor));
+	g_return_if_fail(XFDASHBOARD_IS_CLICK_ACTION(inUserData));
+
+	priv=self->priv;
+	appButton=XFDASHBOARD_APPLICATION_BUTTON(inActor);
+	action=XFDASHBOARD_CLICK_ACTION(inUserData);
+
+	/* Check if right button was used when the application button was clicked */
+	if(xfdashboard_click_action_get_button(action)==XFDASHBOARD_CLICK_ACTION_RIGHT_BUTTON)
+	{
+		ClutterActor							*popup;
+		ClutterActor							*menuItem;
+		GAppInfo								*appInfo;
+		const GList								*appWindows;
+
+		/* Get app info for application button as it is needed most the time */
+		appInfo=xfdashboard_application_button_get_app_info(appButton);
+		if(!appInfo)
+		{
+			g_critical(_("No application information available for clicked application button."));
+			return;
+		}
+
+		/* Create pop-up menu */
+		popup=xfdashboard_popup_menu_new_for_source(CLUTTER_ACTOR(self));
+		xfdashboard_popup_menu_set_destroy_on_cancel(XFDASHBOARD_POPUP_MENU(popup), TRUE);
+		xfdashboard_popup_menu_set_title(XFDASHBOARD_POPUP_MENU(popup), g_app_info_get_display_name(appInfo));
+		xfdashboard_popup_menu_set_title_gicon(XFDASHBOARD_POPUP_MENU(popup), g_app_info_get_icon(appInfo));
+
+		/* Add each open window to pop-up of application */
+		appWindows=xfdashboard_application_tracker_get_window_list_by_app_info(priv->appTracker, appInfo);
+		if(appWindows)
+		{
+			const GList							*iter;
+			GList								*sortedList;
+			XfdashboardWindowTracker			*windowTracker;
+			XfdashboardWindowTrackerWindow		*window;
+			XfdashboardWindowTrackerWorkspace	*activeWorkspace;
+			XfdashboardWindowTrackerWorkspace	*windowWorkspace;
+			gboolean							separatorAdded;
+
+			/* Create sorted list of windows. The window is added to begin
+			 * of list if it is on active workspace and to end of list if it
+			 * is on any other workspace.
+			 */
+			windowTracker=xfdashboard_window_tracker_get_default();
+			activeWorkspace=xfdashboard_window_tracker_get_active_workspace(windowTracker);
+
+			sortedList=NULL;
+			for(iter=appWindows; iter; iter=g_list_next(iter))
+			{
+				/* Get window currently iterated */
+				window=XFDASHBOARD_WINDOW_TRACKER_WINDOW(iter->data);
+				if(!window) continue;
+
+				/* Get workspace of window */
+				windowWorkspace=xfdashboard_window_tracker_window_get_workspace(window);
+
+				/* If window is on active workspace add to begin of sorted list,
+				 * otherwise add to end of sorted list.
+				 */
+				if(windowWorkspace==activeWorkspace)
+				{
+					sortedList=g_list_prepend(sortedList, window);
+				}
+					else
+					{
+						sortedList=g_list_append(sortedList, window);
+					}
+			}
+
+			/* Now add menu items for each window in sorted list */
+			separatorAdded=FALSE;
+			for(iter=sortedList; iter; iter=g_list_next(iter))
+			{
+				/* Get window currently iterated */
+				window=XFDASHBOARD_WINDOW_TRACKER_WINDOW(iter->data);
+				if(!window) continue;
+
+				/* Get workspace of window */
+				windowWorkspace=xfdashboard_window_tracker_window_get_workspace(window);
+
+				/* Add separator if currently iterated window is not on active
+				 * workspace then all following windows are not on active workspace
+				 * anymore and a separator is added to split them from the ones
+				 * on active workspace. But add this separator only once.
+				 */
+				if(windowWorkspace!=activeWorkspace &&
+					!separatorAdded)
+				{
+					menuItem=xfdashboard_popup_menu_item_separator_new();
+					clutter_actor_set_x_expand(menuItem, TRUE);
+					xfdashboard_popup_menu_add_item(XFDASHBOARD_POPUP_MENU(popup), XFDASHBOARD_POPUP_MENU_ITEM(menuItem));
+
+					separatorAdded=TRUE;
+				}
+
+				/* Create menu item for window */
+				menuItem=xfdashboard_popup_menu_item_button_new();
+				xfdashboard_label_set_text(XFDASHBOARD_LABEL(menuItem), xfdashboard_window_tracker_window_get_name(window));
+				clutter_actor_set_x_expand(menuItem, TRUE);
+				xfdashboard_popup_menu_add_item(XFDASHBOARD_POPUP_MENU(popup), XFDASHBOARD_POPUP_MENU_ITEM(menuItem));
+
+				g_signal_connect(menuItem,
+									"activated",
+									G_CALLBACK(_xfdashboard_quicklaunch_on_favourite_popup_menu_item_activate_window),
+									window);
+			}
+
+			/* Add a separator to split windows from other actions in pop-up menu */
+			menuItem=xfdashboard_popup_menu_item_separator_new();
+			clutter_actor_set_x_expand(menuItem, TRUE);
+			xfdashboard_popup_menu_add_item(XFDASHBOARD_POPUP_MENU(popup), XFDASHBOARD_POPUP_MENU_ITEM(menuItem));
+
+			/* Release allocated resources */
+			g_list_free(sortedList);
+			g_object_unref(windowTracker);
+		}
+
+		/* Add menu item to launch application if it is not running */
+		if(!xfdashboard_application_tracker_is_running_by_app_info(priv->appTracker, appInfo))
+		{
+			menuItem=xfdashboard_popup_menu_item_button_new();
+			xfdashboard_label_set_text(XFDASHBOARD_LABEL(menuItem), _("Launch"));
+			clutter_actor_set_x_expand(menuItem, TRUE);
+			xfdashboard_popup_menu_add_item(XFDASHBOARD_POPUP_MENU(popup), XFDASHBOARD_POPUP_MENU_ITEM(menuItem));
+
+			g_signal_connect(menuItem,
+								"activated",
+								G_CALLBACK(_xfdashboard_quicklaunch_on_favourite_popup_menu_item_launch),
+								appInfo);
+		}
+
+// TODO: Add actions from GAppInfo
+
+		/* Add "Remove from favourites" if application button is for a favourite application */
+		if(xfdashboard_stylable_has_class(XFDASHBOARD_STYLABLE(appButton), "favourite-app"))
+		{
+			menuItem=xfdashboard_popup_menu_item_button_new();
+			xfdashboard_label_set_text(XFDASHBOARD_LABEL(menuItem), _("Remove from favourites"));
+			clutter_actor_set_x_expand(menuItem, TRUE);
+			xfdashboard_popup_menu_add_item(XFDASHBOARD_POPUP_MENU(popup), XFDASHBOARD_POPUP_MENU_ITEM(menuItem));
+
+			g_signal_connect(menuItem,
+								"activated",
+								G_CALLBACK(_xfdashboard_quicklaunch_on_favourite_popup_menu_item_remove_from_favourite),
+								appButton);
+		}
+
+		/* Add "Add to favourites" if application button is for a non-favourite application */
+		if(xfdashboard_stylable_has_class(XFDASHBOARD_STYLABLE(appButton), "dynamic-app"))
+		{
+			menuItem=xfdashboard_popup_menu_item_button_new();
+			xfdashboard_label_set_text(XFDASHBOARD_LABEL(menuItem), _("Add to favourites"));
+			clutter_actor_set_x_expand(menuItem, TRUE);
+			xfdashboard_popup_menu_add_item(XFDASHBOARD_POPUP_MENU(popup), XFDASHBOARD_POPUP_MENU_ITEM(menuItem));
+
+			g_signal_connect(menuItem,
+								"activated",
+								G_CALLBACK(_xfdashboard_quicklaunch_on_favourite_popup_menu_item_add_to_favourite),
+								appButton);
+		}
+
+		/* Activate pop-up menu */
+		xfdashboard_popup_menu_activate(XFDASHBOARD_POPUP_MENU(popup));
+	}
+}
+
 /* Drag of a quicklaunch icon begins */
 static void _xfdashboard_quicklaunch_on_favourite_drag_begin(ClutterDragAction *inAction,
 																ClutterActor *inActor,
@@ -445,9 +866,9 @@ static void _xfdashboard_quicklaunch_on_favourite_drag_begin(ClutterDragAction *
 
 	dragHandle=xfdashboard_application_button_new_from_app_info(appInfo);
 	clutter_actor_set_position(dragHandle, inStageX, inStageY);
-	xfdashboard_button_set_icon_size(XFDASHBOARD_BUTTON(dragHandle), priv->normalIconSize);
-	xfdashboard_button_set_sync_icon_size(XFDASHBOARD_BUTTON(dragHandle), FALSE);
-	xfdashboard_button_set_style(XFDASHBOARD_BUTTON(dragHandle), XFDASHBOARD_BUTTON_STYLE_ICON);
+	xfdashboard_label_set_icon_size(XFDASHBOARD_LABEL(dragHandle), priv->normalIconSize);
+	xfdashboard_label_set_sync_icon_size(XFDASHBOARD_LABEL(dragHandle), FALSE);
+	xfdashboard_label_set_style(XFDASHBOARD_LABEL(dragHandle), XFDASHBOARD_LABEL_STYLE_ICON);
 	clutter_actor_add_child(CLUTTER_ACTOR(stage), dragHandle);
 
 	clutter_drag_action_set_drag_handle(inAction, dragHandle);
@@ -546,9 +967,9 @@ static gboolean _xfdashboard_quicklaunch_on_drop_begin(XfdashboardQuicklaunch *s
 		appInfo=xfdashboard_application_button_get_app_info(XFDASHBOARD_APPLICATION_BUTTON(draggedActor));
 
 		priv->dragPreviewIcon=xfdashboard_application_button_new_from_app_info(appInfo);
-		xfdashboard_button_set_icon_size(XFDASHBOARD_BUTTON(priv->dragPreviewIcon), priv->normalIconSize);
-		xfdashboard_button_set_sync_icon_size(XFDASHBOARD_BUTTON(priv->dragPreviewIcon), FALSE);
-		xfdashboard_button_set_style(XFDASHBOARD_BUTTON(priv->dragPreviewIcon), XFDASHBOARD_BUTTON_STYLE_ICON);
+		xfdashboard_label_set_icon_size(XFDASHBOARD_LABEL(priv->dragPreviewIcon), priv->normalIconSize);
+		xfdashboard_label_set_sync_icon_size(XFDASHBOARD_LABEL(priv->dragPreviewIcon), FALSE);
+		xfdashboard_label_set_style(XFDASHBOARD_LABEL(priv->dragPreviewIcon), XFDASHBOARD_LABEL_STYLE_ICON);
 		if(priv->dragMode==DRAG_MODE_CREATE) clutter_actor_hide(priv->dragPreviewIcon);
 		clutter_actor_add_child(CLUTTER_ACTOR(self), priv->dragPreviewIcon);
 
@@ -1040,13 +1461,18 @@ static ClutterActor* _xfdashboard_quicklaunch_create_dynamic_actor(XfdashboardQu
 
 	/* Create and set up actor */
 	actor=xfdashboard_application_button_new_from_app_info(inAppInfo);
-	xfdashboard_button_set_icon_size(XFDASHBOARD_BUTTON(actor), priv->normalIconSize);
-	xfdashboard_button_set_sync_icon_size(XFDASHBOARD_BUTTON(actor), FALSE);
-	xfdashboard_button_set_style(XFDASHBOARD_BUTTON(actor), XFDASHBOARD_BUTTON_STYLE_ICON);
+	xfdashboard_label_set_icon_size(XFDASHBOARD_LABEL(actor), priv->normalIconSize);
+	xfdashboard_label_set_sync_icon_size(XFDASHBOARD_LABEL(actor), FALSE);
+	xfdashboard_label_set_style(XFDASHBOARD_LABEL(actor), XFDASHBOARD_LABEL_STYLE_ICON);
 	xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(actor), "dynamic-app");
 
 	/* Set up and add click action */
 	g_signal_connect_swapped(actor, "clicked", G_CALLBACK(_xfdashboard_quicklaunch_on_favourite_clicked), self);
+
+	/* Set up and add pop-up menu click action */
+	action=xfdashboard_click_action_new();
+	g_signal_connect_swapped(action, "clicked", G_CALLBACK(_xfdashboard_quicklaunch_on_favourite_popup_menu), self);
+	clutter_actor_add_action(actor, action);
 
 	/* Set up and add tooltip action */
 	action=xfdashboard_tooltip_action_new();
@@ -1072,13 +1498,18 @@ static ClutterActor* _xfdashboard_quicklaunch_create_favourite_actor(Xfdashboard
 
 	/* Create and set up actor */
 	actor=xfdashboard_application_button_new_from_app_info(inAppInfo);
-	xfdashboard_button_set_icon_size(XFDASHBOARD_BUTTON(actor), priv->normalIconSize);
-	xfdashboard_button_set_sync_icon_size(XFDASHBOARD_BUTTON(actor), FALSE);
-	xfdashboard_button_set_style(XFDASHBOARD_BUTTON(actor), XFDASHBOARD_BUTTON_STYLE_ICON);
+	xfdashboard_label_set_icon_size(XFDASHBOARD_LABEL(actor), priv->normalIconSize);
+	xfdashboard_label_set_sync_icon_size(XFDASHBOARD_LABEL(actor), FALSE);
+	xfdashboard_label_set_style(XFDASHBOARD_LABEL(actor), XFDASHBOARD_LABEL_STYLE_ICON);
 	xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(actor), "favourite-app");
 
 	/* Set up and add click action */
 	g_signal_connect_swapped(actor, "clicked", G_CALLBACK(_xfdashboard_quicklaunch_on_favourite_clicked), self);
+
+	/* Set up and add pop-up menu click action */
+	action=xfdashboard_click_action_new();
+	g_signal_connect_swapped(action, "clicked", G_CALLBACK(_xfdashboard_quicklaunch_on_favourite_popup_menu), self);
+	clutter_actor_add_action(actor, action);
 
 	/* Set up and add drag'n'drop action */
 	action=xfdashboard_drag_action_new_with_source(CLUTTER_ACTOR(self));
@@ -1187,9 +1618,10 @@ static void _xfdashboard_quicklaunch_update_icons_from_property(XfdashboardQuick
 	{
 		currentSelectionAppInfo=xfdashboard_application_button_get_app_info(XFDASHBOARD_APPLICATION_BUTTON(priv->selectedItem));
 
-		g_debug("Going to destroy current selection %p (%s) for desktop ID '%s'",
-					priv->selectedItem, G_OBJECT_TYPE_NAME(priv->selectedItem),
-					g_app_info_get_id(xfdashboard_application_button_get_app_info(XFDASHBOARD_APPLICATION_BUTTON(priv->selectedItem))));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Going to destroy current selection %p (%s) for desktop ID '%s'",
+							priv->selectedItem, G_OBJECT_TYPE_NAME(priv->selectedItem),
+							g_app_info_get_id(xfdashboard_application_button_get_app_info(XFDASHBOARD_APPLICATION_BUTTON(priv->selectedItem))));
 	}
 
 	/* Remove all application buttons */
@@ -1233,9 +1665,10 @@ static void _xfdashboard_quicklaunch_update_icons_from_property(XfdashboardQuick
 			{
 				xfdashboard_focusable_set_selection(XFDASHBOARD_FOCUSABLE(self), actor);
 
-				g_debug("Select newly created actor %p (%s) because it matches desktop ID '%s'",
-							actor, G_OBJECT_TYPE_NAME(actor),
-							g_app_info_get_id(xfdashboard_application_button_get_app_info(XFDASHBOARD_APPLICATION_BUTTON(actor))));
+				XFDASHBOARD_DEBUG(self, ACTOR,
+									"Select newly created actor %p (%s) because it matches desktop ID '%s'",
+									actor, G_OBJECT_TYPE_NAME(actor),
+									g_app_info_get_id(xfdashboard_application_button_get_app_info(XFDASHBOARD_APPLICATION_BUTTON(actor))));
 			}
 		}
 
@@ -1642,36 +2075,30 @@ static gboolean _xfdashboard_quicklaunch_selection_add_favourite(XfdashboardQuic
 	currentSelection=xfdashboard_focusable_get_selection(inSource);
 	if(!currentSelection)
 	{
-		g_debug("Source actor %s has no selection and no favourite can be added.",
-					G_OBJECT_TYPE_NAME(inSource));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Source actor %s has no selection and no favourite can be added.",
+							G_OBJECT_TYPE_NAME(inSource));
 		return(CLUTTER_EVENT_STOP);
 	}
 
 	if(!XFDASHBOARD_IS_APPLICATION_BUTTON(currentSelection))
 	{
-		g_debug("Current selection at source actor %s has type %s but only selections of type %s can be added.",
-					G_OBJECT_TYPE_NAME(inSource),
-					G_OBJECT_TYPE_NAME(currentSelection),
-					g_type_name(XFDASHBOARD_TYPE_APPLICATION_BUTTON));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Current selection at source actor %s has type %s but only selections of type %s can be added.",
+							G_OBJECT_TYPE_NAME(inSource),
+							G_OBJECT_TYPE_NAME(currentSelection),
+							g_type_name(XFDASHBOARD_TYPE_APPLICATION_BUTTON));
 		return(CLUTTER_EVENT_STOP);
 	}
 
-	/* Check if XfdashboardApplicationButton provides all information
-	 * needed to add favourite.
+	/* Check if application button provides all information needed to add favourite
+	 * and also check for duplicates.
 	 */
 	appInfo=xfdashboard_application_button_get_app_info(XFDASHBOARD_APPLICATION_BUTTON(currentSelection));
-	if(appInfo)
+	if(appInfo &&
+		!_xfdashboard_quicklaunch_has_favourite_appinfo(self, appInfo))
 	{
 		ClutterActor		*favouriteActor;
-
-		/* Check for duplicates */
-		if(_xfdashboard_quicklaunch_has_favourite_appinfo(self, appInfo))
-		{
-			/* Release allocated resources */
-			g_object_unref(appInfo);
-
-			return(CLUTTER_EVENT_STOP);
-		}
 
 		/* If an actor for current selection to add to favourites already exists,
 		 * destroy and remove it regardless if it an actor or a favourite app or
@@ -1698,9 +2125,9 @@ static gboolean _xfdashboard_quicklaunch_selection_add_favourite(XfdashboardQuic
 
 		/* Notify about new favourite */
 		xfdashboard_notify(CLUTTER_ACTOR(self),
-							xfdashboard_application_button_get_icon_name(XFDASHBOARD_APPLICATION_BUTTON(currentSelection)),
+							xfdashboard_application_button_get_icon_name(XFDASHBOARD_APPLICATION_BUTTON(favouriteActor)),
 							_("Favourite '%s' added"),
-							xfdashboard_application_button_get_display_name(XFDASHBOARD_APPLICATION_BUTTON(currentSelection)));
+							xfdashboard_application_button_get_display_name(XFDASHBOARD_APPLICATION_BUTTON(favouriteActor)));
 
 		g_signal_emit(self, XfdashboardQuicklaunchSignals[SIGNAL_FAVOURITE_ADDED], 0, appInfo);
 	}
@@ -1735,25 +2162,28 @@ static gboolean _xfdashboard_quicklaunch_selection_remove_favourite(XfdashboardQ
 	currentSelection=xfdashboard_focusable_get_selection(inSource);
 	if(!currentSelection)
 	{
-		g_debug("Source actor %s has no selection so no favourite can be removed.",
-					G_OBJECT_TYPE_NAME(inSource));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Source actor %s has no selection so no favourite can be removed.",
+							G_OBJECT_TYPE_NAME(inSource));
 		return(CLUTTER_EVENT_STOP);
 	}
 
 	if(!XFDASHBOARD_IS_APPLICATION_BUTTON(currentSelection))
 	{
-		g_debug("Current selection at source actor %s has type %s but only selections of type %s can be removed.",
-					G_OBJECT_TYPE_NAME(inSource),
-					G_OBJECT_TYPE_NAME(currentSelection),
-					g_type_name(XFDASHBOARD_TYPE_APPLICATION_BUTTON));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Current selection at source actor %s has type %s but only selections of type %s can be removed.",
+							G_OBJECT_TYPE_NAME(inSource),
+							G_OBJECT_TYPE_NAME(currentSelection),
+							g_type_name(XFDASHBOARD_TYPE_APPLICATION_BUTTON));
 		return(CLUTTER_EVENT_STOP);
 	}
 
 	if(priv->dragPreviewIcon && currentSelection==priv->dragPreviewIcon)
 	{
-		g_debug("Current selection at source actor %s is %s which is the drag preview icon which cannot be removed.",
-					G_OBJECT_TYPE_NAME(inSource),
-					G_OBJECT_TYPE_NAME(currentSelection));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Current selection at source actor %s is %s which is the drag preview icon which cannot be removed.",
+							G_OBJECT_TYPE_NAME(inSource),
+							G_OBJECT_TYPE_NAME(currentSelection));
 		return(CLUTTER_EVENT_STOP);
 	}
 
@@ -1796,7 +2226,6 @@ static gboolean _xfdashboard_quicklaunch_selection_remove_favourite(XfdashboardQ
 		clutter_actor_add_child(CLUTTER_ACTOR(self), actor);
 	}
 
-
 	/* Update favourites from icon order */
 	_xfdashboard_quicklaunch_update_property_from_icons(self);
 
@@ -1831,8 +2260,9 @@ static gboolean _xfdashboard_quicklaunch_favourite_reorder_selection(Xfdashboard
 	 */
 	if(priv->orientation!=orientation)
 	{
-		g_debug("Source actor %s does not have expected orientation.",
-					G_OBJECT_TYPE_NAME(self));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Source actor %s does not have expected orientation.",
+							G_OBJECT_TYPE_NAME(self));
 		return(CLUTTER_EVENT_STOP);
 	}
 
@@ -1840,32 +2270,36 @@ static gboolean _xfdashboard_quicklaunch_favourite_reorder_selection(Xfdashboard
 	currentSelection=xfdashboard_focusable_get_selection(XFDASHBOARD_FOCUSABLE(self));
 	if(!currentSelection)
 	{
-		g_debug("Source actor %s has no selection so no favourite can be reordered.",
-					G_OBJECT_TYPE_NAME(self));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Source actor %s has no selection so no favourite can be reordered.",
+							G_OBJECT_TYPE_NAME(self));
 		return(CLUTTER_EVENT_STOP);
 	}
 
 	if(!XFDASHBOARD_IS_APPLICATION_BUTTON(currentSelection))
 	{
-		g_debug("Current selection at source actor %s has type %s but only selections of type %s can be reordered.",
-					G_OBJECT_TYPE_NAME(self),
-					G_OBJECT_TYPE_NAME(currentSelection),
-					g_type_name(XFDASHBOARD_TYPE_APPLICATION_BUTTON));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Current selection at source actor %s has type %s but only selections of type %s can be reordered.",
+							G_OBJECT_TYPE_NAME(self),
+							G_OBJECT_TYPE_NAME(currentSelection),
+							g_type_name(XFDASHBOARD_TYPE_APPLICATION_BUTTON));
 		return(CLUTTER_EVENT_STOP);
 	}
 
 	if(!xfdashboard_stylable_has_class(XFDASHBOARD_STYLABLE(currentSelection), "favourite-app"))
 	{
-		g_debug("Current selection at source actor %s is not a favourite and cannot be reordered.",
-					G_OBJECT_TYPE_NAME(self));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Current selection at source actor %s is not a favourite and cannot be reordered.",
+							G_OBJECT_TYPE_NAME(self));
 		return(CLUTTER_EVENT_STOP);
 	}
 
 	if(priv->dragPreviewIcon && currentSelection==priv->dragPreviewIcon)
 	{
-		g_debug("Current selection at source actor %s is %s which is the drag preview icon which cannot be reordered.",
-					G_OBJECT_TYPE_NAME(self),
-					G_OBJECT_TYPE_NAME(currentSelection));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Current selection at source actor %s is %s which is the drag preview icon which cannot be reordered.",
+							G_OBJECT_TYPE_NAME(self),
+							G_OBJECT_TYPE_NAME(currentSelection));
 		return(CLUTTER_EVENT_STOP);
 	}
 
@@ -1886,18 +2320,20 @@ static gboolean _xfdashboard_quicklaunch_favourite_reorder_selection(Xfdashboard
 
 	if(!newSelection)
 	{
-		g_debug("Current selection %s at source actor %s is already at end of list",
-					G_OBJECT_TYPE_NAME(currentSelection),
-					G_OBJECT_TYPE_NAME(self));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Current selection %s at source actor %s is already at end of list",
+							G_OBJECT_TYPE_NAME(currentSelection),
+							G_OBJECT_TYPE_NAME(self));
 		return(CLUTTER_EVENT_STOP);
 	}
 
 	if(!XFDASHBOARD_IS_APPLICATION_BUTTON(newSelection))
 	{
-		g_debug("Current selection %s at source actor %s cannot be moved because it is blocked by %s.",
-					G_OBJECT_TYPE_NAME(currentSelection),
-					G_OBJECT_TYPE_NAME(self),
-					G_OBJECT_TYPE_NAME(newSelection));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Current selection %s at source actor %s cannot be moved because it is blocked by %s.",
+							G_OBJECT_TYPE_NAME(currentSelection),
+							G_OBJECT_TYPE_NAME(self),
+							G_OBJECT_TYPE_NAME(newSelection));
 		return(CLUTTER_EVENT_STOP);
 	}
 
@@ -1976,9 +2412,10 @@ static void _xfdashboard_quicklaunch_on_app_tracker_state_changed(XfdashboardQui
 	appInfo=xfdashboard_application_database_lookup_desktop_id(priv->appDB, inDesktopID);
 	if(!appInfo)
 	{
-		g_debug("Unknown desktop ID '%s' changed state to '%s'",
-				inDesktopID,
-				inIsRunning ? "running" : "stopped");
+		XFDASHBOARD_DEBUG(self, APPLICATIONS,
+							"Unknown desktop ID '%s' changed state to '%s'",
+							inDesktopID,
+							inIsRunning ? "running" : "stopped");
 		return;
 	}
 
@@ -1999,9 +2436,10 @@ static void _xfdashboard_quicklaunch_on_app_tracker_state_changed(XfdashboardQui
 			clutter_actor_show(actor);
 			clutter_actor_add_child(CLUTTER_ACTOR(self), actor);
 
-			g_debug("Created dynamic actor %p for newly running desktop ID '%s'",
-					actor,
-					inDesktopID);
+			XFDASHBOARD_DEBUG(self, ACTOR,
+								"Created dynamic actor %p for newly running desktop ID '%s'",
+								actor,
+								inDesktopID);
 		}
 	}
 
@@ -2017,9 +2455,10 @@ static void _xfdashboard_quicklaunch_on_app_tracker_state_changed(XfdashboardQui
 		if(actor &&
 			xfdashboard_stylable_has_class(XFDASHBOARD_STYLABLE(actor), "dynamic-app"))
 		{
-			g_debug("Destroying dynamic actor %p for stopped desktop ID '%s'",
-					actor,
-					inDesktopID);
+			XFDASHBOARD_DEBUG(self, ACTOR,
+								"Destroying dynamic actor %p for stopped desktop ID '%s'",
+								actor,
+								inDesktopID);
 
 			clutter_actor_destroy(actor);
 		}
@@ -2360,6 +2799,7 @@ static ClutterActor* _xfdashboard_quicklaunch_focusable_find_selection(Xfdashboa
 	XfdashboardQuicklaunchPrivate		*priv;
 	ClutterActor						*selection;
 	ClutterActor						*newSelection;
+	gchar								*valueName;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(inFocusable), FALSE);
 	g_return_val_if_fail(XFDASHBOARD_IS_QUICKLAUNCH(inFocusable), FALSE);
@@ -2375,10 +2815,14 @@ static ClutterActor* _xfdashboard_quicklaunch_focusable_find_selection(Xfdashboa
 	if(!inSelection)
 	{
 		selection=clutter_actor_get_first_child(CLUTTER_ACTOR(self));
-		g_debug("No selection at %s, so select first child %s for direction %u",
-				G_OBJECT_TYPE_NAME(self),
-				selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
-				inDirection);
+
+		valueName=xfdashboard_get_enum_value_name(XFDASHBOARD_TYPE_SELECTION_TARGET, inDirection);
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"No selection at %s, so select first child %s for direction %s",
+							G_OBJECT_TYPE_NAME(self),
+							selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
+							valueName);
+		g_free(valueName);
 
 		return(selection);
 	}
@@ -2477,8 +2921,6 @@ static ClutterActor* _xfdashboard_quicklaunch_focusable_find_selection(Xfdashboa
 
 		default:
 			{
-				gchar					*valueName;
-
 				valueName=xfdashboard_get_enum_value_name(XFDASHBOARD_TYPE_SELECTION_TARGET, inDirection);
 				g_critical(_("Focusable object %s does not handle selection direction of type %s."),
 							G_OBJECT_TYPE_NAME(self),
@@ -2492,11 +2934,12 @@ static ClutterActor* _xfdashboard_quicklaunch_focusable_find_selection(Xfdashboa
 	if(newSelection) selection=newSelection;
 
 	/* Return new selection found */
-	g_debug("Selecting %s at %s for current selection %s in direction %u",
-			selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
-			G_OBJECT_TYPE_NAME(self),
-			inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
-			inDirection);
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Selecting %s at %s for current selection %s in direction %u",
+						selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
+						G_OBJECT_TYPE_NAME(self),
+						inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
+						inDirection);
 
 	return(selection);
 }
@@ -2756,7 +3199,7 @@ static void xfdashboard_quicklaunch_class_init(XfdashboardQuicklaunchClass *klas
 						G_STRUCT_OFFSET(XfdashboardQuicklaunchClass, selection_add_favourite),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2770,7 +3213,7 @@ static void xfdashboard_quicklaunch_class_init(XfdashboardQuicklaunchClass *klas
 						G_STRUCT_OFFSET(XfdashboardQuicklaunchClass, selection_remove_favourite),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2784,7 +3227,7 @@ static void xfdashboard_quicklaunch_class_init(XfdashboardQuicklaunchClass *klas
 						G_STRUCT_OFFSET(XfdashboardQuicklaunchClass, favourite_reorder_left),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2798,7 +3241,7 @@ static void xfdashboard_quicklaunch_class_init(XfdashboardQuicklaunchClass *klas
 						G_STRUCT_OFFSET(XfdashboardQuicklaunchClass, favourite_reorder_right),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2812,7 +3255,7 @@ static void xfdashboard_quicklaunch_class_init(XfdashboardQuicklaunchClass *klas
 						G_STRUCT_OFFSET(XfdashboardQuicklaunchClass, favourite_reorder_up),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2826,7 +3269,7 @@ static void xfdashboard_quicklaunch_class_init(XfdashboardQuicklaunchClass *klas
 						G_STRUCT_OFFSET(XfdashboardQuicklaunchClass, favourite_reorder_down),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2877,16 +3320,16 @@ static void xfdashboard_quicklaunch_init(XfdashboardQuicklaunch *self)
 	/* Add "applications" button */
 	priv->appsButton=xfdashboard_toggle_button_new_with_text(_("Applications"));
 	clutter_actor_set_name(priv->appsButton, "applications-button");
-	xfdashboard_button_set_icon_size(XFDASHBOARD_BUTTON(priv->appsButton), priv->normalIconSize);
-	xfdashboard_button_set_sync_icon_size(XFDASHBOARD_BUTTON(priv->appsButton), FALSE);
+	xfdashboard_label_set_icon_size(XFDASHBOARD_LABEL(priv->appsButton), priv->normalIconSize);
+	xfdashboard_label_set_sync_icon_size(XFDASHBOARD_LABEL(priv->appsButton), FALSE);
 	clutter_actor_add_child(CLUTTER_ACTOR(self), priv->appsButton);
 
 	/* Next add trash button to box but initially hidden and register as drop target */
 	priv->trashButton=xfdashboard_toggle_button_new_with_text( _("Remove"));
 	clutter_actor_set_name(priv->trashButton, "trash-button");
 	clutter_actor_hide(priv->trashButton);
-	xfdashboard_button_set_icon_size(XFDASHBOARD_BUTTON(priv->trashButton), priv->normalIconSize);
-	xfdashboard_button_set_sync_icon_size(XFDASHBOARD_BUTTON(priv->trashButton), FALSE);
+	xfdashboard_label_set_icon_size(XFDASHBOARD_LABEL(priv->trashButton), priv->normalIconSize);
+	xfdashboard_label_set_sync_icon_size(XFDASHBOARD_LABEL(priv->trashButton), FALSE);
 	clutter_actor_add_child(CLUTTER_ACTOR(self), priv->trashButton);
 
 	dropAction=xfdashboard_drop_action_new();
@@ -2969,8 +3412,8 @@ void xfdashboard_quicklaunch_set_normal_icon_size(XfdashboardQuicklaunch *self, 
 		priv->normalIconSize=inIconSize;
 		clutter_actor_queue_relayout(CLUTTER_ACTOR(self));
 
-		xfdashboard_button_set_icon_size(XFDASHBOARD_BUTTON(priv->appsButton), priv->normalIconSize);
-		xfdashboard_button_set_icon_size(XFDASHBOARD_BUTTON(priv->trashButton), priv->normalIconSize);
+		xfdashboard_label_set_icon_size(XFDASHBOARD_LABEL(priv->appsButton), priv->normalIconSize);
+		xfdashboard_label_set_icon_size(XFDASHBOARD_LABEL(priv->trashButton), priv->normalIconSize);
 
 		/* Notify about property change */
 		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardQuicklaunchProperties[PROP_NORMAL_ICON_SIZE]);

@@ -1,7 +1,7 @@
 /*
  * bindings: Customizable keyboard and pointer bindings for focusable actors
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 
 #include <libxfdashboard/utils.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -194,7 +195,9 @@ static gboolean _xfdashboard_bindings_pool_parse_keycode(const gchar *inText,
 	key=0;
 	modifiers=0;
 
-	g_debug("Trying to translating key-binding '%s' to keycode and modifiers", inText);
+	XFDASHBOARD_DEBUG(_xfdashboard_bindings_pool, MISC,
+						"Trying to translating key-binding '%s' to keycode and modifiers",
+						inText);
 
 	/* Split text into parts. Valid delimiters are '+', '-', white-spaces. */
 	parts=xfdashboard_split_string(inText, "+- \t");
@@ -312,7 +315,11 @@ static gboolean _xfdashboard_bindings_pool_parse_keycode(const gchar *inText,
 	if(outKey) *outKey=key;
 	if(outModifiers) *outModifiers=modifiers;
 
-	g_debug("Translated key-binding '%s' to keycode %04x and modifiers %04x", inText, key, modifiers);
+	XFDASHBOARD_DEBUG(_xfdashboard_bindings_pool, MISC,
+						"Translated key-binding '%s' to keycode %04x and modifiers %04x",
+						inText,
+						key,
+						modifiers);
 
 	/* Return with success result */
 	return(TRUE);
@@ -808,7 +815,9 @@ static gboolean _xfdashboard_bindings_pool_load_bindings_from_file(XfdashboardBi
 	error=NULL;
 	success=TRUE;
 
-	g_debug("Loading bindings from %s'", inPath);
+	XFDASHBOARD_DEBUG(self, MISC,
+						"Loading bindings from %s'",
+						inPath);
 
 	/* Load XML file into memory */
 	error=NULL;
@@ -1024,7 +1033,9 @@ gboolean xfdashboard_bindings_pool_load(XfdashboardBindingsPool *self, GError **
 		if(envFile)
 		{
 			configFile=g_strdup(envFile);
-			g_debug("Trying bindings configuration file: %s", configFile);
+			XFDASHBOARD_DEBUG(self, MISC,
+								"Trying bindings configuration file: %s",
+								configFile);
 			if(!g_file_test(configFile, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
 			{
 				g_free(configFile);
@@ -1041,7 +1052,9 @@ gboolean xfdashboard_bindings_pool_load(XfdashboardBindingsPool *self, GError **
 	if(!configFile)
 	{
 		configFile=g_build_filename(g_get_user_config_dir(), "xfdashboard", "bindings.xml", NULL);
-		g_debug("Trying bindings configuration file: %s", configFile);
+		XFDASHBOARD_DEBUG(self, MISC,
+							"Trying bindings configuration file: %s",
+							configFile);
 		if(!g_file_test(configFile, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
 		{
 			g_free(configFile);
@@ -1055,7 +1068,9 @@ gboolean xfdashboard_bindings_pool_load(XfdashboardBindingsPool *self, GError **
 	if(!configFile)
 	{
 		configFile=g_build_filename(PACKAGE_DATADIR, "xfdashboard", "bindings.xml", NULL);
-		g_debug("Trying bindings configuration file: %s", configFile);
+		XFDASHBOARD_DEBUG(self, MISC,
+							"Trying bindings configuration file: %s",
+							configFile);
 		if(!g_file_test(configFile, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
 		{
 			g_free(configFile);
@@ -1120,12 +1135,12 @@ const XfdashboardBinding* xfdashboard_bindings_pool_find_for_event(XfdashboardBi
 	lookupBinding=xfdashboard_binding_new_for_event(inEvent);
 	if(!lookupBinding) return(NULL);
 
-	/* Beginning at class of actor check if we have a binding stored matching
+	/* Beginning at class of actor, check if we have a binding stored matching
 	 * the binding to lookup. If any matches return the binding found.
 	 * If it does not match and the class has interfaces collect them but
 	 * avoid duplicates. Then get parent class and repeat the checks as described
 	 * before.
-	 * If we reach top class without a matching binding check if we have
+	 * If we reach top class without a matching binding, check if we have
 	 * a binding for any interface we collected on our way through parent classes
 	 * and return the matching binding if found.
 	 */
@@ -1140,10 +1155,11 @@ const XfdashboardBinding* xfdashboard_bindings_pool_find_for_event(XfdashboardBi
 		/* Check if we have a binding matching lookup binding */
 		if(g_hash_table_lookup_extended(priv->bindings, lookupBinding, (gpointer*)&foundBinding, NULL))
 		{
-			g_debug("Found binding for class=%s, key=%04x, mods=%04x",
-					xfdashboard_binding_get_class_name(lookupBinding),
-					xfdashboard_binding_get_key(lookupBinding),
-					xfdashboard_binding_get_modifiers(lookupBinding));
+			XFDASHBOARD_DEBUG(self, MISC,
+								"Found binding for class=%s, key=%04x, mods=%04x",
+								xfdashboard_binding_get_class_name(lookupBinding),
+								xfdashboard_binding_get_key(lookupBinding),
+								xfdashboard_binding_get_modifiers(lookupBinding));
 
 			/* Found a binding so stop iterating through classes of actor */
 			if(interfaces) g_slist_free(interfaces);
@@ -1188,10 +1204,11 @@ const XfdashboardBinding* xfdashboard_bindings_pool_find_for_event(XfdashboardBi
 			/* Check for matching binding */
 			if(g_hash_table_lookup_extended(priv->bindings, lookupBinding, (gpointer*)&foundBinding, NULL))
 			{
-				g_debug("Found binding for interface=%s for key=%04x, mods=%04x",
-						xfdashboard_binding_get_class_name(lookupBinding),
-						xfdashboard_binding_get_key(lookupBinding),
-						xfdashboard_binding_get_modifiers(lookupBinding));
+				XFDASHBOARD_DEBUG(self, MISC,
+									"Found binding for interface=%s for key=%04x, mods=%04x",
+									xfdashboard_binding_get_class_name(lookupBinding),
+									xfdashboard_binding_get_key(lookupBinding),
+									xfdashboard_binding_get_modifiers(lookupBinding));
 
 				/* Found a binding so stop iterating through classes of actor */
 				if(interfaces) g_slist_free(interfaces);

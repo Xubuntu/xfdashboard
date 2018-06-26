@@ -1,7 +1,7 @@
 /*
  * plugins-manager: Single-instance managing plugins
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,8 +43,15 @@ typedef struct _XfdashboardPluginsManager			XfdashboardPluginsManager;
 typedef struct _XfdashboardPluginsManagerClass		XfdashboardPluginsManagerClass;
 typedef struct _XfdashboardPluginsManagerPrivate	XfdashboardPluginsManagerPrivate;
 
+/**
+ * XfdashboardPluginsManager:
+ *
+ * The #XfdashboardPluginsManager structure contains only private data and
+ * should be accessed using the provided API
+ */
 struct _XfdashboardPluginsManager
 {
+	/*< private >*/
 	/* Parent instance */
 	GObject								parent_instance;
 
@@ -52,6 +59,11 @@ struct _XfdashboardPluginsManager
 	XfdashboardPluginsManagerPrivate	*priv;
 };
 
+/**
+ * XfdashboardPluginsManagerClass:
+ *
+ * The #XfdashboardPluginsManagerClass structure contains only private data
+ */
 struct _XfdashboardPluginsManagerClass
 {
 	/*< private >*/

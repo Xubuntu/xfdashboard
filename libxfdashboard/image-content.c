@@ -1,7 +1,7 @@
 /*
  * image-content: An asynchronous loaded and cached image content
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #include <libxfdashboard/application.h>
 #include <libxfdashboard/stylable.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 #if GTK_CHECK_VERSION(3, 14 ,0)
@@ -78,7 +79,10 @@ struct _XfdashboardImageContentPrivate
 	GIcon								*gicon;
 	gint								iconSize;
 
+	GList								*actors;
+
 	guint								contentAttachedSignalID;
+	guint								contentDetachedSignalID;
 	guint								iconThemeChangedSignalID;
 };
 
@@ -133,7 +137,10 @@ static ClutterImage* _xfdashboard_image_content_get_cached_image(const gchar *in
 	/* Get loaded image and reference it */
 	image=CLUTTER_IMAGE(g_hash_table_lookup(_xfdashboard_image_content_cache, inKey));
 	g_object_ref(image);
-	g_debug("Using cached image '%s' - ref-count is now %d" , inKey, G_OBJECT(image)->ref_count);
+	XFDASHBOARD_DEBUG(image, IMAGES,
+						"Using cached image '%s' - ref-count is now %d" ,
+						inKey,
+						G_OBJECT(image)->ref_count);
 
 	return(image);
 }
@@ -155,8 +162,28 @@ static void _xfdashboard_image_content_destroy_cache(void)
 	/* Destroy cache hashtable */
 	cacheSize=g_hash_table_size(_xfdashboard_image_content_cache);
 	if(cacheSize>0) g_warning(_("Destroying image cache still containing %d images."), cacheSize);
+#ifdef DEBUG
+	if(cacheSize>0)
+	{
+		GHashTableIter						iter;
+		gpointer							hashKey, hashValue;
+		const gchar							*key;
+		XfdashboardImageContent				*content;
 
-	g_debug("Destroying image cache hashtable");
+		g_hash_table_iter_init(&iter, _xfdashboard_image_content_cache);
+		while(g_hash_table_iter_next (&iter, &hashKey, &hashValue))
+		{
+			key=(const gchar*)hashKey;
+			content=XFDASHBOARD_IMAGE_CONTENT(hashValue);
+			g_print("Image content in cache: Item %s@%p for key '%s' (used by %d actors)\n",
+						G_OBJECT_TYPE_NAME(content), content,
+						key,
+						g_list_length(content->priv->actors));
+		}
+	}
+#endif
+
+	XFDASHBOARD_DEBUG(NULL, IMAGES, "Destroying image cache hashtable");
 	g_hash_table_destroy(_xfdashboard_image_content_cache);
 	_xfdashboard_image_content_cache=NULL;
 }
@@ -171,7 +198,7 @@ static void _xfdashboard_image_content_create_cache(void)
 
 	/* Create create hashtable */
 	_xfdashboard_image_content_cache=g_hash_table_new(g_str_hash, g_str_equal);
-	g_debug("Created image cache hashtable");
+	XFDASHBOARD_DEBUG(NULL, IMAGES, "Created image cache hashtable");
 
 	/* Connect to "shutdown" signal of application to
 	 * clean up hashtable
@@ -193,7 +220,10 @@ static void _xfdashboard_image_content_remove_from_cache(XfdashboardImageContent
 	if(!_xfdashboard_image_content_cache) return;
 
 	/* Remove from cache */
-	g_debug("Removing image '%s' with ref-count %d" , priv->key, G_OBJECT(self)->ref_count);
+	XFDASHBOARD_DEBUG(self, IMAGES,
+						"Removing image '%s' with ref-count %d",
+						priv->key,
+						G_OBJECT(self)->ref_count);
 	g_hash_table_remove(_xfdashboard_image_content_cache, priv->key);
 }
 
@@ -231,13 +261,19 @@ static void _xfdashboard_image_content_store_in_cache(XfdashboardImageContent *s
 		if(content)
 		{
 			g_object_unref(content);
-			g_debug("Replacing image '%s' which had ref-count %u", priv->key, G_OBJECT(content)->ref_count);
+			XFDASHBOARD_DEBUG(self, IMAGES,
+								"Replacing image '%s' which had ref-count %u",
+								priv->key,
+								G_OBJECT(content)->ref_count);
 		}
 	}
 
 	/* Store new image in cache */
 	g_hash_table_insert(_xfdashboard_image_content_cache, priv->key, self);
-	g_debug("Added image '%s' with ref-count %d" , priv->key, G_OBJECT(self)->ref_count);
+	XFDASHBOARD_DEBUG(self, IMAGES,
+						"Added image '%s' with ref-count %d",
+						priv->key,
+						G_OBJECT(self)->ref_count);
 }
 
 /* Set an empty image of size 1x1 pixels (e.g. when loading asynchronously) */
@@ -316,13 +352,17 @@ static void _xfdashboard_image_content_loading_async_callback(GObject *inSource,
 	if(priv->loadState==XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADED_SUCCESSFULLY)
 	{
 		g_signal_emit(self, XfdashboardImageContentSignals[SIGNAL_LOADED], 0);
-		g_debug("Successfully loaded image for key '%s' asynchronously", priv->key ? priv->key : "<nil>");
+		XFDASHBOARD_DEBUG(self, IMAGES,
+							"Successfully loaded image for key '%s' asynchronously",
+							priv->key ? priv->key : "<nil>");
 	}
 		/* ... or emit "loading-failed" signal if loading has failed. */
 		else
 		{
 			g_signal_emit(self, XfdashboardImageContentSignals[SIGNAL_LOADING_FAILED], 0);
-			g_debug("Failed to load image for key '%s' asynchronously", priv->key ? priv->key : "<nil>");
+			XFDASHBOARD_DEBUG(self, IMAGES,
+								"Failed to load image for key '%s' asynchronously",
+								priv->key ? priv->key : "<nil>");
 		}
 
 	/* Now release the extra reference we took to keep this instance alive
@@ -421,7 +461,12 @@ static void _xfdashboard_image_content_load_from_file(XfdashboardImageContent *s
 					error=NULL;
 				}
 			}
-				else g_debug("Loaded fallback icon for file '%s' from built-in pixbuf", priv->iconName);
+				else
+				{
+					XFDASHBOARD_DEBUG(self, IMAGES,
+										"Loaded fallback icon for file '%s' from built-in pixbuf",
+										priv->iconName);
+				}
 
 			g_object_unref(iconPixbuf);
 		}
@@ -477,7 +522,10 @@ static void _xfdashboard_image_content_load_from_file(XfdashboardImageContent *s
 													(GAsyncReadyCallback)_xfdashboard_image_content_loading_async_callback,
 													g_object_ref(self));
 
-		g_debug("Loading icon '%s' from file %s", priv->iconName, filename);
+		XFDASHBOARD_DEBUG(self, IMAGES,
+							"Loading icon '%s' from file %s",
+							priv->iconName,
+							filename);
 
 		/* Release allocated resources */
 		g_object_unref(stream);
@@ -511,9 +559,10 @@ static gboolean _xfdashboard_image_content_load_from_icon_name_is_supported_suff
 		if(g_strcmp0(inExtension+1, *entry)==0)
 		{
 			isSupported=TRUE;
-			g_debug("Extension '%s' is supported by '%s'",
-						inExtension+1,
-						gdk_pixbuf_format_get_description(inFormat));
+			XFDASHBOARD_DEBUG(NULL, IMAGES,
+								"Extension '%s' is supported by '%s'",
+								inExtension+1,
+								gdk_pixbuf_format_get_description(inFormat));
 		}
 	}
 
@@ -566,7 +615,10 @@ static void _xfdashboard_image_content_load_from_icon_name(XfdashboardImageConte
 
 			/* Get suffix - the file extension */
 			extension=g_utf8_casefold(extensionPosition, -1);
-			g_debug("Checking if icon filename '%s' with suffix '%s' is supported by gdk-pixbuf", priv->iconName, extensionPosition);
+			XFDASHBOARD_DEBUG(self, IMAGES,
+								"Checking if icon filename '%s' with suffix '%s' is supported by gdk-pixbuf",
+								priv->iconName,
+								extensionPosition);
 
 			/* Get all formats supported by gdk-pixbuf and check if
 			 * suffix matches any of them.
@@ -605,12 +657,24 @@ static void _xfdashboard_image_content_load_from_icon_name(XfdashboardImageConte
 #endif
 
 				if(!iconInfo) g_warning(_("Could not lookup icon name '%s' for icon '%s'"), iconName, priv->iconName);
-					else g_debug("Extension '%s' is supported and loaded icon name '%s' for icon '%s'", extension, iconName, priv->iconName);
+					else
+					{
+						XFDASHBOARD_DEBUG(self, IMAGES,
+											"Extension '%s' is supported and loaded icon name '%s' for icon '%s'",
+											extension,
+											iconName,
+											priv->iconName);
+					}
 
 				/* Release allocated resources */
 				g_free(iconName);
 			}
-				else g_debug("Extension '%s' is not supported by gdk-pixbuf", extension);
+				else
+				{
+					XFDASHBOARD_DEBUG(self, IMAGES,
+										"Extension '%s' is not supported by gdk-pixbuf",
+										extension);
+				}
 
 			/* Release allocated resources */
 			g_free(extension);
@@ -663,7 +727,12 @@ static void _xfdashboard_image_content_load_from_icon_name(XfdashboardImageConte
 				error=NULL;
 			}
 		}
-			else g_debug("Loaded image data into content for icon '%s' from built-in pixbuf", priv->iconName);
+			else
+			{
+				XFDASHBOARD_DEBUG(self, IMAGES,
+									"Loaded image data into content for icon '%s' from built-in pixbuf",
+									priv->iconName);
+			}
 
 		g_object_unref(iconPixbuf);
 	}
@@ -714,7 +783,10 @@ static void _xfdashboard_image_content_load_from_icon_name(XfdashboardImageConte
 			g_object_unref(stream);
 			g_object_unref(file);
 
-			g_debug("Loading icon '%s' from icon file %s", priv->iconName, filename);
+			XFDASHBOARD_DEBUG(self, IMAGES,
+								"Loading icon '%s' from icon file %s",
+								priv->iconName,
+								filename);
 		}
 
 	/* Release allocated resources */
@@ -791,7 +863,12 @@ static void _xfdashboard_image_content_load_from_gicon(XfdashboardImageContent *
 				error=NULL;
 			}
 		}
-			else g_debug("Loaded image data into content for gicon '%s' from built-in pixbuf", g_icon_to_string(priv->gicon));
+			else
+			{
+				XFDASHBOARD_DEBUG(self, IMAGES,
+									"Loaded image data into content for gicon '%s' from built-in pixbuf",
+									g_icon_to_string(priv->gicon));
+			}
 
 		g_object_unref(iconPixbuf);
 	}
@@ -839,9 +916,10 @@ static void _xfdashboard_image_content_load_from_gicon(XfdashboardImageContent *
 			g_object_unref(stream);
 			g_object_unref(file);
 
-			g_debug("Loading gicon '%s' from file %s",
-						g_icon_to_string(priv->gicon),
-						filename);
+			XFDASHBOARD_DEBUG(self, IMAGES,
+								"Loading gicon '%s' from file %s",
+								g_icon_to_string(priv->gicon),
+								filename);
 		}
 
 	/* Release allocated resources */
@@ -957,53 +1035,24 @@ static void _xfdashboard_image_content_setup_for_gicon(XfdashboardImageContent *
 	priv->iconSize=inSize;
 }
 
-/* IMPLEMENTATION: ClutterContent */
-
-/* Image was attached to an actor */
-static void _xfdashboard_image_content_on_attached(ClutterContent *inContent,
-													ClutterActor *inActor,
-													gpointer inUserData)
+/* Load image */
+static void _xfdashboard_image_content_load(XfdashboardImageContent *self)
 {
-	XfdashboardImageContent				*self;
 	XfdashboardImageContentPrivate		*priv;
 
-	g_return_if_fail(XFDASHBOARD_IS_IMAGE_CONTENT(inContent));
+	g_return_if_fail(XFDASHBOARD_IS_IMAGE_CONTENT(self));
 
-	self=XFDASHBOARD_IMAGE_CONTENT(inContent);
 	priv=self->priv;
 
-	/* If image is being loaded then do nothing */
-	if(priv->loadState==XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADING) return;
+	/* If image is in state of getting loaded or finished loading then do nothing */
+	if(priv->loadState!=XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_NONE) return;
 
-	/* Check if image was already loaded then emit signal
-	 * appropiate for last load status.
-	 */
-	if(priv->loadState==XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADED_SUCCESSFULLY ||
-		priv->loadState==XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADED_FAILED)
-	{
-		/* Emit "loaded" signal if loading was successful ... */
-		if(priv->loadState==XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADED_SUCCESSFULLY)
-		{
-			g_signal_emit(self, XfdashboardImageContentSignals[SIGNAL_LOADED], 0);
-		}
-			/* ... or emit "loading-failed" signal if loading has failed. */
-			else
-			{
-				g_signal_emit(self, XfdashboardImageContentSignals[SIGNAL_LOADING_FAILED], 0);
-			}
-
-		return;
-	}
+	XFDASHBOARD_DEBUG(self, IMAGES,
+						"Begin loading image with key '%s'",
+						priv->key);
 
 	/* Mark image being loaded */
 	priv->loadState=XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADING;
-
-	/* Also disconnect signal handler as it should not be called anymore */
-	if(priv->contentAttachedSignalID)
-	{
-		g_signal_handler_disconnect(self, priv->contentAttachedSignalID);
-		priv->contentAttachedSignalID=0;
-	}
 
 	/* Set empty image - just for the case loading failed at any point */
 	_xfdashboard_image_content_set_empty_image(self);
@@ -1030,6 +1079,191 @@ static void _xfdashboard_image_content_on_attached(ClutterContent *inContent,
 		default:
 			g_warning(_("Cannot load image '%s' of unknown type %d"), priv->key, priv->type);
 			break;
+	}
+}
+
+/* Callback function for g_list_foreach() at list of known actors using this
+ * image content. This callback function will only disconnect all signal handlers
+ * connected by this image content.
+ */
+static void _xfdashboard_image_content_disconnect_signals_handlers_from_actor(gpointer inData,
+																				gpointer inUserData)
+{
+	XfdashboardImageContent				*self;
+	ClutterActor						*actor;
+
+	g_return_if_fail(XFDASHBOARD_IS_IMAGE_CONTENT(inUserData));
+	g_return_if_fail(CLUTTER_IS_ACTOR(inData));
+
+	self=XFDASHBOARD_IMAGE_CONTENT(inUserData);
+	actor=CLUTTER_ACTOR(inData);
+
+	/* Disconnect signal handlers */
+	g_signal_handlers_disconnect_by_data(actor, self);
+}
+
+/* An actor using this image as content was mapped or unmapped */
+static void _xfdashboard_image_content_on_actor_mapped(XfdashboardImageContent *self,
+														GParamSpec *inSpec,
+														gpointer inUserData)
+{
+	XfdashboardImageContentPrivate		*priv;
+	ClutterActor						*actor;
+
+	g_return_if_fail(XFDASHBOARD_IS_IMAGE_CONTENT(self));
+	g_return_if_fail(CLUTTER_IS_ACTOR(inUserData));
+
+	priv=self->priv;
+	actor=CLUTTER_ACTOR(inUserData);
+
+	/* If actor was mapped then load image now and disconnect signal handlers
+	 * from all known actors using this image content.
+	 */
+	if(clutter_actor_is_mapped(actor))
+	{
+		/* Remove signal handlers from all known actors using this image content */
+		g_list_foreach(priv->actors, _xfdashboard_image_content_disconnect_signals_handlers_from_actor, self);
+
+		/* Load image now */
+		XFDASHBOARD_DEBUG(self, IMAGES,
+							"Image with key '%s' will be loaded now because actor %s@%p is mapped now",
+							priv->key,
+							actor ? G_OBJECT_TYPE_NAME(actor) : "<nil>",
+							actor);
+
+		_xfdashboard_image_content_load(self);
+	}
+}
+
+
+/* IMPLEMENTATION: ClutterContent */
+
+/* Image was attached to an actor */
+static void _xfdashboard_image_content_on_attached(ClutterContent *inContent,
+													ClutterActor *inActor,
+													gpointer inUserData)
+{
+	XfdashboardImageContent				*self;
+	XfdashboardImageContentPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_IMAGE_CONTENT(inContent));
+	g_return_if_fail(!inActor || CLUTTER_IS_ACTOR(inActor));
+
+	self=XFDASHBOARD_IMAGE_CONTENT(inContent);
+	priv=self->priv;
+
+	/* If we got an actor then add it to list of actors known to have this image
+	 * attached.
+	 */
+	if(inActor &&
+		CLUTTER_IS_ACTOR(inActor))
+	{
+		XFDASHBOARD_DEBUG(self, IMAGES,
+							"Attached image with key '%s' to %s actor %s@%p",
+							priv->key,
+							(inActor && clutter_actor_is_mapped(inActor)) ? "mapped" : "unmapped",
+							inActor ? G_OBJECT_TYPE_NAME(inActor) : "<nil>",
+							inActor);
+
+		/* Add actor to list of known actors using this image content. Avoid
+		 * duplicates in this list although it should never happen.
+		 */
+		if(!g_list_find(priv->actors, inActor))
+		{
+			priv->actors=g_list_prepend(priv->actors, inActor);
+		}
+	}
+
+	/* If image is being loaded then do nothing */
+	if(priv->loadState==XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADING) return;
+
+	/* Check if image was already loaded then emit signal
+	 * appropiate for last load status.
+	 */
+	if(priv->loadState==XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADED_SUCCESSFULLY ||
+		priv->loadState==XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADED_FAILED)
+	{
+		/* Emit "loaded" signal if loading was successful ... */
+		if(priv->loadState==XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADED_SUCCESSFULLY)
+		{
+			g_signal_emit(self, XfdashboardImageContentSignals[SIGNAL_LOADED], 0);
+		}
+			/* ... or emit "loading-failed" signal if loading has failed. */
+			else
+			{
+				g_signal_emit(self, XfdashboardImageContentSignals[SIGNAL_LOADING_FAILED], 0);
+			}
+
+		return;
+	}
+
+	/* If we got an actor then check if it is mapped. If it is not mapped then
+	 * connect a signal handler to get notified when the actor is mapped. If the
+	 * actor is mapped then call the signal handler directly. The signal handler
+	 * called, either when the actor is mapped or called directly, will load the
+	 * image.
+	 */
+	if(inActor &&
+		CLUTTER_IS_ACTOR(inActor))
+	{
+		/* If actor is not mapped then connect signal handler and return here
+		 * as the signal handler will load the image once the actor was mapped.
+		 */
+		if(!clutter_actor_is_mapped(inActor))
+		{
+			g_signal_connect_swapped(inActor,
+										"notify::mapped",
+										G_CALLBACK(_xfdashboard_image_content_on_actor_mapped),
+										self);
+
+			return;
+		}
+	}
+
+	/* If we get here then either the actor is mapped or we got not an actor at
+	 * all, so start loading image now. Otherwise it will never get loaded.
+	 */
+	XFDASHBOARD_DEBUG(self, IMAGES,
+						"Attached image with key '%s' need to get loaded immediately",
+						priv->key);
+	_xfdashboard_image_content_load(self);
+}
+
+/* Image was detached from an actor */
+static void _xfdashboard_image_content_on_detached(ClutterContent *inContent,
+													ClutterActor *inActor,
+													gpointer inUserData)
+{
+	XfdashboardImageContent				*self;
+	XfdashboardImageContentPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_IMAGE_CONTENT(inContent));
+	g_return_if_fail(!inActor || CLUTTER_IS_ACTOR(inActor));
+
+	self=XFDASHBOARD_IMAGE_CONTENT(inContent);
+	priv=self->priv;
+
+
+	/* Remove actor from list of actors known to have this image attached and
+	 * disconnect signal handlers.
+	 */
+	if(inActor &&
+		CLUTTER_IS_ACTOR(inActor))
+	{
+		GList							*iter;
+
+		/* Remove actor from list of known actors using this image content */
+		iter=g_list_find(priv->actors, inActor);
+		if(iter) priv->actors=g_list_delete_link(priv->actors, iter);
+
+		/* Disconnect signal handler */
+		g_signal_handlers_disconnect_by_data(inActor, self);
+
+		XFDASHBOARD_DEBUG(self, IMAGES,
+							"Detached image with key '%s' from actor %s@%p",
+							priv->key,
+							inActor ? G_OBJECT_TYPE_NAME(inActor) : "<nil>",
+							inActor);
 	}
 }
 
@@ -1092,10 +1326,23 @@ static void _xfdashboard_image_content_dispose(GObject *inObject)
 	/* Release allocated resources */
 	priv->type=XFDASHBOARD_IMAGE_TYPE_NONE;
 
+	if(priv->actors)
+	{
+		g_list_foreach(priv->actors, _xfdashboard_image_content_disconnect_signals_handlers_from_actor, self);
+		g_list_free(priv->actors);
+		priv->actors=NULL;
+	}
+
 	if(priv->contentAttachedSignalID)
 	{
 		g_signal_handler_disconnect(self, priv->contentAttachedSignalID);
 		priv->contentAttachedSignalID=0;
+	}
+
+	if(priv->contentDetachedSignalID)
+	{
+		g_signal_handler_disconnect(self, priv->contentDetachedSignalID);
+		priv->contentDetachedSignalID=0;
 	}
 
 	if(priv->iconThemeChangedSignalID)
@@ -1267,17 +1514,24 @@ void xfdashboard_image_content_init(XfdashboardImageContent *self)
 	priv->loadState=XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_NONE;
 	priv->iconTheme=gtk_icon_theme_get_default();
 	priv->missingIconName=g_strdup(XFDASHBOARD_IMAGE_CONTENT_DEFAULT_FALLBACK_ICON_NAME);
+	priv->actors=NULL;
 
 	/* Style content */
 	xfdashboard_stylable_invalidate(XFDASHBOARD_STYLABLE(self));
 
-	/* Connect to "attached" signal of ClutterContent to get notified
-	 * when this image is used. We will load image when this image is
-	 * attached the first time.
+	/* Connect to "attached" and "detached" signal of ClutterContent to get
+	 * notified when this image is used or released. We will check if the actor
+	 * using this image is mapped and load image or we wait until any actor having
+	 * this image attached is mapped and then load the image.
 	 */
 	priv->contentAttachedSignalID=g_signal_connect(self,
 													"attached",
 													G_CALLBACK(_xfdashboard_image_content_on_attached),
+													NULL);
+
+	priv->contentDetachedSignalID=g_signal_connect(self,
+													"detached",
+													G_CALLBACK(_xfdashboard_image_content_on_detached),
 													NULL);
 
 	/* Connect to "changed" signal of GtkIconTheme to get notified
@@ -1495,12 +1749,14 @@ void xfdashboard_image_content_set_missing_icon_name(XfdashboardImageContent *se
 			/* Set state of image to "not-loaded" */
 			priv->loadState=XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_NONE;
 
-			/* Call signal handler for first-time attached image content which
-			 * will set up an empty image first and then tries to load the image.
-			 * It is likely to fail again but then it will show the new missing
-			 * icon instead of the old one.
+			/* Try to load image again. It will set up an empty image first and
+			 * then try to load the image.  It is likely that it will fail again
+			 * but then it will show the new missing icon instead of the old one.
 			 */
-			_xfdashboard_image_content_on_attached(CLUTTER_CONTENT(self), NULL, NULL);
+			XFDASHBOARD_DEBUG(self, IMAGES,
+								"Reload failed  image with key '%s' because of changed missing-icon property",
+								priv->key);
+			_xfdashboard_image_content_load(self);
 		}
 
 		/* Invalidate ourselve to get us redrawn */
@@ -1509,29 +1765,6 @@ void xfdashboard_image_content_set_missing_icon_name(XfdashboardImageContent *se
 		/* Notify about property change */
 		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardImageContentProperties[PROP_MISSING_ICON_NAME]);
 	}
-}
-
-/* Get size of image as specified when creating this object instance */
-gint xfdashboard_image_content_get_size(XfdashboardImageContent *self)
-{
-	g_return_val_if_fail(XFDASHBOARD_IS_IMAGE_CONTENT(self), 0);
-
-	return(self->priv->iconSize);
-}
-
-/* Get real size of image loaded */
-void xfdashboard_image_content_get_real_size(XfdashboardImageContent *self, gint *outWidth, gint *outHeight)
-{
-	gfloat			w, h;
-
-	g_return_if_fail(XFDASHBOARD_IS_IMAGE_CONTENT(self));
-
-	/* Get preferred size of ClutterImage as it will be the real size */
-	clutter_content_get_preferred_size(CLUTTER_CONTENT(self), &w, &h);
-
-	/* Store sizes computed */
-	if(outWidth) *outWidth=floor(w);
-	if(outHeight) *outHeight=floor(h);
 }
 
 /* Get loading state of image */
@@ -1556,7 +1789,9 @@ void xfdashboard_image_content_force_load(XfdashboardImageContent *self)
 	 */
 	if(priv->loadState==XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_NONE)
 	{
-		g_debug("Need to enforce loading '%s'", priv->iconName);
-		_xfdashboard_image_content_on_attached(CLUTTER_CONTENT(self), NULL, NULL);
+		XFDASHBOARD_DEBUG(self, IMAGES,
+							"Need to enforce loading image with key '%s'",
+							priv->key);
+		_xfdashboard_image_content_load(self);
 	}
 }

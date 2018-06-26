@@ -1,7 +1,7 @@
 /*
  * stage: Global stage of application
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ typedef struct _XfdashboardStagePrivate		XfdashboardStagePrivate;
 
 struct _XfdashboardStage
 {
+	/*< private >*/
 	/* Parent instance */
 	ClutterStage							parent_instance;
 
@@ -62,6 +63,8 @@ struct _XfdashboardStageClass
 
 	/*< public >*/
 	/* Virtual functions */
+	void (*actor_created)(XfdashboardStage *self, ClutterActor *inActor);
+
 	void (*search_started)(XfdashboardStage *self);
 	void (*search_changed)(XfdashboardStage *self, gchar *inText);
 	void (*search_ended)(XfdashboardStage *self);

@@ -1,7 +1,7 @@
 /*
  * windows-view: A view showing visible windows
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,9 @@
 #include <libxfdashboard/marshal.h>
 #include <libxfdashboard/enums.h>
 #include <libxfdashboard/stage-interface.h>
+#include <libxfdashboard/live-workspace.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -80,6 +82,7 @@ struct _XfdashboardWindowsViewPrivate
 	gboolean							isWindowsNumberShown;
 
 	gboolean							filterMonitorWindows;
+	gboolean							filterWorkspaceWindows;
 	XfdashboardStageInterface			*currentStage;
 	XfdashboardWindowTrackerMonitor		*currentMonitor;
 	guint								currentStageMonitorBindingID;
@@ -95,6 +98,7 @@ enum
 	PROP_PREVENT_UPSCALING,
 	PROP_SCROLL_EVENT_CHANGES_WORKSPACE,
 	PROP_FILTER_MONITOR_WINDOWS,
+	PROP_FILTER_WORKSPACE_WINDOWS,
 
 	PROP_LAST
 };
@@ -205,20 +209,24 @@ static gboolean _xfdashboard_windows_view_update_stage_and_monitor(XfdashboardWi
 static gboolean _xfdashboard_windows_view_is_visible_window(XfdashboardWindowsView *self,
 																XfdashboardWindowTrackerWindow *inWindow)
 {
-	XfdashboardWindowsViewPrivate		*priv;
+	XfdashboardWindowsViewPrivate			*priv;
+	XfdashboardWindowTrackerWindowState		state;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_WINDOWS_VIEW(self), FALSE);
 	g_return_val_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inWindow), FALSE);
 
 	priv=self->priv;
 
+	/* Get state of window */
+	state=xfdashboard_window_tracker_window_get_state(inWindow);
+
 	/* Determine if windows should be shown depending on its state, size and position */
-	if(xfdashboard_window_tracker_window_is_skip_pager(inWindow))
+	if(state & XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_SKIP_PAGER)
 	{
 		return(FALSE);
 	}
 
-	if(xfdashboard_window_tracker_window_is_skip_tasklist(inWindow))
+	if(state & XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_SKIP_TASKLIST)
 	{
 		return(FALSE);
 	}
@@ -228,8 +236,13 @@ static gboolean _xfdashboard_windows_view_is_visible_window(XfdashboardWindowsVi
 		return(FALSE);
 	}
 
-	if(!priv->workspace ||
-		!xfdashboard_window_tracker_window_is_visible_on_workspace(inWindow, priv->workspace))
+	if(!priv->workspace)
+	{
+		return(FALSE);
+	}
+
+	if(!xfdashboard_window_tracker_window_is_visible(inWindow) ||
+		(priv->filterWorkspaceWindows && !xfdashboard_window_tracker_window_is_on_workspace(inWindow, priv->workspace)))
 	{
 		return(FALSE);
 	}
@@ -249,9 +262,9 @@ static gboolean _xfdashboard_windows_view_is_visible_window(XfdashboardWindowsVi
 static XfdashboardLiveWindow* _xfdashboard_windows_view_find_by_window(XfdashboardWindowsView *self,
 																		XfdashboardWindowTrackerWindow *inWindow)
 {
-	XfdashboardLiveWindow	*liveWindow;
-	ClutterActor			*child;
-	ClutterActorIter		iter;
+	XfdashboardLiveWindow		*liveWindow;
+	ClutterActor				*child;
+	ClutterActorIter			iter;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_WINDOWS_VIEW(self), NULL);
 	g_return_val_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inWindow), NULL);
@@ -263,7 +276,10 @@ static XfdashboardLiveWindow* _xfdashboard_windows_view_find_by_window(Xfdashboa
 		if(!XFDASHBOARD_IS_LIVE_WINDOW(child)) continue;
 
 		liveWindow=XFDASHBOARD_LIVE_WINDOW(child);
-		if(xfdashboard_live_window_get_window(liveWindow)==inWindow) return(liveWindow);
+		if(xfdashboard_live_window_simple_get_window(XFDASHBOARD_LIVE_WINDOW_SIMPLE(liveWindow))==inWindow)
+		{
+			return(liveWindow);
+		}
 	}
 
 	/* If we get here we did not find the window and we return NULL */
@@ -322,8 +338,8 @@ static void _xfdashboard_windows_view_recreate_window_actors(XfdashboardWindowsV
 	if(priv->selectedItem)
 	{
 		g_object_remove_weak_pointer(G_OBJECT(priv->selectedItem), &priv->selectedItem);
+		priv->selectedItem=NULL;
 	}
-	priv->selectedItem=NULL;
 
 	/* Destroy all actors */
 	clutter_actor_destroy_all_children(CLUTTER_ACTOR(self));
@@ -383,7 +399,7 @@ static void _xfdashboard_windows_view_move_live_to_view(XfdashboardWindowsView *
 	priv=self->priv;
 
 	/* Get window from window actor */
-	window=xfdashboard_live_window_get_window(inWindowActor);
+	window=xfdashboard_live_window_simple_get_window(XFDASHBOARD_LIVE_WINDOW_SIMPLE(inWindowActor));
 
 	/* Get source and target workspace */
 	sourceWorkspace=xfdashboard_window_tracker_window_get_workspace(window);
@@ -393,23 +409,24 @@ static void _xfdashboard_windows_view_move_live_to_view(XfdashboardWindowsView *
 	sourceMonitor=xfdashboard_window_tracker_window_get_monitor(window);
 	targetMonitor=priv->currentMonitor;
 
-	g_debug("Moving window '%s' from %s-monitor %d to %s-monitor %d and from workspace '%s' (%d) to '%s' (%d)",
-				xfdashboard_window_tracker_window_get_title(window),
-				xfdashboard_window_tracker_monitor_is_primary(sourceMonitor) ? "primary" : "secondary",
-				xfdashboard_window_tracker_monitor_get_number(sourceMonitor),
-				xfdashboard_window_tracker_monitor_is_primary(targetMonitor) ? "primary" : "secondary",
-				xfdashboard_window_tracker_monitor_get_number(targetMonitor),
-				xfdashboard_window_tracker_workspace_get_name(sourceWorkspace),
-				xfdashboard_window_tracker_workspace_get_number(sourceWorkspace),
-				xfdashboard_window_tracker_workspace_get_name(targetWorkspace),
-				xfdashboard_window_tracker_workspace_get_number(targetWorkspace));
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Moving window '%s' from %s-monitor %d to %s-monitor %d and from workspace '%s' (%d) to '%s' (%d)",
+						xfdashboard_window_tracker_window_get_name(window),
+						xfdashboard_window_tracker_monitor_is_primary(sourceMonitor) ? "primary" : "secondary",
+						xfdashboard_window_tracker_monitor_get_number(sourceMonitor),
+						xfdashboard_window_tracker_monitor_is_primary(targetMonitor) ? "primary" : "secondary",
+						xfdashboard_window_tracker_monitor_get_number(targetMonitor),
+						xfdashboard_window_tracker_workspace_get_name(sourceWorkspace),
+						xfdashboard_window_tracker_workspace_get_number(sourceWorkspace),
+						xfdashboard_window_tracker_workspace_get_name(targetWorkspace),
+						xfdashboard_window_tracker_workspace_get_number(targetWorkspace));
 
 	/* Get position and size of window to move */
-	xfdashboard_window_tracker_window_get_position_size(window,
-														&oldWindowX,
-														&oldWindowY,
-														&oldWindowWidth,
-														&oldWindowHeight);
+	xfdashboard_window_tracker_window_get_geometry(window,
+													&oldWindowX,
+													&oldWindowY,
+													&oldWindowWidth,
+													&oldWindowHeight);
 
 	/* Calculate source x and y coordinate relative to monitor size in percent */
 	xfdashboard_window_tracker_monitor_get_geometry(sourceMonitor,
@@ -433,23 +450,25 @@ static void _xfdashboard_windows_view_move_live_to_view(XfdashboardWindowsView *
 	if(!xfdashboard_window_tracker_workspace_is_equal(sourceWorkspace, targetWorkspace))
 	{
 		xfdashboard_window_tracker_window_move_to_workspace(window, targetWorkspace);
-		g_debug("Moved window '%s' from workspace '%s' (%d) to '%s' (%d)",
-					xfdashboard_window_tracker_window_get_title(window),
-					xfdashboard_window_tracker_workspace_get_name(sourceWorkspace),
-					xfdashboard_window_tracker_workspace_get_number(sourceWorkspace),
-					xfdashboard_window_tracker_workspace_get_name(targetWorkspace),
-					xfdashboard_window_tracker_workspace_get_number(targetWorkspace));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Moved window '%s' from workspace '%s' (%d) to '%s' (%d)",
+							xfdashboard_window_tracker_window_get_name(window),
+							xfdashboard_window_tracker_workspace_get_name(sourceWorkspace),
+							xfdashboard_window_tracker_workspace_get_number(sourceWorkspace),
+							xfdashboard_window_tracker_workspace_get_name(targetWorkspace),
+							xfdashboard_window_tracker_workspace_get_number(targetWorkspace));
 	}
 
 	/* Move window to new position */
 	xfdashboard_window_tracker_window_move(window, newWindowX, newWindowY);
-	g_debug("Moved window '%s' from [%d,%d] at monitor [%d,%d x %d,%d] to [%d,%d] at monitor [%d,%d x %d,%d] (relative x=%.2f, y=%.2f)",
-				xfdashboard_window_tracker_window_get_title(window),
-				oldWindowX, oldWindowY,
-				oldMonitorX, oldMonitorY, oldMonitorWidth, oldMonitorHeight,
-				newWindowX, newWindowY,
-				newMonitorX, newMonitorY, newMonitorWidth, newMonitorHeight,
-				relativeX, relativeY);
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Moved window '%s' from [%d,%d] at monitor [%d,%d x %d,%d] to [%d,%d] at monitor [%d,%d x %d,%d] (relative x=%.2f, y=%.2f)",
+						xfdashboard_window_tracker_window_get_name(window),
+						oldWindowX, oldWindowY,
+						oldMonitorX, oldMonitorY, oldMonitorWidth, oldMonitorHeight,
+						newWindowX, newWindowY,
+						newMonitorX, newMonitorY, newMonitorWidth, newMonitorHeight,
+						relativeX, relativeY);
 }
 
 /* Drag of an actor to this view as drop target begins */
@@ -471,15 +490,29 @@ static gboolean _xfdashboard_windows_view_on_drop_begin(XfdashboardWindowsView *
 	dragSource=xfdashboard_drag_action_get_source(inDragAction);
 	draggedActor=xfdashboard_drag_action_get_actor(inDragAction);
 
-	/* Check if we can handle dragged actor from given source */
+	/* We can handle dragged actor if it is an application button and its source
+	 * is quicklaunch.
+	 */
 	if(XFDASHBOARD_IS_QUICKLAUNCH(dragSource) &&
 		XFDASHBOARD_IS_APPLICATION_BUTTON(draggedActor))
 	{
 		canHandle=TRUE;
 	}
 
+	/* We can handle dragged actor if it is a live window and its source
+	 * is windows view.
+	 */
 	if(XFDASHBOARD_IS_WINDOWS_VIEW(dragSource) &&
 		XFDASHBOARD_IS_LIVE_WINDOW(draggedActor))
+	{
+		canHandle=TRUE;
+	}
+
+	/* We can handle dragged actor if it is a live window and its source
+	 * is a live workspace
+	 */
+	if(XFDASHBOARD_IS_LIVE_WORKSPACE(dragSource) &&
+		XFDASHBOARD_IS_LIVE_WINDOW_SIMPLE(draggedActor))
 	{
 		canHandle=TRUE;
 	}
@@ -530,7 +563,7 @@ static void _xfdashboard_windows_view_on_drop_drop(XfdashboardWindowsView *self,
 		XFDASHBOARD_IS_LIVE_WINDOW(draggedActor))
 	{
 		XfdashboardWindowsView			*sourceWindowsView;
-		XfdashboardLiveWindow			*liveWindow;
+		XfdashboardLiveWindow			*liveWindowActor;
 
 		/* Get source windows view */
 		sourceWindowsView=XFDASHBOARD_WINDOWS_VIEW(dragSource);
@@ -540,17 +573,54 @@ static void _xfdashboard_windows_view_on_drop_drop(XfdashboardWindowsView *self,
 		 */
 		if(sourceWindowsView==self)
 		{
-			g_message("Will not handle drop of %s at %s because source and target are the same.",
+			XFDASHBOARD_DEBUG(self, ACTOR,
+						"Will not handle drop of %s at %s because source and target are the same.",
 						G_OBJECT_TYPE_NAME(draggedActor),
 						G_OBJECT_TYPE_NAME(dragSource));
 			return;
 		}
 
 		/* Get dragged window */
-		liveWindow=XFDASHBOARD_LIVE_WINDOW(draggedActor);
+		liveWindowActor=XFDASHBOARD_LIVE_WINDOW(draggedActor);
 
-		/* Move window to monitor of this window view */
-		_xfdashboard_windows_view_move_live_to_view(self, liveWindow);
+		/* Move dragged window to monitor of this window view */
+		_xfdashboard_windows_view_move_live_to_view(self, liveWindowActor);
+
+		/* Drop action handled so return here */
+		return;
+	}
+
+	/* Handle drop of an window from a live workspace */
+	if(XFDASHBOARD_IS_LIVE_WORKSPACE(dragSource) &&
+		XFDASHBOARD_IS_LIVE_WINDOW_SIMPLE(draggedActor))
+	{
+		XfdashboardLiveWorkspace			*sourceLiveWorkspace;
+		XfdashboardWindowTrackerWorkspace*	sourceWorkspace;
+		XfdashboardLiveWindowSimple			*liveWindowActor;
+		XfdashboardWindowTrackerWindow		*window;
+
+		/* Get source live workspace and its workspace */
+		sourceLiveWorkspace=XFDASHBOARD_LIVE_WORKSPACE(dragSource);
+		sourceWorkspace=xfdashboard_live_workspace_get_workspace(sourceLiveWorkspace);
+
+		/* Do nothing if source and destination workspaces are the same as nothing
+		 * is to do in this case.
+		 */
+		if(xfdashboard_window_tracker_workspace_is_equal(sourceWorkspace, priv->workspace))
+		{
+			XFDASHBOARD_DEBUG(self, ACTOR,
+						"Will not handle drop of %s at %s because source and target workspaces are the same.",
+						G_OBJECT_TYPE_NAME(draggedActor),
+						G_OBJECT_TYPE_NAME(dragSource));
+			return;
+		}
+
+		/* Get dragged window */
+		liveWindowActor=XFDASHBOARD_LIVE_WINDOW_SIMPLE(draggedActor);
+		window=xfdashboard_live_window_simple_get_window(liveWindowActor);
+
+		/* Move dragged window to workspace of this window view */
+		xfdashboard_window_tracker_window_move_to_workspace(window, priv->workspace);
 
 		/* Drop action handled so return here */
 		return;
@@ -711,16 +781,30 @@ static void _xfdashboard_windows_view_on_window_monitor_changed(XfdashboardWindo
 static void _xfdashboard_windows_view_on_window_clicked(XfdashboardWindowsView *self,
 														gpointer inUserData)
 {
-	XfdashboardLiveWindow				*liveWindow;
+	XfdashboardWindowsViewPrivate		*priv;
+	XfdashboardLiveWindowSimple			*liveWindow;
 	XfdashboardWindowTrackerWindow		*window;
+	XfdashboardWindowTrackerWorkspace	*activeWorkspace;
+	XfdashboardWindowTrackerWorkspace	*windowWorkspace;
 
 	g_return_if_fail(XFDASHBOARD_IS_WINDOWS_VIEW(self));
-	g_return_if_fail(XFDASHBOARD_IS_LIVE_WINDOW(inUserData));
+	g_return_if_fail(XFDASHBOARD_IS_LIVE_WINDOW_SIMPLE(inUserData));
 
-	liveWindow=XFDASHBOARD_LIVE_WINDOW(inUserData);
+	priv=self->priv;
+	liveWindow=XFDASHBOARD_LIVE_WINDOW_SIMPLE(inUserData);
 
-	/* Activate clicked window */
-	window=XFDASHBOARD_WINDOW_TRACKER_WINDOW(xfdashboard_live_window_get_window(liveWindow));
+	/* Get window to activate */
+	window=xfdashboard_live_window_simple_get_window(liveWindow);
+
+	/* Move to workspace if window to active is on a different one than the active one */
+	activeWorkspace=xfdashboard_window_tracker_get_active_workspace(priv->windowTracker);
+	if(!xfdashboard_window_tracker_window_is_on_workspace(window, activeWorkspace))
+	{
+		windowWorkspace=xfdashboard_window_tracker_window_get_workspace(window);
+		xfdashboard_window_tracker_workspace_activate(windowWorkspace);
+	}
+
+	/* Activate window */
 	xfdashboard_window_tracker_window_activate(window);
 
 	/* Quit application */
@@ -731,16 +815,16 @@ static void _xfdashboard_windows_view_on_window_clicked(XfdashboardWindowsView *
 static void _xfdashboard_windows_view_on_window_close_clicked(XfdashboardWindowsView *self,
 																gpointer inUserData)
 {
-	XfdashboardLiveWindow				*liveWindow;
+	XfdashboardLiveWindowSimple			*liveWindow;
 	XfdashboardWindowTrackerWindow		*window;
 
 	g_return_if_fail(XFDASHBOARD_IS_WINDOWS_VIEW(self));
-	g_return_if_fail(XFDASHBOARD_IS_LIVE_WINDOW(inUserData));
+	g_return_if_fail(XFDASHBOARD_IS_LIVE_WINDOW_SIMPLE(inUserData));
 
-	liveWindow=XFDASHBOARD_LIVE_WINDOW(inUserData);
+	liveWindow=XFDASHBOARD_LIVE_WINDOW_SIMPLE(inUserData);
 
 	/* Close clicked window */
-	window=XFDASHBOARD_WINDOW_TRACKER_WINDOW(xfdashboard_live_window_get_window(liveWindow));
+	window=XFDASHBOARD_WINDOW_TRACKER_WINDOW(xfdashboard_live_window_simple_get_window(liveWindow));
 	xfdashboard_window_tracker_window_close(window);
 }
 
@@ -854,13 +938,13 @@ static void _xfdashboard_windows_view_on_drag_begin(ClutterDragAction *inAction,
 	ClutterStage					*stage;
 	GdkPixbuf						*windowIcon;
 	ClutterContent					*image;
-	XfdashboardLiveWindow			*liveWindow;
+	XfdashboardLiveWindowSimple		*liveWindow;
 
 	g_return_if_fail(CLUTTER_IS_DRAG_ACTION(inAction));
-	g_return_if_fail(XFDASHBOARD_IS_LIVE_WINDOW(inActor));
+	g_return_if_fail(XFDASHBOARD_IS_LIVE_WINDOW_SIMPLE(inActor));
 	g_return_if_fail(XFDASHBOARD_IS_WINDOWS_VIEW(inUserData));
 
-	liveWindow=XFDASHBOARD_LIVE_WINDOW(inActor);
+	liveWindow=XFDASHBOARD_LIVE_WINDOW_SIMPLE(inActor);
 
 	/* Prevent signal "clicked" from being emitted on dragged icon */
 	g_signal_handlers_block_by_func(inActor, _xfdashboard_windows_view_on_window_clicked, inUserData);
@@ -869,7 +953,7 @@ static void _xfdashboard_windows_view_on_drag_begin(ClutterDragAction *inAction,
 	stage=CLUTTER_STAGE(clutter_actor_get_stage(inActor));
 
 	/* Create a application icon for drag handle */
-	windowIcon=xfdashboard_window_tracker_window_get_icon(xfdashboard_live_window_get_window(liveWindow));
+	windowIcon=xfdashboard_window_tracker_window_get_icon(xfdashboard_live_window_simple_get_window(liveWindow));
 	image=xfdashboard_image_content_new_for_pixbuf(windowIcon);
 
 	dragHandle=xfdashboard_background_new();
@@ -928,7 +1012,7 @@ static XfdashboardLiveWindow* _xfdashboard_windows_view_create_actor(Xfdashboard
 	/* Check if window opened is a stage window */
 	if(xfdashboard_window_tracker_window_is_stage(inWindow))
 	{
-		g_debug("Will not create live-window actor for stage window.");
+		XFDASHBOARD_DEBUG(self, ACTOR, "Will not create live-window actor for stage window.");
 		return(NULL);
 	}
 
@@ -938,7 +1022,7 @@ static XfdashboardLiveWindow* _xfdashboard_windows_view_create_actor(Xfdashboard
 	g_signal_connect_swapped(actor, "close", G_CALLBACK(_xfdashboard_windows_view_on_window_close_clicked), self);
 	g_signal_connect_swapped(actor, "geometry-changed", G_CALLBACK(_xfdashboard_windows_view_on_window_geometry_changed), self);
 	g_signal_connect_swapped(actor, "visibility-changed", G_CALLBACK(_xfdashboard_windows_view_on_window_visibility_changed), self);
-	xfdashboard_live_window_set_window(XFDASHBOARD_LIVE_WINDOW(actor), inWindow);
+	xfdashboard_live_window_simple_set_window(XFDASHBOARD_LIVE_WINDOW_SIMPLE(actor), inWindow);
 
 	dragAction=xfdashboard_drag_action_new_with_source(CLUTTER_ACTOR(self));
 	clutter_drag_action_set_drag_threshold(CLUTTER_DRAG_ACTION(dragAction), -1, -1);
@@ -1029,9 +1113,10 @@ static gboolean _xfdashboard_windows_view_on_scroll_event(ClutterActor *inActor,
 
 		/* Unhandled directions */
 		default:
-			g_debug("Cannot handle scroll direction %d in %s",
-						clutter_event_get_scroll_direction(inEvent),
-						G_OBJECT_TYPE_NAME(self));
+			XFDASHBOARD_DEBUG(self, ACTOR,
+								"Cannot handle scroll direction %d in %s",
+								clutter_event_get_scroll_direction(inEvent),
+								G_OBJECT_TYPE_NAME(self));
 			return(CLUTTER_EVENT_PROPAGATE);
 	}
 
@@ -1071,8 +1156,8 @@ static void _xfdashboard_windows_view_set_scroll_event_changes_workspace(Xfdashb
 	}
 }
 
-/* Set flag if this view should show all windows of current workspace or only the windows
- * which are at current workspace and on the monitor where this view is placed at.
+/* Set flag if this view should show all windows of all monitors or only the windows
+ * which are at the monitor where this view is placed at.
  */
 static void _xfdashboard_windows_view_set_filter_monitor_windows(XfdashboardWindowsView *self, gboolean inFilterMonitorWindows)
 {
@@ -1096,6 +1181,31 @@ static void _xfdashboard_windows_view_set_filter_monitor_windows(XfdashboardWind
 	}
 }
 
+/* Set flag if this view should show all windows of all workspaces or only the windows
+ * which are at current workspace.
+ */
+static void _xfdashboard_windows_view_set_filter_workspace_windows(XfdashboardWindowsView *self, gboolean inFilterWorkspaceWindows)
+{
+	XfdashboardWindowsViewPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_WINDOWS_VIEW(self));
+
+	priv=self->priv;
+
+	/* Set value if changed */
+	if(priv->filterWorkspaceWindows!=inFilterWorkspaceWindows)
+	{
+		/* Set value */
+		priv->filterWorkspaceWindows=inFilterWorkspaceWindows;
+
+		/* Recreate all window actors */
+		_xfdashboard_windows_view_recreate_window_actors(self);
+
+		/* Notify about property change */
+		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardWindowsViewProperties[PROP_FILTER_WORKSPACE_WINDOWS]);
+	}
+}
+
 /* Action signal to close currently selected window was emitted */
 static gboolean _xfdashboard_windows_view_window_close(XfdashboardWindowsView *self,
 														XfdashboardFocusable *inSource,
@@ -1112,7 +1222,7 @@ static gboolean _xfdashboard_windows_view_window_close(XfdashboardWindowsView *s
 	/* Check if a window is currenly selected */
 	if(!priv->selectedItem)
 	{
-		g_debug("No window to close is selected.");
+		XFDASHBOARD_DEBUG(self, ACTOR, "No window to close is selected.");
 		return(CLUTTER_EVENT_STOP);
 	}
 
@@ -1419,7 +1529,7 @@ static gboolean _xfdashboard_windows_view_focusable_set_selection(XfdashboardFoc
 	priv->selectedItem=inSelection;
 
 	/* Add weak reference at new selection */
-	g_object_add_weak_pointer(G_OBJECT(priv->selectedItem), &priv->selectedItem);
+	if(priv->selectedItem) g_object_add_weak_pointer(G_OBJECT(priv->selectedItem), &priv->selectedItem);
 
 	/* New selection was set successfully */
 	return(TRUE);
@@ -1443,6 +1553,7 @@ static ClutterActor* _xfdashboard_windows_view_focusable_find_selection(Xfdashbo
 	gint									newSelectionIndex;
 	ClutterActorIter						iter;
 	ClutterActor							*child;
+	gchar									*valueName;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(inFocusable), NULL);
 	g_return_val_if_fail(XFDASHBOARD_IS_WINDOWS_VIEW(inFocusable), NULL);
@@ -1458,10 +1569,14 @@ static ClutterActor* _xfdashboard_windows_view_focusable_find_selection(Xfdashbo
 	if(!inSelection)
 	{
 		newSelection=clutter_actor_get_first_child(CLUTTER_ACTOR(self));
-		g_debug("No selection at %s, so select first child %s for direction %u",
-				G_OBJECT_TYPE_NAME(self),
-				newSelection ? G_OBJECT_TYPE_NAME(newSelection) : "<nil>",
-				inDirection);
+
+		valueName=xfdashboard_get_enum_value_name(XFDASHBOARD_TYPE_SELECTION_TARGET, inDirection);
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"No selection at %s, so select first child %s for direction %s",
+							G_OBJECT_TYPE_NAME(self),
+							newSelection ? G_OBJECT_TYPE_NAME(newSelection) : "<nil>",
+							valueName);
+		g_free(valueName);
 
 		return(newSelection);
 	}
@@ -1556,7 +1671,7 @@ static ClutterActor* _xfdashboard_windows_view_focusable_find_selection(Xfdashbo
 
 		case XFDASHBOARD_SELECTION_TARGET_NEXT:
 			newSelection=clutter_actor_get_next_sibling(inSelection);
-			if(!selection) selection=clutter_actor_get_previous_sibling(inSelection);
+			if(!newSelection) newSelection=clutter_actor_get_previous_sibling(inSelection);
 			break;
 
 		case XFDASHBOARD_SELECTION_TARGET_PAGE_LEFT:
@@ -1585,8 +1700,6 @@ static ClutterActor* _xfdashboard_windows_view_focusable_find_selection(Xfdashbo
 
 		default:
 			{
-				gchar					*valueName;
-
 				valueName=xfdashboard_get_enum_value_name(XFDASHBOARD_TYPE_SELECTION_TARGET, inDirection);
 				g_critical(_("Focusable object %s does not handle selection direction of type %s."),
 							G_OBJECT_TYPE_NAME(self),
@@ -1600,11 +1713,12 @@ static ClutterActor* _xfdashboard_windows_view_focusable_find_selection(Xfdashbo
 	if(newSelection) selection=newSelection;
 
 	/* Return new selection found */
-	g_debug("Selecting %s at %s for current selection %s in direction %u",
-			selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
-			G_OBJECT_TYPE_NAME(self),
-			inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
-			inDirection);
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Selecting %s at %s for current selection %s in direction %u",
+						selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>",
+						G_OBJECT_TYPE_NAME(self),
+						inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>",
+						inDirection);
 
 	return(selection);
 }
@@ -1748,6 +1862,12 @@ static void _xfdashboard_windows_view_dispose(GObject *inObject)
 	XfdashboardWindowsViewPrivate	*priv=XFDASHBOARD_WINDOWS_VIEW(self)->priv;
 
 	/* Release allocated resources */
+	if(priv->selectedItem)
+	{
+		g_object_remove_weak_pointer(G_OBJECT(priv->selectedItem), &priv->selectedItem);
+		priv->selectedItem=NULL;
+	}
+
 	if(priv->scrollEventChangingWorkspaceStage)
 	{
 		if(priv->scrollEventChangingWorkspaceStageSignalID)
@@ -1837,6 +1957,10 @@ static void _xfdashboard_windows_view_set_property(GObject *inObject,
 			_xfdashboard_windows_view_set_filter_monitor_windows(self, g_value_get_boolean(inValue));
 			break;
 
+		case PROP_FILTER_WORKSPACE_WINDOWS:
+			_xfdashboard_windows_view_set_filter_workspace_windows(self, g_value_get_boolean(inValue));
+			break;
+
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(inObject, inPropID, inSpec);
 			break;
@@ -1871,6 +1995,10 @@ static void _xfdashboard_windows_view_get_property(GObject *inObject,
 
 		case PROP_FILTER_MONITOR_WINDOWS:
 			g_value_set_boolean(outValue, self->priv->filterMonitorWindows);
+			break;
+
+		case PROP_FILTER_WORKSPACE_WINDOWS:
+			g_value_set_boolean(outValue, self->priv->filterWorkspaceWindows);
 			break;
 
 		default:
@@ -1951,12 +2079,20 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 								FALSE,
 								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+	XfdashboardWindowsViewProperties[PROP_FILTER_WORKSPACE_WINDOWS]=
+		g_param_spec_boolean("filter-workspace-windows",
+								_("Filter workspace windows"),
+								_("Whether this view should only show windows of active workspace"),
+								TRUE,
+								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
 	g_object_class_install_properties(gobjectClass, PROP_LAST, XfdashboardWindowsViewProperties);
 
 	/* Define stylable properties */
 	xfdashboard_actor_install_stylable_property(actorClass, XfdashboardWindowsViewProperties[PROP_SPACING]);
 	xfdashboard_actor_install_stylable_property(actorClass, XfdashboardWindowsViewProperties[PROP_PREVENT_UPSCALING]);
 	xfdashboard_actor_install_stylable_property(actorClass, XfdashboardWindowsViewProperties[PROP_FILTER_MONITOR_WINDOWS]);
+	xfdashboard_actor_install_stylable_property(actorClass, XfdashboardWindowsViewProperties[PROP_FILTER_WORKSPACE_WINDOWS]);
 
 	/* Define actions */
 	XfdashboardWindowsViewSignals[ACTION_WINDOW_CLOSE]=
@@ -1966,7 +2102,7 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 						G_STRUCT_OFFSET(XfdashboardWindowsViewClass, window_close),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -1980,7 +2116,7 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 						G_STRUCT_OFFSET(XfdashboardWindowsViewClass, windows_show_numbers),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -1994,7 +2130,7 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 						G_STRUCT_OFFSET(XfdashboardWindowsViewClass, windows_hide_numbers),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2008,7 +2144,7 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 						G_STRUCT_OFFSET(XfdashboardWindowsViewClass, windows_activate_window_one),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2022,7 +2158,7 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 						G_STRUCT_OFFSET(XfdashboardWindowsViewClass, windows_activate_window_two),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2036,7 +2172,7 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 						G_STRUCT_OFFSET(XfdashboardWindowsViewClass, windows_activate_window_three),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2050,7 +2186,7 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 						G_STRUCT_OFFSET(XfdashboardWindowsViewClass, windows_activate_window_four),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2064,7 +2200,7 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 						G_STRUCT_OFFSET(XfdashboardWindowsViewClass, windows_activate_window_five),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2078,7 +2214,7 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 						G_STRUCT_OFFSET(XfdashboardWindowsViewClass, windows_activate_window_six),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2092,7 +2228,7 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 						G_STRUCT_OFFSET(XfdashboardWindowsViewClass, windows_activate_window_seven),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2106,7 +2242,7 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 						G_STRUCT_OFFSET(XfdashboardWindowsViewClass, windows_activate_window_eight),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2120,7 +2256,7 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 						G_STRUCT_OFFSET(XfdashboardWindowsViewClass, windows_activate_window_nine),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2134,7 +2270,7 @@ static void xfdashboard_windows_view_class_init(XfdashboardWindowsViewClass *kla
 						G_STRUCT_OFFSET(XfdashboardWindowsViewClass, windows_activate_window_ten),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -2165,6 +2301,7 @@ static void xfdashboard_windows_view_init(XfdashboardWindowsView *self)
 	priv->scrollEventChangingWorkspaceStage=NULL;
 	priv->scrollEventChangingWorkspaceStageSignalID=0;
 	priv->filterMonitorWindows=FALSE;
+	priv->filterWorkspaceWindows=TRUE;
 	priv->currentStage=NULL;
 	priv->currentMonitor=NULL;
 	priv->currentStageMonitorBindingID=0;

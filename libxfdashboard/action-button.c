@@ -1,7 +1,7 @@
 /*
  * action-button: A button representing an action to execute when clicked
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,33 @@
  * 
  */
 
+/**
+ * SECTION:action-button
+ * @short_description: A button to perform a key binding action
+ * @include: xfdashboard/action-button.h
+ *
+ * This actor is a #XfdashboardButton and behaves exactly like a key binding which
+ * performs a specified action on a specific actor when the associated key
+ * combination is pressed. But instead of a key combination a button is displayed
+ * and the action performed when this button is clicked.
+ *
+ * A #XfdashboardActionButton is usually created in the layout definition
+ * of a theme but it can also be created with xfdashboard_action_button_new()
+ * followed by a call to xfdashboard_action_button_set_target() and
+ * xfdashboard_action_button_set_action() to configure it.
+ *
+ * For example a #XfdashboardActionButton can be created which will quit the
+ * application when clicked:
+ *
+ * |[<!-- language="C" -->
+ *   ClutterActor       *actionButton;
+ *
+ *   actionButton=xfdashboard_action_button_new();
+ *   xfdashboard_action_button_set_target(XFDASHBOARD_ACTION_BUTTON(actionButton), "XfdashboardApplication");
+ *   xfdashboard_action_button_set_action(XFDASHBOARD_ACTION_BUTTON(actionButton), "exit");
+ * ]|
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -32,6 +59,7 @@
 #include <libxfdashboard/focusable.h>
 #include <libxfdashboard/focus-manager.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -88,9 +116,9 @@ static void _xfdashboard_action_button_clicked(XfdashboardButton *inButton)
 
 	/* Get target object to perform action at */
 	targets=xfdashboard_focus_manager_get_targets(priv->focusManager, priv->target);
-	g_debug("Target list for '%s' has %d entries",
-				priv->target,
-				g_slist_length(targets));
+	XFDASHBOARD_DEBUG(self, ACTOR, "Target list for '%s' has %d entries",
+						priv->target,
+						g_slist_length(targets));
 
 	/* Emit action at each actor in target list */
 	for(iter=targets; iter; iter=g_slist_next(iter))
@@ -172,9 +200,9 @@ static void _xfdashboard_action_button_clicked(XfdashboardButton *inButton)
 		}
 
 		/* Emit action signal at target */
-		g_debug("Emitting action signal '%s' at actor %s",
-					priv->action,
-					G_OBJECT_TYPE_NAME(targetObject));
+		XFDASHBOARD_DEBUG(self, ACTOR, "Emitting action signal '%s' at actor %s",
+							priv->action,
+							G_OBJECT_TYPE_NAME(targetObject));
 
 		event=clutter_get_current_event();
 		eventStatus=CLUTTER_EVENT_PROPAGATE;
@@ -185,10 +213,10 @@ static void _xfdashboard_action_button_clicked(XfdashboardButton *inButton)
 								event,
 								&eventStatus);
 
-		g_debug("Action signal '%s' was %s by actor %s",
-					priv->action,
-					eventStatus==CLUTTER_EVENT_STOP ? "handled" : "not handled",
-					G_OBJECT_TYPE_NAME(targetObject));
+		XFDASHBOARD_DEBUG(self, ACTOR, "Action signal '%s' was %s by actor %s",
+							priv->action,
+							eventStatus==CLUTTER_EVENT_STOP ? "handled" : "not handled",
+							G_OBJECT_TYPE_NAME(targetObject));
 	}
 
 	/* Release allocated resources */
@@ -414,6 +442,12 @@ static void xfdashboard_action_button_class_init(XfdashboardActionButtonClass *k
 	g_type_class_add_private(klass, sizeof(XfdashboardActionButtonPrivate));
 
 	/* Define properties */
+	/**
+	 * XfdashboardActionButton:target:
+	 *
+	 * A string with the class name of target at which the action should be
+	 * performed.
+	 */
 	XfdashboardActionButtonProperties[PROP_TARGET]=
 		g_param_spec_string("target",
 								_("Target"),
@@ -421,6 +455,11 @@ static void xfdashboard_action_button_class_init(XfdashboardActionButtonClass *k
 								NULL,
 								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+	/**
+	 * XfdashboardActionButton:action:
+	 *
+	 * A string with the signal action name to perform at target.
+	 */
 	XfdashboardActionButtonProperties[PROP_ACTION]=
 		g_param_spec_string("action",
 								_("Action"),
@@ -451,13 +490,27 @@ static void xfdashboard_action_button_init(XfdashboardActionButton *self)
 
 /* IMPLEMENTATION: Public API */
 
-/* Create new actor */
+/**
+ * xfdashboard_action_button_new:
+ *
+ * Creates a new #XfdashboardActionButton actor
+ *
+ * Return value: The newly created #XfdashboardActionButton
+ */
 ClutterActor* xfdashboard_action_button_new(void)
 {
 	return(g_object_new(XFDASHBOARD_TYPE_ACTION_BUTTON, NULL));
 }
 
-/* Get/set target to perform action at */
+/**
+ * xfdashboard_action_button_get_target:
+ * @self: A #XfdashboardActionButton
+ *
+ * Retrieves the target's class name of @self at which the action should be
+ * performed.
+ *
+ * Return value: A string with target's class name
+ */
 const gchar* xfdashboard_action_button_get_target(XfdashboardActionButton *self)
 {
 	g_return_val_if_fail(XFDASHBOARD_IS_ACTION_BUTTON(self), NULL);
@@ -465,6 +518,14 @@ const gchar* xfdashboard_action_button_get_target(XfdashboardActionButton *self)
 	return(self->priv->target);
 }
 
+/**
+ * xfdashboard_action_button_set_target:
+ * @self: A #XfdashboardActionButton
+ * @inTarget: The target's class name
+ *
+ * Sets the target's class name at @self at which the action should be
+ * performed by this actor.
+ */
 void xfdashboard_action_button_set_target(XfdashboardActionButton *self, const gchar *inTarget)
 {
 	XfdashboardActionButtonPrivate		*priv;
@@ -486,7 +547,14 @@ void xfdashboard_action_button_set_target(XfdashboardActionButton *self, const g
 	}
 }
 
-/* Get/set action to perform at target */
+/**
+ * xfdashboard_action_button_get_target:
+ * @self: A #XfdashboardActionButton
+ *
+ * Retrieves the action's signal name of @self which will be performed at target.
+ *
+ * Return value: A string with action's signal name
+ */
 const gchar* xfdashboard_action_button_get_action(XfdashboardActionButton *self)
 {
 	g_return_val_if_fail(XFDASHBOARD_IS_ACTION_BUTTON(self), NULL);
@@ -494,6 +562,13 @@ const gchar* xfdashboard_action_button_get_action(XfdashboardActionButton *self)
 	return(self->priv->action);
 }
 
+/**
+ * xfdashboard_action_button_set_action:
+ * @self: A #XfdashboardActionButton
+ * @inAction: The action's signal name
+ *
+ * Sets the action's signal name at @self which will be performed at target.
+ */
 void xfdashboard_action_button_set_action(XfdashboardActionButton *self, const gchar *inAction)
 {
 	XfdashboardActionButtonPrivate		*priv;

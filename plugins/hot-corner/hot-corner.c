@@ -1,7 +1,7 @@
 /*
  * hot-corner: Activates application when pointer is move to a corner
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,11 @@ struct _XfdashboardHotCornerPrivate
 	XfdashboardApplication					*application;
 	XfdashboardWindowTracker				*windowTracker;
 	GdkWindow								*rootWindow;
+#if GTK_CHECK_VERSION(3, 20, 0)
+	GdkSeat									*seat;
+#else
 	GdkDeviceManager						*deviceManager;
+#endif
 
 	guint									timeoutID;
 	GDateTime								*enteredTime;
@@ -114,6 +118,7 @@ static gboolean _xfdashboard_hot_corner_check_hot_corner(gpointer inUserData)
 	XfdashboardHotCorner							*self;
 	XfdashboardHotCornerPrivate						*priv;
 	XfdashboardWindowTrackerWindow					*activeWindow;
+	XfdashboardWindowTrackerWindowState				activeWindowState;
 	GdkDevice										*pointerDevice;
 	gint											pointerX, pointerY;
 	XfdashboardWindowTrackerMonitor					*primaryMonitor;
@@ -137,15 +142,20 @@ static gboolean _xfdashboard_hot_corner_check_hot_corner(gpointer inUserData)
 
 	/* Do nothing if current window is fullscreen but not this application */
 	activeWindow=xfdashboard_window_tracker_get_active_window(priv->windowTracker);
+	activeWindowState=xfdashboard_window_tracker_window_get_state(activeWindow);
 	if(activeWindow &&
-		xfdashboard_window_tracker_window_is_fullscreen(activeWindow) &&
+		(activeWindowState & XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_FULLSCREEN) &&
 		!xfdashboard_window_tracker_window_is_stage(activeWindow))
 	{
 		return(G_SOURCE_CONTINUE);
 	}
 
 	/* Get current position of pointer */
+#if GTK_CHECK_VERSION(3, 20, 0)
+	pointerDevice=gdk_seat_get_pointer(priv->seat);
+#else
 	pointerDevice=gdk_device_manager_get_client_pointer(priv->deviceManager);
+#endif
 	if(!pointerDevice)
 	{
 		g_critical(_("Could not get pointer to determine pointer position"));
@@ -172,8 +182,7 @@ static gboolean _xfdashboard_hot_corner_check_hot_corner(gpointer inUserData)
 		{
 			/* Set position to 0,0 and size to screen size */
 			monitorRect.x1=monitorRect.y1=0;
-			monitorRect.x2=xfdashboard_window_tracker_get_screen_width(priv->windowTracker);
-			monitorRect.y2=xfdashboard_window_tracker_get_screen_height(priv->windowTracker);
+			xfdashboard_window_tracker_get_screen_size(priv->windowTracker, &monitorRect.x2, &monitorRect.y2);
 		}
 
 	/* Get rectangle where pointer must be inside to activate hot corner */
@@ -351,7 +360,11 @@ void xfdashboard_hot_corner_init(XfdashboardHotCorner *self)
 	priv->application=xfdashboard_application_get_default();
 	priv->windowTracker=xfdashboard_window_tracker_get_default();
 	priv->rootWindow=NULL;
+#if GTK_CHECK_VERSION(3, 20, 0)
+	priv->seat=NULL;
+#else
 	priv->deviceManager=NULL;
+#endif
 
 	priv->timeoutID=0;
 	priv->enteredTime=NULL;
@@ -368,14 +381,22 @@ void xfdashboard_hot_corner_init(XfdashboardHotCorner *self)
 		if(priv->rootWindow)
 		{
 			display=gdk_window_get_display(priv->rootWindow);
+#if GTK_CHECK_VERSION(3, 20, 0)
+			priv->seat=gdk_display_get_default_seat(display);
+#else
 			priv->deviceManager=gdk_display_get_device_manager(display);
+#endif
 		}
 			else
 			{
 				g_critical(_("Disabling hot-corner plugin because the root window to determine pointer position could not be found."));
 			}
 
+#if GTK_CHECK_VERSION(3, 20, 0)
+		if(priv->seat)
+#else
 		if(priv->deviceManager)
+#endif
 		{
 			/* Start polling pointer position */
 			priv->timeoutID=g_timeout_add(POLL_POINTER_POSITION_INTERVAL,

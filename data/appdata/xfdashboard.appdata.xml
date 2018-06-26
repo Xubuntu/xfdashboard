@@ -5,22 +5,34 @@
 	<project_license>GPL-2.0+</project_license>
 	<name>xfdashboard</name>
 	<summary>Maybe a Gnome shell like dashboard for Xfce</summary>
+	<summary xml:lang="ca">Potser un tauler de control similar a Gnome Shell per a Xfce</summary>
+	<summary xml:lang="de">Ein Gnome Shell ähnliches Dashboard für Xfce</summary>
+	<summary xml:lang="el">Ενδεχομένως ένα ταμπλό δραστηριοτήτων όμοιο με αυτό του κελύφους Gnome</summary>
 	<summary xml:lang="es">Tal vez un intérprete de órdenes a modo de panel para Xfce</summary>
 	<summary xml:lang="fr">Peut-être un shell GNOME comme un tableau de bord pour Xfce</summary>
 	<summary xml:lang="he">אולי לוח מחוונים דומה Gnome עבור Xfce</summary>
 	<summary xml:lang="lt">Galbūt, į Gnome apvalkalą panašus skydelis, skirtas Xfce</summary>
 	<summary xml:lang="sr">Полетник Иксфце-а који подсећа на Гномову шкољку</summary>
+	<summary xml:lang="tr">Xfce için belki Gnome shell'e benzeyen bir kumanda paneli</summary>
 
 	<description>
 		<p>Xfdashboard provides a GNOME shell dashboard like interface for use with Xfce desktop.</p>
+		<p xml:lang="ca">Xfdashboard proporciona una interfície de tauler de control similar a Gnome Shell per utilitzar amb l'escriptori Xfce.</p>
+		<p xml:lang="de">Xfdashboard bietet ein GNOME Shell ähnliches Dashboard Interface für die Benützung mit dem Xfce Desktop an.</p>
+		<p xml:lang="el">To Xfdashboard παρέχει μια διεπαφή όμοια με την επισκόπηση δραστηριοτήτων του κελύφους GNOME προς χρήση με το περιβάλλον εργασίας Xfce.</p>
 		<p xml:lang="es">Xfdashboard provee un Intérprete de panel como el de GNOME para usarse en el entorno de escritorio Xfce.</p>
 		<p xml:lang="fr">Xfdashboard fournit un tableau de bord shell GNOME comme interface pour une utilisation avec le bureau Xfce.</p>
 		<p xml:lang="lt">Xfdashboard pateikia į Gnome apvalkalo skydelį panašią sąsają, skirtą naudoti Xfce darbalaukyje.</p>
+		<p xml:lang="pl">Xfdashboard dostarcza interfejs wzorowany na panelu powłoki GNOME do użycia w Xfce.</p>
 		<p xml:lang="sr">Полетник Иксфце-а је сучеље попут Гномове шкољке за употребу на радној површи Иксфце-а.</p>
+		<p xml:lang="tr">Xfdashboard, Xfce masaüstüyle birlikte kullanılmak üzere bir GNOME kabuk gösterge tablası gibi bir arabirim sağlar.</p>
 		<p>It can be configured to run to any keyboard shortcut and when executed provides an overview of applications currently open enabling the user to switch between different applications. The search feature works like Xfce's app finder which makes it convenient to search for and start applications.</p>
+		<p xml:lang="el">Μπορεί να ρυθμιστεί ώστε να εκτελείται με οποιαδήποτε εντολή και όταν εκτελείται παρέχει μια επισκόπηση των ανοιχτών εφαρμογών δίνοντας στο χρήστη τη δυνατότητα εναλλαγής μεταξύ διαφορετικών εφαρμογών. Η λειτουργία αναζήτησης λειτουργεί όπως η εύρεση εφαρμογών του Xfce πράγμα που καθιστά βολική την αναζήτηση και εκκίνηση εφαρμογών.</p>
 		<p xml:lang="es">Puede ser configurado para funcionar con cualquier combinación de teclas y cuando se ejecuta proporciona una visión general de las aplicaciones que estén abiertas permitendo al usuario cambiar entre diferentes aplicaciones. La función de búsqueda funciona como el buscador de aplicaciones de Xfce que hace que sea conveniente para buscar e iniciar aplicaciones.</p>
 		<p xml:lang="fr">Il peut être configuré pour fonctionner avec n'importe quel raccourci clavier et lorsqu'il est exécuté donne un aperçu des applications actuellement ouvertes permettant à l'utilisateur de basculer entre différentes applications. La fonction de recherche fonctionne comme l'application Finder de Xfce qui le rend pratique pour rechercher et démarrer des applications.</p>
+		<p xml:lang="pl">Może zostać skonfigurowany do uruchomienia pod dowolnym skrótem klawiszowym. Kiedy uruchomiony, wyświetla podgląd uruchomionych aplikacji i pozwala na przełączanie pomiędzy nimi. Funkcja wyszukiwania działa podobnie do Wyszukiwarki aplikacji Xfce, pozwalając szybciej uruchomić aplikacje.</p>
 		<p xml:lang="sr">Може се подесити да се покреће на било коју пречицу дугмади, и када се изврши даје преглед тренутно отворених програма, омогућујући кориснику да прелази са једног програма на други. Претрага ради попут претраживача програма за Иксфце што чини полетника згодним за претрагу и покретање програма.</p>
+		<p xml:lang="tr">Herhangi bir klavye kısayoluna gidecek şekilde yapılandırılabilir ve yürütülürken, kullanıcıların farklı uygulamalar arasında geçiş yapabilmeleri için halen açık olan uygulamalara genel bir bakış sağlar. Arama özelliği, uygulamaları aramak ve başlatmak için uygun Xfce'nin uygulama bulucusu gibi çalışır.</p>
 	</description>
 
 	<screenshots>
@@ -29,18 +41,26 @@
 		</screenshot>
 		<screenshot>
 			<caption>Browsing applications</caption>
+			<caption xml:lang="ca">Navegació per les aplicacions</caption>
+			<caption xml:lang="el">Περιήγηση στις εφαρμογές</caption>
 			<caption xml:lang="es">Navegar por las aplicaciones</caption>
 			<caption xml:lang="fr">Applications de navigation</caption>
 			<caption xml:lang="he">סיור באפליקציות</caption>
+			<caption xml:lang="pl">Przeglądanie aplikacji</caption>
 			<caption xml:lang="sr">Преглед програма</caption>
+			<caption xml:lang="tr">Uygulamar taranıyor</caption>
 			<image>http://goodies.xfce.org/_media/projects/applications/xfdashboard/applications-view.png</image>
 		</screenshot>
 		<screenshot>
 			<caption>Searching applications</caption>
+			<caption xml:lang="ca">Cerca d'aplicacions</caption>
+			<caption xml:lang="el">Αναζήτηση εφαρμογών</caption>
 			<caption xml:lang="es">Buscar aplicaciones</caption>
 			<caption xml:lang="fr">Applications de recherche</caption>
 			<caption xml:lang="he">חיפוש אפליקציות</caption>
+			<caption xml:lang="pl">Wyszukiwanie aplikacji</caption>
 			<caption xml:lang="sr">Претрага програма</caption>
+			<caption xml:lang="tr">Uygulamaları aranıyor</caption>
 			<image>http://goodies.xfce.org/_media/projects/applications/xfdashboard/search-view.png</image>
 		</screenshot>
 	</screenshots>
@@ -72,6 +92,26 @@
 	</keywords>
 
 	<releases>
+		<release version="0.7.4" timestamp="1505796460">
+			<description>
+				<p>This unstable development adds lots of new and updated translations and support for newer xfconf versions.</p>
+			</description>
+		</release>
+		<release version="0.7.3" timestamp="1499409263">
+			<description>
+				<p>This unstable development implements a new experimental backend for GDK as well as it supports user stylesheets now.</p>
+			</description>
+		</release>
+		<release version="0.7.2" timestamp="1494826045">
+			<description>
+				<p>This unstable development improves loading performance of images and icon, adds a fine-grained debugging system and introduces an interface for multiple backends but only X11 is still the one only one supported.</p>
+			</description>
+		</release>
+		<release version="0.7.1" timestamp="1488792398">
+			<description>
+				<p>This unstable development introduces child windows shown next to the main window.</p>
+			</description>
+		</release>
 		<release version="0.6.1" timestamp="1482422594">
 			<description>
 				<p>This stable version fixes a bug setting the correct default applications at first use.</p>
@@ -79,7 +119,7 @@
 		</release>
 		<release version="0.7.0" timestamp="1473183039">
 			<description>
-				<p>This unstable development fixes introduces pop-up menus.</p>
+				<p>This unstable development introduces pop-up menus.</p>
 			</description>
 		</release>
 		<release version="0.6.0" timestamp="1463772864">
@@ -100,40 +140,60 @@
 		<release version="0.5.90" timestamp="1456659470">
 			<description>
 				<p>This unstable development introduces a hot-corner plugin to activate this application when the pointer is near a specific corner of the screen. It also introduce a new settings application which allows to enable and/or disable plugin as well as to configure them.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable introduce un complemento de esquina activa para activar esta aplicación cuando el puntero está cerca de una esquina específica de la pantalla. También introduce una nueva aplicación de configuración que permite habilitar y/o deshabilitar el complemento así como configurarlos.</p>
+				<p xml:lang="fr">Cette évolution instable présente un greffon hot-coin pour activer cette application lorsque le pointeur se trouve à proximité d'un coin spécifique de l'écran. Il introduit également une nouvelle application de paramètres qui permet d'activer et / ou désactiver le greffon ainsi que de les configurer.</p>
+				<p xml:lang="tr">Bu kararsız geliştirme, işaretçi ekranın belirli bir köşesine yakın olduğunda bu uygulamayı etkinleştirmek için sıcak köşe eklentisi getiriyor. Ayrıca, eklentiyi etkinleştirmek ve/veya devre dışı bırakmak ve bunları yapılandırmak için izin veren yeni bir ayar uygulaması sunuyor.</p>
 			</description>
 		</release>
 		<release version="0.5.5" timestamp="1454269066">
 			<description>
 				<p>This unstable development introduces a new search provider plugin which uses installed Gnome-Shell search providers as additional source.</p>
+				<p xml:lang="ca">En aquest desenvolupament inestable s'introdueix un nou connector de proveïdor de cerques que utilitza els proveïdors de cerca instal·lats de Gnome-Shell com a origen addicional.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable introduce un nuevo complemento de proveedor de búsqueda que utiliza los proveedores de búsqueda de Gnome-Shell instalados como fuente adicional.</p>
+				<p xml:lang="fr">Cette évolution instable introduit un nouveau greffon fournisseur de recherche qui utilise des fournisseurs de recherche installé Gnome-Shell en tant que source supplémentaire.</p>
+				<p xml:lang="tr">Bu istikrarsız gelişme, yüklü Gnome-Shell arama sağlayıcılarını ek kaynak olarak kullanan yeni bir arama sağlayıcısı eklentisi sunuyor.</p>
 			</description>
 		</release>
 		<release version="0.5.4" timestamp="1450515013">
 			<description>
 				<p>This unstable development introduces a new optional configuration to themes about defining which elements can be focused and in which order.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable introduce una nueva configuración opcional a los temas sobre la definición de los elementos que se pueden enfocar y en qué orden.</p>
+				<p xml:lang="fr">Cette évolution instable introduit une nouvelle configuration en option à des thèmes sur la définition des éléments qui peuvent être focalisés et dans quel ordre.</p>
+				<p xml:lang="tr">Bu istikrarsız geliştirme, hangi öğelerin hangi sırada odaklanabileceğini tanımlamakla ilgili yeni bir isteğe bağlı konfigürasyonu temalara sunar.</p>
 			</description>
 		</release>
 		<release version="0.5.3" timestamp="1447437275">
 			<description>
 				<p>This unstable development introduces a basic and simple plugin system as well as a sample plugin adding a new view showing a clock.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable introduce un sistema de complementos básicos y simples, así como un complemento de ejemplo que añade una nueva vista que muestra un reloj.</p>
+				<p xml:lang="fr">Cette évolution instable introduit un système de greffon basique et simple ainsi qu'un échantillon greffon d'ajouter une nouvelle vue montrant une horloge.</p>
 				<p xml:lang="lt">Šis nestabilus kūrimas pristato pagrindinę ir paprastą įskiepių sistemą, o taip pat pavyzdinį įskiepį, pridėdamas naują rodinį, kuris rodo laikrodį.</p>
+				<p xml:lang="tr">Bu istikrarsız geliştirme, temel ve basit bir eklenti sisteminin yanı sıra, saati gösteren yeni bir görünüm ekleyerek bir örnek eklenti sunar.</p>
 			</description>
 		</release>
 		<release version="0.5.2" timestamp="1444326527">
 			<description>
 				<p>This unstable development introduces a new configurable options to allows start a new instance of an application or to activate the current window. It also improves the detection of running application as well as bug-fixes and other smaller improvements.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable introduce nuevas opciones configurables que permiten iniciar una nueva instancia de una aplicación o activar la ventana actual. También mejora la detección de aplicaciones en ejecución, así como correcciones de errores y otras mejoras más pequeñas.</p>
+				<p xml:lang="fr">Cette évolution instable introduit une nouvelle options configurables pour permet de commencer une nouvelle instance d'une application ou pour activer la fenêtre en cours. Il améliore également la détection d'application en cours d'exécution, ainsi que des corrections de bugs et d'autres petites améliorations.</p>
 				<p xml:lang="lt">Šis nestabilus kūrimas pristato naujas konfigūruojamas parinktis, leidžiančias paleisti naują programos egzempliorių arba aktyvuoti esamą langą. Jis taip pat pagerina vykdomų programų aptikimą, o taip pat jame yra yra ištaisytos klaidos bei yra kiti nedideli patobulinimai.</p>
+				<p xml:lang="tr">Bu kararsız geliştirme, bir uygulamanın yeni bir örneğini başlatmaya veya geçerli pencereyi etkinleştirmeye izin vermek için yeni yapılandırılabilir seçenekler sunar. Ayrıca çalışan uygulamanın yanı sıra hata düzeltmeleri ve diğer küçük geliştirmelerin algılanmasını da geliştirir.</p>
 			</description>
 		</release>
 		<release version="0.5.1" timestamp="1441652092">
 			<description>
 				<p>This unstable development introduces a new configurable options to speed up loading window contents in background and it shows also running applications in quicklaunch for those not being stored as favourites. As usual it also contains a lots of bug-fixes and smaller improvements.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable introduce nuevas opciones configurables para acelerar el contenido de la ventana de carga en segundo plano y también muestra las aplicaciones en ejecución en el lanzador rápido para aquellas que no se han almacenado como favoritas. Como de costumbre, también contiene un montón de correcciones de errores y mejoras más pequeñas.</p>
 				<p xml:lang="fr">Cette évolution instable introduit une nouvelle options configurables pour accélérer contenu de la fenêtre de chargement en arrière-plan et il montre les applications en cours d'exécution dans quicklaunch aussi pour ceux qui ne sont pas stockés en tant que favoris. Comme d'habitude il contient également un bon nombre de corrections de bugs et de petites améliorations.</p>
+				<p xml:lang="tr">Bu istikrarsız geliştirme, arka planda pencere içeriğini yüklemeyi hızlandırmak için yeni yapılandırılabilir seçenekler sunar ve sık kullanılanlar olarak saklanmayan uygulamalar için hızlı çalışan uygulamaların da çalıştığını gösterir. Her zamanki gibi hata düzeltmeleri ve daha küçük geliştirmeler de içerir.</p>
 			</description>
 		</release>
 		<release version="0.5.0" timestamp="1434045183">
 			<description>
 				<p>This unstable development introduces new options to workspace selector and loads the window contents in background to make the application feel smoother and faster, especially at start-up. It also contains a lots of bug-fixes and smaller improvements.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable introduce nuevas opciones al selector de espacio de trabajo y carga el contenido de la ventana en segundo plano para hacer que la aplicación se sienta más suave y más rápida, especialmente en la puesta en marcha. También contiene un montón de correcciones de errores y mejoras más pequeñas.</p>
 				<p xml:lang="fr">Cette évolution instable introduit de nouvelles options à sélecteur d'espace de travail et charge le contenu des fenêtres en arrière-plan pour rendre l'application plus lisse et plus rapide, surtout au démarrage. Il contient également un bon nombre de corrections de bugs et de petites améliorations.</p>
+				<p xml:lang="tr">Bu istikrarsız geliştirme, çalışma alan seçicisine yeni seçenekler getirir ve özellikle başlangıçta uygulamanın daha yumuşak ve daha hızlı hissetmesini sağlamak için pencere içeriğini arka planda yükler. Ayrıca bir sürü hata düzeltmesi ve daha küçük iyileştirmeler içerir.</p>
 			</description>
 		</release>
 		<release version="0.4.2" timestamp="1433008431">
@@ -141,6 +201,7 @@
 				<p>This release hopefully fixes problems with the stage resizes finally. Also the method to determine the desktop window was changed.</p>
 				<p xml:lang="es">Esta versión corrige finalmente los problemas con el cambio de tamaño del escenario. También el método para determinar la ventana del escritorio que ha cambiado.</p>
 				<p xml:lang="fr">Cette version corrige avec espoir des problèmes avec le redimensionnement de la scène finalement. Aussi la méthode pour déterminer la fenêtre du bureau a été modifiée.</p>
+				<p xml:lang="tr">Bu sürüm umarım son olarak zemin yeniden boyutlandırma sorunlarını giderir. Ayrıca, masaüstü penceresini belirleme yöntemi değiştirildi.</p>
 			</description>
 		</release>
 		<release version="0.4.1" timestamp="1432920422">
@@ -162,6 +223,7 @@
 		<release version="0.3.91" timestamp="1427561560">
 			<description>
 				<p>This unstable development introduces a new box layout fixing layout of children when using right-to-left language. Also support for localization was fixed and other smaller bug-fixes and improvements.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable introduce una nueva disposición de la caja de la disposición de hijos al usar lenguas de derecha a izquierda. También se solucionó la compatibilidad con la localización y otras mejoras y correcciones de errores menores.</p>
 				<p xml:lang="fr">Cette évolution instable introduit une nouvelle boîte disposition fixant la disposition des enfants lors de l'utilisation de langue de droite à gauche. Également un support pour la localisation a été fixé et d'autres corrections de bogues et améliorations mineures.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање представља нови кутијасти распоред који исправља распоред порода при коришћењу писама које се читају са десна на лево. Такође, садржи исправљену подршку за преводе и још неке ситне бубе и побољшања.</p>
 			</description>
@@ -195,6 +257,7 @@
 		<release version="0.3.7" timestamp="1421530687">
 			<description>
 				<p>This unstable development fixes a bug which rendered the new settings application completely unusable.</p>
+				<p xml:lang="ca">En aquest desenvolupament inestable es corregeix un error que feia que la nova aplicació de configuració fos totalment inutilitzable.</p>
 				<p xml:lang="es">Esta versión de desarrollo inestable corrige un error que hacía que la nueva aplicación de ajustes quedará totalmente inutilizable.</p>
 				<p xml:lang="fr">Cette évolution instable corrige un bogue qui rendait les nouveaux paramètres application complètement inutilisable.</p>
 				<p xml:lang="sr">Ово нестабилно развојно издање исправља бубу која приказује нови програм поставки потпуно неупотребљиво.</p>
@@ -203,6 +266,8 @@
 		<release version="0.3.6" timestamp="1421519406">
 			<description>
 				<p>This unstable development introduces a settings application.</p>
+				<p xml:lang="ca">En aquest desenvolupament inestable s'introdueix una aplicació dels ajusts.</p>
+				<p xml:lang="el">Αυτή η έκδοση ανάπτυξης εισάγει μια εφαρμογή ρυθμίσεων.</p>
 				<p xml:lang="es">Esta versión de desarrollo inestable introduce una aplicación de ajustes</p>
 				<p xml:lang="fr">Cette évolution instable introduit une application paramètres.</p>
 				<p xml:lang="lt">Šioje nestabilioje kūrimo laidoje pristatoma nustatymų programa.</p>
@@ -228,6 +293,7 @@
 		<release version="0.3.3" timestamp="1413740495">
 			<description>
 				<p>This unstable development introduces a workaround to get window content of minimized windows to display them in windows view.</p>
+				<p xml:lang="el">Αυτή η δοκιμαστική έκδοση ανάπτυξης εισάγει μια λύση για την εμφάνιση του περιεχομένου των ελαχιστοποιημένων παραθύρων στην προβολή παραθύρων.</p>
 				<p xml:lang="fr">Cette évolution instable introduit une solution de contournement pour obtenir le contenu de la fenêtre des fenêtres réduites pour les afficher dans les fenêtres de vue.</p>
 				<p xml:lang="sr">Непостојано развојно издање укључује покушај да се приказује и садржај умањених прозора.</p>
 			</description>
@@ -235,7 +301,9 @@
 		<release version="0.3.2" timestamp="1410150601">
 			<description>
 				<p>This unstable development introduces effects.</p>
-				<p xml:lang="es">Esta versión de desarrollo introduce efectos.</p>
+				<p xml:lang="ca">En aquest desenvolupament inestable s'introdueixen els efectes.</p>
+				<p xml:lang="el">Αυτή η ασταθής έκδοση ανάπτυξης εισάγει εφέ.</p>
+				<p xml:lang="es">Esta versión de desarrollo inestable introduce efectos.</p>
 				<p xml:lang="fr">Cette évolution instable introduit des effets.</p>
 				<p xml:lang="lt">Šioje nestabilioje kūrimo laidoje yra pristatomi efektai.</p>
 				<p xml:lang="sr">Ово је непостојано развојно издање које први пут садржи дејства површи.</p>
@@ -279,9 +347,12 @@
 		<release version="0.2.0" timestamp="1402160953">
 			<description>
 				<p>Initial release.</p>
+				<p xml:lang="ca">Publicació inicial.</p>
+				<p xml:lang="el">Αρχική έκδοση.</p>
 				<p xml:lang="es">Primera versión.</p>
 				<p xml:lang="fr">Première publication.</p>
 				<p xml:lang="lt">Pradinė laida.</p>
+				<p xml:lang="pl">Pierwsze wydanie.</p>
 				<p xml:lang="sr">Прво издање</p>
 			</description>
 		</release>

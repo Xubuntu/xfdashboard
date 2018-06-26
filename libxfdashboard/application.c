@@ -2,7 +2,7 @@
  * application: Single-instance managing application and single-instance
  *              objects like window manager and so on.
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,16 @@
  * MA 02110-1301, USA.
  * 
  * 
+ */
+
+/**
+ * SECTION:application
+ * @short_description: The core application class
+ * @include: xfdashboard/application.h
+ *
+ * #XfdashboardApplication is a single instance object. Its main purpose
+ * is to setup and start-up the application and also to manage other
+ * (mainly single instance) objects.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -49,8 +59,10 @@
 #include <libxfdashboard/application-database.h>
 #include <libxfdashboard/application-tracker.h>
 #include <libxfdashboard/plugins-manager.h>
+#include <libxfdashboard/window-tracker-backend.h>
 #include <libxfdashboard/marshal.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -65,30 +77,34 @@ G_DEFINE_TYPE(XfdashboardApplication,
 struct _XfdashboardApplicationPrivate
 {
 	/* Properties related */
-	gboolean						isDaemon;
-	gboolean						isSuspended;
-	gchar							*themeName;
+	gboolean							isDaemon;
+	gboolean							isSuspended;
+	gchar								*themeName;
 
 	/* Instance related */
-	gboolean						initialized;
-	gboolean						isQuitting;
+	gboolean							initialized;
+	gboolean							isQuitting;
+	gboolean							forcedNewInstance;
 
-	XfconfChannel					*xfconfChannel;
-	XfdashboardViewManager			*viewManager;
-	XfdashboardSearchManager		*searchManager;
-	XfdashboardFocusManager			*focusManager;
+	XfconfChannel						*xfconfChannel;
+	XfdashboardStage					*stage;
+	XfdashboardViewManager				*viewManager;
+	XfdashboardSearchManager			*searchManager;
+	XfdashboardFocusManager				*focusManager;
 
-	XfdashboardTheme				*theme;
-	gulong							xfconfThemeChangedSignalID;
+	XfdashboardTheme					*theme;
+	gulong								xfconfThemeChangedSignalID;
 
-	XfdashboardBindingsPool			*bindings;
+	XfdashboardBindingsPool				*bindings;
 
-	XfdashboardApplicationDatabase	*appDatabase;
-	XfdashboardApplicationTracker	*appTracker;
+	XfdashboardApplicationDatabase		*appDatabase;
+	XfdashboardApplicationTracker		*appTracker;
 
-	XfceSMClient					*sessionManagementClient;
+	XfceSMClient						*sessionManagementClient;
 
-	XfdashboardPluginsManager		*pluginManager;
+	XfdashboardPluginsManager			*pluginManager;
+
+	XfdashboardWindowTrackerBackend		*windowTrackerBackend;
 };
 
 /* Properties */
@@ -99,6 +115,7 @@ enum
 	PROP_DAEMONIZED,
 	PROP_SUSPENDED,
 	PROP_THEME_NAME,
+	PROP_STAGE,
 
 	PROP_LAST
 };
@@ -108,11 +125,17 @@ static GParamSpec* XfdashboardApplicationProperties[PROP_LAST]={ 0, };
 /* Signals */
 enum
 {
+	SIGNAL_INITIALIZED,
 	SIGNAL_QUIT,
 	SIGNAL_SHUTDOWN_FINAL,
+
 	SIGNAL_SUSPEND,
 	SIGNAL_RESUME,
+
+	SIGNAL_THEME_LOADING,
+	SIGNAL_THEME_LOADED,
 	SIGNAL_THEME_CHANGED,
+
 	SIGNAL_APPLICATION_LAUNCHED,
 
 	/* Actions */
@@ -142,7 +165,6 @@ static void _xfdashboard_application_quit(XfdashboardApplication *self, gboolean
 {
 	XfdashboardApplicationPrivate	*priv;
 	gboolean						shouldQuit;
-	GSList							*stages, *entry;
 
 	g_return_if_fail(XFDASHBOARD_IS_APPLICATION(self));
 
@@ -176,13 +198,15 @@ static void _xfdashboard_application_quit(XfdashboardApplication *self, gboolean
 			xfce_sm_client_set_restart_style(priv->sessionManagementClient, XFCE_SM_CLIENT_RESTART_NORMAL);
 		}
 
-		/* Destroy stages */
-		stages=clutter_stage_manager_list_stages(clutter_stage_manager_get_default());
-		for(entry=stages; entry!=NULL; entry=g_slist_next(entry)) clutter_actor_destroy(CLUTTER_ACTOR(entry->data));
-		g_slist_free(stages);
-
 		/* Emit "quit" signal */
 		g_signal_emit(self, XfdashboardApplicationSignals[SIGNAL_QUIT], 0);
+
+		/* Destroy stage */
+		if(priv->stage)
+		{
+			clutter_actor_destroy(CLUTTER_ACTOR(priv->stage));
+			priv->stage=NULL;
+		}
 
 		/* Really quit application here and now */
 		if(priv->initialized)
@@ -232,7 +256,7 @@ static void _xfdashboard_application_on_session_quit(XfdashboardApplication *sel
 	g_return_if_fail(XFCE_IS_SM_CLIENT(inUserData));
 
 	/* Force application to quit */
-	g_debug("Received 'quit' from session management client - initiating shutdown");
+	XFDASHBOARD_DEBUG(self, MISC, "Received 'quit' from session management client - initiating shutdown");
 	_xfdashboard_application_quit(self, TRUE);
 }
 
@@ -266,27 +290,25 @@ static void _xfdashboard_application_set_theme_name(XfdashboardApplication *self
 	/* Set value if changed */
 	if(g_strcmp0(priv->themeName, inThemeName)!=0)
 	{
-		/* Set value */
-		if(priv->themeName) g_free(priv->themeName);
-		priv->themeName=g_strdup(inThemeName);
+		/* Create new theme instance */
+		theme=xfdashboard_theme_new(inThemeName);
 
-		/* Notify about property change */
-		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardApplicationProperties[PROP_THEME_NAME]);
+		/* Emit signal that theme is going to be loaded */
+		g_signal_emit(self, XfdashboardApplicationSignals[SIGNAL_THEME_LOADING], 0, theme);
 
-		/* Create new theme instance and load theme */
-		theme=xfdashboard_theme_new();
-		if(!xfdashboard_theme_load(theme, priv->themeName, &error))
+		/* Load theme */
+		if(!xfdashboard_theme_load(theme, &error))
 		{
 			/* Show critical warning at console */
 			g_critical(_("Could not load theme '%s': %s"),
-						priv->themeName,
+						inThemeName,
 						(error && error->message) ? error->message : _("unknown error"));
 
 			/* Show warning as notification */
 			xfdashboard_notify(NULL,
 								"dialog-error",
 								_("Could not load theme '%s': %s"),
-								priv->themeName,
+								inThemeName,
 								(error && error->message) ? error->message : _("unknown error"));
 
 			/* Release allocated resources */
@@ -295,6 +317,16 @@ static void _xfdashboard_application_set_theme_name(XfdashboardApplication *self
 
 			return;
 		}
+
+		/* Emit signal that theme was loaded successfully and will soon be applied */
+		g_signal_emit(self, XfdashboardApplicationSignals[SIGNAL_THEME_LOADED], 0, theme);
+
+		/* Set value */
+		if(priv->themeName) g_free(priv->themeName);
+		priv->themeName=g_strdup(inThemeName);
+
+		/* Notify about property change */
+		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardApplicationProperties[PROP_THEME_NAME]);
 
 		/* Release current theme and store new one */
 		if(priv->theme) g_object_unref(priv->theme);
@@ -308,18 +340,16 @@ static void _xfdashboard_application_set_theme_name(XfdashboardApplication *self
 }
 
 /* Perform full initialization of this application instance */
-static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication *self,
-															XfdashboardStage **outStage)
+static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication *self)
 {
 	XfdashboardApplicationPrivate	*priv;
 	GError							*error;
-	ClutterActor					*stage;
 #if !GARCON_CHECK_VERSION(0,3,0)
 	const gchar						*desktop;
 #endif
+	XfceSMClientRestartStyle		sessionManagementRestartStyle;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATION(self), FALSE);
-	g_return_val_if_fail(outStage==NULL || *outStage==NULL, FALSE);
 
 	priv=self->priv;
 	error=NULL;
@@ -345,9 +375,12 @@ static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication 
 #endif
 
 	/* Setup the session management */
+	sessionManagementRestartStyle=XFCE_SM_CLIENT_RESTART_IMMEDIATELY;
+	if(priv->forcedNewInstance) sessionManagementRestartStyle=XFCE_SM_CLIENT_RESTART_NORMAL;
+
 	priv->sessionManagementClient=xfce_sm_client_get();
 	xfce_sm_client_set_priority(priv->sessionManagementClient, XFCE_SM_CLIENT_PRIORITY_DEFAULT);
-	xfce_sm_client_set_restart_style(priv->sessionManagementClient, XFCE_SM_CLIENT_RESTART_IMMEDIATELY);
+	xfce_sm_client_set_restart_style(priv->sessionManagementClient, sessionManagementRestartStyle);
 	g_signal_connect_swapped(priv->sessionManagementClient, "quit", G_CALLBACK(_xfdashboard_application_on_session_quit), self);
 
 	if(!xfce_sm_client_connect(priv->sessionManagementClient, &error))
@@ -384,6 +417,17 @@ static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication 
 		return(FALSE);
 	}
 
+	/* Create single-instance of window tracker backend to keep it alive while
+	 * application is running and to avoid multiple reinitializations. It must
+	 * be create before any class using a window tracker.
+	 */
+	priv->windowTrackerBackend=xfdashboard_window_tracker_backend_get_default();
+	if(!priv->windowTrackerBackend)
+	{
+		g_critical(_("Could not setup window tracker backend"));
+		return(FALSE);
+	}
+
 	/* Set up application database */
 	priv->appDatabase=xfdashboard_application_database_get_default();
 	if(!priv->appDatabase)
@@ -405,6 +449,39 @@ static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication 
 	if(!priv->appTracker)
 	{
 		g_critical(_("Could not initialize application tracker"));
+		return(FALSE);
+	}
+
+	/* Register built-in views (order of registration is important) */
+	priv->viewManager=xfdashboard_view_manager_get_default();
+
+	xfdashboard_view_manager_register(priv->viewManager, "builtin.windows", XFDASHBOARD_TYPE_WINDOWS_VIEW);
+	xfdashboard_view_manager_register(priv->viewManager, "builtin.applications", XFDASHBOARD_TYPE_APPLICATIONS_VIEW);
+	xfdashboard_view_manager_register(priv->viewManager, "builtin.search", XFDASHBOARD_TYPE_SEARCH_VIEW);
+
+	/* Register built-in search providers */
+	priv->searchManager=xfdashboard_search_manager_get_default();
+
+	xfdashboard_search_manager_register(priv->searchManager, "builtin.applications", XFDASHBOARD_TYPE_APPLICATIONS_SEARCH_PROVIDER);
+
+	/* Create single-instance of focus manager to keep it alive while
+	 * application is running.
+	 */
+	priv->focusManager=xfdashboard_focus_manager_get_default();
+
+	/* Create single-instance of plugin manager to keep it alive while
+	 * application is running.
+	 */
+	priv->pluginManager=xfdashboard_plugins_manager_get_default();
+	if(!priv->pluginManager)
+	{
+		g_critical(_("Could not initialize plugin manager"));
+		return(FALSE);
+	}
+
+	if(!xfdashboard_plugins_manager_setup(priv->pluginManager))
+	{
+		g_critical(_("Could not setup plugin manager"));
 		return(FALSE);
 	}
 
@@ -440,86 +517,47 @@ static gboolean _xfdashboard_application_initialize_full(XfdashboardApplication 
 	 */
 	if(!priv->theme) return(FALSE);
 
-	/* Register built-in views (order of registration is important) */
-	priv->viewManager=xfdashboard_view_manager_get_default();
-
-	xfdashboard_view_manager_register(priv->viewManager, "builtin.windows", XFDASHBOARD_TYPE_WINDOWS_VIEW);
-	xfdashboard_view_manager_register(priv->viewManager, "builtin.applications", XFDASHBOARD_TYPE_APPLICATIONS_VIEW);
-	xfdashboard_view_manager_register(priv->viewManager, "builtin.search", XFDASHBOARD_TYPE_SEARCH_VIEW);
-
-	/* Register built-in search providers */
-	priv->searchManager=xfdashboard_search_manager_get_default();
-
-	xfdashboard_search_manager_register(priv->searchManager, "builtin.applications", XFDASHBOARD_TYPE_APPLICATIONS_SEARCH_PROVIDER);
-
-	/* Create single-instance of plugin manager to keep it alive while
-	 * application is running.
-	 */
-	priv->pluginManager=xfdashboard_plugins_manager_get_default();
-	if(!priv->pluginManager)
-	{
-		g_critical(_("Could not initialize plugin manager"));
-		return(FALSE);
-	}
-
-	if(!xfdashboard_plugins_manager_setup(priv->pluginManager))
-	{
-		g_critical(_("Could not setup plugin manager"));
-		return(FALSE);
-	}
-
-	/* Create single-instance of focus manager to keep it alive while
-	 * application is running.
-	 */
-	priv->focusManager=xfdashboard_focus_manager_get_default();
-
 	/* Create stage containing all monitors */
-	stage=xfdashboard_stage_new();
-	g_signal_connect_swapped(stage, "delete-event", G_CALLBACK(_xfdashboard_application_on_delete_stage), self);
+	priv->stage=XFDASHBOARD_STAGE(xfdashboard_stage_new());
+	g_signal_connect_swapped(priv->stage, "delete-event", G_CALLBACK(_xfdashboard_application_on_delete_stage), self);
 
 	/* Emit signal 'theme-changed' to get current theme loaded at each stage created */
 	g_signal_emit(self, XfdashboardApplicationSignals[SIGNAL_THEME_CHANGED], 0, priv->theme);
 
-	/* Set return results */
-	if(outStage) *outStage=XFDASHBOARD_STAGE(stage);
+	/* Initialization was successful so send signal and return TRUE */
+	g_signal_emit(self, XfdashboardApplicationSignals[SIGNAL_INITIALIZED], 0);
 
-	/* Initialization was successful so return TRUE */
 #ifdef DEBUG
 	xfdashboard_notify(NULL, NULL, _("Welcome to %s (%s)!"), PACKAGE_NAME, PACKAGE_VERSION);
 #else
 	xfdashboard_notify(NULL, NULL, _("Welcome to %s!"), PACKAGE_NAME);
 #endif
+
 	return(TRUE);
 }
 
 /* Switch to requested view */
 static void _xfdashboard_application_switch_to_view(XfdashboardApplication *self, const gchar *inInternalViewName)
 {
-	GSList							*stages, *iter;
+	XfdashboardApplicationPrivate	*priv;
 
 	g_return_if_fail(XFDASHBOARD_IS_APPLICATION(self));
+
+	priv=self->priv;
 
 	/* If no view name was specified then do nothing and return immediately */
 	if(!inInternalViewName ||
 		!inInternalViewName[0])
 	{
-		g_debug("No view to switch to specified");
+		XFDASHBOARD_DEBUG(self, MISC, "No view to switch to specified");
 		return;
 	}
 
-	/* Iterate through list of stages and set specified view at stage */
-	g_debug("Trying to switch to view '%s'", inInternalViewName);
-
-	stages=clutter_stage_manager_list_stages(clutter_stage_manager_get_default());
-	for(iter=stages; iter; iter=g_slist_next(iter))
-	{
-		/* Tell stage to switch view */
-		if(XFDASHBOARD_IS_STAGE(iter->data))
-		{
-			xfdashboard_stage_set_switch_to_view(XFDASHBOARD_STAGE(iter->data),
-													inInternalViewName);
-		}
-	}
+	/* Tell stage to switch requested view */
+	XFDASHBOARD_DEBUG(self, MISC,
+						"Trying to switch to view '%s'",
+						inInternalViewName);
+	xfdashboard_stage_set_switch_to_view(priv->stage, inInternalViewName);
 }
 
 /* Handle command-line on primary instance */
@@ -528,7 +566,6 @@ static gint _xfdashboard_application_handle_command_line_arguments(XfdashboardAp
 																	gchar **inArgv)
 {
 	XfdashboardApplicationPrivate	*priv;
-	XfdashboardStage				*stage;
 	GOptionContext					*context;
 	gboolean						result;
 	GError							*error;
@@ -542,8 +579,8 @@ static gint _xfdashboard_application_handle_command_line_arguments(XfdashboardAp
 										{ "daemonize", 'd', 0, G_OPTION_ARG_NONE, &optionDaemonize, N_("Fork to background"), NULL },
 										{ "quit", 'q', 0, G_OPTION_ARG_NONE, &optionQuit, N_("Quit running instance"), NULL },
 										{ "restart", 'r', 0, G_OPTION_ARG_NONE, &optionRestart, N_("Restart running instance"), NULL },
-										{ "toggle", 't', 0, G_OPTION_ARG_NONE, &optionToggle, N_("Toggles suspend/resume state if running instance was started in daemon mode otherwise it quits running non-daemon instance"), NULL },
-										{ "view", 0, 0, G_OPTION_ARG_STRING, &optionSwitchToView, N_("The view to switch to on startup or resume"), NULL },
+										{ "toggle", 't', 0, G_OPTION_ARG_NONE, &optionToggle, N_("Toggles visibility if running instance was started in daemon mode otherwise it quits running non-daemon instance"), NULL },
+										{ "view", 0, 0, G_OPTION_ARG_STRING, &optionSwitchToView, N_("The ID of view to switch to on startup or resume"), "ID" },
 										{ NULL }
 									};
 
@@ -551,7 +588,6 @@ static gint _xfdashboard_application_handle_command_line_arguments(XfdashboardAp
 
 	priv=self->priv;
 	error=NULL;
-	stage=NULL;
 
 	/* Set up options */
 	optionDaemonize=FALSE;
@@ -561,19 +597,19 @@ static gint _xfdashboard_application_handle_command_line_arguments(XfdashboardAp
 	optionSwitchToView=NULL;
 
 	/* Setup command-line options */
-	context=g_option_context_new(N_("- A Gnome Shell like dashboard for Xfce4"));
+	context=g_option_context_new(N_(""));
+	g_option_context_set_summary(context, N_("A Gnome Shell like dashboard for Xfce4 - version " PACKAGE_VERSION));
+	g_option_context_set_translation_domain(context, GETTEXT_PACKAGE);
 	g_option_context_add_group(context, gtk_get_option_group(TRUE));
 	g_option_context_add_group(context, clutter_get_option_group_without_init());
 	g_option_context_add_group(context, xfce_sm_client_get_option_group(inArgc, inArgv));
 	g_option_context_add_main_entries(context, entries, GETTEXT_PACKAGE);
 
 #ifdef DEBUG
-	/* I always forget the name of the environment variable to get the debug
-	 * message display which are emitted with g_debug(). So display a hint
-	 * if application was compiled with debug enabled.
-	 */
-	g_print("** To get debug messages set environment variable G_MESSAGES_DEBUG to %s\n", PACKAGE_NAME);
-	g_print("** e.g.: G_MESSAGES_DEBUG=%s %s\n", PACKAGE_NAME, inArgv[0]);
+#ifdef XFDASHBOARD_ENABLE_DEBUG
+	g_print("** Use environment variable XFDASHBOARD_DEBUG to enable debug messages\n");
+	g_print("** To get a list of debug categories set XFDASHBOARD_DEBUG=help\n");
+#endif
 #endif
 
 	if(!g_option_context_parse(context, &inArgc, &inArgv, &error))
@@ -594,6 +630,51 @@ static gint _xfdashboard_application_handle_command_line_arguments(XfdashboardAp
 		return(XFDASHBOARD_APPLICATION_ERROR_FAILED);
 	}
 
+	/* Set up debug flags */
+#ifdef XFDASHBOARD_ENABLE_DEBUG
+	{
+		const gchar					*environment;
+		static const GDebugKey		debugKeys[]=
+									{
+										{ "misc", XFDASHBOARD_DEBUG_MISC },
+										{ "actor", XFDASHBOARD_DEBUG_ACTOR },
+										{ "style", XFDASHBOARD_DEBUG_STYLE },
+										{ "styling", XFDASHBOARD_DEBUG_STYLE },
+										{ "theme", XFDASHBOARD_DEBUG_THEME },
+										{ "apps", XFDASHBOARD_DEBUG_APPLICATIONS },
+										{ "applications", XFDASHBOARD_DEBUG_APPLICATIONS },
+										{ "images", XFDASHBOARD_DEBUG_IMAGES },
+										{ "windows", XFDASHBOARD_DEBUG_WINDOWS },
+										{ "window-tracker", XFDASHBOARD_DEBUG_WINDOWS },
+									};
+
+		/* Parse debug flags */
+		environment=g_getenv("XFDASHBOARD_DEBUG");
+		if(environment)
+		{
+			xfdashboard_debug_flags=
+				g_parse_debug_string(environment,
+										debugKeys,
+										G_N_ELEMENTS(debugKeys));
+			environment=NULL;
+		}
+
+		/* Parse object names to debug */
+		environment=g_getenv("XFDASHBOARD_DEBUG");
+		if(environment)
+		{
+			if(G_UNLIKELY(xfdashboard_debug_classes))
+			{
+				g_strfreev(xfdashboard_debug_classes);
+				xfdashboard_debug_classes=NULL;
+			}
+
+			xfdashboard_debug_classes=g_strsplit(environment, ",", -1);
+			environment=NULL;
+		}
+	}
+#endif
+
 	/* If this application instance is a remote instance do not handle any
 	 * command-line argument. The arguments will be sent to the primary instance,
 	 * handled there and the exit code will be sent back to the remote instance.
@@ -603,7 +684,7 @@ static gint _xfdashboard_application_handle_command_line_arguments(XfdashboardAp
 	 */
 	if(g_application_get_is_remote(G_APPLICATION(self)))
 	{
-		g_debug("Do not handle command-line parameters on remote application instance");
+		XFDASHBOARD_DEBUG(self, MISC, "Do not handle command-line parameters on remote application instance");
 
 		/* Release allocated resources */
 		if(optionSwitchToView) g_free(optionSwitchToView);
@@ -614,7 +695,7 @@ static gint _xfdashboard_application_handle_command_line_arguments(XfdashboardAp
 		 */
 		return(XFDASHBOARD_APPLICATION_ERROR_NONE);
 	}
-	g_debug("Handling command-line parameters on primary application instance");
+	XFDASHBOARD_DEBUG(self, MISC, "Handling command-line parameters on primary application instance");
 
 	/* Handle options: restart
 	 *
@@ -627,7 +708,7 @@ static gint _xfdashboard_application_handle_command_line_arguments(XfdashboardAp
 		priv->initialized)
 	{
 		/* Quit existing instance for restart */
-		g_debug("Received request to restart application!");
+		XFDASHBOARD_DEBUG(self, MISC, "Received request to restart application!");
 		_xfdashboard_application_quit(self, TRUE);
 
 		/* Release allocated resources */
@@ -647,7 +728,7 @@ static gint _xfdashboard_application_handle_command_line_arguments(XfdashboardAp
 	if(optionQuit)
 	{
 		/* Quit existing instance */
-		g_debug("Received request to quit running instance!");
+		XFDASHBOARD_DEBUG(self, MISC, "Received request to quit running instance!");
 		_xfdashboard_application_quit(self, TRUE);
 
 		/* Release allocated resources */
@@ -705,32 +786,41 @@ static gint _xfdashboard_application_handle_command_line_arguments(XfdashboardAp
 	 * Check if application shoud run in daemon mode. A daemonized instance runs in
 	 * background and does not present the stage initially. The application must not
 	 * be initialized yet as it can only be done on start-up.
+	 *
+	 * Does not work if a new instance was forced.
 	 */
 	if(optionDaemonize &&
 		!priv->initialized)
 	{
-		priv->isDaemon=optionDaemonize;
-		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardApplicationProperties[PROP_DAEMONIZED]);
-
-		if(priv->isDaemon)
+		if(!priv->forcedNewInstance)
 		{
-			priv->isSuspended=TRUE;
-			g_object_notify_by_pspec(G_OBJECT(self), XfdashboardApplicationProperties[PROP_SUSPENDED]);
+			priv->isDaemon=optionDaemonize;
+			g_object_notify_by_pspec(G_OBJECT(self), XfdashboardApplicationProperties[PROP_DAEMONIZED]);
+
+			if(priv->isDaemon)
+			{
+				priv->isSuspended=TRUE;
+				g_object_notify_by_pspec(G_OBJECT(self), XfdashboardApplicationProperties[PROP_SUSPENDED]);
+			}
 		}
+			else
+			{
+				g_warning(_("Cannot daemonized because a temporary new instance of application was forced."));
+			}
 	}
 
 	/* Check if this instance needs to be initialized fully */
 	if(!priv->initialized)
 	{
 		/* Perform full initialization of this application instance */
-		result=_xfdashboard_application_initialize_full(self, &stage);
+		result=_xfdashboard_application_initialize_full(self);
 		if(result==FALSE) return(XFDASHBOARD_APPLICATION_ERROR_FAILED);
 
 		/* Switch to view if requested */
 		_xfdashboard_application_switch_to_view(self, optionSwitchToView);
 
 		/* Show application if not started daemonized */
-		if(!priv->isDaemon) clutter_actor_show(CLUTTER_ACTOR(stage));
+		if(!priv->isDaemon) clutter_actor_show(CLUTTER_ACTOR(priv->stage));
 
 		/* Take extra reference on the application to keep application in
 		 * function g_application_run() alive when returning.
@@ -905,6 +995,12 @@ static void _xfdashboard_application_dispose(GObject *inObject)
 	g_signal_emit(self, XfdashboardApplicationSignals[SIGNAL_SHUTDOWN_FINAL], 0);
 
 	/* Release allocated resources */
+	if(priv->windowTrackerBackend)
+	{
+		g_object_unref(priv->windowTrackerBackend);
+		priv->windowTrackerBackend=NULL;
+	}
+
 	if(priv->pluginManager)
 	{
 		g_object_unref(priv->pluginManager);
@@ -915,18 +1011,6 @@ static void _xfdashboard_application_dispose(GObject *inObject)
 	{
 		xfconf_g_property_unbind(priv->xfconfThemeChangedSignalID);
 		priv->xfconfThemeChangedSignalID=0L;
-	}
-
-	if(priv->theme)
-	{
-		g_object_unref(priv->theme);
-		priv->theme=NULL;
-	}
-
-	if(priv->themeName)
-	{
-		g_free(priv->themeName);
-		priv->themeName=NULL;
 	}
 
 	if(priv->viewManager)
@@ -970,9 +1054,36 @@ static void _xfdashboard_application_dispose(GObject *inObject)
 		priv->appTracker=NULL;
 	}
 
+	if(priv->theme)
+	{
+		g_object_unref(priv->theme);
+		priv->theme=NULL;
+	}
+
+	if(priv->themeName)
+	{
+		g_free(priv->themeName);
+		priv->themeName=NULL;
+	}
+
+	if(priv->stage)
+	{
+		g_object_unref(priv->stage);
+		priv->stage=NULL;
+	}
+
 	/* Shutdown session management */
 	if(priv->sessionManagementClient)
 	{
+		/* This instance looks like to be disposed normally and not like a crash
+		 * so set the restart style at session management to something that it
+		 * will not restart itself but shutting down.
+		 */
+		if(XFCE_IS_SM_CLIENT(priv->sessionManagementClient))
+		{
+			xfce_sm_client_set_restart_style(priv->sessionManagementClient, XFCE_SM_CLIENT_RESTART_NORMAL);
+		}
+
 		priv->sessionManagementClient=NULL;
 	}
 
@@ -1024,6 +1135,10 @@ static void _xfdashboard_application_get_property(GObject *inObject,
 			g_value_set_boolean(outValue, self->priv->isSuspended);
 			break;
 
+		case PROP_STAGE:
+			g_value_set_object(outValue, self->priv->stage);
+			break;
+
 		case PROP_THEME_NAME:
 			g_value_set_string(outValue, self->priv->themeName);
 			break;
@@ -1058,6 +1173,13 @@ static void xfdashboard_application_class_init(XfdashboardApplicationClass *klas
 	g_type_class_add_private(klass, sizeof(XfdashboardApplicationPrivate));
 
 	/* Define properties */
+	/**
+	 * XfdashboardApplication:is-daemonized:
+	 *
+	 * A flag indicating if application is running in daemon mode. It is set to
+	 * %TRUE if it running in daemon mode otherwise %FALSE as it running in
+	 * standalone application.
+	 */
 	XfdashboardApplicationProperties[PROP_DAEMONIZED]=
 		g_param_spec_boolean("is-daemonized",
 								_("Is daemonized"),
@@ -1065,6 +1187,13 @@ static void xfdashboard_application_class_init(XfdashboardApplicationClass *klas
 								FALSE,
 								G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+	/**
+	 * XfdashboardApplication:is-suspended:
+	 *
+	 * A flag indicating if application running in daemon mode is suspended.
+	 * It is set to %TRUE if application is suspended. If it is %FALSE then
+	 * application is resumed, active and visible.
+	 */
 	XfdashboardApplicationProperties[PROP_SUSPENDED]=
 		g_param_spec_boolean("is-suspended",
 								_("Is suspended"),
@@ -1072,6 +1201,23 @@ static void xfdashboard_application_class_init(XfdashboardApplicationClass *klas
 								FALSE,
 								G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+	/**
+	 * XfdashboardApplication:stage:
+	 *
+	 * The #XfdashboardStage of application.
+	 */
+	XfdashboardApplicationProperties[PROP_STAGE]=
+		g_param_spec_object("stage",
+								_("Stage"),
+								_("The stage object of application"),
+								XFDASHBOARD_TYPE_STAGE,
+								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+	/**
+	 * XfdashboardApplication:theme-name:
+	 *
+	 * The name of current theme used in application.
+	 */
 	XfdashboardApplicationProperties[PROP_THEME_NAME]=
 		g_param_spec_string("theme-name",
 								_("Theme name"),
@@ -1082,6 +1228,38 @@ static void xfdashboard_application_class_init(XfdashboardApplicationClass *klas
 	g_object_class_install_properties(gobjectClass, PROP_LAST, XfdashboardApplicationProperties);
 
 	/* Define signals */
+	/**
+	 * XfdashboardApplication::initialized:
+	 * @self: The application's primary instance was fully initialized
+	 *
+	 * The ::initialized signal is emitted when the primary instance of
+	 * application was fully initialized.
+	 *
+	 * The main purpose of this signal is to give other objects and plugin
+	 * a chance to initialize properly after application is fully initialized
+	 * and all other components are really available and also initialized.
+	 */
+	XfdashboardApplicationSignals[SIGNAL_INITIALIZED]=
+		g_signal_new("initialized",
+						G_TYPE_FROM_CLASS(klass),
+						G_SIGNAL_RUN_LAST,
+						G_STRUCT_OFFSET(XfdashboardApplicationClass, initialized),
+						NULL,
+						NULL,
+						g_cclosure_marshal_VOID__VOID,
+						G_TYPE_NONE,
+						0);
+
+	/**
+	 * XfdashboardApplication::quit:
+	 * @self: The application going to quit
+	 *
+	 * The ::quit signal is emitted when the application is going to quit. This
+	 * signal is definitely emitted before the stage is destroyed.
+	 *
+	 * The main purpose of this signal is to give other objects and plugin
+	 * a chance to clean-up properly.
+	 */
 	XfdashboardApplicationSignals[SIGNAL_QUIT]=
 		g_signal_new("quit",
 						G_TYPE_FROM_CLASS(klass),
@@ -1093,6 +1271,15 @@ static void xfdashboard_application_class_init(XfdashboardApplicationClass *klas
 						G_TYPE_NONE,
 						0);
 
+	/**
+	 * XfdashboardApplication::shutdown-final:
+	 * @self: The application being destroyed
+	 *
+	 * The ::shutdown-final signal is emitted when the application object
+	 * is currently destroyed and can be considered as quitted. The stage is
+	 * detroyed when this signal is emitted and only the non-visible managers
+	 * are still accessible at this time.
+	 */
 	XfdashboardApplicationSignals[SIGNAL_SHUTDOWN_FINAL]=
 		g_signal_new("shutdown-final",
 						G_TYPE_FROM_CLASS(klass),
@@ -1104,6 +1291,15 @@ static void xfdashboard_application_class_init(XfdashboardApplicationClass *klas
 						G_TYPE_NONE,
 						0);
 
+	/**
+	 * XfdashboardApplication::suspend:
+	 * @self: The application suspended
+	 *
+	 * The ::suspend signal is emitted when the application is suspended and
+	 * send to background.
+	 *
+	 * This signal is only emitted if application is running in daemon mode.
+	 */
 	XfdashboardApplicationSignals[SIGNAL_SUSPEND]=
 		g_signal_new("suspend",
 						G_TYPE_FROM_CLASS(klass),
@@ -1115,6 +1311,15 @@ static void xfdashboard_application_class_init(XfdashboardApplicationClass *klas
 						G_TYPE_NONE,
 						0);
 
+	/**
+	 * XfdashboardApplication::resume:
+	 * @self: The application resumed
+	 *
+	 * The ::resume signal is emitted when the application is resumed and
+	 * brought to foreground.
+	 *
+	 * This signal is only emitted if application is running in daemon mode.
+	 */
 	XfdashboardApplicationSignals[SIGNAL_RESUME]=
 		g_signal_new("resume",
 						G_TYPE_FROM_CLASS(klass),
@@ -1126,6 +1331,59 @@ static void xfdashboard_application_class_init(XfdashboardApplicationClass *klas
 						G_TYPE_NONE,
 						0);
 
+	/**
+	 * XfdashboardApplication::theme-loading:
+	 * @self: The application whose theme is going to change
+	 * @inTheme: The new #XfdashboardTheme used
+	 *
+	 * The ::theme-loading signal is emitted when the theme of application is
+	 * going to be loaded. When this signal is received no file was loaded so far
+	 * but will be. For example, at this moment it is possible to load a CSS file
+	 * by a plugin before the CSS files of the new theme will be loaded to give
+	 * the theme a chance to override the default CSS of plugin.
+	 */
+	XfdashboardApplicationSignals[SIGNAL_THEME_LOADING]=
+		g_signal_new("theme-loading",
+						G_TYPE_FROM_CLASS(klass),
+						G_SIGNAL_RUN_LAST,
+						G_STRUCT_OFFSET(XfdashboardApplicationClass, theme_loading),
+						NULL,
+						NULL,
+						g_cclosure_marshal_VOID__OBJECT,
+						G_TYPE_NONE,
+						1,
+						XFDASHBOARD_TYPE_THEME);
+
+	/**
+	 * XfdashboardApplication::theme-loaded:
+	 * @self: The application whose theme is going to change
+	 * @inTheme: The new #XfdashboardTheme used
+	 *
+	 * The ::theme-loaded signal is emitted when the new theme of application was
+	 * loaded and will soon be applied. When this signal is received it is the
+	 * last chance for other components and plugins to load additionally resources
+	 * like CSS, e.g. to override CSS of theme.
+	 */
+	XfdashboardApplicationSignals[SIGNAL_THEME_LOADED]=
+		g_signal_new("theme-loaded",
+						G_TYPE_FROM_CLASS(klass),
+						G_SIGNAL_RUN_LAST,
+						G_STRUCT_OFFSET(XfdashboardApplicationClass, theme_loaded),
+						NULL,
+						NULL,
+						g_cclosure_marshal_VOID__OBJECT,
+						G_TYPE_NONE,
+						1,
+						XFDASHBOARD_TYPE_THEME);
+
+	/**
+	 * XfdashboardApplication::theme-changed:
+	 * @self: The application whose theme has changed
+	 * @inTheme: The new #XfdashboardTheme used
+	 *
+	 * The ::theme-changed signal is emitted when a new theme of application
+	 * has been loaded and applied.
+	 */
 	XfdashboardApplicationSignals[SIGNAL_THEME_CHANGED]=
 		g_signal_new("theme-changed",
 						G_TYPE_FROM_CLASS(klass),
@@ -1138,6 +1396,14 @@ static void xfdashboard_application_class_init(XfdashboardApplicationClass *klas
 						1,
 						XFDASHBOARD_TYPE_THEME);
 
+	/**
+	 * XfdashboardApplication::application-launched:
+	 * @self: The application
+	 * @inAppInfo: The #GAppInfo that was just launched
+	 *
+	 * The ::application-launched signal is emitted when a #GAppInfo has been
+	 * launched successfully, e.g. via any #XfdashboardApplicationButton.
+	 */
 	XfdashboardApplicationSignals[SIGNAL_APPLICATION_LAUNCHED]=
 		g_signal_new("application-launched",
 						G_TYPE_FROM_CLASS(klass),
@@ -1150,6 +1416,18 @@ static void xfdashboard_application_class_init(XfdashboardApplicationClass *klas
 						1,
 						G_TYPE_APP_INFO);
 
+	/**
+	 * XfdashboardApplication::exit:
+	 * @self: The application
+	 * @inFocusable: The source #XfdashboardFocusable which send this signal
+	 * @inAction: A string containing the action (that is this signal name)
+	 * @inEvent: The #ClutterEvent associated to this signal and action
+	 *
+	 * The ::exit signal is an action and when emitted it causes the application
+	 * to quit like calling xfdashboard_application_quit_or_suspend().
+	 *
+	 * Note: This action can be used at key bindings.
+	 */
 	XfdashboardApplicationSignals[ACTION_EXIT]=
 		g_signal_new("exit",
 						G_TYPE_FROM_CLASS(klass),
@@ -1157,7 +1435,7 @@ static void xfdashboard_application_class_init(XfdashboardApplicationClass *klas
 						G_STRUCT_OFFSET(XfdashboardApplicationClass, exit),
 						g_signal_accumulator_true_handled,
 						NULL,
-						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+						_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 						G_TYPE_BOOLEAN,
 						3,
 						XFDASHBOARD_TYPE_FOCUSABLE,
@@ -1184,6 +1462,7 @@ static void xfdashboard_application_init(XfdashboardApplication *self)
 	priv->themeName=NULL;
 	priv->initialized=FALSE;
 	priv->xfconfChannel=NULL;
+	priv->stage=NULL;
 	priv->viewManager=NULL;
 	priv->searchManager=NULL;
 	priv->focusManager=NULL;
@@ -1192,6 +1471,8 @@ static void xfdashboard_application_init(XfdashboardApplication *self)
 	priv->isQuitting=FALSE;
 	priv->sessionManagementClient=NULL;
 	priv->pluginManager=NULL;
+	priv->forcedNewInstance=FALSE;
+	priv->windowTrackerBackend=NULL;
 
 	/* Add callable DBUS actions for this application */
 	action=g_simple_action_new("Quit", NULL);
@@ -1202,7 +1483,36 @@ static void xfdashboard_application_init(XfdashboardApplication *self)
 
 /* IMPLEMENTATION: Public API */
 
-/* Get single instance of application */
+/**
+ * xfdashboard_application_has_default:
+ *
+ * Determine if the singleton instance of #XfdashboardApplication was created.
+ * If the singleton instance of #XfdashboardApplication was created, it can be
+ * retrieved with xfdashboard_application_get_default().
+ *
+ * This function is useful if only the availability of the singleton instance
+ * wants to be checked as xfdashboard_application_get_default() will create this
+ * singleton instance if not available.
+ *
+ * Return value: %TRUE if singleton instance of #XfdashboardApplication was
+ *   created or %FALSE if not.
+ */
+gboolean xfdashboard_application_has_default(void)
+{
+	if(G_LIKELY(_xfdashboard_application)) return(TRUE);
+
+	return(FALSE);
+}
+
+/**
+ * xfdashboard_application_get_default:
+ *
+ * Retrieves the singleton instance of #XfdashboardApplication.
+ *
+ * Return value: (transfer none): The instance of #XfdashboardApplication.
+ *   The returned object is owned by Xfdashboard and it should not be
+ *   unreferenced directly.
+ */
 XfdashboardApplication* xfdashboard_application_get_default(void)
 {
 	if(G_UNLIKELY(!_xfdashboard_application))
@@ -1229,6 +1539,11 @@ XfdashboardApplication* xfdashboard_application_get_default(void)
 												"flags", G_APPLICATION_HANDLES_COMMAND_LINE,
 												NULL);
 
+		if(forceNewInstance)
+		{
+			_xfdashboard_application->priv->forcedNewInstance=TRUE;
+		}
+
 		/* Release allocated resources */
 		if(appID) g_free(appID);
 	}
@@ -1236,7 +1551,15 @@ XfdashboardApplication* xfdashboard_application_get_default(void)
 	return(_xfdashboard_application);
 }
 
-/* Get flag if application is running in daemonized mode */
+/**
+ * xfdashboard_application_is_daemonized:
+ * @self: A #XfdashboardApplication
+ *
+ * Checks if application is running in background (daemon mode).
+ *
+ * Return value: %TRUE if @self is running in background and
+ *   %FALSE if it is running as standalone application.
+ */
 gboolean xfdashboard_application_is_daemonized(XfdashboardApplication *self)
 {
 	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATION(self), FALSE);
@@ -1244,7 +1567,17 @@ gboolean xfdashboard_application_is_daemonized(XfdashboardApplication *self)
 	return(self->priv->isDaemon);
 }
 
-/* Get flag if application is suspended or resumed */
+/**
+ * xfdashboard_application_is_suspended:
+ * @self: A #XfdashboardApplication
+ *
+ * Checks if application is suspended, that means it is not visible and
+ * not active.
+ *
+ * Note: This state can only be check when @self is running in daemon mode.
+ *
+ * Return value: %TRUE if @self is suspended and %FALSE if it is resumed.
+ */
 gboolean xfdashboard_application_is_suspended(XfdashboardApplication *self)
 {
 	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATION(self), FALSE);
@@ -1252,7 +1585,14 @@ gboolean xfdashboard_application_is_suspended(XfdashboardApplication *self)
 	return(self->priv->isSuspended);
 }
 
-/* Get flag if application is going to quit */
+/**
+ * xfdashboard_application_is_quitting:
+ * @self: A #XfdashboardApplication
+ *
+ * Checks if application is in progress to quit.
+ *
+ * Return value: %TRUE if @self is going to quit, otherwise %FALSE.
+ */
 gboolean xfdashboard_application_is_quitting(XfdashboardApplication *self)
 {
 	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATION(self), FALSE);
@@ -1260,7 +1600,15 @@ gboolean xfdashboard_application_is_quitting(XfdashboardApplication *self)
 	return(self->priv->isQuitting);
 }
 
-/* Resume application */
+/**
+ * xfdashboard_application_resume:
+ * @self: A #XfdashboardApplication or %NULL
+ *
+ * Resumes @self from suspended state, brings it to foreground
+ * and activates it.
+ *
+ * If @self is %NULL the default singleton is used if it was created.
+ */
 void xfdashboard_application_resume(XfdashboardApplication *self)
 {
 	g_return_if_fail(self==NULL || XFDASHBOARD_IS_APPLICATION(self));
@@ -1275,7 +1623,16 @@ void xfdashboard_application_resume(XfdashboardApplication *self)
 	}
 }
 
-/* Quit application */
+/**
+ * xfdashboard_application_suspend_or_quit:
+ * @self: A #XfdashboardApplication or %NULL
+ *
+ * Quits @self if running as standalone application or suspends @self
+ * if runnning if running in daemon mode. Suspending application means
+ * to hide application window and send it to background.
+ *
+ * If @self is %NULL the default singleton is used if it was created.
+ */
 void xfdashboard_application_suspend_or_quit(XfdashboardApplication *self)
 {
 	g_return_if_fail(self==NULL || XFDASHBOARD_IS_APPLICATION(self));
@@ -1290,6 +1647,16 @@ void xfdashboard_application_suspend_or_quit(XfdashboardApplication *self)
 	}
 }
 
+/**
+ * xfdashboard_application_quit_forced:
+ * @self: A #XfdashboardApplication or %NULL
+ *
+ * Quits @self regardless if it is running as standalone application
+ * or in daemon mode. The application is really quitted after calling
+ * this function.
+ *
+ * If @self is %NULL the default singleton is used if it was created.
+ */
 void xfdashboard_application_quit_forced(XfdashboardApplication *self)
 {
 	g_return_if_fail(self==NULL || XFDASHBOARD_IS_APPLICATION(self));
@@ -1311,26 +1678,50 @@ void xfdashboard_application_quit_forced(XfdashboardApplication *self)
 	}
 }
 
-/* Get xfconf channel for this application */
-XfconfChannel* xfdashboard_application_get_xfconf_channel(XfdashboardApplication *self)
+/**
+ * xfdashboard_application_get_stage:
+ * @self: A #XfdashboardApplication or %NULL
+ *
+ * Retrieve #XfdashboardStage of @self.
+ *
+ * If @self is %NULL the default singleton is used if it was created.
+ *
+ * Return value: (transfer none): The #XfdashboardStage of application at @self.
+ */
+XfdashboardStage* xfdashboard_application_get_stage(XfdashboardApplication *self)
 {
-	XfconfChannel			*channel=NULL;
+	XfdashboardStage		*stage;
 
 	g_return_val_if_fail(self==NULL || XFDASHBOARD_IS_APPLICATION(self), NULL);
+
+	stage=NULL;
 
 	/* Get default single instance if NULL is requested */
 	if(!self) self=_xfdashboard_application;
 
 	/* Get xfconf channel */
-	if(G_LIKELY(self)) channel=self->priv->xfconfChannel;
+	if(G_LIKELY(self)) stage=self->priv->stage;
 
-	return(channel);
+	return(stage);
 }
 
-/* Get current theme used */
+/**
+ * xfdashboard_application_get_theme:
+ * @self: A #XfdashboardApplication or %NULL
+ *
+ * Retrieve the current #XfdashboardTheme of @self.
+ *
+ * If @self is %NULL the default singleton is used if it was created.
+ *
+ * Return value: (transfer none): The current #XfdashboardTheme of application at @self.
+ */
 XfdashboardTheme* xfdashboard_application_get_theme(XfdashboardApplication *self)
 {
-	XfdashboardTheme		*theme=NULL;
+	XfdashboardTheme		*theme;
+
+	g_return_val_if_fail(self==NULL || XFDASHBOARD_IS_APPLICATION(self), NULL);
+
+	theme=NULL;
 
 	/* Get default single instance if NULL is requested */
 	if(!self) self=_xfdashboard_application;
@@ -1339,4 +1730,32 @@ XfdashboardTheme* xfdashboard_application_get_theme(XfdashboardApplication *self
 	if(G_LIKELY(self)) theme=self->priv->theme;
 
 	return(theme);
+}
+
+/**
+ * xfdashboard_application_get_xfconf_channel:
+ * @self: A #XfdashboardApplication or %NULL
+ *
+ * Retrieve the #XfconfChannel of @self used to query or modify settings stored
+ * in Xfconf.
+ *
+ * If @self is %NULL the default singleton is used if it was created.
+ *
+ * Return value: (transfer none): The current #XfconfChannel of application at @self.
+ */
+XfconfChannel* xfdashboard_application_get_xfconf_channel(XfdashboardApplication *self)
+{
+	XfconfChannel			*channel;
+
+	g_return_val_if_fail(self==NULL || XFDASHBOARD_IS_APPLICATION(self), NULL);
+
+	channel=NULL;
+
+	/* Get default single instance if NULL is requested */
+	if(!self) self=_xfdashboard_application;
+
+	/* Get xfconf channel */
+	if(G_LIKELY(self)) channel=self->priv->xfconfChannel;
+
+	return(channel);
 }

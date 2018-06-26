@@ -6,7 +6,15 @@
 
 G_BEGIN_DECLS
 
-/* VOID:FLOAT,FLOAT (marshal.list:1) */
+/* VOID:FLAGS,FLAGS (marshal.list:1) */
+extern void _xfdashboard_marshal_VOID__FLAGS_FLAGS (GClosure     *closure,
+                                                    GValue       *return_value,
+                                                    guint         n_param_values,
+                                                    const GValue *param_values,
+                                                    gpointer      invocation_hint,
+                                                    gpointer      marshal_data);
+
+/* VOID:FLOAT,FLOAT (marshal.list:2) */
 extern void _xfdashboard_marshal_VOID__FLOAT_FLOAT (GClosure     *closure,
                                                     GValue       *return_value,
                                                     guint         n_param_values,
@@ -14,21 +22,13 @@ extern void _xfdashboard_marshal_VOID__FLOAT_FLOAT (GClosure     *closure,
                                                     gpointer      invocation_hint,
                                                     gpointer      marshal_data);
 
-/* VOID:INT,INT (marshal.list:2) */
+/* VOID:INT,INT (marshal.list:3) */
 extern void _xfdashboard_marshal_VOID__INT_INT (GClosure     *closure,
                                                 GValue       *return_value,
                                                 guint         n_param_values,
                                                 const GValue *param_values,
                                                 gpointer      invocation_hint,
                                                 gpointer      marshal_data);
-
-/* VOID:INT,INT,INT,INT (marshal.list:3) */
-extern void _xfdashboard_marshal_VOID__INT_INT_INT_INT (GClosure     *closure,
-                                                        GValue       *return_value,
-                                                        guint         n_param_values,
-                                                        const GValue *param_values,
-                                                        gpointer      invocation_hint,
-                                                        gpointer      marshal_data);
 
 /* VOID:OBJECT,OBJECT (marshal.list:4) */
 extern void _xfdashboard_marshal_VOID__OBJECT_OBJECT (GClosure     *closure,
@@ -86,23 +86,15 @@ extern void _xfdashboard_marshal_BOOLEAN__OBJECT_FLOAT_FLOAT (GClosure     *clos
                                                               gpointer      invocation_hint,
                                                               gpointer      marshal_data);
 
-/* BOOLEAN:OBJECT,STRING,OBJECT (marshal.list:11) */
-extern void _xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT (GClosure     *closure,
-                                                                GValue       *return_value,
-                                                                guint         n_param_values,
-                                                                const GValue *param_values,
-                                                                gpointer      invocation_hint,
-                                                                gpointer      marshal_data);
+/* BOOLEAN:OBJECT,STRING,BOXED (marshal.list:11) */
+extern void _xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED (GClosure     *closure,
+                                                               GValue       *return_value,
+                                                               guint         n_param_values,
+                                                               const GValue *param_values,
+                                                               gpointer      invocation_hint,
+                                                               gpointer      marshal_data);
 
-/* BOOLEAN:VOID (marshal.list:12) */
-extern void _xfdashboard_marshal_BOOLEAN__VOID (GClosure     *closure,
-                                                GValue       *return_value,
-                                                guint         n_param_values,
-                                                const GValue *param_values,
-                                                gpointer      invocation_hint,
-                                                gpointer      marshal_data);
-
-/* OBJECT:VOID (marshal.list:13) */
+/* OBJECT:VOID (marshal.list:12) */
 extern void _xfdashboard_marshal_OBJECT__VOID (GClosure     *closure,
                                                GValue       *return_value,
                                                guint         n_param_values,

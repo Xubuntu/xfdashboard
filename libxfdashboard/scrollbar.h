@@ -1,7 +1,7 @@
 /*
  * scrollbar: A scroll bar
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ typedef struct _XfdashboardScrollbarClass		XfdashboardScrollbarClass;
 
 struct _XfdashboardScrollbar
 {
+	/*< private >*/
 	/* Parent instance */
 	XfdashboardBackground			parent_instance;
 

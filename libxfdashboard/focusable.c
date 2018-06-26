@@ -3,7 +3,7 @@
  *            managed by focus manager for keyboard navigation and
  *            selection handling
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@
 #include <libxfdashboard/focus-manager.h>
 #include <libxfdashboard/application.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this interface in GObject system */
@@ -65,7 +66,11 @@ enum
 	ACTION_SELECTION_MOVE_PAGE_RIGHT,
 	ACTION_SELECTION_MOVE_PAGE_UP,
 	ACTION_SELECTION_MOVE_PAGE_DOWN,
+	ACTION_SELECTION_MOVE_NEXT,
+	ACTION_SELECTION_MOVE_PREVIOUS,
 	ACTION_SELECTION_ACTIVATE,
+
+	ACTION_FOCUS_MOVE_TO,
 
 	SIGNAL_LAST
 };
@@ -320,6 +325,57 @@ static gboolean _xfdashboard_focusable_selection_move_last(XfdashboardFocusable 
 	return(_xfdashboard_focusable_selection_move_to_direction(self, inSource, inAction, inEvent, XFDASHBOARD_SELECTION_TARGET_LAST));
 }
 
+static gboolean _xfdashboard_focusable_selection_move_next(XfdashboardFocusable *self,
+															XfdashboardFocusable *inSource,
+															const gchar *inAction,
+															ClutterEvent *inEvent)
+{
+	return(_xfdashboard_focusable_selection_move_to_direction(self, inSource, inAction, inEvent, XFDASHBOARD_SELECTION_TARGET_NEXT));
+}
+
+static gboolean _xfdashboard_focusable_selection_move_previous(XfdashboardFocusable *self,
+																XfdashboardFocusable *inSource,
+																const gchar *inAction,
+																ClutterEvent *inEvent)
+{
+	ClutterActor				*currentSelection;
+	ClutterActor				*iter;
+	ClutterActor				*lastSelection;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(self), CLUTTER_EVENT_PROPAGATE);
+	g_return_val_if_fail(inEvent, CLUTTER_EVENT_PROPAGATE);
+
+	/* Check for key press or release event */
+	if(clutter_event_type(inEvent)!=CLUTTER_KEY_PRESS &&
+		clutter_event_type(inEvent)!=CLUTTER_KEY_RELEASE)
+	{
+		return(CLUTTER_EVENT_PROPAGATE);
+	}
+
+	/* If focusable actor does not support selections return here with event unhandled */
+	if(!xfdashboard_focusable_supports_selection(self)) return(CLUTTER_EVENT_PROPAGATE);
+
+	/* Find selection just before the current one */
+	currentSelection=xfdashboard_focusable_get_selection(self);
+
+	iter=xfdashboard_focusable_find_selection(self, currentSelection, XFDASHBOARD_SELECTION_TARGET_FIRST);
+	lastSelection=iter;
+	if(currentSelection)
+	{
+		while(iter && iter!=currentSelection)
+		{
+			lastSelection=iter;
+			iter=xfdashboard_focusable_find_selection(self, iter, XFDASHBOARD_SELECTION_TARGET_NEXT);
+		};
+	}
+
+	/* Set new selection */
+	if(lastSelection) xfdashboard_focusable_set_selection(self, lastSelection);
+
+	/* All done so return and stop further processing of this action */
+	return(CLUTTER_EVENT_STOP);
+}
+
 static gboolean _xfdashboard_focusable_selection_move_page_left(XfdashboardFocusable *self,
 																XfdashboardFocusable *inSource,
 																const gchar *inAction,
@@ -376,6 +432,23 @@ static gboolean _xfdashboard_focusable_selection_activate(XfdashboardFocusable *
 	return(CLUTTER_EVENT_STOP);
 }
 
+/* Action signal to move focus to this focusable actor was emitted */
+static gboolean _xfdashboard_focusable_focus_move_to(XfdashboardFocusable *self,
+															XfdashboardFocusable *inSource,
+															const gchar *inAction,
+															ClutterEvent *inEvent)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(self), CLUTTER_EVENT_PROPAGATE);
+	g_return_val_if_fail(inEvent, CLUTTER_EVENT_PROPAGATE);
+
+	/* Move focus to this focuables actor */
+	xfdashboard_focusable_move_focus_to(self);
+
+	/* All done so return and stop further processing of this event */
+	return(CLUTTER_EVENT_STOP);
+}
+
+
 /* IMPLEMENTATION: GObject */
 
 /* Interface initialization
@@ -399,11 +472,14 @@ void xfdashboard_focusable_default_init(XfdashboardFocusableInterface *iface)
 	iface->selection_move_down=_xfdashboard_focusable_selection_move_down;
 	iface->selection_move_first=_xfdashboard_focusable_selection_move_first;
 	iface->selection_move_last=_xfdashboard_focusable_selection_move_last;
+	iface->selection_move_next=_xfdashboard_focusable_selection_move_next;
+	iface->selection_move_previous=_xfdashboard_focusable_selection_move_previous;
 	iface->selection_move_page_left=_xfdashboard_focusable_selection_move_page_left;
 	iface->selection_move_page_right=_xfdashboard_focusable_selection_move_page_right;
 	iface->selection_move_page_up=_xfdashboard_focusable_selection_move_page_up;
 	iface->selection_move_page_down=_xfdashboard_focusable_selection_move_page_down;
 	iface->selection_activate=_xfdashboard_focusable_selection_activate;
+	iface->focus_move_to=_xfdashboard_focusable_focus_move_to;
 
 	/* Define signals and actions */
 	if(!initialized)
@@ -454,7 +530,7 @@ void xfdashboard_focusable_default_init(XfdashboardFocusableInterface *iface)
 							G_STRUCT_OFFSET(XfdashboardFocusableInterface, selection_move_left),
 							g_signal_accumulator_true_handled,
 							NULL,
-							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 							G_TYPE_BOOLEAN,
 							3,
 							XFDASHBOARD_TYPE_FOCUSABLE,
@@ -468,7 +544,7 @@ void xfdashboard_focusable_default_init(XfdashboardFocusableInterface *iface)
 							G_STRUCT_OFFSET(XfdashboardFocusableInterface, selection_move_right),
 							g_signal_accumulator_true_handled,
 							NULL,
-							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 							G_TYPE_BOOLEAN,
 							3,
 							XFDASHBOARD_TYPE_FOCUSABLE,
@@ -482,7 +558,7 @@ void xfdashboard_focusable_default_init(XfdashboardFocusableInterface *iface)
 							G_STRUCT_OFFSET(XfdashboardFocusableInterface, selection_move_up),
 							g_signal_accumulator_true_handled,
 							NULL,
-							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 							G_TYPE_BOOLEAN,
 							3,
 							XFDASHBOARD_TYPE_FOCUSABLE,
@@ -496,7 +572,7 @@ void xfdashboard_focusable_default_init(XfdashboardFocusableInterface *iface)
 							G_STRUCT_OFFSET(XfdashboardFocusableInterface, selection_move_down),
 							g_signal_accumulator_true_handled,
 							NULL,
-							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 							G_TYPE_BOOLEAN,
 							3,
 							XFDASHBOARD_TYPE_FOCUSABLE,
@@ -510,7 +586,7 @@ void xfdashboard_focusable_default_init(XfdashboardFocusableInterface *iface)
 							G_STRUCT_OFFSET(XfdashboardFocusableInterface, selection_move_first),
 							g_signal_accumulator_true_handled,
 							NULL,
-							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 							G_TYPE_BOOLEAN,
 							3,
 							XFDASHBOARD_TYPE_FOCUSABLE,
@@ -524,7 +600,7 @@ void xfdashboard_focusable_default_init(XfdashboardFocusableInterface *iface)
 							G_STRUCT_OFFSET(XfdashboardFocusableInterface, selection_move_last),
 							g_signal_accumulator_true_handled,
 							NULL,
-							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 							G_TYPE_BOOLEAN,
 							3,
 							XFDASHBOARD_TYPE_FOCUSABLE,
@@ -538,7 +614,7 @@ void xfdashboard_focusable_default_init(XfdashboardFocusableInterface *iface)
 							G_STRUCT_OFFSET(XfdashboardFocusableInterface, selection_move_page_left),
 							g_signal_accumulator_true_handled,
 							NULL,
-							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 							G_TYPE_BOOLEAN,
 							3,
 							XFDASHBOARD_TYPE_FOCUSABLE,
@@ -552,7 +628,7 @@ void xfdashboard_focusable_default_init(XfdashboardFocusableInterface *iface)
 							G_STRUCT_OFFSET(XfdashboardFocusableInterface, selection_move_page_right),
 							g_signal_accumulator_true_handled,
 							NULL,
-							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 							G_TYPE_BOOLEAN,
 							3,
 							XFDASHBOARD_TYPE_FOCUSABLE,
@@ -566,7 +642,7 @@ void xfdashboard_focusable_default_init(XfdashboardFocusableInterface *iface)
 							G_STRUCT_OFFSET(XfdashboardFocusableInterface, selection_move_page_up),
 							g_signal_accumulator_true_handled,
 							NULL,
-							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 							G_TYPE_BOOLEAN,
 							3,
 							XFDASHBOARD_TYPE_FOCUSABLE,
@@ -580,7 +656,35 @@ void xfdashboard_focusable_default_init(XfdashboardFocusableInterface *iface)
 							G_STRUCT_OFFSET(XfdashboardFocusableInterface, selection_move_page_down),
 							g_signal_accumulator_true_handled,
 							NULL,
-							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
+							G_TYPE_BOOLEAN,
+							3,
+							XFDASHBOARD_TYPE_FOCUSABLE,
+							G_TYPE_STRING,
+							CLUTTER_TYPE_EVENT);
+
+		XfdashboardFocusableSignals[ACTION_SELECTION_MOVE_NEXT]=
+			g_signal_new("selection-move-next",
+							XFDASHBOARD_TYPE_FOCUSABLE,
+							G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+							G_STRUCT_OFFSET(XfdashboardFocusableInterface, selection_move_next),
+							g_signal_accumulator_true_handled,
+							NULL,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
+							G_TYPE_BOOLEAN,
+							3,
+							XFDASHBOARD_TYPE_FOCUSABLE,
+							G_TYPE_STRING,
+							CLUTTER_TYPE_EVENT);
+
+		XfdashboardFocusableSignals[ACTION_SELECTION_MOVE_PREVIOUS]=
+			g_signal_new("selection-move-previous",
+							XFDASHBOARD_TYPE_FOCUSABLE,
+							G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+							G_STRUCT_OFFSET(XfdashboardFocusableInterface, selection_move_previous),
+							g_signal_accumulator_true_handled,
+							NULL,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 							G_TYPE_BOOLEAN,
 							3,
 							XFDASHBOARD_TYPE_FOCUSABLE,
@@ -594,7 +698,21 @@ void xfdashboard_focusable_default_init(XfdashboardFocusableInterface *iface)
 							G_STRUCT_OFFSET(XfdashboardFocusableInterface, selection_activate),
 							g_signal_accumulator_true_handled,
 							NULL,
-							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_OBJECT,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
+							G_TYPE_BOOLEAN,
+							3,
+							XFDASHBOARD_TYPE_FOCUSABLE,
+							G_TYPE_STRING,
+							CLUTTER_TYPE_EVENT);
+
+		XfdashboardFocusableSignals[ACTION_FOCUS_MOVE_TO]=
+			g_signal_new("focus-move-to",
+							XFDASHBOARD_TYPE_FOCUSABLE,
+							G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+							G_STRUCT_OFFSET(XfdashboardFocusableInterface, focus_move_to),
+							g_signal_accumulator_true_handled,
+							NULL,
+							_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED,
 							G_TYPE_BOOLEAN,
 							3,
 							XFDASHBOARD_TYPE_FOCUSABLE,
@@ -668,14 +786,17 @@ void xfdashboard_focusable_set_focus(XfdashboardFocusable *self)
 			xfdashboard_stylable_add_pseudo_class(XFDASHBOARD_STYLABLE(selection), "selected");
 		}
 
-		g_debug("Set selection to %s for focused actor %s",
-				G_OBJECT_TYPE_NAME(self),
-				selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>");
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Set selection to %s for focused actor %s",
+							G_OBJECT_TYPE_NAME(self),
+							selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>");
 	}
 
 	/* Emit signal */
 	g_signal_emit(self, XfdashboardFocusableSignals[SIGNAL_FOCUS_GAINED], 0, self);
-	g_debug("Emitted signal 'focus-gained' for focused actor %s", G_OBJECT_TYPE_NAME(self));
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Emitted signal 'focus-gained' for focused actor %s",
+						G_OBJECT_TYPE_NAME(self));
 }
 
 /* Call virtual function "unset_focus" */
@@ -713,14 +834,17 @@ void xfdashboard_focusable_unset_focus(XfdashboardFocusable *self)
 			xfdashboard_stylable_remove_pseudo_class(XFDASHBOARD_STYLABLE(selection), "selected");
 		}
 
-		g_debug("Unstyled selection %s for focus loosing actor %s",
-				G_OBJECT_TYPE_NAME(self),
-				selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>");
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Unstyled selection %s for focus loosing actor %s",
+							G_OBJECT_TYPE_NAME(self),
+							selection ? G_OBJECT_TYPE_NAME(selection) : "<nil>");
 	}
 
 	/* Emit signal */
 	g_signal_emit(self, XfdashboardFocusableSignals[SIGNAL_FOCUS_LOST], 0, self);
-	g_debug("Emitted signal 'focus-lost' for focused actor %s", G_OBJECT_TYPE_NAME(self));
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Emitted signal 'focus-lost' for focused actor %s",
+						G_OBJECT_TYPE_NAME(self));
 }
 
 /* Call virtual function "supports_selection" */
@@ -904,4 +1028,31 @@ gboolean xfdashboard_focusable_activate_selection(XfdashboardFocusable *self, Cl
 	/* If we get here the virtual function was not overridden */
 	XFDASHBOARD_FOCUSABLE_WARN_NOT_IMPLEMENTED(self, "activate_selection");
 	return(FALSE);
+}
+
+/* Move focus to this focusable actor */
+gboolean xfdashboard_focusable_move_focus_to(XfdashboardFocusable *self)
+{
+	XfdashboardFocusManager		*focusManager;
+	gboolean					success;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_FOCUSABLE(self), FALSE);
+
+	success=FALSE;
+
+	/* Check if this focusable actor can get focus */
+	if(!xfdashboard_focusable_can_focus(self)) return(FALSE);
+
+	/* Get focus manager to change focus */
+	focusManager=xfdashboard_focus_manager_get_default();
+
+	/* Try to move focus to this focusable actor and check success */
+	xfdashboard_focus_manager_set_focus(focusManager, self);
+	if(xfdashboard_focus_manager_get_focus(focusManager)==self) success=TRUE;
+
+	/* Release allocated resources */
+	g_object_unref(focusManager);
+
+	/* Return success result to move focus */
+	return(success);
 }

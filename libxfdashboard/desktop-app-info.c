@@ -2,7 +2,7 @@
  * desktop-app-info: A GDesktopAppInfo like object for garcon menu
  *                   items implementing and supporting GAppInfo
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #include <libxfdashboard/desktop-app-info.h>
 #include <libxfdashboard/application-database.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -626,7 +627,10 @@ static gboolean _xfdashboard_desktop_app_info_launch_appinfo_internal(Xfdashboar
 	{
 		GDBusConnection							*sessionBus;
 
-		g_debug("Launching %s succeeded with PID %ld.", garcon_menu_item_get_name(priv->item), (long)launchedPID);
+		XFDASHBOARD_DEBUG(self, APPLICATIONS,
+							"Launching %s succeeded with PID %ld.",
+							garcon_menu_item_get_name(priv->item),
+							(long)launchedPID);
 
 		/* Open connection to DBUS session bus and send notification about
 		 * successful launch of application. Then flush and close DBUS
@@ -1026,8 +1030,8 @@ static gboolean _xfdashboard_desktop_app_info_gappinfo_should_show(GAppInfo *inA
 	/* If desktop app info has no item return FALSE here */
 	if(!priv->item) return(FALSE);
 
-	/* Check if menu item should be shown in current environment */
-	return(garcon_menu_item_get_show_in_environment(priv->item));
+	/* Check if menu item is visible and therefore can be shown */
+	return(garcon_menu_element_get_visible(GARCON_MENU_ELEMENT(priv->item)));
 }
 
 /* Get command-line of GAppInfo with which the application will be started */
@@ -1274,7 +1278,6 @@ GAppInfo* xfdashboard_desktop_app_info_new_from_desktop_id(const gchar *inDeskto
 		g_warning(_("Desktop ID '%s' not found"), inDesktopID);
 		return(NULL);
 	}
-	g_debug("Found desktop file '%s' for desktop ID '%s'", desktopFilename, inDesktopID);
 
 	/* Create this class instance for desktop file found */
 	file=g_file_new_for_path(desktopFilename);
@@ -1282,6 +1285,11 @@ GAppInfo* xfdashboard_desktop_app_info_new_from_desktop_id(const gchar *inDeskto
 														"desktop-id", inDesktopID,
 														"file", file,
 														NULL));
+	XFDASHBOARD_DEBUG(instance, APPLICATIONS,
+						"Created %s desktop file '%s' for desktop ID '%s'",
+						G_OBJECT_TYPE_NAME(instance),
+						desktopFilename,
+						inDesktopID);
 	if(file) g_object_unref(file);
 
 	/* Release allocated resources */
@@ -1359,46 +1367,6 @@ gboolean xfdashboard_desktop_app_info_is_valid(XfdashboardDesktopAppInfo *self)
 	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self), FALSE);
 
 	return(self->priv->isValid);
-}
-
-/* Determine if desktop app info is hidden */
-gboolean xfdashboard_desktop_app_info_get_hidden(XfdashboardDesktopAppInfo *self)
-{
-	XfdashboardDesktopAppInfoPrivate	*priv;
-	gboolean							isHidden;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self), TRUE);
-
-	priv=self->priv;
-	isHidden=TRUE;
-
-	/* If a menu item exists get hidden state from it  */
-	if(priv->item)
-	{
-		isHidden=garcon_menu_item_get_hidden(priv->item);
-	}
-
-	return(isHidden);
-}
-
-/* Get "NoDisplay" value of desktop app info */
-gboolean xfdashboard_desktop_app_info_get_nodisplay(XfdashboardDesktopAppInfo *self)
-{
-	XfdashboardDesktopAppInfoPrivate	*priv;
-	gboolean							noDisplay;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self), TRUE);
-
-	priv=self->priv;
-	noDisplay=TRUE;
-
-	/* If a menu item exists get "NoDisplay" value from it */
-	if(priv->item)
-	{
-		noDisplay=garcon_menu_item_get_no_display(priv->item);
-	}
-
-	return(noDisplay);
 }
 
 /* Get file of desktop app info */

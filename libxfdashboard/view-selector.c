@@ -1,7 +1,7 @@
 /*
  * view-selector: A selector for registered views
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -172,7 +172,7 @@ static void _xfdashboard_view_selector_on_view_icon_changed(XfdashboardView *inV
 	g_return_if_fail(XFDASHBOARD_IS_TOGGLE_BUTTON(inUserData));
 
 	button=XFDASHBOARD_BUTTON(inUserData);
-	xfdashboard_button_set_icon_name(button, xfdashboard_view_get_icon(inView));
+	xfdashboard_label_set_icon_name(XFDASHBOARD_LABEL(button), xfdashboard_view_get_icon(inView));
 }
 
 /* Called when the name of a view has changed */
@@ -208,7 +208,7 @@ static void _xfdashboard_view_selector_on_view_added(XfdashboardViewSelector *se
 	viewName=g_markup_printf_escaped("%s", xfdashboard_view_get_name(inView));
 	viewIcon=xfdashboard_view_get_icon(inView);
 
-	button=xfdashboard_toggle_button_new_full(viewIcon, viewName);
+	button=xfdashboard_toggle_button_new_full_with_icon_name(viewIcon, viewName);
 	xfdashboard_toggle_button_set_auto_toggle(XFDASHBOARD_TOGGLE_BUTTON(button), FALSE);
 	g_object_set_data(G_OBJECT(button), "view", inView);
 	g_signal_connect_swapped(button, "clicked", G_CALLBACK(_xfdashboard_view_selector_on_view_button_clicked), self);
@@ -471,7 +471,6 @@ static void xfdashboard_view_selector_init(XfdashboardViewSelector *self)
 
 /* IMPLEMENTATION: Public API */
 
-/* Create new instance */
 /**
  * xfdashboard_view_selector_new:
  *
@@ -503,7 +502,7 @@ ClutterActor* xfdashboard_view_selector_new(void)
  *   viewSelector=xfdashboard_view_selector_new();
  *   xfdashboard_view_selector_set_viewpad(XFDASHBOARD_VIEW_SELECTOR(viewSelector), viewpad);
  * ]|
-
+ *
  * Return value: The newly created #XfdashboardViewSelector
  */
 ClutterActor* xfdashboard_view_selector_new_for_viewpad(XfdashboardViewpad *inViewpad)
@@ -513,7 +512,6 @@ ClutterActor* xfdashboard_view_selector_new_for_viewpad(XfdashboardViewpad *inVi
 										NULL)));
 }
 
-/* Get/set viewpad */
 /**
  * xfdashboard_view_selector_get_viewpad:
  * @self: A #XfdashboardViewSelector
@@ -581,7 +579,6 @@ void xfdashboard_view_selector_set_viewpad(XfdashboardViewSelector *self, Xfdash
 	g_object_notify_by_pspec(G_OBJECT(self), XfdashboardViewSelectorProperties[PROP_VIEWPAD]);
 }
 
-/* Get/set spacing */
 /**
  * xfdashboard_view_selector_get_spacing:
  * @self: A #XfdashboardViewSelector
@@ -626,7 +623,6 @@ void xfdashboard_view_selector_set_spacing(XfdashboardViewSelector *self, gfloat
 	g_object_notify_by_pspec(G_OBJECT(self), XfdashboardViewSelectorProperties[PROP_SPACING]);
 }
 
-/* Get/set orientation */
 /**
  * xfdashboard_view_selector_get_orientation:
  * @self: A #XfdashboardViewSelector

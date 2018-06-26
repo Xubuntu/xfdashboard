@@ -1,7 +1,7 @@
 /*
  * search-view: A view showing applications matching search criterias
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,27 @@
  * 
  */
 
+/**
+ * SECTION:search-view
+ * @short_description: A view showing results for a search of requested search terms
+ * @include: xfdashboard/search-view.h
+ *
+ * This view #XfdashboardSearchView is a view used to show the results of a search.
+ * It requests all registered and enabled search providers to return a result set
+ * for the search term provided with xfdashboard_search_view_update_search(). For
+ * each item in the result set this view will requests an actor at the associated
+ * search provider to display that result item.
+ *
+ * To clear the results and to stop further searches the function
+ * xfdashboard_search_view_reset_search() should be called. Usually the application
+ * will also switch back to active view before the search was started.
+ *
+ * <note><para>
+ * This view is an internal view and registered by the core of the application.
+ * You should not register an additional instance of this view at #XfdashboardViewManager.
+ * </para></note>
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -38,6 +59,7 @@
 #include <libxfdashboard/enums.h>
 #include <libxfdashboard/application.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -324,9 +346,10 @@ static XfdashboardSearchViewProviderData* _xfdashboard_search_view_get_provider_
 	if(!container)
 	{
 		/* Container for requested child was not found */
-		g_debug("Did not find container for actor %p of type %s",
-					inChild,
-					G_OBJECT_TYPE_NAME(inChild));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Did not find container for actor %p of type %s",
+							inChild,
+							G_OBJECT_TYPE_NAME(inChild));
 
 		return(NULL);
 	}
@@ -370,10 +393,11 @@ static void _xfdashboard_search_view_on_search_provider_registered(XfdashboardSe
 		data=_xfdashboard_search_view_provider_data_new(self, inProviderID);
 		priv->providers=g_list_append(priv->providers, data);
 
-		g_debug("Created search provider %s of type %s in %s",
-					xfdashboard_search_provider_get_name(data->provider),
-					G_OBJECT_TYPE_NAME(data->provider),
-					G_OBJECT_TYPE_NAME(self));
+		XFDASHBOARD_DEBUG(self, MISC,
+							"Created search provider %s of type %s in %s",
+							xfdashboard_search_provider_get_name(data->provider),
+							G_OBJECT_TYPE_NAME(data->provider),
+							G_OBJECT_TYPE_NAME(self));
 	}
 		else _xfdashboard_search_view_provider_data_unref(data);
 }
@@ -396,10 +420,11 @@ static void _xfdashboard_search_view_on_search_provider_unregistered(Xfdashboard
 	data=_xfdashboard_search_view_get_provider_data(self, inProviderID);
 	if(data)
 	{
-		g_debug("Unregistering search provider %s of type %s in %s",
-					xfdashboard_search_provider_get_name(data->provider),
-					G_OBJECT_TYPE_NAME(data->provider),
-					G_OBJECT_TYPE_NAME(self));
+		XFDASHBOARD_DEBUG(self, MISC,
+							"Unregistering search provider %s of type %s in %s",
+							xfdashboard_search_provider_get_name(data->provider),
+							G_OBJECT_TYPE_NAME(data->provider),
+							G_OBJECT_TYPE_NAME(self));
 
 		/* Find data of unregistered search provider in list of
 		 * active search providers to remove it from that list.
@@ -591,11 +616,12 @@ static void _xfdashboard_search_view_on_provider_container_destroyed(ClutterActo
 		 * new selection found and will be set.
 		 */
 		oldSelection=xfdashboard_focusable_get_selection(XFDASHBOARD_FOCUSABLE(self));
-		g_debug("Container of provider %s is destroyed but holds current selection %p of type %s - so selecting %p of type %s of provider %s",
-					providerData->provider ? G_OBJECT_TYPE_NAME(providerData->provider) : "<nil>",
-					oldSelection, oldSelection ? G_OBJECT_TYPE_NAME(oldSelection) : "<nil>",
-					newSelection, newSelection ? G_OBJECT_TYPE_NAME(newSelection) : "<nil>",
-					newSelectionProvider && newSelectionProvider->provider ? G_OBJECT_TYPE_NAME(newSelectionProvider->provider) : "<nil>");
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Container of provider %s is destroyed but holds current selection %p of type %s - so selecting %p of type %s of provider %s",
+							providerData->provider ? G_OBJECT_TYPE_NAME(providerData->provider) : "<nil>",
+							oldSelection, oldSelection ? G_OBJECT_TYPE_NAME(oldSelection) : "<nil>",
+							newSelection, newSelection ? G_OBJECT_TYPE_NAME(newSelection) : "<nil>",
+							newSelectionProvider && newSelectionProvider->provider ? G_OBJECT_TYPE_NAME(newSelectionProvider->provider) : "<nil>");
 
 		xfdashboard_focusable_set_selection(XFDASHBOARD_FOCUSABLE(self), newSelection);
 	}
@@ -826,10 +852,11 @@ static guint _xfdashboard_search_view_perform_search(XfdashboardSearchView *self
 		providerNewResultSet=xfdashboard_search_provider_get_result_set(providerData->provider,
 																		(const gchar**)inSearchTerms->termList,
 																		providerLastResultSet);
-		g_debug("Performed %s search at search provider %s and got %u result items",
-					canDoIncrementalSearch==TRUE ? "incremental" : "full",
-					G_OBJECT_TYPE_NAME(providerData->provider),
-					providerNewResultSet ? xfdashboard_search_result_set_get_size(providerNewResultSet) : 0);
+		XFDASHBOARD_DEBUG(self, MISC,
+							"Performed %s search at search provider %s and got %u result items",
+							canDoIncrementalSearch==TRUE ? "incremental" : "full",
+							G_OBJECT_TYPE_NAME(providerData->provider),
+							providerNewResultSet ? xfdashboard_search_result_set_get_size(providerNewResultSet) : 0);
 
 		/* Count number of results */
 		if(providerNewResultSet) numberResults+=xfdashboard_search_result_set_get_size(providerNewResultSet);
@@ -853,7 +880,10 @@ static guint _xfdashboard_search_view_perform_search(XfdashboardSearchView *self
 
 #ifdef DEBUG
 	/* Get time for this search for debug performance */
-	g_debug("Updating search for '%s' took %f seconds", inSearchTerms->termString, g_timer_elapsed(timer, NULL));
+	XFDASHBOARD_DEBUG(self, MISC,
+						"Updating search for '%s' took %f seconds",
+						inSearchTerms->termString,
+						g_timer_elapsed(timer, NULL));
 	g_timer_destroy(timer);
 #endif
 
@@ -883,9 +913,10 @@ static guint _xfdashboard_search_view_perform_search(XfdashboardSearchView *self
 
 			/* Set new selection */
 			xfdashboard_focusable_set_selection(XFDASHBOARD_FOCUSABLE(self), selection);
-			g_debug("Reselecting selectable item in direction %d at provider %s as old selection vanished",
-					reselectDirection,
-					xfdashboard_search_provider_get_name(reselectProvider->provider));
+			XFDASHBOARD_DEBUG(self, ACTOR,
+								"Reselecting selectable item in direction %d at provider %s as old selection vanished",
+								reselectDirection,
+								xfdashboard_search_provider_get_name(reselectProvider->provider));
 		}
 	}
 
@@ -1330,9 +1361,10 @@ static ClutterActor* _xfdashboard_search_view_focusable_find_selection(Xfdashboa
 			}
 		}
 
-		g_debug("No selection for %s, so select first selectable actor of provider %s",
-					G_OBJECT_TYPE_NAME(self),
-					newSelectionProvider && newSelectionProvider->provider ? G_OBJECT_TYPE_NAME(newSelectionProvider->provider) : "<unknown provider>");
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"No selection for %s, so select first selectable actor of provider %s",
+							G_OBJECT_TYPE_NAME(self),
+							newSelectionProvider && newSelectionProvider->provider ? G_OBJECT_TYPE_NAME(newSelectionProvider->provider) : "<unknown provider>");
 
 		return(newSelection);
 	}
@@ -1361,9 +1393,10 @@ static ClutterActor* _xfdashboard_search_view_focusable_find_selection(Xfdashboa
 			}
 		}
 
-		g_debug("First selection requested at %s, so select first selectable actor of provider %s",
-					G_OBJECT_TYPE_NAME(self),
-					newSelectionProvider && newSelectionProvider->provider ? G_OBJECT_TYPE_NAME(newSelectionProvider->provider) : "<unknown provider>");
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"First selection requested at %s, so select first selectable actor of provider %s",
+							G_OBJECT_TYPE_NAME(self),
+							newSelectionProvider && newSelectionProvider->provider ? G_OBJECT_TYPE_NAME(newSelectionProvider->provider) : "<unknown provider>");
 
 		return(newSelection);
 	}
@@ -1392,9 +1425,10 @@ static ClutterActor* _xfdashboard_search_view_focusable_find_selection(Xfdashboa
 			}
 		}
 
-		g_debug("Last selection requested at %s, so select last selectable actor of provider %s",
-					G_OBJECT_TYPE_NAME(self),
-					newSelectionProvider && newSelectionProvider->provider ? G_OBJECT_TYPE_NAME(newSelectionProvider->provider) : "<unknown provider>");
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Last selection requested at %s, so select last selectable actor of provider %s",
+							G_OBJECT_TYPE_NAME(self),
+							newSelectionProvider && newSelectionProvider->provider ? G_OBJECT_TYPE_NAME(newSelectionProvider->provider) : "<unknown provider>");
 
 		return(newSelection);
 	}
@@ -1405,17 +1439,19 @@ static ClutterActor* _xfdashboard_search_view_focusable_find_selection(Xfdashboa
 	newSelectionProvider=_xfdashboard_search_view_get_provider_data_by_actor(self, inSelection);
 	if(!newSelectionProvider)
 	{
-		g_debug("Could not find provider for selection %p of type %s",
-					inSelection,
-					inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>");
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Could not find provider for selection %p of type %s",
+							inSelection,
+							inSelection ? G_OBJECT_TYPE_NAME(inSelection) : "<nil>");
 		return(NULL);
 	}
 
 	currentProviderIter=g_list_find(priv->providers, newSelectionProvider);
 	if(!currentProviderIter)
 	{
-		g_debug("Could not find position of provider %s",
-					newSelectionProvider->provider ? G_OBJECT_TYPE_NAME(newSelectionProvider->provider) : "<unknown provider>");
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Could not find position of provider %s",
+							newSelectionProvider->provider ? G_OBJECT_TYPE_NAME(newSelectionProvider->provider) : "<unknown provider>");
 
 		/* Release allocated resources */
 		_xfdashboard_search_view_provider_data_unref(newSelectionProvider);
@@ -1619,6 +1655,13 @@ static void xfdashboard_search_view_class_init(XfdashboardSearchViewClass *klass
 	g_type_class_add_private(klass, sizeof(XfdashboardSearchViewPrivate));
 
 	/* Define signals */
+	/**
+	 * XfdashboardSearchView::search-reset:
+	 * @self: The #XfdashboardSearchView whose search was resetted
+	 *
+	 * The ::search-reset signal is emitted when the current search is cancelled
+	 * and resetted.
+	 */
 	XfdashboardSearchViewSignals[SIGNAL_SEARCH_RESET]=
 		g_signal_new("search-reset",
 						G_TYPE_FROM_CLASS(klass),
@@ -1630,6 +1673,13 @@ static void xfdashboard_search_view_class_init(XfdashboardSearchViewClass *klass
 						G_TYPE_NONE,
 						0);
 
+	/**
+	 * XfdashboardSearchView::search-updated:
+	 * @self: The #XfdashboardSearchView whose search was updated
+	 *
+	 * The ::search-updated signal is emitted each time the search term has changed
+	 * and all search providers have returned their result which are shown by @self.
+	 */
 	XfdashboardSearchViewSignals[SIGNAL_SEARCH_UPDATED]=
 		g_signal_new("search-updated",
 						G_TYPE_FROM_CLASS(klass),
@@ -1704,7 +1754,13 @@ static void xfdashboard_search_view_init(XfdashboardSearchView *self)
 
 /* IMPLEMENTATION: Public API */
 
-/* Reset an ongoing search */
+/**
+ * xfdashboard_search_view_reset_search:
+ * @self: A #XfdashboardSearchView
+ *
+ * Cancels and resets the current search at @self. All results will be cleared
+ * and usually the view switches back to the one before the search was started.
+ */
 void xfdashboard_search_view_reset_search(XfdashboardSearchView *self)
 {
 	XfdashboardSearchViewPrivate	*priv;
@@ -1775,7 +1831,17 @@ void xfdashboard_search_view_reset_search(XfdashboardSearchView *self)
 	g_signal_emit(self, XfdashboardSearchViewSignals[SIGNAL_SEARCH_RESET], 0);
 }
 
-/* Start a new search or update an ongoing one */
+/**
+ * xfdashboard_search_view_update_search:
+ * @self: A #XfdashboardSearchView
+ * @inSearchString: The search term to use for new search or to update current one
+ *
+ * Starts a new search or update the current search at @self with the updated
+ * search terms in @inSearchString. All search providers will be asked to provide
+ * a initial result set for @inSearchString if a new search is started or to
+ * return an updated result set for the new search term in @inSearchString which
+ * are then shown by @self.
+ */
 void xfdashboard_search_view_update_search(XfdashboardSearchView *self, const gchar *inSearchString)
 {
 	XfdashboardSearchViewPrivate				*priv;

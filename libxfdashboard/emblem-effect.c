@@ -1,7 +1,7 @@
 /*
  * emblem-effect: Draws an emblem on top of an actor
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@
 #include <libxfdashboard/image-content.h>
 #include <libxfdashboard/enums.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -135,6 +136,7 @@ static void _xfdashboard_emblem_effect_paint(ClutterEffect *inEffect, ClutterEff
 	ClutterActorBox							textureCoordBox;
 	gfloat									offset;
 	gfloat									oversize;
+	CoglFramebuffer							*framebuffer;
 
 	g_return_if_fail(XFDASHBOARD_IS_EMBLEM_EFFECT(inEffect));
 
@@ -196,8 +198,9 @@ static void _xfdashboard_emblem_effect_paint(ClutterEffect *inEffect, ClutterEff
 	if(actorBox.x2<=actorBox.x1 ||
 		actorBox.y2<=actorBox.y1)
 	{
-		g_debug("Will not draw emblem '%s' because width or height of actor is zero or below after padding was applied.",
-				priv->iconName);
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Will not draw emblem '%s' because width or height of actor is zero or below after padding was applied.",
+							priv->iconName);
 		return;
 	}
 
@@ -309,18 +312,20 @@ static void _xfdashboard_emblem_effect_paint(ClutterEffect *inEffect, ClutterEff
 	if(loadingState!=XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADED_SUCCESSFULLY &&
 		loadingState!=XFDASHBOARD_IMAGE_CONTENT_LOADING_STATE_LOADED_FAILED)
 	{
-		g_debug("Emblem image '%s' is still being loaded at %s",
-				priv->iconName,
-				G_OBJECT_TYPE_NAME(inEffect));
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Emblem image '%s' is still being loaded at %s",
+							priv->iconName,
+							G_OBJECT_TYPE_NAME(inEffect));
 		return;
 	}
 
-	cogl_push_source(priv->pipeline);
-	cogl_rectangle_with_texture_coords(rectangleBox.x1, rectangleBox.y1,
-										rectangleBox.x2, rectangleBox.y2,
-										textureCoordBox.x1, textureCoordBox.y1,
-										textureCoordBox.x2, textureCoordBox.y2);
-	cogl_pop_source();
+	framebuffer=cogl_get_draw_framebuffer();
+	cogl_framebuffer_draw_textured_rectangle(framebuffer,
+												priv->pipeline,
+												rectangleBox.x1, rectangleBox.y1,
+												rectangleBox.x2, rectangleBox.y2,
+												textureCoordBox.x1, textureCoordBox.y1,
+												textureCoordBox.x2, textureCoordBox.y2);
 }
 
 /* IMPLEMENTATION: GObject */

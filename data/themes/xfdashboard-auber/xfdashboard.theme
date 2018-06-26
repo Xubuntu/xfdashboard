@@ -1,11 +1,15 @@
 [Xfdashboard Theme]
 Name=xfdashboard-auber
-Name[es]=xfdashboard-auber
+Name[el]=xfdashboard-auber
+Name[es]=Xfdashboard auber
 Name[fr]=xfdashboard-aube
 Name[lt]=xfdashboard-baklažanas
+Name[pl]=xfdashboard-auber
 Name[sr]=Полетник Аубер
 Comment=Aubergine theme for xfdashboard
-Comment[es]=Tema de color berenjena para xfdashboard
+Comment[ca]=Tema albergínia per a xfdashboard
+Comment[el]=Μελιτζανί θέμα για το xfdashboard
+Comment[es]=Tema de color berenjena para Xfdashboard
 Comment[fr]=Thème Aubergine pour xfdashboard
 Comment[lt]=Baklažaninė xfdashboard tema
 Comment[sr]=Тема полетника Aubergine
@@ -13,5 +17,5 @@ Style=xfdashboard-auber.css
 Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Author=lacios
-Version=0.7.1git.a3d2f91
+Version=0.7.4git.021bf6b
 Screenshot=screenshot-xfdashboard-auber.png

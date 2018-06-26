@@ -2,7 +2,7 @@
  * desktop-app-info: A GDesktopAppInfo like object for garcon menu
  *                   items implementing and supporting GAppInfo
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ typedef struct _XfdashboardDesktopAppInfoPrivate		XfdashboardDesktopAppInfoPriva
 
 struct _XfdashboardDesktopAppInfo
 {
+	/*< private >*/
 	/* Parent instance */
 	GObject								parent_instance;
 
@@ -73,9 +74,6 @@ GAppInfo* xfdashboard_desktop_app_info_new_from_file(GFile *inFile);
 GAppInfo* xfdashboard_desktop_app_info_new_from_menu_item(GarconMenuItem *inMenuItem);
 
 gboolean xfdashboard_desktop_app_info_is_valid(XfdashboardDesktopAppInfo *self);
-
-gboolean xfdashboard_desktop_app_info_get_hidden(XfdashboardDesktopAppInfo *self);
-gboolean xfdashboard_desktop_app_info_get_nodisplay(XfdashboardDesktopAppInfo *self);
 
 GFile* xfdashboard_desktop_app_info_get_file(XfdashboardDesktopAppInfo *self);
 gboolean xfdashboard_desktop_app_info_reload(XfdashboardDesktopAppInfo *self);

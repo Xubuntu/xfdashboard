@@ -1,7 +1,7 @@
 /*
  * stage-interface: A top-level actor for a monitor at stage
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,9 @@
 #include <libxfdashboard/actor.h>
 #include <libxfdashboard/enums.h>
 #include <libxfdashboard/stage.h>
+#include <libxfdashboard/stylable.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -57,6 +59,7 @@ struct _XfdashboardStageInterfacePrivate
 	GBinding								*bindingBackgroundColor;
 
 	guint									geometryChangedID;
+	guint									primaryChangedID;
 };
 
 /* Properties */
@@ -92,11 +95,35 @@ static void _xfdashboard_stage_interface_on_geometry_changed(XfdashboardStageInt
 	clutter_actor_set_position(CLUTTER_ACTOR(self), x, y);
 	clutter_actor_set_size(CLUTTER_ACTOR(self), w, h);
 
-	g_debug("Stage interface moved to %d,%d and resized to %dx%d because %s monitor %d changed geometry",
-				x, y,
-				w, h,
-				xfdashboard_window_tracker_monitor_is_primary(priv->monitor) ? "primary" : "non-primary",
-				xfdashboard_window_tracker_monitor_get_number(priv->monitor));
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Stage interface moved to %d,%d and resized to %dx%d because %s monitor %d changed geometry",
+						x, y,
+						w, h,
+						xfdashboard_window_tracker_monitor_is_primary(priv->monitor) ? "primary" : "non-primary",
+						xfdashboard_window_tracker_monitor_get_number(priv->monitor));
+}
+
+/* Monitor changed primary state */
+static void _xfdashboard_stage_interface_on_primary_changed(XfdashboardStageInterface *self, gpointer inUserData)
+{
+	XfdashboardStageInterfacePrivate	*priv;
+	gboolean							isPrimary;
+
+	g_return_if_fail(XFDASHBOARD_IS_STAGE_INTERFACE(self));
+
+	priv=self->priv;
+
+	/* Get new primary state of monitor */
+	isPrimary=xfdashboard_window_tracker_monitor_is_primary(priv->monitor);
+
+	/* Depending on primary state set CSS class */
+	if(isPrimary) xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(self), "primary-monitor");
+		else xfdashboard_stylable_remove_class(XFDASHBOARD_STYLABLE(self), "primary-monitor");
+
+	XFDASHBOARD_DEBUG(self, ACTOR,
+						"Stage interface changed primary state to %s because of monitor %d",
+						xfdashboard_window_tracker_monitor_is_primary(priv->monitor) ? "primary" : "non-primary",
+						xfdashboard_window_tracker_monitor_get_number(priv->monitor));
 }
 
 /* IMPLEMENTATION: ClutterActor */
@@ -152,6 +179,7 @@ static void _xfdashboard_stage_interface_get_preferred_height(ClutterActor *inAc
 	XfdashboardStageInterface			*self=XFDASHBOARD_STAGE_INTERFACE(inActor);
 	XfdashboardStageInterfacePrivate	*priv=self->priv;
 	gfloat								minHeight, naturalHeight;
+	gint								h;
 	ClutterActor						 *stage;
 
 	/* Set up default values */
@@ -160,7 +188,8 @@ static void _xfdashboard_stage_interface_get_preferred_height(ClutterActor *inAc
 	/* Get monitor size if available otherwise get stage size */
 	if(priv->monitor)
 	{
-		minHeight=naturalHeight=xfdashboard_window_tracker_monitor_get_height(priv->monitor);
+		xfdashboard_window_tracker_monitor_get_geometry(priv->monitor, NULL, NULL, NULL, &h);
+		minHeight=naturalHeight=h;
 	}
 		else
 		{
@@ -181,6 +210,7 @@ static void _xfdashboard_stage_interface_get_preferred_width(ClutterActor *inAct
 	XfdashboardStageInterface			*self=XFDASHBOARD_STAGE_INTERFACE(inActor);
 	XfdashboardStageInterfacePrivate	*priv=self->priv;
 	gfloat								minWidth, naturalWidth;
+	gint								w;
 	ClutterActor						 *stage;
 
 	/* Set up default values */
@@ -189,7 +219,8 @@ static void _xfdashboard_stage_interface_get_preferred_width(ClutterActor *inAct
 	/* Get monitor size if available otherwise get stage size */
 	if(priv->monitor)
 	{
-		minWidth=naturalWidth=xfdashboard_window_tracker_monitor_get_width(priv->monitor);
+		xfdashboard_window_tracker_monitor_get_geometry(priv->monitor, NULL, NULL, &w, NULL);
+		minWidth=naturalWidth=w;
 	}
 		else
 		{
@@ -229,6 +260,12 @@ static void _xfdashboard_stage_interface_dispose(GObject *inObject)
 		{
 			g_signal_handler_disconnect(priv->monitor, priv->geometryChangedID);
 			priv->geometryChangedID=0;
+		}
+
+		if(priv->primaryChangedID)
+		{
+			g_signal_handler_disconnect(priv->monitor, priv->primaryChangedID);
+			priv->primaryChangedID=0;
 		}
 
 		g_object_unref(priv->monitor);
@@ -365,6 +402,7 @@ static void xfdashboard_stage_interface_init(XfdashboardStageInterface *self)
 	/* Set default values */
 	priv->monitor=NULL;
 	priv->geometryChangedID=0;
+	priv->primaryChangedID=0;
 	priv->backgroundType=XFDASHBOARD_STAGE_BACKGROUND_IMAGE_TYPE_NONE;
 	priv->backgroundColor=NULL;
 	priv->bindingBackgroundImageType=NULL;
@@ -411,6 +449,12 @@ void xfdashboard_stage_interface_set_monitor(XfdashboardStageInterface *self, Xf
 				priv->geometryChangedID=0;
 			}
 
+			if(priv->primaryChangedID)
+			{
+				g_signal_handler_disconnect(priv->monitor, priv->primaryChangedID);
+				priv->primaryChangedID=0;
+			}
+
 			g_object_unref(priv->monitor);
 			priv->monitor=NULL;
 		}
@@ -422,9 +466,16 @@ void xfdashboard_stage_interface_set_monitor(XfdashboardStageInterface *self, Xf
 															"geometry-changed",
 															G_CALLBACK(_xfdashboard_stage_interface_on_geometry_changed),
 															self);
+		priv->primaryChangedID=g_signal_connect_swapped(priv->monitor,
+															"primary-changed",
+															G_CALLBACK(_xfdashboard_stage_interface_on_primary_changed),
+															self);
 
 		/* Resize actor to new monitor */
 		_xfdashboard_stage_interface_on_geometry_changed(self, priv->monitor);
+
+		/* Update actor from primary state */
+		_xfdashboard_stage_interface_on_primary_changed(self, priv->monitor);
 
 		/* Notify about property change */
 		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardStageInterfaceProperties[PROP_MONITOR]);

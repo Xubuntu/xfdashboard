@@ -3,7 +3,7 @@
  *            managed by focus manager for keyboard navigation and
  *            selection handling
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,6 +87,14 @@ struct _XfdashboardFocusableInterface
 											XfdashboardFocusable *inSource,
 											const gchar *inAction,
 											ClutterEvent *inEvent);
+	gboolean (*selection_move_next)(XfdashboardFocusable *self,
+											XfdashboardFocusable *inSource,
+											const gchar *inAction,
+											ClutterEvent *inEvent);
+	gboolean (*selection_move_previous)(XfdashboardFocusable *self,
+											XfdashboardFocusable *inSource,
+											const gchar *inAction,
+											ClutterEvent *inEvent);
 	gboolean (*selection_move_page_left)(XfdashboardFocusable *self,
 											XfdashboardFocusable *inSource,
 											const gchar *inAction,
@@ -107,6 +115,11 @@ struct _XfdashboardFocusableInterface
 											XfdashboardFocusable *inSource,
 											const gchar *inAction,
 											ClutterEvent *inEvent);
+
+	gboolean (*focus_move_to)(XfdashboardFocusable *self,
+								XfdashboardFocusable *inSource,
+								const gchar *inAction,
+								ClutterEvent *inEvent);
 };
 
 /* Public API */
@@ -121,6 +134,8 @@ ClutterActor* xfdashboard_focusable_get_selection(XfdashboardFocusable *self);
 gboolean xfdashboard_focusable_set_selection(XfdashboardFocusable *self, ClutterActor *inSelection);
 ClutterActor* xfdashboard_focusable_find_selection(XfdashboardFocusable *self, ClutterActor *inSelection, XfdashboardSelectionTarget inDirection);
 gboolean xfdashboard_focusable_activate_selection(XfdashboardFocusable *self, ClutterActor *inSelection);
+
+gboolean xfdashboard_focusable_move_focus_to(XfdashboardFocusable *self);
 
 G_END_DECLS
 

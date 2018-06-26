@@ -1,7 +1,7 @@
 /*
  * actor: Abstract base actor
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #include <libxfdashboard/focusable.h>
 #include <libxfdashboard/utils.h>
 #include <libxfdashboard/compat.h>
+#include <libxfdashboard/debug.h>
 
 
 /* Define this class in GObject system */
@@ -59,6 +60,7 @@ struct _XfdashboardActorPrivate
 	/* Instance related */
 	GHashTable		*lastThemeStyleSet;
 	gboolean		forceStyleRevalidation;
+	gboolean		isFirstParent;
 };
 
 /* Properties */
@@ -203,16 +205,16 @@ static void _xfdashboard_actor_on_reactive_changed(GObject *inObject,
 
 	self=XFDASHBOARD_ACTOR(inObject);
 
-	/* Set pseudo-class ':insensitive' if actor is now not reactive
+	/* Add pseudo-class ':insensitive' if actor is now not reactive
 	 * and remove this pseudo-class if actor is now reactive.
 	 */
 	if(clutter_actor_get_reactive(CLUTTER_ACTOR(self)))
 	{
-		xfdashboard_stylable_add_pseudo_class(XFDASHBOARD_STYLABLE(self), "insensitive");
+		xfdashboard_stylable_remove_pseudo_class(XFDASHBOARD_STYLABLE(self), "insensitive");
 	}
 		else
 		{
-			xfdashboard_stylable_remove_pseudo_class(XFDASHBOARD_STYLABLE(self), "insensitive");
+			xfdashboard_stylable_add_pseudo_class(XFDASHBOARD_STYLABLE(self), "insensitive");
 		}
 
 	/* Invalide styling to get it recomputed */
@@ -306,7 +308,7 @@ static gboolean _xfdashboard_actor_focusable_can_focus(XfdashboardFocusable *inF
 	self=XFDASHBOARD_ACTOR(inFocusable);
 	priv=self->priv;
 
-	/* This actor can only be focused if it is mapped, visibl	e and reactive */
+	/* This actor can only be focused if it is mapped, visible and reactive */
 	if(priv->canFocus &&
 		clutter_actor_is_mapped(CLUTTER_ACTOR(self)) &&
 		clutter_actor_is_visible(CLUTTER_ACTOR(self)) &&
@@ -504,7 +506,12 @@ static void _xfdashboard_actor_stylable_invalidate(XfdashboardStylable *inStylab
 		gchar					*defaultsValStr;
 		GParamSpec				*realParamSpec;
 
-		g_debug("Got param specs for %p (%s) with class '%s' and pseudo-class '%s'", self, G_OBJECT_TYPE_NAME(self), priv->styleClasses, priv->stylePseudoClasses);
+		XFDASHBOARD_DEBUG(self, STYLE,
+							"Got param specs for %p (%s) with class '%s' and pseudo-class '%s'",
+							self,
+							G_OBJECT_TYPE_NAME(self),
+							priv->styleClasses,
+							priv->stylePseudoClasses);
 
 		g_hash_table_iter_init(&hashIter, possibleStyleSet);
 		while(g_hash_table_iter_next(&hashIter, (gpointer*)&defaultsKey, (gpointer*)&paramSpec))
@@ -515,13 +522,18 @@ static void _xfdashboard_actor_stylable_invalidate(XfdashboardStylable *inStylab
 			g_param_value_set_default(realParamSpec, &defaultsVal);
 
 			defaultsValStr=g_strdup_value_contents(&defaultsVal);
-			g_debug("%d: param spec [%s] %s=%s\n", ++i, G_OBJECT_CLASS_NAME(klass), defaultsKey, defaultsValStr);
+			XFDASHBOARD_DEBUG(self, STYLE,
+								"%d: param spec [%s] %s=%s\n",
+								++i,
+								G_OBJECT_CLASS_NAME(klass),
+								defaultsKey,
+								defaultsValStr);
 			g_free(defaultsValStr);
 
 			g_value_unset(&defaultsVal);
 		}
 
-		g_debug("End of param specs");
+		XFDASHBOARD_DEBUG(self, STYLE, "End of param specs");
 	}
 #endif
 
@@ -533,15 +545,25 @@ static void _xfdashboard_actor_stylable_invalidate(XfdashboardStylable *inStylab
 	{
 		gint					i=0;
 
-		g_debug("Got styles from theme for %p (%s) with class '%s' and pseudo-class '%s'", self, G_OBJECT_TYPE_NAME(self), priv->styleClasses, priv->stylePseudoClasses);
+		XFDASHBOARD_DEBUG(self, STYLE,
+							"Got styles from theme for %p (%s) with class '%s' and pseudo-class '%s'",
+							self,
+							G_OBJECT_TYPE_NAME(self),
+							priv->styleClasses,
+							priv->stylePseudoClasses);
 
 		g_hash_table_iter_init(&hashIter, themeStyleSet);
 		while(g_hash_table_iter_next(&hashIter, (gpointer*)&styleName, (gpointer*)&styleValue))
 		{
-			g_debug("%d: [%s] %s=%s\n", ++i, styleValue->source, (gchar*)styleName, styleValue->string);
+			XFDASHBOARD_DEBUG(self, STYLE,
+								"%d: [%s] %s=%s\n",
+								++i,
+								styleValue->source,
+								(gchar*)styleName,
+								styleValue->string);
 		}
 
-		g_debug("End of styles from theme");
+		XFDASHBOARD_DEBUG(self, STYLE, "End of styles from theme");
 	}
 #endif
 
@@ -588,7 +610,11 @@ static void _xfdashboard_actor_stylable_invalidate(XfdashboardStylable *inStylab
 				gchar					*valstr;
 
 				valstr=g_strdup_value_contents(&propertyValue);
-				g_debug("Setting theme value of style property [%s] %s=%s\n", G_OBJECT_CLASS_NAME(klass), styleName, valstr);
+				XFDASHBOARD_DEBUG(self, STYLE,
+									"Setting theme value of style property [%s] %s=%s\n",
+									G_OBJECT_CLASS_NAME(klass),
+									styleName,
+									valstr);
 				g_free(valstr);
 			}
 #endif
@@ -644,7 +670,11 @@ static void _xfdashboard_actor_stylable_invalidate(XfdashboardStylable *inStylab
 				gchar					*valstr;
 
 				valstr=g_strdup_value_contents(&propertyValue);
-				g_debug("Restoring default value of style property [%s] %s=%s\n", G_OBJECT_CLASS_NAME(klass), styleName, valstr);
+				XFDASHBOARD_DEBUG(self, STYLE,
+									"Restoring default value of style property [%s] %s=%s\n",
+									G_OBJECT_CLASS_NAME(klass),
+									styleName,
+									valstr);
 				g_free(valstr);
 			}
 #endif
@@ -746,18 +776,40 @@ static gboolean _xfdashboard_actor_enter_event(ClutterActor *inActor, ClutterCro
 /* Actor was (re)parented */
 static void _xfdashboard_actor_parent_set(ClutterActor *inActor, ClutterActor *inOldParent)
 {
-	XfdashboardActor		*self;
-	ClutterActorClass		*parentClass;
+	XfdashboardActor			*self;
+	XfdashboardActorPrivate		*priv;
+	ClutterActorClass			*parentClass;
 
 	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inActor));
 
 	self=XFDASHBOARD_ACTOR(inActor);
+	priv=self->priv;
 
 	/* Call parent's virtual function */
 	parentClass=CLUTTER_ACTOR_CLASS(xfdashboard_actor_parent_class);
 	if(parentClass->parent_set)
 	{
 		parentClass->parent_set(inActor, inOldParent);
+	}
+
+	/* Check if it is a newly created actor which is parented for the first time.
+	 * Then emit 'actor-created' signal on stage.
+	 */
+	if(priv->isFirstParent &&
+		!inOldParent &&
+		clutter_actor_get_parent(inActor))
+	{
+		ClutterActor			*stage;
+
+		/* Get stage where this actor belongs to and emit signal at stage */
+		stage=clutter_actor_get_stage(inActor);
+		if(XFDASHBOARD_IS_STAGE(stage))
+		{
+			g_signal_emit_by_name(stage, "actor-created", inActor, NULL);
+		}
+
+		/* Set flag that a parent set and signal was emitted */
+		priv->isFirstParent=FALSE;
 	}
 
 	/* Invalide styling to get it recomputed because its ID (from point
@@ -975,6 +1027,10 @@ void xfdashboard_actor_class_init(XfdashboardActorClass *klass)
 	xfdashboard_actor_install_stylable_property_by_name(klass, "y-expand");
 	xfdashboard_actor_install_stylable_property_by_name(klass, "x-align");
 	xfdashboard_actor_install_stylable_property_by_name(klass, "y-align");
+	xfdashboard_actor_install_stylable_property_by_name(klass, "margin-top");
+	xfdashboard_actor_install_stylable_property_by_name(klass, "margin-bottom");
+	xfdashboard_actor_install_stylable_property_by_name(klass, "margin-left");
+	xfdashboard_actor_install_stylable_property_by_name(klass, "margin-right");
 }
 
 /* Object initialization
@@ -992,6 +1048,7 @@ void xfdashboard_actor_init(XfdashboardActor *self)
 	priv->styleClasses=NULL;
 	priv->stylePseudoClasses=NULL;
 	priv->lastThemeStyleSet=NULL;
+	priv->isFirstParent=TRUE;
 
 	/* Connect signals */
 	g_signal_connect(self, "notify::mapped", G_CALLBACK(_xfdashboard_actor_on_mapped_changed), NULL);
@@ -1015,8 +1072,9 @@ void xfdashboard_actor_base_class_finalize(XfdashboardActorClass *klass)
 		{
 			g_param_spec_pool_remove(_xfdashboard_actor_stylable_properties_pool, paramSpec);
 
-			g_debug("Unregistered stylable property named '%s' for class '%s'",
-					g_param_spec_get_name(paramSpec), G_OBJECT_CLASS_NAME(klass));
+			XFDASHBOARD_DEBUG(NULL, STYLE,
+								"Unregistered stylable property named '%s' for class '%s'",
+								g_param_spec_get_name(paramSpec), G_OBJECT_CLASS_NAME(klass));
 
 			g_param_spec_unref(paramSpec);
 		}
@@ -1174,8 +1232,9 @@ void xfdashboard_actor_install_stylable_property(XfdashboardActorClass *klass, G
 									g_param_spec_ref(inParamSpec),
 									(GDestroyNotify)g_param_spec_unref);
 	g_param_spec_pool_insert(_xfdashboard_actor_stylable_properties_pool, stylableParamSpec, G_OBJECT_CLASS_TYPE(klass));
-	g_debug("Registered stylable property '%s' for class '%s'",
-				g_param_spec_get_name(inParamSpec), G_OBJECT_CLASS_NAME(klass));
+	XFDASHBOARD_DEBUG(NULL, STYLE,
+						"Registered stylable property '%s' for class '%s'",
+						g_param_spec_get_name(inParamSpec), G_OBJECT_CLASS_NAME(klass));
 }
 
 void xfdashboard_actor_install_stylable_property_by_name(XfdashboardActorClass *klass, const gchar *inParamName)

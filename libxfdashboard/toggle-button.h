@@ -1,7 +1,7 @@
 /*
  * toggle-button: A button which can toggle its state between on and off
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,8 +43,15 @@ typedef struct _XfdashboardToggleButton				XfdashboardToggleButton;
 typedef struct _XfdashboardToggleButtonClass		XfdashboardToggleButtonClass;
 typedef struct _XfdashboardToggleButtonPrivate		XfdashboardToggleButtonPrivate;
 
+/**
+ * XfdashboardToggleButton:
+ *
+ * The #XfdashboardToggleButton structure contains only private data and
+ * should be accessed using the provided API
+ */
 struct _XfdashboardToggleButton
 {
+	/*< private >*/
 	/* Parent instance */
 	XfdashboardButton				parent_instance;
 
@@ -52,6 +59,12 @@ struct _XfdashboardToggleButton
 	XfdashboardToggleButtonPrivate	*priv;
 };
 
+/**
+ * XfdashboardToggleButtonClass:
+ * @toggled: Class handler for the #XfdashboardToggleButtonClass::toggled signal
+ *
+ * The #XfdashboardToggleButtonClass structure contains only private data
+ */
 struct _XfdashboardToggleButtonClass
 {
 	/*< private >*/
@@ -68,14 +81,18 @@ GType xfdashboard_toggle_button_get_type(void) G_GNUC_CONST;
 
 ClutterActor* xfdashboard_toggle_button_new(void);
 ClutterActor* xfdashboard_toggle_button_new_with_text(const gchar *inText);
-ClutterActor* xfdashboard_toggle_button_new_with_icon(const gchar *inIconName);
-ClutterActor* xfdashboard_toggle_button_new_full(const gchar *inIconName, const gchar *inText);
+ClutterActor* xfdashboard_toggle_button_new_with_icon_name(const gchar *inIconName);
+ClutterActor* xfdashboard_toggle_button_new_with_gicon(GIcon *inIcon);
+ClutterActor* xfdashboard_toggle_button_new_full_with_icon_name(const gchar *inIconName, const gchar *inText);
+ClutterActor* xfdashboard_toggle_button_new_full_with_gicon(GIcon *inIcon, const gchar *inText);
 
 gboolean xfdashboard_toggle_button_get_toggle_state(XfdashboardToggleButton *self);
 void xfdashboard_toggle_button_set_toggle_state(XfdashboardToggleButton *self, gboolean inToggleState);
 
 gboolean xfdashboard_toggle_button_get_auto_toggle(XfdashboardToggleButton *self);
 void xfdashboard_toggle_button_set_auto_toggle(XfdashboardToggleButton *self, gboolean inAuto);
+
+void xfdashboard_toggle_button_toggle(XfdashboardToggleButton *self);
 
 G_END_DECLS
 
