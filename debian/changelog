@@ -1,3 +1,22 @@
+xfdashboard (0.7.4-0ubuntu1) devel; urgency=medium
+
+  * d/watch: Adjust to pick up development versions too.
+  * New upstream version 0.7.4
+  * d/libxfdashboard0.symbols: Update symbols.
+  * d/compat, d/control: Turn the volume up to 11.
+  * d/control, d/copyright, d/watch: Use https where possible.
+  * d/control:
+    - Replace autotools-dev build-depend with xfce4-dev-tools.
+    - Drop versioned build-depends on garcon and xfconf.
+    - Correct section of libxfdashboard0 to 'libs'
+  * d/copyright: Update years.
+  * d/rules:
+    - Ensure the 'm4' directory exists before autoreconf.
+    - Drop '--with autotools-dev'
+  * Update Standards-Version to 4.1.4.
+
+ -- Unit 193 <unit193@ubuntu.com>  Tue, 26 Jun 2018 03:20:39 -0400
+
 xfdashboard (0.6.1-0ubuntu1) devel; urgency=medium
 
   * d/watch: Only track stable releases.
