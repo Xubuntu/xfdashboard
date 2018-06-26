@@ -9,7 +9,7 @@ include /usr/share/dpkg/buildflags.mk
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 %:
-	dh $@  --with autotools-dev
+	dh $@
 
 override_dh_installchangelogs:
 	dh_installchangelogs ChangeLog
