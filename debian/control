@@ -4,7 +4,6 @@ Priority: optional
 Maintainer: Xubuntu Developers <xubuntu-devel@lists.ubuntu.com>
 Uploaders: Unit 193 <unit193@ubuntu.com>
 Build-Depends: debhelper (>= 11),
- autotools-dev,
  gettext,
  intltool,
  libclutter-1.0-dev,
@@ -17,7 +16,8 @@ Build-Depends: debhelper (>= 11),
  libxfce4ui-2-dev,
  libxfce4util-dev,
  libxfconf-0-dev (>= 4.10.0),
- pkg-config
+ pkg-config,
+ xfce4-dev-tools
 Standards-Version: 3.9.8
 Homepage: http://goodies.xfce.org/projects/applications/xfdashboard/start
 Vcs-Browser: https://git.launchpad.net/~xubuntu-dev/+git/xfdashboard
