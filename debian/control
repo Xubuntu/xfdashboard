@@ -3,7 +3,7 @@ Section: xfce
 Priority: optional
 Maintainer: Xubuntu Developers <xubuntu-devel@lists.ubuntu.com>
 Uploaders: Unit 193 <unit193@ubuntu.com>
-Build-Depends: debhelper (>= 9.20160114),
+Build-Depends: debhelper (>= 11),
  autotools-dev,
  gettext,
  intltool,
