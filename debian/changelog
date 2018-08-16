@@ -1,3 +1,14 @@
+xfdashboard (0.7.5-0ubuntu1) devel; urgency=medium
+
+  * New upstream version 0.7.5
+  * d/libxfdashboard0.symbols: Update symbols for new release.
+  * d/rules:
+    - Drop dbgsym migration.
+    - Migrate from dh_install --fail-missing to dh_missing --fail-missing.
+  * Update Standards-Version to 4.2.0.
+
+ -- Unit 193 <unit193@ubuntu.com>  Thu, 16 Aug 2018 01:59:27 -0400
+
 xfdashboard (0.7.4-0ubuntu1) devel; urgency=medium
 
   * d/watch: Adjust to pick up development versions too.
