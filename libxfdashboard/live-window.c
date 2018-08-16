@@ -235,8 +235,7 @@ static void _xfdashboard_live_window_on_subwindow_actor_workspace_changed(Xfdash
  * shown anymore and find associated actor to destroy it
  */
 static void _xfdashboard_live_window_on_subwindow_actor_state_changed(XfdashboardLiveWindow *self,
-																		gint inChangedMask,
-																		gint inNewState,
+																		XfdashboardWindowTrackerWindowState inOldState,
 																		gpointer inUserData)
 {
 	XfdashboardWindowTrackerWindow		*window;
@@ -357,8 +356,13 @@ static void _xfdashboard_live_window_on_clicked(XfdashboardLiveWindow *self,
 	priv=self->priv;
 	action=XFDASHBOARD_CLICK_ACTION(inUserData);
 
-	/* Only emit any of these signals if click was perform with left button */
-	if(xfdashboard_click_action_get_button(action)!=XFDASHBOARD_CLICK_ACTION_LEFT_BUTTON) return;
+	/* Only emit any of these signals if click was perform with left button 
+	 * or is a short touchscreen touch event.
+	 */
+	if(!xfdashboard_click_action_is_left_button_or_tap(action))
+	{
+		return;
+	}
 
 	/* Check if click happened in "close button" */
 	if(clutter_actor_is_visible(priv->actorClose))
@@ -675,7 +679,7 @@ static void _xfdashboard_live_window_get_preferred_width(ClutterActor *self,
 			clutter_actor_get_preferred_width(child,
 												inForHeight,
 												&childMinWidth,
-												 &childNaturalWidth);
+												&childNaturalWidth);
 			if(childMinWidth>minWidth) minWidth=childMinWidth;
 			if(childNaturalWidth>naturalWidth) naturalWidth=childNaturalWidth;
 		}

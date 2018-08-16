@@ -393,8 +393,10 @@ static void _xfdashboard_search_result_container_on_result_item_actor_clicked(Xf
 
 	self=XFDASHBOARD_SEARCH_RESULT_CONTAINER(inUserData);
 
-	/* Only emit signal if click was perform with left button */
-	if(xfdashboard_click_action_get_button(inAction)==XFDASHBOARD_CLICK_ACTION_LEFT_BUTTON)
+	/* Only emit any of these signals if click was perform with left button 
+	 * or is a short touchscreen touch event.
+	 */
+	if(xfdashboard_click_action_is_left_button_or_tap(inAction))
 	{
 		/* Activate result item by actor clicked */
 		_xfdashboard_search_result_container_activate_result_item_by_actor(self, inActor);
@@ -656,7 +658,7 @@ static void _xfdashboard_search_result_container_update_result_items(Xfdashboard
 		/* If we tried to create at least one more actore than maximum allowed
 		 * then set text at "more"-label otherwise set empty text to "hide" it
 		 */
-		if(actorsCount>priv->maxResultsItemsCount)
+		if(!inShowAllItems && actorsCount>priv->maxResultsItemsCount)
 		{
 			gchar								*labelText;
 			gint								moreCount;
@@ -1344,7 +1346,7 @@ static void xfdashboard_search_result_container_class_init(XfdashboardSearchResu
 						G_STRUCT_OFFSET(XfdashboardSearchResultContainerClass, item_clicked),
 						NULL,
 						NULL,
-						_xfdashboard_marshal_VOID__OBJECT_OBJECT,
+						_xfdashboard_marshal_VOID__VARIANT_OBJECT,
 						G_TYPE_NONE,
 						2,
 						G_TYPE_VARIANT,

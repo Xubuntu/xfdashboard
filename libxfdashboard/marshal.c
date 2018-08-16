@@ -198,7 +198,44 @@ _xfdashboard_marshal_VOID__OBJECT_OBJECT (GClosure     *closure,
             data2);
 }
 
-/* VOID:OBJECT,FLOAT,FLOAT (marshal.list:5) */
+/* VOID:VARIANT,OBJECT (marshal.list:5) */
+void
+_xfdashboard_marshal_VOID__VARIANT_OBJECT (GClosure     *closure,
+                                           GValue       *return_value G_GNUC_UNUSED,
+                                           guint         n_param_values,
+                                           const GValue *param_values,
+                                           gpointer      invocation_hint G_GNUC_UNUSED,
+                                           gpointer      marshal_data)
+{
+  typedef void (*GMarshalFunc_VOID__VARIANT_OBJECT) (gpointer     data1,
+                                                     gpointer     arg_1,
+                                                     gpointer     arg_2,
+                                                     gpointer     data2);
+  GMarshalFunc_VOID__VARIANT_OBJECT callback;
+  GCClosure *cc = (GCClosure*) closure;
+  gpointer data1, data2;
+
+  g_return_if_fail (n_param_values == 3);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_VOID__VARIANT_OBJECT) (marshal_data ? marshal_data : cc->callback);
+
+  callback (data1,
+            g_marshal_value_peek_variant (param_values + 1),
+            g_marshal_value_peek_object (param_values + 2),
+            data2);
+}
+
+/* VOID:OBJECT,FLOAT,FLOAT (marshal.list:6) */
 void
 _xfdashboard_marshal_VOID__OBJECT_FLOAT_FLOAT (GClosure     *closure,
                                                GValue       *return_value G_GNUC_UNUSED,
@@ -237,7 +274,7 @@ _xfdashboard_marshal_VOID__OBJECT_FLOAT_FLOAT (GClosure     *closure,
             data2);
 }
 
-/* VOID:OBJECT,OBJECT,OBJECT (marshal.list:6) */
+/* VOID:OBJECT,OBJECT,OBJECT (marshal.list:7) */
 void
 _xfdashboard_marshal_VOID__OBJECT_OBJECT_OBJECT (GClosure     *closure,
                                                  GValue       *return_value G_GNUC_UNUSED,
@@ -276,7 +313,7 @@ _xfdashboard_marshal_VOID__OBJECT_OBJECT_OBJECT (GClosure     *closure,
             data2);
 }
 
-/* VOID:STRING,BOOLEAN (marshal.list:7) */
+/* VOID:STRING,BOOLEAN (marshal.list:8) */
 void
 _xfdashboard_marshal_VOID__STRING_BOOLEAN (GClosure     *closure,
                                            GValue       *return_value G_GNUC_UNUSED,
@@ -313,7 +350,7 @@ _xfdashboard_marshal_VOID__STRING_BOOLEAN (GClosure     *closure,
             data2);
 }
 
-/* BOOLEAN:OBJECT (marshal.list:8) */
+/* BOOLEAN:OBJECT (marshal.list:9) */
 void
 _xfdashboard_marshal_BOOLEAN__OBJECT (GClosure     *closure,
                                       GValue       *return_value G_GNUC_UNUSED,
@@ -352,7 +389,7 @@ _xfdashboard_marshal_BOOLEAN__OBJECT (GClosure     *closure,
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:OBJECT,ENUM (marshal.list:9) */
+/* BOOLEAN:OBJECT,ENUM (marshal.list:10) */
 void
 _xfdashboard_marshal_BOOLEAN__OBJECT_ENUM (GClosure     *closure,
                                            GValue       *return_value G_GNUC_UNUSED,
@@ -393,7 +430,7 @@ _xfdashboard_marshal_BOOLEAN__OBJECT_ENUM (GClosure     *closure,
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:OBJECT,FLOAT,FLOAT (marshal.list:10) */
+/* BOOLEAN:OBJECT,FLOAT,FLOAT (marshal.list:11) */
 void
 _xfdashboard_marshal_BOOLEAN__OBJECT_FLOAT_FLOAT (GClosure     *closure,
                                                   GValue       *return_value G_GNUC_UNUSED,
@@ -436,7 +473,7 @@ _xfdashboard_marshal_BOOLEAN__OBJECT_FLOAT_FLOAT (GClosure     *closure,
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:OBJECT,STRING,BOXED (marshal.list:11) */
+/* BOOLEAN:OBJECT,STRING,BOXED (marshal.list:12) */
 void
 _xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED (GClosure     *closure,
                                                    GValue       *return_value G_GNUC_UNUSED,
@@ -479,7 +516,7 @@ _xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED (GClosure     *closure,
   g_value_set_boolean (return_value, v_return);
 }
 
-/* OBJECT:VOID (marshal.list:12) */
+/* OBJECT:VOID (marshal.list:13) */
 void
 _xfdashboard_marshal_OBJECT__VOID (GClosure     *closure,
                                    GValue       *return_value G_GNUC_UNUSED,

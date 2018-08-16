@@ -38,7 +38,15 @@ extern void _xfdashboard_marshal_VOID__OBJECT_OBJECT (GClosure     *closure,
                                                       gpointer      invocation_hint,
                                                       gpointer      marshal_data);
 
-/* VOID:OBJECT,FLOAT,FLOAT (marshal.list:5) */
+/* VOID:VARIANT,OBJECT (marshal.list:5) */
+extern void _xfdashboard_marshal_VOID__VARIANT_OBJECT (GClosure     *closure,
+                                                       GValue       *return_value,
+                                                       guint         n_param_values,
+                                                       const GValue *param_values,
+                                                       gpointer      invocation_hint,
+                                                       gpointer      marshal_data);
+
+/* VOID:OBJECT,FLOAT,FLOAT (marshal.list:6) */
 extern void _xfdashboard_marshal_VOID__OBJECT_FLOAT_FLOAT (GClosure     *closure,
                                                            GValue       *return_value,
                                                            guint         n_param_values,
@@ -46,7 +54,7 @@ extern void _xfdashboard_marshal_VOID__OBJECT_FLOAT_FLOAT (GClosure     *closure
                                                            gpointer      invocation_hint,
                                                            gpointer      marshal_data);
 
-/* VOID:OBJECT,OBJECT,OBJECT (marshal.list:6) */
+/* VOID:OBJECT,OBJECT,OBJECT (marshal.list:7) */
 extern void _xfdashboard_marshal_VOID__OBJECT_OBJECT_OBJECT (GClosure     *closure,
                                                              GValue       *return_value,
                                                              guint         n_param_values,
@@ -54,7 +62,7 @@ extern void _xfdashboard_marshal_VOID__OBJECT_OBJECT_OBJECT (GClosure     *closu
                                                              gpointer      invocation_hint,
                                                              gpointer      marshal_data);
 
-/* VOID:STRING,BOOLEAN (marshal.list:7) */
+/* VOID:STRING,BOOLEAN (marshal.list:8) */
 extern void _xfdashboard_marshal_VOID__STRING_BOOLEAN (GClosure     *closure,
                                                        GValue       *return_value,
                                                        guint         n_param_values,
@@ -62,7 +70,7 @@ extern void _xfdashboard_marshal_VOID__STRING_BOOLEAN (GClosure     *closure,
                                                        gpointer      invocation_hint,
                                                        gpointer      marshal_data);
 
-/* BOOLEAN:OBJECT (marshal.list:8) */
+/* BOOLEAN:OBJECT (marshal.list:9) */
 extern void _xfdashboard_marshal_BOOLEAN__OBJECT (GClosure     *closure,
                                                   GValue       *return_value,
                                                   guint         n_param_values,
@@ -70,7 +78,7 @@ extern void _xfdashboard_marshal_BOOLEAN__OBJECT (GClosure     *closure,
                                                   gpointer      invocation_hint,
                                                   gpointer      marshal_data);
 
-/* BOOLEAN:OBJECT,ENUM (marshal.list:9) */
+/* BOOLEAN:OBJECT,ENUM (marshal.list:10) */
 extern void _xfdashboard_marshal_BOOLEAN__OBJECT_ENUM (GClosure     *closure,
                                                        GValue       *return_value,
                                                        guint         n_param_values,
@@ -78,7 +86,7 @@ extern void _xfdashboard_marshal_BOOLEAN__OBJECT_ENUM (GClosure     *closure,
                                                        gpointer      invocation_hint,
                                                        gpointer      marshal_data);
 
-/* BOOLEAN:OBJECT,FLOAT,FLOAT (marshal.list:10) */
+/* BOOLEAN:OBJECT,FLOAT,FLOAT (marshal.list:11) */
 extern void _xfdashboard_marshal_BOOLEAN__OBJECT_FLOAT_FLOAT (GClosure     *closure,
                                                               GValue       *return_value,
                                                               guint         n_param_values,
@@ -86,7 +94,7 @@ extern void _xfdashboard_marshal_BOOLEAN__OBJECT_FLOAT_FLOAT (GClosure     *clos
                                                               gpointer      invocation_hint,
                                                               gpointer      marshal_data);
 
-/* BOOLEAN:OBJECT,STRING,BOXED (marshal.list:11) */
+/* BOOLEAN:OBJECT,STRING,BOXED (marshal.list:12) */
 extern void _xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED (GClosure     *closure,
                                                                GValue       *return_value,
                                                                guint         n_param_values,
@@ -94,7 +102,7 @@ extern void _xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED (GClosure     *clo
                                                                gpointer      invocation_hint,
                                                                gpointer      marshal_data);
 
-/* OBJECT:VOID (marshal.list:12) */
+/* OBJECT:VOID (marshal.list:13) */
 extern void _xfdashboard_marshal_OBJECT__VOID (GClosure     *closure,
                                                GValue       *return_value,
                                                guint         n_param_values,

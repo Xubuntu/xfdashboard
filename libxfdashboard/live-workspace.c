@@ -103,6 +103,7 @@ static gboolean _xfdashboard_live_workspace_is_visible_window(XfdashboardLiveWor
 {
 	XfdashboardLiveWorkspacePrivate			*priv;
 	XfdashboardWindowTrackerWindowState		state;
+	gboolean								visible;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_LIVE_WORKSPACE(self), FALSE);
 	g_return_val_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inWindow), FALSE);
@@ -110,19 +111,64 @@ static gboolean _xfdashboard_live_workspace_is_visible_window(XfdashboardLiveWor
 	priv=self->priv;
 
 	/* Determine if windows should be shown at workspace depending on its state */
+	visible=TRUE;
+
 	state=xfdashboard_window_tracker_window_get_state(inWindow);
-	if((state & XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_SKIP_PAGER) ||
-		(state & XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_SKIP_TASKLIST) ||
-		!xfdashboard_window_tracker_window_is_visible(inWindow) ||
-		(!priv->workspace && !(state & XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_PINNED)) ||
-		(priv->workspace && !xfdashboard_window_tracker_window_is_on_workspace(inWindow, priv->workspace)) ||
-		xfdashboard_window_tracker_window_is_stage(inWindow))
+	if(visible && (state & XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_SKIP_PAGER))
 	{
-		return(FALSE);
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Window '%s' is invisible due to 'skip-pager' window state",
+							xfdashboard_window_tracker_window_get_name(inWindow));
+		visible=FALSE;
 	}
 
-	/* If we get here the window should be shown */
-	return(TRUE);
+	if(visible && (state & XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_SKIP_TASKLIST))
+	{
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Window '%s' is invisible due to 'skip-tasklist' window state",
+							xfdashboard_window_tracker_window_get_name(inWindow));
+		visible=FALSE;
+	}
+
+	if(visible &&
+		!xfdashboard_window_tracker_window_is_visible(inWindow))
+	{
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Window '%s' is really invisible",
+							xfdashboard_window_tracker_window_get_name(inWindow));
+		visible=FALSE;
+	}
+
+	if(visible &&
+		(!priv->workspace && !(state & XFDASHBOARD_WINDOW_TRACKER_WINDOW_STATE_PINNED)))
+	{
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Window '%s' is invisible because no workspace was set and window is not pinned",
+							xfdashboard_window_tracker_window_get_name(inWindow));
+		visible=FALSE;
+	}
+
+	if(visible &&
+		(priv->workspace && !xfdashboard_window_tracker_window_is_on_workspace(inWindow, priv->workspace)))
+	{
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Window '%s' is invisible because window is not on workspace '%s'",
+							xfdashboard_window_tracker_window_get_name(inWindow),
+							xfdashboard_window_tracker_workspace_get_name(priv->workspace));
+		visible=FALSE;
+	}
+
+	if(visible &&
+		xfdashboard_window_tracker_window_is_stage(inWindow))
+	{
+		XFDASHBOARD_DEBUG(self, ACTOR,
+							"Window '%s' is invisible because it is the stage window",
+							xfdashboard_window_tracker_window_get_name(inWindow));
+		visible=FALSE;
+	}
+
+	/* Return visibility result */
+	return(visible);
 }
 
 /* Find live window actor by window */
@@ -280,7 +326,7 @@ static ClutterActor* _xfdashboard_live_workspace_create_and_add_window_actor(Xfd
 		/* Move existing window actor to new stacking position */
 		g_object_ref(actor);
 		clutter_actor_remove_child(CLUTTER_ACTOR(self), actor);
-		if(lastWindowActor)
+		if(lastWindowActor && lastWindowActor!=actor)
 		{
 			clutter_actor_insert_child_above(CLUTTER_ACTOR(self), actor, lastWindowActor);
 			XFDASHBOARD_DEBUG(self, ACTOR,
@@ -345,8 +391,10 @@ static void _xfdashboard_live_workspace_on_clicked(XfdashboardLiveWorkspace *sel
 
 	action=XFDASHBOARD_CLICK_ACTION(inUserData);
 
-	/* Only emit signal if click was perform with left button */
-	if(xfdashboard_click_action_get_button(action)==XFDASHBOARD_CLICK_ACTION_LEFT_BUTTON)
+	/* Only emit any of these signals if click was perform with left button 
+	 * or is a short touchscreen touch event.
+	 */
+	if(xfdashboard_click_action_is_left_button_or_tap(action))
 	{
 		/* Emit "clicked" signal */
 		g_signal_emit(self, XfdashboardLiveWorkspaceSignals[SIGNAL_CLICKED], 0);
@@ -1142,6 +1190,9 @@ void xfdashboard_live_workspace_set_workspace(XfdashboardLiveWorkspace *self, Xf
 		window=xfdashboard_live_window_simple_get_window(XFDASHBOARD_LIVE_WINDOW_SIMPLE(child));
 		if(!window || !XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(window)) continue;
 
+		/* Do not destroy background image layer */
+		if(child==priv->backgroundImageLayer) continue;
+
 		/* Destroy window actor */
 		clutter_actor_destroy(child);
 	}
@@ -1248,6 +1299,7 @@ void xfdashboard_live_workspace_set_background_image_type(XfdashboardLiveWorkspa
 						if(backgroundWindow)
 						{
 							xfdashboard_live_window_simple_set_window(XFDASHBOARD_LIVE_WINDOW_SIMPLE(priv->backgroundImageLayer), backgroundWindow);
+							clutter_actor_show(priv->backgroundImageLayer);
 							XFDASHBOARD_DEBUG(self, ACTOR,
 												"Desktop window was found and set up as background image for workspace '%s'",
 												xfdashboard_window_tracker_workspace_get_name(priv->workspace));

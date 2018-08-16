@@ -1236,11 +1236,31 @@ static void _xfdashboard_application_database_check_search_path_duplicate(gpoint
 
 /* IMPLEMENTATION: GObject */
 
+/* Construct this object */
+static GObject* _xfdashboard_application_database_constructor(GType inType,
+																guint inNumberConstructParams,
+																GObjectConstructParam *inConstructParams)
+{
+	GObject									*object;
+
+	if(!_xfdashboard_application_database)
+	{
+		object=G_OBJECT_CLASS(xfdashboard_application_database_parent_class)->constructor(inType, inNumberConstructParams, inConstructParams);
+		_xfdashboard_application_database=XFDASHBOARD_APPLICATION_DATABASE(object);
+	}
+		else
+		{
+			object=g_object_ref(G_OBJECT(_xfdashboard_application_database));
+		}
+
+	return(object);
+}
+
 /* Dispose this object */
 static void _xfdashboard_application_database_dispose(GObject *inObject)
 {
-	XfdashboardApplicationDatabase							*self=XFDASHBOARD_APPLICATION_DATABASE(inObject);
-	XfdashboardApplicationDatabasePrivate					*priv=self->priv;
+	XfdashboardApplicationDatabase			*self=XFDASHBOARD_APPLICATION_DATABASE(inObject);
+	XfdashboardApplicationDatabasePrivate	*priv=self->priv;
 
 	/* Release allocated resources */
 	_xfdashboard_application_database_clean(self);
@@ -1251,14 +1271,21 @@ static void _xfdashboard_application_database_dispose(GObject *inObject)
 		priv->searchPaths=NULL;
 	}
 
-	/* Unset singleton */
+	/* Call parent's class dispose method */
+	G_OBJECT_CLASS(xfdashboard_application_database_parent_class)->dispose(inObject);
+}
+
+/* Finalize this object */
+static void _xfdashboard_application_database_finalize(GObject *inObject)
+{
+	/* Release allocated resources finally, e.g. unset singleton */
 	if(G_LIKELY(G_OBJECT(_xfdashboard_application_database)==inObject))
 	{
 		_xfdashboard_application_database=NULL;
 	}
 
 	/* Call parent's class dispose method */
-	G_OBJECT_CLASS(xfdashboard_application_database_parent_class)->dispose(inObject);
+	G_OBJECT_CLASS(xfdashboard_application_database_parent_class)->finalize(inObject);
 }
 
 /* Set/get properties */
@@ -1291,7 +1318,9 @@ static void xfdashboard_application_database_class_init(XfdashboardApplicationDa
 	GObjectClass		*gobjectClass=G_OBJECT_CLASS(klass);
 
 	/* Override functions */
+	gobjectClass->constructor=_xfdashboard_application_database_constructor;
 	gobjectClass->dispose=_xfdashboard_application_database_dispose;
+	gobjectClass->finalize=_xfdashboard_application_database_finalize;
 	gobjectClass->get_property=_xfdashboard_application_database_get_property;
 
 	/* Set up private structure */
@@ -1405,13 +1434,10 @@ static void xfdashboard_application_database_init(XfdashboardApplicationDatabase
 /* Get single instance of application */
 XfdashboardApplicationDatabase* xfdashboard_application_database_get_default(void)
 {
-	if(G_UNLIKELY(_xfdashboard_application_database==NULL))
-	{
-		_xfdashboard_application_database=g_object_new(XFDASHBOARD_TYPE_APPLICATION_DATABASE, NULL);
-	}
-		else g_object_ref(_xfdashboard_application_database);
+	GObject									*singleton;
 
-	return(_xfdashboard_application_database);
+	singleton=g_object_new(XFDASHBOARD_TYPE_APPLICATION_DATABASE, NULL);
+	return(XFDASHBOARD_APPLICATION_DATABASE(singleton));
 }
 
 /* Determine if menu and applications has been loaded successfully */

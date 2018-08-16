@@ -36,6 +36,11 @@
 #include <libxfdashboard/application-button.h>
 #include <libxfdashboard/application.h>
 #include <libxfdashboard/drag-action.h>
+#include <libxfdashboard/click-action.h>
+#include <libxfdashboard/popup-menu.h>
+#include <libxfdashboard/popup-menu-item-button.h>
+#include <libxfdashboard/popup-menu-item-separator.h>
+#include <libxfdashboard/application-tracker.h>
 #include <libxfdashboard/utils.h>
 #include <libxfdashboard/enums.h>
 #include <libxfdashboard/compat.h>
@@ -714,6 +719,153 @@ static void _xfdashboard_applications_search_provider_on_application_removed(Xfd
 	priv->allApps=xfdashboard_application_database_get_all_applications(priv->appDB);
 }
 
+/* User selected to open a new window or to launch that application at pop-up menu */
+static void _xfdashboard_applications_search_provider_on_popup_menu_item_launch(XfdashboardPopupMenuItem *inMenuItem,
+																				gpointer inUserData)
+{
+	GAppInfo							*appInfo;
+	XfdashboardApplicationTracker		*appTracker;
+	GIcon								*gicon;
+	const gchar							*iconName;
+
+	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU_ITEM(inMenuItem));
+	g_return_if_fail(G_IS_APP_INFO(inUserData));
+
+	appInfo=G_APP_INFO(inUserData);
+	iconName=NULL;
+
+	/* Get icon of application */
+	gicon=g_app_info_get_icon(appInfo);
+	if(gicon) iconName=g_icon_to_string(gicon);
+
+	/* Check if we should launch that application or to open a new window */
+	appTracker=xfdashboard_application_tracker_get_default();
+	if(!xfdashboard_application_tracker_is_running_by_app_info(appTracker, appInfo))
+	{
+		GAppLaunchContext			*context;
+		GError						*error;
+
+		/* Create context to start application at */
+		context=xfdashboard_create_app_context(NULL);
+
+		/* Try to launch application */
+		error=NULL;
+		if(!g_app_info_launch(appInfo, NULL, context, &error))
+		{
+			/* Show notification about failed application launch */
+			xfdashboard_notify(CLUTTER_ACTOR(inMenuItem),
+								iconName,
+								_("Launching application '%s' failed: %s"),
+								g_app_info_get_display_name(appInfo),
+								(error && error->message) ? error->message : _("unknown error"));
+			g_warning(_("Launching application '%s' failed: %s"),
+						g_app_info_get_display_name(appInfo),
+						(error && error->message) ? error->message : _("unknown error"));
+			if(error) g_error_free(error);
+		}
+			else
+			{
+				/* Show notification about successful application launch */
+				xfdashboard_notify(CLUTTER_ACTOR(inMenuItem),
+									iconName,
+									_("Application '%s' launched"),
+									g_app_info_get_display_name(appInfo));
+
+				/* Emit signal for successful application launch */
+				g_signal_emit_by_name(xfdashboard_application_get_default(), "application-launched", appInfo);
+
+				/* Quit application */
+				xfdashboard_application_suspend_or_quit(NULL);
+			}
+
+		/* Release allocated resources */
+		g_object_unref(context);
+	}
+
+	/* Release allocated resources */
+	g_object_unref(appTracker);
+	g_object_unref(gicon);
+}
+
+/* A right-click might have happened on an application icon */
+static void _xfdashboard_applications_search_provider_on_popup_menu(XfdashboardApplicationsSearchProvider *self,
+																	ClutterActor *inActor,
+																	gpointer inUserData)
+{
+	XfdashboardApplicationButton				*button;
+	XfdashboardClickAction						*action;
+
+	g_return_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(self));
+	g_return_if_fail(XFDASHBOARD_IS_APPLICATION_BUTTON(inActor));
+	g_return_if_fail(XFDASHBOARD_IS_CLICK_ACTION(inUserData));
+
+	button=XFDASHBOARD_APPLICATION_BUTTON(inActor);
+	action=XFDASHBOARD_CLICK_ACTION(inUserData);
+
+	/* Check if right button was used when the application button was clicked */
+	if(xfdashboard_click_action_get_button(action)==XFDASHBOARD_CLICK_ACTION_RIGHT_BUTTON)
+	{
+		ClutterActor							*popup;
+		ClutterActor							*menuItem;
+		GAppInfo								*appInfo;
+		XfdashboardApplicationTracker			*appTracker;
+		gchar									*sourceStyleClass;
+
+		/* Get app info for application button as it is needed most the time */
+		appInfo=xfdashboard_application_button_get_app_info(button);
+		if(!appInfo)
+		{
+			g_critical(_("No application information available for clicked application button."));
+			return;
+		}
+
+		/* Create pop-up menu */
+		popup=xfdashboard_popup_menu_new();
+		xfdashboard_popup_menu_set_destroy_on_cancel(XFDASHBOARD_POPUP_MENU(popup), TRUE);
+		xfdashboard_popup_menu_set_title(XFDASHBOARD_POPUP_MENU(popup), g_app_info_get_display_name(appInfo));
+		xfdashboard_popup_menu_set_title_gicon(XFDASHBOARD_POPUP_MENU(popup), g_app_info_get_icon(appInfo));
+
+		/* Add each open window to pop-up of application */
+		if(xfdashboard_application_button_add_popup_menu_items_for_windows(button, XFDASHBOARD_POPUP_MENU(popup))>0)
+		{
+			/* Add a separator to split windows from other actions in pop-up menu */
+			menuItem=xfdashboard_popup_menu_item_separator_new();
+			clutter_actor_set_x_expand(menuItem, TRUE);
+			xfdashboard_popup_menu_add_item(XFDASHBOARD_POPUP_MENU(popup), XFDASHBOARD_POPUP_MENU_ITEM(menuItem));
+		}
+
+		/* Add menu item to launch application if it is not running */
+		appTracker=xfdashboard_application_tracker_get_default();
+		if(!xfdashboard_application_tracker_is_running_by_app_info(appTracker, appInfo))
+		{
+			menuItem=xfdashboard_popup_menu_item_button_new();
+			xfdashboard_label_set_text(XFDASHBOARD_LABEL(menuItem), _("Launch"));
+			clutter_actor_set_x_expand(menuItem, TRUE);
+			xfdashboard_popup_menu_add_item(XFDASHBOARD_POPUP_MENU(popup), XFDASHBOARD_POPUP_MENU_ITEM(menuItem));
+
+			g_signal_connect(menuItem,
+								"activated",
+								G_CALLBACK(_xfdashboard_applications_search_provider_on_popup_menu_item_launch),
+								appInfo);
+		}
+		g_object_unref(appTracker);
+
+		/* Add application actions */
+		xfdashboard_application_button_add_popup_menu_items_for_actions(button, XFDASHBOARD_POPUP_MENU(popup));
+
+		/* Set style class as pop-up menu has no source set to create style
+		 * class automatically because this class is not derived from an actor
+		 * class.
+		 */
+		sourceStyleClass=g_strdup_printf("popup-menu-source-%s", G_OBJECT_TYPE_NAME(self));
+		xfdashboard_stylable_add_class(XFDASHBOARD_STYLABLE(popup), sourceStyleClass);
+		g_free(sourceStyleClass);
+
+		/* Activate pop-up menu */
+		xfdashboard_popup_menu_activate(XFDASHBOARD_POPUP_MENU(popup));
+	}
+}
+
 /* Drag of an menu item begins */
 static void _xfdashboard_applications_search_provider_on_drag_begin(ClutterDragAction *inAction,
 																	ClutterActor *inActor,
@@ -783,6 +935,7 @@ static gfloat _xfdashboard_applications_search_provider_score(XfdashboardApplica
 	XfdashboardApplicationsSearchProviderPrivate		*priv;
 	gchar												*title;
 	gchar												*description;
+	GList												*keywords;
 	const gchar											*command;
 	const gchar											*value;
 	gint												matchesFound, matchesExpected;
@@ -794,6 +947,7 @@ static gfloat _xfdashboard_applications_search_provider_score(XfdashboardApplica
 
 	priv=self->priv;
 	score=-1.0f;
+	keywords=NULL;
 
 	/* Empty search term matches no menu item */
 	if(!inSearchTerms) return(0.0f);
@@ -807,9 +961,9 @@ static gfloat _xfdashboard_applications_search_provider_score(XfdashboardApplica
 	 * search terms.
 	 *
 	 * But a matching display names weights more than a matching description and
-	 * also a matching command weights more than a matching description. The weights
-	 * are 0.4 for matching display names, 0.4 for matching commands and 0.2 for
-	 * matching descriptions.
+	 * also a matching command or keyword weights more than a matching description.
+	 * So the weights are 0.4 for matching display names, 0.25 for matching commands,
+	 * 0.25 for matching keywords and 0.1 for matching descriptions.
 	 *
 	 * While iterating through all search terms we add the weights "points" for
 	 * each matching item and when we iterated through all search terms we divide
@@ -827,13 +981,25 @@ static gfloat _xfdashboard_applications_search_provider_score(XfdashboardApplica
 
 	command=g_app_info_get_executable(inAppInfo);
 
+	if(XFDASHBOARD_IS_DESKTOP_APP_INFO(inAppInfo))
+	{
+		GList											*appKeywords;
+		GList											*iter;
+
+		appKeywords=xfdashboard_desktop_app_info_get_keywords(XFDASHBOARD_DESKTOP_APP_INFO(inAppInfo));
+		for(iter=appKeywords; iter; iter=g_list_next(iter))
+		{
+			keywords=g_list_prepend(keywords, g_utf8_strdown(iter->data, -1));
+		}
+	}
+
 	matchesFound=0;
 	pointsSearch=0.0f;
 	while(*inSearchTerms)
 	{
-		gboolean						termMatch;
-		gchar							*commandPos;
-		gfloat							pointsTerm;
+		gboolean										termMatch;
+		gchar											*commandPos;
+		gfloat											pointsTerm;
 
 		/* Reset "found" indicator and score of current search term */
 		termMatch=FALSE;
@@ -847,11 +1013,20 @@ static gfloat _xfdashboard_applications_search_provider_score(XfdashboardApplica
 			termMatch=TRUE;
 		}
 
-		if(description &&
-			g_strstr_len(description, -1, *inSearchTerms))
+		if(keywords)
 		{
-			pointsTerm+=0.2;
-			termMatch=TRUE;
+			GList						*iter;
+
+			for(iter=keywords; iter; iter=g_list_next(iter))
+			{
+				if(iter->data &&
+					g_strstr_len(iter->data, -1, *inSearchTerms))
+				{
+					pointsTerm+=0.25;
+					termMatch=TRUE;
+					break;
+				}
+			}
 		}
 
 		if(command)
@@ -860,9 +1035,16 @@ static gfloat _xfdashboard_applications_search_provider_score(XfdashboardApplica
 			if(commandPos &&
 				(commandPos==command || *(commandPos-1)==G_DIR_SEPARATOR))
 			{
-				pointsTerm+=0.4;
+				pointsTerm+=0.25;
 				termMatch=TRUE;
 			}
+		}
+
+		if(description &&
+			g_strstr_len(description, -1, *inSearchTerms))
+		{
+			pointsTerm+=0.1;
+			termMatch=TRUE;
 		}
 
 		/* Increase match counter if we found a match */
@@ -918,6 +1100,7 @@ static gfloat _xfdashboard_applications_search_provider_score(XfdashboardApplica
 	}
 
 	/* Release allocated resources */
+	if(keywords) g_list_free_full(keywords, g_free);
 	if(description) g_free(description);
 	if(title) g_free(title);
 
@@ -1013,7 +1196,6 @@ static XfdashboardSearchResultSet* _xfdashboard_applications_search_provider_get
 	GList												*iter;
 	guint												numberTerms;
 	gchar												**terms, **termsIter;
-	GVariant											*resultItem;
 	XfdashboardDesktopAppInfo							*appInfo;
 	gfloat												score;
 
@@ -1039,7 +1221,7 @@ static XfdashboardSearchResultSet* _xfdashboard_applications_search_provider_get
 	terms=g_new(gchar*, numberTerms+1);
 	if(!terms)
 	{
-		g_critical(_("Could not allocate memory to copy search criterias for case-insensitive search"));
+		g_critical(_("Could not allocate memory to copy search criteria for case-insensitive search"));
 		return(NULL);
 	}
 
@@ -1073,26 +1255,19 @@ static XfdashboardSearchResultSet* _xfdashboard_applications_search_provider_get
 			continue;
 		}
 
-		/* Get result item */
-		resultItem=g_variant_new_string(g_app_info_get_id(G_APP_INFO(appInfo)));
-
-		/* Check if current app info is in previous result set and should be checked
-		 * if a previous result set is provided.
-		 */
-		if(!inPreviousResultSet ||
-			xfdashboard_search_result_set_has_item(inPreviousResultSet, resultItem))
+		/* Check for a match against search terms */
+		score=_xfdashboard_applications_search_provider_score(self, terms, G_APP_INFO(appInfo));
+		if(score>=0.0f)
 		{
-			/* Check for a match against search terms */
-			score=_xfdashboard_applications_search_provider_score(self, terms, G_APP_INFO(appInfo));
-			if(score>=0.0f)
-			{
-				xfdashboard_search_result_set_add_item(resultSet, g_variant_ref(resultItem));
-				xfdashboard_search_result_set_set_item_score(resultSet, resultItem, score);
-			}
-		}
+			GVariant									*resultItem;
 
-		/* Release allocated resources */
-		g_variant_unref(resultItem);
+			/* Create result item */
+			resultItem=g_variant_new_string(g_app_info_get_id(G_APP_INFO(appInfo)));
+
+			/* Add result item to result set */
+			xfdashboard_search_result_set_add_item(resultSet, resultItem);
+			xfdashboard_search_result_set_set_item_score(resultSet, resultItem, score);
+		}
 	}
 
 	/* Sort result set */
@@ -1124,6 +1299,7 @@ static ClutterActor* _xfdashboard_applications_search_provider_create_result_act
 	XfdashboardApplicationsSearchProvider			*self;
 	XfdashboardApplicationsSearchProviderPrivate	*priv;
 	ClutterActor									*actor;
+	ClutterAction									*clickAction;
 	ClutterAction									*dragAction;
 	GAppInfo										*appInfo;
 
@@ -1147,6 +1323,10 @@ static ClutterActor* _xfdashboard_applications_search_provider_create_result_act
 	/* Create actor for result item */
 	actor=xfdashboard_application_button_new_from_app_info(appInfo);
 	clutter_actor_show(actor);
+
+	clickAction=xfdashboard_click_action_new();
+	g_signal_connect_swapped(clickAction, "clicked", G_CALLBACK(_xfdashboard_applications_search_provider_on_popup_menu), self);
+	clutter_actor_add_action(actor, clickAction);
 
 	dragAction=xfdashboard_drag_action_new();
 	clutter_drag_action_set_drag_threshold(CLUTTER_DRAG_ACTION(dragAction), -1, -1);

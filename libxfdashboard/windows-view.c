@@ -685,37 +685,6 @@ static void _xfdashboard_windows_view_on_window_opened(XfdashboardWindowsView *s
 		}
 }
 
-/* A window was closed */
-static void _xfdashboard_windows_view_on_window_closed(XfdashboardWindowsView *self,
-														XfdashboardWindowTrackerWindow *inWindow,
-														gpointer inUserData)
-{
-	XfdashboardLiveWindow				*liveWindow;
-
-	g_return_if_fail(XFDASHBOARD_IS_WINDOWS_VIEW(self));
-	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inWindow));
-
-	/* Check if parent stage interface changed. If not just destroy window actor.
-	 * Otherwise recreate all window actors for changed stage interface and
-	 * monitor.
-	 */
-	if(!_xfdashboard_windows_view_update_stage_and_monitor(self))
-	{
-		/* Find live window for window just being closed and destroy it */
-		liveWindow=_xfdashboard_windows_view_find_by_window(self, inWindow);
-		if(G_LIKELY(liveWindow))
-		{
-			/* Destroy actor */
-			clutter_actor_destroy(CLUTTER_ACTOR(liveWindow));
-		}
-	}
-		else
-		{
-			/* Recreate all window actors because parent stage interface changed */
-			_xfdashboard_windows_view_recreate_window_actors(self);
-		}
-}
-
 /* A window has changed monitor */
 static void _xfdashboard_windows_view_on_window_monitor_changed(XfdashboardWindowsView *self,
 																XfdashboardWindowTrackerWindow *inWindow,
@@ -728,8 +697,8 @@ static void _xfdashboard_windows_view_on_window_monitor_changed(XfdashboardWindo
 
 	g_return_if_fail(XFDASHBOARD_IS_WINDOWS_VIEW(self));
 	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inWindow));
-	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_MONITOR(inOldMonitor));
-	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_MONITOR(inNewMonitor));
+	g_return_if_fail(inOldMonitor==NULL || XFDASHBOARD_IS_WINDOW_TRACKER_MONITOR(inOldMonitor));
+	g_return_if_fail(inNewMonitor==NULL || XFDASHBOARD_IS_WINDOW_TRACKER_MONITOR(inNewMonitor));
 
 	priv=self->priv;
 
@@ -738,9 +707,11 @@ static void _xfdashboard_windows_view_on_window_monitor_changed(XfdashboardWindo
 	 * and create it. Otherwise recreate all window actors for changed stage
 	 * interface and monitor.
 	 */
-	if(!_xfdashboard_windows_view_update_stage_and_monitor(self))
+	if(!_xfdashboard_windows_view_update_stage_and_monitor(self) &&
+		G_LIKELY(!inOldMonitor) &&
+		G_LIKELY(!inNewMonitor))
 	{
-		/* Check if window moved away from this view*/
+		/* Check if window moved away from this view */
 		if(priv->currentMonitor==inOldMonitor &&
 			!_xfdashboard_windows_view_is_visible_window(self, inWindow))
 		{
@@ -2345,11 +2316,6 @@ static void xfdashboard_windows_view_init(XfdashboardWindowsView *self)
 	g_signal_connect_swapped(priv->windowTracker,
 								"window-opened",
 								G_CALLBACK(_xfdashboard_windows_view_on_window_opened),
-								self);
-
-	g_signal_connect_swapped(priv->windowTracker,
-								"window-closed",
-								G_CALLBACK(_xfdashboard_windows_view_on_window_closed),
 								self);
 
 	g_signal_connect_swapped(priv->windowTracker,
