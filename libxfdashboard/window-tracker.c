@@ -84,6 +84,17 @@ static guint XfdashboardWindowTrackerSignals[SIGNAL_LAST]={ 0, };
 				G_OBJECT_TYPE_NAME(self), \
 				vfunc);
 
+/* Default signal handler for signal "window_closed" */
+static void _xfdashboard_window_tracker_real_window_closed(XfdashboardWindowTracker *self,
+															XfdashboardWindowTrackerWindow *inWindow)
+{
+	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER(self));
+	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inWindow));
+
+	/* By default (if not overidden) emit "closed" signal at window */
+	g_signal_emit_by_name(inWindow, "closed");
+}
+
 
 /* IMPLEMENTATION: GObject */
 
@@ -94,6 +105,11 @@ void xfdashboard_window_tracker_default_init(XfdashboardWindowTrackerInterface *
 {
 	static gboolean		initialized=FALSE;
 	GParamSpec			*property;
+
+	/* The following virtual functions should be overriden if default
+	 * implementation does not fit.
+	 */
+	iface->window_closed=_xfdashboard_window_tracker_real_window_closed;
 
 	/* Define properties, signals and actions */
 	if(!initialized)
@@ -819,7 +835,7 @@ XfdashboardWindowTrackerWorkspace* xfdashboard_window_tracker_get_workspace_by_n
 }
 
 /**
- * xfdashboard_window_tracker_get_monitors_count:
+ * xfdashboard_window_tracker_supports_multiple_monitors:
  * @self: A #XfdashboardWindowTracker
  *
  * Determines if window tracker at @self supports multiple monitors.

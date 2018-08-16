@@ -484,7 +484,7 @@ static void _xfdashboard_stage_on_searchbox_text_changed(XfdashboardStage *self,
 	/* Check if current text length if greater than zero and previous text length
 	 * was zero. If check is successful it marks the start of a search. Emit the
 	 * "search-started" signal. There is no need to start a search a search over
-	 * all search providers as it will be done later by updating search criterias.
+	 * all search providers as it will be done later by updating search criteria.
 	 * There is also no need to activate search view because we will ensure that
 	 * search view is activate on any change in search text box but we enable that
 	 * view to be able to activate it ;)
@@ -515,7 +515,7 @@ static void _xfdashboard_stage_on_searchbox_text_changed(XfdashboardStage *self,
 	}
 
 	/* Ensure that search view is active, emit signal for text changed,
-	 * update search criterias and set active toggle state at apps button
+	 * update search criteria and set active toggle state at apps button
 	 */
 	xfdashboard_viewpad_set_active_view(XFDASHBOARD_VIEWPAD(priv->viewpad), searchView);
 	xfdashboard_search_view_update_search(XFDASHBOARD_SEARCH_VIEW(searchView), text);
@@ -629,25 +629,26 @@ static void _xfdashboard_stage_on_view_activated(XfdashboardStage *self, Xfdashb
  * signal handler to find new stage window.
  */
 static void _xfdashboard_stage_on_window_closed(XfdashboardStage *self,
-												XfdashboardWindowTrackerWindow *inWindow,
 												gpointer inUserData)
 {
 	XfdashboardStagePrivate				*priv;
+	XfdashboardWindowTrackerWindow		*window;
 
 	g_return_if_fail(XFDASHBOARD_IS_STAGE(self));
-	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inWindow));
+	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inUserData));
 
 	priv=self->priv;
+	window=XFDASHBOARD_WINDOW_TRACKER_WINDOW(inUserData);
 
 	/* Check if window closed is this stage window */
-	if(priv->stageWindow!=inWindow) return;
-
-	/* Forget stage window as it was closed */
-	priv->stageWindow=NULL;
+	if(priv->stageWindow!=window) return;
 
 	/* Disconnect this signal handler as this stage window was closed*/
 	XFDASHBOARD_DEBUG(self, ACTOR, "Stage window was closed. Removing signal handler");
-	g_signal_handlers_disconnect_by_func(priv->windowTracker, G_CALLBACK(_xfdashboard_stage_on_window_closed), self);
+	g_signal_handlers_disconnect_by_func(priv->stageWindow, G_CALLBACK(_xfdashboard_stage_on_window_closed), self);
+
+	/* Forget stage window as it was closed */
+	priv->stageWindow=NULL;
 
 	/* Instead reconnect signal handler to find new stage window */
 	XFDASHBOARD_DEBUG(self, ACTOR, "Reconnecting signal to find new stage window as this one as closed");
@@ -690,7 +691,10 @@ static void _xfdashboard_stage_on_window_opened(XfdashboardStage *self,
 	 * handler again.
 	 */
 	XFDASHBOARD_DEBUG(self, ACTOR, "Connecting signal signal handler to get notified about destruction of stage window");
-	g_signal_connect_swapped(priv->windowTracker, "window-closed", G_CALLBACK(_xfdashboard_stage_on_window_closed), self);
+	g_signal_connect_swapped(priv->stageWindow,
+								"closed",
+								G_CALLBACK(_xfdashboard_stage_on_window_closed),
+								self);
 
 	/* Set focus */
 	_xfdashboard_stage_set_focus(self);
@@ -1628,6 +1632,7 @@ static void _xfdashboard_stage_dispose(GObject *inObject)
 	/* Release allocated resources */
 	if(priv->stageWindow)
 	{
+		g_signal_handlers_disconnect_by_func(priv->stageWindow, G_CALLBACK(_xfdashboard_stage_on_window_closed), self);
 		xfdashboard_window_tracker_window_hide_stage(priv->stageWindow);
 		priv->stageWindow=NULL;
 	}
@@ -1845,7 +1850,7 @@ static void xfdashboard_stage_class_init(XfdashboardStageClass *klass)
 						G_STRUCT_OFFSET(XfdashboardStageClass, actor_created),
 						NULL,
 						NULL,
-						g_cclosure_marshal_VOID__VOID,
+						g_cclosure_marshal_VOID__OBJECT,
 						G_TYPE_NONE,
 						1,
 						CLUTTER_TYPE_ACTOR);

@@ -59,7 +59,15 @@ struct _XfdashboardDesktopAppInfoPrivate
 	GarconMenuItem		*item;
 	guint				itemChangedID;
 
+	GKeyFile			*secondarySource;
+
 	gchar				*binaryExecutable;
+
+	gboolean			needActions;
+	GList				*actions;
+
+	gboolean			needKeywords;
+	GList				*keywords;
 };
 
 /* Properties */
@@ -94,6 +102,399 @@ typedef struct
 	gchar	*startupNotificationID;
 	gchar	*desktopFile;
 } XfdashboardDesktopAppInfoChildSetupData;
+
+/* Load secondary source file if not already done.
+ * Note: It is called secondary source although it is the same file as used
+ * for GarconMenuItem. But it is not the same source because the file is loaded
+ * via a GKeyFile object to get access to entries not provided by garcon or
+ * implemented in an unusable way for xfdashboard.
+ */
+static gboolean _xfdashboard_desktop_app_info_load_secondary_source(XfdashboardDesktopAppInfo *self)
+{
+	XfdashboardDesktopAppInfoPrivate		*priv;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self), FALSE);
+
+	priv=self->priv;
+
+	/* Only load secondary source file if not already done and a file is set */
+	if(!priv->secondarySource &&
+		priv->file)
+	{
+		GKeyFile							*keyfile;
+		gchar								*secondarySourceFilename;
+		GError								*error;
+
+		error=NULL;
+
+		/* Get path to secondary source file */
+		secondarySourceFilename=g_file_get_path(priv->file);
+
+		/* Load secondary source file */
+		keyfile=g_key_file_new();
+		if(!g_key_file_load_from_file(keyfile,
+										secondarySourceFilename,
+										G_KEY_FILE_KEEP_TRANSLATIONS,
+										&error))
+		{
+			/* Show warning */
+			g_warning(_("Could not load secondary source %s for desktop ID '%s': %s"),
+						secondarySourceFilename,
+						priv->desktopID,
+						error ? error->message : _("Unknown error"));
+
+			/* Release allocated resources */
+			if(error) g_error_free(error);
+			if(secondarySourceFilename) g_free(secondarySourceFilename);
+			if(keyfile) g_key_file_unref(keyfile);
+
+			/* Return FALSE to indicate error */
+			return(FALSE);
+		}
+
+		/* Use secondary source */
+		priv->secondarySource=g_key_file_ref(keyfile);
+
+		/* Release allocated resources */
+		if(secondarySourceFilename) g_free(secondarySourceFilename);
+		if(keyfile) g_key_file_unref(keyfile);
+	}
+
+	/* If we get here and we have no keyfile for secondary source, return FALSE
+	 * to indicate that secondary source is not available.
+	 */
+	if(G_UNLIKELY(!priv->secondarySource)) return(FALSE);
+
+	/* Return TRUE for success */
+	return(TRUE);
+}
+
+/* Get or update path to executable file for this application */
+static void _xfdashboard_desktop_app_info_update_binary_executable(XfdashboardDesktopAppInfo *self)
+{
+	XfdashboardDesktopAppInfoPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self));
+
+	priv=self->priv;
+
+	/* Get path to executable file for this application by striping white-space from
+	 * the beginning of the command to execute when launching up to first white-space
+	 * after the first command-line argument (which is the command).
+	 */
+	if(priv->binaryExecutable)
+	{
+		g_free(priv->binaryExecutable);
+		priv->binaryExecutable=NULL;
+	}
+
+	if(priv->item)
+	{
+		const gchar						*command;
+		const gchar						*commandStart;
+		const gchar						*commandEnd;
+
+		command=garcon_menu_item_get_command(priv->item);
+
+		while(*command==' ') command++;
+		commandStart=command;
+
+		while(*command && *command!=' ') command++;
+		commandEnd=command;
+
+		priv->binaryExecutable=g_strndup(commandStart, commandEnd-commandStart);
+	}
+}
+
+/* (Re-)Load application actions */
+static void _xfdashboard_desktop_app_info_update_actions(XfdashboardDesktopAppInfo *self)
+{
+	XfdashboardDesktopAppInfoPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self));
+
+	priv=self->priv;
+
+	/* Reload only if needed */
+	if(!priv->needActions) return;
+
+	/* Remove old actions loaded */
+	if(priv->actions)
+	{
+		g_list_free_full(priv->actions, g_object_unref);
+		priv->actions=NULL;
+	}
+
+	/* Get application actions for menu item (desktop entry) */
+#if 0 /*GARCON_CHECK_VERSION(0, 6, 3)*/
+	if(priv->item)
+	{
+		GList								*itemActions;
+		GList								*iter;
+		const gchar							*itemActionName;
+		GarconMenuItemAction				*itemAction;
+		XfdashboardDesktopAppInfoAction		*action;
+
+		/* Get action from garcon menu item and create desktop info action object
+		 * for each action iterated.
+		 */
+		itemActions=garcon_menu_item_get_actions(priv->item);
+		for(iter=itemActions; iter; iter=g_list_next(iter))
+		{
+			/* Get action currently iterated from garcon menu item */
+			itemActionName=(const gchar*)(iter->data);
+			if(!itemActionName)
+			{
+				g_warning(_("Cannot create application action because of empty action name for desktop ID '%s'"),
+							priv->desktopID);
+				continue;
+			}
+
+			itemAction=garcon_menu_item_get_action(priv->item, itemActionName);
+			if(!itemAction)
+			{
+				g_warning(_("Cannot create application action for desktop ID '%s'"),
+							priv->desktopID);
+				continue;
+			}
+
+			/* Create desktop info action object and add to list */
+			action=XFDASHBOARD_DESKTOP_APP_INFO_ACTION
+					(
+						g_object_new(XFDASHBOARD_TYPE_DESKTOP_APP_INFO_ACTION,
+										"name", garcon_menu_item_action_get_name(itemAction),
+										"icon-name", garcon_menu_item_action_get_icon_name(itemAction),
+										"command", garcon_menu_item_action_get_command(itemAction),
+										NULL)
+					);
+			priv->actions=g_list_prepend(priv->actions, action);
+
+			XFDASHBOARD_DEBUG(self, APPLICATIONS,
+								"Created application action '%s' for desktop ID '%s'",
+								xfdashboard_desktop_app_info_action_get_name(action),
+								priv->desktopID);
+		}
+		priv->actions=g_list_reverse(priv->actions);
+
+		/* Release allocated resources */
+		g_list_free(itemActions);
+	}
+#else
+	/* Garcon prior to version 0.6.0 does not provide accessor function for
+	 * application actions of a desktop entry and the first version providing
+	 * these function return the action in an unpredictable order but not the
+	 * order as listed in "Action" keyword of desktop entry. So we need to
+	 * load the secondary source and grab them ourselve.
+	 */
+	if(_xfdashboard_desktop_app_info_load_secondary_source(self))
+	{
+		gchar								**itemActions;
+		gchar								**iter;
+		gchar								*itemActionGroup;
+		gchar								*itemActionName;
+		gchar								*itemActionIcon;
+		gchar								*itemActionExec;
+		XfdashboardDesktopAppInfoAction		*action;
+		GError								*error;
+
+		error=NULL;
+
+		/* Get list of actions and their order from "Action" keyword */
+		itemActions=g_key_file_get_string_list(priv->secondarySource,
+												G_KEY_FILE_DESKTOP_GROUP,
+												G_KEY_FILE_DESKTOP_KEY_ACTIONS,
+												NULL,
+												&error);
+		if(!itemActions)
+		{
+			XFDASHBOARD_DEBUG(self, APPLICATIONS,
+								"Could not fetch list of actions from secondary source for desktop ID '%s': %s",
+								priv->desktopID,
+								error ? error->message : _("Unknown error"));
+
+			/* Release allocated resources */
+			if(error) g_error_free(error);
+
+			/* Return from here as we cannot collect any list of actions */
+			return;
+		}
+
+		/* Get action currently iterated from string list of secondary source */
+		for(iter=itemActions; *iter; iter++)
+		{
+			/* Determine group name in desktop file to retrieve data about
+			 * application action currently iterated.
+			 */
+			itemActionGroup=g_strdup_printf("Desktop Action %s", *iter);
+
+			/* Get display name of application action. According to the specification,
+			 * it says only the "Name" keyword is required. So do not create a
+			 * desktop info action object if it is missing, but fail silenty and
+			 * continue with next action in list.
+			 */
+			itemActionName=g_key_file_get_locale_string(priv->secondarySource,
+														itemActionGroup,
+														G_KEY_FILE_DESKTOP_KEY_NAME,
+														NULL,
+														&error);
+			if(!itemActionName)
+			{
+				XFDASHBOARD_DEBUG(self, APPLICATIONS,
+									"Could not get name of action '%s' from secondary source for desktop ID '%s': %s",
+									*iter,
+									priv->desktopID,
+									error ? error->message : _("Unknown error"));
+
+				/* Release allocated resources */
+				if(itemActionGroup) g_free(itemActionGroup);
+				if(error)
+				{
+					g_error_free(error);
+					error=NULL;
+				}
+
+				/* Continue with next action */
+				continue;
+			}
+
+			/* Get optional icon name of application action */
+			itemActionIcon=g_key_file_get_string(priv->secondarySource,
+													itemActionGroup,
+													G_KEY_FILE_DESKTOP_KEY_ICON,
+													NULL);
+
+			/* Get optional command of application action */
+			itemActionExec=g_key_file_get_string(priv->secondarySource,
+													itemActionGroup,
+													G_KEY_FILE_DESKTOP_KEY_EXEC,
+													NULL);
+
+			/* Create desktop info action object and add to list */
+			action=XFDASHBOARD_DESKTOP_APP_INFO_ACTION
+					(
+						g_object_new(XFDASHBOARD_TYPE_DESKTOP_APP_INFO_ACTION,
+										"name", itemActionName,
+										"icon-name", itemActionIcon,
+										"command", itemActionExec,
+										NULL)
+					);
+			priv->actions=g_list_prepend(priv->actions, action);
+
+			XFDASHBOARD_DEBUG(self, APPLICATIONS,
+								"Created application action '%s' for desktop ID '%s' from secondary source",
+								xfdashboard_desktop_app_info_action_get_name(action),
+								priv->desktopID);
+
+			/* Release allocated resources */
+			if(itemActionExec) g_free(itemActionExec);
+			if(itemActionIcon) g_free(itemActionIcon);
+			if(itemActionName) g_free(itemActionName);
+			if(itemActionGroup) g_free(itemActionGroup);
+		}
+		priv->actions=g_list_reverse(priv->actions);
+
+		/* Release allocated resources */
+		if(itemActions) g_strfreev(itemActions);
+	}
+#endif
+
+	/* Set flag that application actions are loaded and do not need futher updates */
+	priv->needActions=FALSE;
+}
+
+/* (Re-)Load keywords */
+static void _xfdashboard_desktop_app_info_update_keywords(XfdashboardDesktopAppInfo *self)
+{
+	XfdashboardDesktopAppInfoPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self));
+
+	priv=self->priv;
+
+	/* Reload only if needed */
+	if(!priv->needKeywords) return;
+
+	/* Remove old actions loaded */
+	if(priv->keywords)
+	{
+		g_list_free_full(priv->keywords, g_free);
+		priv->keywords=NULL;
+	}
+
+	/* Get application actions for menu item (desktop entry) */
+#if 0 /*GARCON_CHECK_VERSION(0, 6, 3)*/
+	if(priv->item)
+	{
+		const GList							*keywords;
+
+		/* Get keywords from garcon menu item and create a deep copy of list */
+		keywords=garcon_menu_item_get_keywords(priv->item);
+		for(iter=keywords; iter; iter=g_list_next(iter))
+		{
+			/* Create copy of list entry and prepend to new list */
+			priv->keywords=g_list_prepend(priv->keywords, g_strdup((const gchar*)(iter->data)));
+
+			XFDASHBOARD_DEBUG(self, APPLICATIONS,
+								"Added keyword '%s' for desktop ID '%s'",
+								(const gchar*)(iter->data),
+								priv->desktopID);
+		}
+		priv->keywords=g_list_reverse(priv->keywords);
+	}
+#else
+	/* Garcon does not provide an accessor function to get keywords for desktop
+	 * entries in any official released version yet. So load them ourselve from
+	 * secondary source.
+	 */
+	if(_xfdashboard_desktop_app_info_load_secondary_source(self))
+	{
+		gchar								**keywords;
+		gchar								**iter;
+		GError								*error;
+
+		error=NULL;
+
+		/* Get keywords from secondary source */
+		keywords=g_key_file_get_string_list(priv->secondarySource,
+												G_KEY_FILE_DESKTOP_GROUP,
+												"Keywords",
+												NULL,
+												&error);
+		if(!keywords)
+		{
+			XFDASHBOARD_DEBUG(self, APPLICATIONS,
+								"Could not fetch list of keywords from secondary source for desktop ID '%s': %s",
+								priv->desktopID,
+								error ? error->message : _("Unknown error"));
+
+			/* Release allocated resources */
+			if(error) g_error_free(error);
+
+			/* Return from here as we cannot collect any list of actions */
+			return;
+		}
+
+		/* Get action currently iterated from string list of secondary source */
+		for(iter=keywords; *iter; iter++)
+		{
+			/* Create copy a currently iterated keyword and prepend to list */
+			priv->keywords=g_list_prepend(priv->keywords, g_strdup(*iter));
+
+			XFDASHBOARD_DEBUG(self, APPLICATIONS,
+								"Added keyword '%s' for desktop ID '%s' from secondary source",
+								*iter,
+								priv->desktopID);
+		}
+		priv->keywords=g_list_reverse(priv->keywords);
+
+		/* Release allocated resources */
+		if(keywords) g_strfreev(keywords);
+	}
+#endif
+
+	/* Set flag that keywords are loaded and do not need futher updates */
+	priv->needKeywords=FALSE;
+}
 
 /* Menu item has changed */
 static void _xfdashboard_desktop_app_info_on_item_changed(XfdashboardDesktopAppInfo *self,
@@ -151,6 +552,13 @@ static void _xfdashboard_desktop_app_info_set_file(XfdashboardDesktopAppInfo *se
 		/* Freeze notification */
 		g_object_freeze_notify(G_OBJECT(self));
 
+		/* Release secondard source */
+		if(priv->secondarySource)
+		{
+			g_key_file_unref(priv->secondarySource);
+			priv->secondarySource=NULL;
+		}
+
 		/* Replace current file to menu item with new one */
 		if(priv->file)
 		{
@@ -186,32 +594,14 @@ static void _xfdashboard_desktop_app_info_set_file(XfdashboardDesktopAppInfo *se
 															self);
 		}
 
-		/* Get path to executable file for this application by striping white-space from
-		 * the beginning of the command to execute when launching up to first white-space
-		 * after the first command-line argument (which is the command).
+		/* Get path to executable file for this application */
+		_xfdashboard_desktop_app_info_update_binary_executable(self);
+
+		/* Set flag to reload application actions and keywords. They will be
+		 * cleared and (re-)loaded on-demand.
 		 */
-		if(priv->binaryExecutable)
-		{
-			g_free(priv->binaryExecutable);
-			priv->binaryExecutable=NULL;
-		}
-
-		if(priv->item)
-		{
-			const gchar						*command;
-			const gchar						*commandStart;
-			const gchar						*commandEnd;
-
-			command=garcon_menu_item_get_command(priv->item);
-
-			while(*command==' ') command++;
-			commandStart=command;
-
-			while(*command && *command!=' ') command++;
-			commandEnd=command;
-
-			priv->binaryExecutable=g_strndup(commandStart, commandEnd-commandStart);
-		}
+		priv->needActions=TRUE;
+		priv->needKeywords=TRUE;
 
 		/* Notify about property change */
 		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardDesktopAppInfoProperties[PROP_FILE]);
@@ -306,37 +696,35 @@ static void _xfdashboard_desktop_app_info_expand_macros_add_uri(const gchar *inU
 }
 
 static gboolean _xfdashboard_desktop_app_info_expand_macros(XfdashboardDesktopAppInfo *self,
+															const gchar *inCommand,
 															GList *inURIs,
 															GString *ioExpanded)
 {
 	XfdashboardDesktopAppInfoPrivate	*priv;
-	const gchar							*command;
 	gboolean							filesOrUriAdded;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self), FALSE);
+	g_return_val_if_fail(inCommand && *inCommand, FALSE);
 	g_return_val_if_fail(ioExpanded, FALSE);
 
 	priv=self->priv;
 
-	/* Get command-line whose macros to expand */
-	command=garcon_menu_item_get_command(priv->item);
-
 	/* Iterate through command-line char by char and expand known macros */
 	filesOrUriAdded=FALSE;
 
-	while(*command)
+	while(*inCommand)
 	{
 		/* Check if character is '%' indicating that a macro could follow ... */
-		if(*command=='%')
+		if(*inCommand=='%')
 		{
 			/* Move to next character to determin which macro to expand
-			 * but check also that we have not reached end of command-line.
+			 * but check also that we have not reached end of inCommand-line.
 			 */
-			command++;
-			if(!*command) break;
+			inCommand++;
+			if(!*inCommand) break;
 
 			/* Expand macro */
-			switch(*command)
+			switch(*inCommand)
 			{
 				case 'f':
 					if(inURIs) _xfdashboard_desktop_app_info_expand_macros_add_file(inURIs->data, ioExpanded);
@@ -425,14 +813,14 @@ static gboolean _xfdashboard_desktop_app_info_expand_macros(XfdashboardDesktopAp
 			}
 		}
 			/* ... otherwise just add the character */
-			else g_string_append_c(ioExpanded, *command);
+			else g_string_append_c(ioExpanded, *inCommand);
 
-		/* Continue with next character in command-line */
-		command++;
+		/* Continue with next character in inCommand-line */
+		inCommand++;
 	}
 
 	/* If URIs was provided but not used (exec key does not contain %f, %F, %u, %U)
-	 * append first URI to expanded command-line.
+	 * append first URI to expanded inCommand-line.
 	 */
 	if(inURIs && !filesOrUriAdded)
 	{
@@ -482,6 +870,7 @@ static void _xfdashboard_desktop_app_info_on_child_spawned(gpointer inUserData)
 }
 
 static gboolean _xfdashboard_desktop_app_info_launch_appinfo_internal(XfdashboardDesktopAppInfo *self,
+																		const gchar *inCommand,
 																		GList *inURIs,
 																		GAppLaunchContext *inContext,
 																		GError **outError)
@@ -500,6 +889,7 @@ static gboolean _xfdashboard_desktop_app_info_launch_appinfo_internal(Xfdashboar
 	XfdashboardDesktopAppInfoChildSetupData		childSetup;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self), FALSE);
+	g_return_val_if_fail(inCommand && *inCommand, FALSE);
 	g_return_val_if_fail(!inContext || G_IS_APP_LAUNCH_CONTEXT(inContext), FALSE);
 	g_return_val_if_fail(outError && *outError==NULL, FALSE);
 
@@ -515,7 +905,7 @@ static gboolean _xfdashboard_desktop_app_info_launch_appinfo_internal(Xfdashboar
 	/* Get command-line with expanded macros */
 	expanded=g_string_new(NULL);
 	if(!expanded ||
-		!_xfdashboard_desktop_app_info_expand_macros(self, inURIs, expanded))
+		!_xfdashboard_desktop_app_info_expand_macros(self, inCommand, inURIs, expanded))
 	{
 		/* Set error */
 		g_set_error_literal(outError,
@@ -957,17 +1347,19 @@ static gboolean _xfdashboard_desktop_app_info_gappinfo_launch(GAppInfo *inAppInf
 																GAppLaunchContext *inContext,
 																GError **outError)
 {
-	XfdashboardDesktopAppInfo	*self;
-	GList						*iter;
-	GList						*uris;
-	gchar						*uri;
-	gboolean					result;
+	XfdashboardDesktopAppInfo			*self;
+	XfdashboardDesktopAppInfoPrivate	*priv;
+	GList								*iter;
+	GList								*uris;
+	gchar								*uri;
+	gboolean							result;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(inAppInfo), FALSE);
 	g_return_val_if_fail(!inContext || G_IS_APP_LAUNCH_CONTEXT(inContext), FALSE);
 	g_return_val_if_fail(outError && *outError==NULL, FALSE);
 
 	self=XFDASHBOARD_DESKTOP_APP_INFO(inAppInfo);
+	priv=self->priv;
 	uris=NULL;
 
 	/* Create list of URIs for files */
@@ -980,6 +1372,7 @@ static gboolean _xfdashboard_desktop_app_info_gappinfo_launch(GAppInfo *inAppInf
 
 	/* Call function to launch application of XfdashboardDesktopAppInfo with URIs */
 	result=_xfdashboard_desktop_app_info_launch_appinfo_internal(self,
+																	garcon_menu_item_get_command(priv->item),
 																	uris,
 																	inContext,
 																	outError);
@@ -997,24 +1390,26 @@ static gboolean _xfdashboard_desktop_app_info_gappinfo_launch_uris(GAppInfo *inA
 																	GAppLaunchContext *inContext,
 																	GError **outError)
 {
-	XfdashboardDesktopAppInfo	*self;
-	gboolean					result;
+	XfdashboardDesktopAppInfo			*self;
+	XfdashboardDesktopAppInfoPrivate	*priv;
+	gboolean							result;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(inAppInfo), FALSE);
 	g_return_val_if_fail(!inContext || G_IS_APP_LAUNCH_CONTEXT(inContext), FALSE);
 	g_return_val_if_fail(outError && *outError==NULL, FALSE);
 
 	self=XFDASHBOARD_DESKTOP_APP_INFO(inAppInfo);
+	priv=self->priv;
 
 	/* Call function to launch application of XfdashboardDesktopAppInfo with URIs */
 	result=_xfdashboard_desktop_app_info_launch_appinfo_internal(self,
+																	garcon_menu_item_get_command(priv->item),
 																	inURIs,
 																	inContext,
 																	outError);
 
 	return(result);
 }
-
 
 /* Check if the application info should be shown */
 static gboolean _xfdashboard_desktop_app_info_gappinfo_should_show(GAppInfo *inAppInfo)
@@ -1100,6 +1495,20 @@ static void _xfdashboard_desktop_app_info_dispose(GObject *inObject)
 	XfdashboardDesktopAppInfoPrivate	*priv=self->priv;
 
 	/* Release allocated variables */
+	if(priv->keywords)
+	{
+		g_list_free_full(priv->keywords, g_free);
+		priv->keywords=NULL;
+	}
+	priv->needKeywords=TRUE;
+
+	if(priv->actions)
+	{
+		g_list_free_full(priv->actions, g_object_unref);
+		priv->actions=NULL;
+	}
+	priv->needActions=TRUE;
+
 	if(priv->binaryExecutable)
 	{
 		g_free(priv->binaryExecutable);
@@ -1116,6 +1525,12 @@ static void _xfdashboard_desktop_app_info_dispose(GObject *inObject)
 
 		g_object_unref(priv->item);
 		priv->item=NULL;
+	}
+
+	if(priv->secondarySource)
+	{
+		g_key_file_unref(priv->secondarySource);
+		priv->secondarySource=NULL;
 	}
 
 	if(priv->file)
@@ -1256,6 +1671,10 @@ static void xfdashboard_desktop_app_info_init(XfdashboardDesktopAppInfo *self)
 	priv->item=NULL;
 	priv->itemChangedID=0;
 	priv->binaryExecutable=NULL;
+	priv->actions=NULL;
+	priv->needActions=TRUE;
+	priv->keywords=NULL;
+	priv->needKeywords=TRUE;
 }
 
 /* IMPLEMENTATION: Public API */
@@ -1388,6 +1807,15 @@ gboolean xfdashboard_desktop_app_info_reload(XfdashboardDesktopAppInfo *self)
 	priv=self->priv;
 	success=FALSE;
 
+	/* Release secondary source if available to enforce reload when updating
+	 * data depending secondard source.
+	 */
+	if(priv->secondarySource)
+	{
+		g_key_file_unref(priv->secondarySource);
+		priv->secondarySource=NULL;
+	}
+
 	/* Reload menu item */
 	if(priv->item)
 	{
@@ -1402,6 +1830,15 @@ gboolean xfdashboard_desktop_app_info_reload(XfdashboardDesktopAppInfo *self)
 						error ? error->message : _("Unknown error"));
 			if(error) g_error_free(error);
 		}
+
+		/* Update path to executable file for this application */
+		_xfdashboard_desktop_app_info_update_binary_executable(self);
+
+		/* Set flag to reload application actions and keywords. They will be
+		 * cleared and (re-)loaded on-demand.
+		 */
+		priv->needActions=TRUE;
+		priv->needKeywords=TRUE;
 	}
 
 	/* If reload was successful emit changed signal */
@@ -1422,4 +1859,119 @@ gboolean xfdashboard_desktop_app_info_reload(XfdashboardDesktopAppInfo *self)
 
 	/* Return success result */
 	return(success);
+}
+
+/* Get list of application actions of desktop app info */
+GList* xfdashboard_desktop_app_info_get_actions(XfdashboardDesktopAppInfo *self)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self), FALSE);
+
+	/* Update list of application actions */
+	_xfdashboard_desktop_app_info_update_actions(self);
+
+	/* Return the list of application actions */
+	return(self->priv->actions);
+}
+
+/* Launch application action of desktop app info */
+gboolean xfdashboard_desktop_app_info_launch_action(XfdashboardDesktopAppInfo *self,
+													XfdashboardDesktopAppInfoAction *inAction,
+													GAppLaunchContext *inContext,
+													GError **outError)
+{
+	const gchar						*actionName;
+	gboolean						success;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self), FALSE);
+	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO_ACTION(inAction), FALSE);
+	g_return_val_if_fail(!inContext || G_IS_APP_LAUNCH_CONTEXT(inContext), FALSE);
+	g_return_val_if_fail(outError && *outError==NULL, FALSE);
+
+	/* Launch by application action's name as it will lookup a maybe updated
+	 * action, e.g. when reloaded in the meantime.
+	 */
+	actionName=xfdashboard_desktop_app_info_action_get_name(inAction);
+	success=xfdashboard_desktop_app_info_launch_action_by_name(self,
+																actionName,
+																inContext,
+																outError);
+
+	/* Return success result */
+	return(success);
+}
+
+gboolean xfdashboard_desktop_app_info_launch_action_by_name(XfdashboardDesktopAppInfo *self,
+															const gchar *inActionName,
+															GAppLaunchContext *inContext,
+															GError **outError)
+{
+	XfdashboardDesktopAppInfoPrivate	*priv;
+	XfdashboardDesktopAppInfoAction		*action;
+	GList								*iter;
+	gboolean							success;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self), FALSE);
+	g_return_val_if_fail(inActionName && *inActionName, FALSE);
+	g_return_val_if_fail(!inContext || G_IS_APP_LAUNCH_CONTEXT(inContext), FALSE);
+	g_return_val_if_fail(outError && *outError==NULL, FALSE);
+
+	priv=self->priv;
+
+	/* Find application action data by name */
+	action=NULL;
+	for(iter=priv->actions; iter && !action; iter=g_list_next(iter))
+	{
+		XfdashboardDesktopAppInfoAction	*iterAction;
+
+		iterAction=XFDASHBOARD_DESKTOP_APP_INFO_ACTION(iter->data);
+		if(!iterAction) continue;
+
+		if(g_strcmp0(xfdashboard_desktop_app_info_action_get_name(iterAction), inActionName)==0)
+		{
+			action=iterAction;
+		}
+	}
+
+	if(!action)
+	{
+		/* Set error */
+		g_set_error(outError,
+					G_IO_ERROR,
+					G_IO_ERROR_NOT_FOUND,
+					_("Invalid application action '%s' to execute for desktop ID '%s'"),
+					inActionName,
+					priv->desktopID);
+
+		/* Return fail status */
+		return(FALSE);
+	}
+
+	/* Launch application action found */
+	success=_xfdashboard_desktop_app_info_launch_appinfo_internal(self,
+																	xfdashboard_desktop_app_info_action_get_command(action),
+																	NULL,
+																	inContext,
+																	outError);
+	if(!success)
+	{
+		g_warning(_("Could launch action '%s' for desktop ID '%s': %s"),
+					xfdashboard_desktop_app_info_action_get_name(action),
+					self->priv->desktopID,
+					(outError && *outError) ? (*outError)->message : _("Unknown error"));
+	}
+
+	/* Return success result of launching action */
+	return(success);
+}
+
+/* Get list of keywords of desktop app info */
+GList* xfdashboard_desktop_app_info_get_keywords(XfdashboardDesktopAppInfo *self)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self), FALSE);
+
+	/* Update list of keywords */
+	_xfdashboard_desktop_app_info_update_keywords(self);
+
+	/* Return the list of keywords */
+	return(self->priv->keywords);
 }

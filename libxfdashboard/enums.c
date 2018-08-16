@@ -120,6 +120,7 @@ GType xfdashboard_bindings_pool_error_enum_get_type(void)
 			{ XFDASHBOARD_BINDINGS_POOL_ERROR_FILE_NOT_FOUND, "XFDASHBOARD_BINDINGS_POOL_ERROR_FILE_NOT_FOUND", "file-not-found" },
 			{ XFDASHBOARD_BINDINGS_POOL_ERROR_PARSER_INTERNAL_ERROR, "XFDASHBOARD_BINDINGS_POOL_ERROR_PARSER_INTERNAL_ERROR", "parser-internal-error" },
 			{ XFDASHBOARD_BINDINGS_POOL_ERROR_MALFORMED, "XFDASHBOARD_BINDINGS_POOL_ERROR_MALFORMED", "malformed" },
+			{ XFDASHBOARD_BINDINGS_POOL_ERROR_INTERNAL_ERROR, "XFDASHBOARD_BINDINGS_POOL_ERROR_INTERNAL_ERROR", "internal-error" },
 			{ 0, NULL, NULL }
 		};
 
@@ -250,30 +251,6 @@ GType xfdashboard_plugin_error_enum_get_type(void)
 }
 
 
-/* enumerations from "theme.h" */
-#include "theme.h"
-
-GType xfdashboard_theme_error_enum_get_type(void)
-{
-	static volatile gsize	g_define_type_id__volatile=0;
-
-	if(g_once_init_enter(&g_define_type_id__volatile))
-	{
-		static const GEnumValue values[]=
-		{
-			{ XFDASHBOARD_THEME_ERROR_THEME_NOT_FOUND, "XFDASHBOARD_THEME_ERROR_THEME_NOT_FOUND", "theme-not-found" },
-			{ XFDASHBOARD_THEME_ERROR_ALREADY_LOADED, "XFDASHBOARD_THEME_ERROR_ALREADY_LOADED", "already-loaded" },
-			{ 0, NULL, NULL }
-		};
-
-		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeErrorEnum"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
-	}
-
-	return(g_define_type_id__volatile);
-}
-
-
 /* enumerations from "theme-css.h" */
 #include "theme-css.h"
 
@@ -361,6 +338,30 @@ GType xfdashboard_theme_layout_error_enum_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeLayoutErrorEnum"), values);
+		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+	}
+
+	return(g_define_type_id__volatile);
+}
+
+
+/* enumerations from "theme.h" */
+#include "theme.h"
+
+GType xfdashboard_theme_error_enum_get_type(void)
+{
+	static volatile gsize	g_define_type_id__volatile=0;
+
+	if(g_once_init_enter(&g_define_type_id__volatile))
+	{
+		static const GEnumValue values[]=
+		{
+			{ XFDASHBOARD_THEME_ERROR_THEME_NOT_FOUND, "XFDASHBOARD_THEME_ERROR_THEME_NOT_FOUND", "theme-not-found" },
+			{ XFDASHBOARD_THEME_ERROR_ALREADY_LOADED, "XFDASHBOARD_THEME_ERROR_ALREADY_LOADED", "already-loaded" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeErrorEnum"), values);
 		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
 	}
 

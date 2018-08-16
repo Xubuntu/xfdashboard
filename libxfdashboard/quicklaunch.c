@@ -43,6 +43,7 @@
 #include <libxfdashboard/focusable.h>
 #include <libxfdashboard/marshal.h>
 #include <libxfdashboard/desktop-app-info.h>
+#include <libxfdashboard/desktop-app-info-action.h>
 #include <libxfdashboard/application-database.h>
 #include <libxfdashboard/application-tracker.h>
 #include <libxfdashboard/window-tracker.h>
@@ -421,27 +422,8 @@ static void _xfdashboard_quicklaunch_on_favourite_clicked(XfdashboardQuicklaunch
 	}
 }
 
-/* User selected to activate a window at pop-up menu */
-static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_activate_window(XfdashboardPopupMenuItem *inMenuItem,
-																					gpointer inUserData)
-{
-	XfdashboardWindowTrackerWindow		*window;
-
-	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU_ITEM(inMenuItem));
-	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inUserData));
-
-	window=XFDASHBOARD_WINDOW_TRACKER_WINDOW(inUserData);
-
-	/* Activate window */
-	xfdashboard_window_tracker_window_activate(window);
-
-	/* Quit application */
-	xfdashboard_application_suspend_or_quit(NULL);
-}
-
 /* User selected to open a new window or to launch that application at pop-up menu */
-static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_launch(XfdashboardPopupMenu *inPopupMenu,
-																			XfdashboardPopupMenuItem *inMenuItem,
+static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_launch(XfdashboardPopupMenuItem *inMenuItem,
 																			gpointer inUserData)
 {
 	GAppInfo							*appInfo;
@@ -449,7 +431,6 @@ static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_launch(Xfdashb
 	GIcon								*gicon;
 	const gchar							*iconName;
 
-	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU(inPopupMenu));
 	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU_ITEM(inMenuItem));
 	g_return_if_fail(G_IS_APP_INFO(inUserData));
 
@@ -475,7 +456,7 @@ static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_launch(Xfdashb
 		if(!g_app_info_launch(appInfo, NULL, context, &error))
 		{
 			/* Show notification about failed application launch */
-			xfdashboard_notify(CLUTTER_ACTOR(inPopupMenu),
+			xfdashboard_notify(CLUTTER_ACTOR(inMenuItem),
 								iconName,
 								_("Launching application '%s' failed: %s"),
 								g_app_info_get_display_name(appInfo),
@@ -488,7 +469,7 @@ static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_launch(Xfdashb
 			else
 			{
 				/* Show notification about successful application launch */
-				xfdashboard_notify(CLUTTER_ACTOR(inPopupMenu),
+				xfdashboard_notify(CLUTTER_ACTOR(inMenuItem),
 									iconName,
 									_("Application '%s' launched"),
 									g_app_info_get_display_name(appInfo));
@@ -510,8 +491,7 @@ static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_launch(Xfdashb
 }
 
 /* User selected to remove application from favourites via pop-up menu */
-static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_remove_from_favourite(XfdashboardPopupMenu *inPopupMenu,
-																						XfdashboardPopupMenuItem *inMenuItem,
+static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_remove_from_favourite(XfdashboardPopupMenuItem *inMenuItem,
 																						gpointer inUserData)
 {
 	XfdashboardApplicationButton		*appButton;
@@ -520,7 +500,6 @@ static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_remove_from_fa
 	XfdashboardQuicklaunch				*self;
 	XfdashboardQuicklaunchPrivate		*priv;
 
-	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU(inPopupMenu));
 	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU_ITEM(inMenuItem));
 	g_return_if_fail(XFDASHBOARD_IS_APPLICATION_BUTTON(inUserData));
 
@@ -579,8 +558,7 @@ static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_remove_from_fa
 }
 
 /* User selected to add application to favourites via pop-up menu */
-static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_add_to_favourite(XfdashboardPopupMenu *inPopupMenu,
-																					XfdashboardPopupMenuItem *inMenuItem,
+static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_add_to_favourite(XfdashboardPopupMenuItem *inMenuItem,
 																					gpointer inUserData)
 {
 	XfdashboardApplicationButton		*appButton;
@@ -589,7 +567,6 @@ static void _xfdashboard_quicklaunch_on_favourite_popup_menu_item_add_to_favouri
 	XfdashboardQuicklaunch				*self;
 	XfdashboardQuicklaunchPrivate		*priv;
 
-	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU(inPopupMenu));
 	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU_ITEM(inMenuItem));
 	g_return_if_fail(XFDASHBOARD_IS_APPLICATION_BUTTON(inUserData));
 
@@ -677,7 +654,6 @@ static void _xfdashboard_quicklaunch_on_favourite_popup_menu(XfdashboardQuicklau
 		ClutterActor							*popup;
 		ClutterActor							*menuItem;
 		GAppInfo								*appInfo;
-		const GList								*appWindows;
 
 		/* Get app info for application button as it is needed most the time */
 		appInfo=xfdashboard_application_button_get_app_info(appButton);
@@ -694,93 +670,12 @@ static void _xfdashboard_quicklaunch_on_favourite_popup_menu(XfdashboardQuicklau
 		xfdashboard_popup_menu_set_title_gicon(XFDASHBOARD_POPUP_MENU(popup), g_app_info_get_icon(appInfo));
 
 		/* Add each open window to pop-up of application */
-		appWindows=xfdashboard_application_tracker_get_window_list_by_app_info(priv->appTracker, appInfo);
-		if(appWindows)
+		if(xfdashboard_application_button_add_popup_menu_items_for_windows(appButton, XFDASHBOARD_POPUP_MENU(popup))>0)
 		{
-			const GList							*iter;
-			GList								*sortedList;
-			XfdashboardWindowTracker			*windowTracker;
-			XfdashboardWindowTrackerWindow		*window;
-			XfdashboardWindowTrackerWorkspace	*activeWorkspace;
-			XfdashboardWindowTrackerWorkspace	*windowWorkspace;
-			gboolean							separatorAdded;
-
-			/* Create sorted list of windows. The window is added to begin
-			 * of list if it is on active workspace and to end of list if it
-			 * is on any other workspace.
-			 */
-			windowTracker=xfdashboard_window_tracker_get_default();
-			activeWorkspace=xfdashboard_window_tracker_get_active_workspace(windowTracker);
-
-			sortedList=NULL;
-			for(iter=appWindows; iter; iter=g_list_next(iter))
-			{
-				/* Get window currently iterated */
-				window=XFDASHBOARD_WINDOW_TRACKER_WINDOW(iter->data);
-				if(!window) continue;
-
-				/* Get workspace of window */
-				windowWorkspace=xfdashboard_window_tracker_window_get_workspace(window);
-
-				/* If window is on active workspace add to begin of sorted list,
-				 * otherwise add to end of sorted list.
-				 */
-				if(windowWorkspace==activeWorkspace)
-				{
-					sortedList=g_list_prepend(sortedList, window);
-				}
-					else
-					{
-						sortedList=g_list_append(sortedList, window);
-					}
-			}
-
-			/* Now add menu items for each window in sorted list */
-			separatorAdded=FALSE;
-			for(iter=sortedList; iter; iter=g_list_next(iter))
-			{
-				/* Get window currently iterated */
-				window=XFDASHBOARD_WINDOW_TRACKER_WINDOW(iter->data);
-				if(!window) continue;
-
-				/* Get workspace of window */
-				windowWorkspace=xfdashboard_window_tracker_window_get_workspace(window);
-
-				/* Add separator if currently iterated window is not on active
-				 * workspace then all following windows are not on active workspace
-				 * anymore and a separator is added to split them from the ones
-				 * on active workspace. But add this separator only once.
-				 */
-				if(windowWorkspace!=activeWorkspace &&
-					!separatorAdded)
-				{
-					menuItem=xfdashboard_popup_menu_item_separator_new();
-					clutter_actor_set_x_expand(menuItem, TRUE);
-					xfdashboard_popup_menu_add_item(XFDASHBOARD_POPUP_MENU(popup), XFDASHBOARD_POPUP_MENU_ITEM(menuItem));
-
-					separatorAdded=TRUE;
-				}
-
-				/* Create menu item for window */
-				menuItem=xfdashboard_popup_menu_item_button_new();
-				xfdashboard_label_set_text(XFDASHBOARD_LABEL(menuItem), xfdashboard_window_tracker_window_get_name(window));
-				clutter_actor_set_x_expand(menuItem, TRUE);
-				xfdashboard_popup_menu_add_item(XFDASHBOARD_POPUP_MENU(popup), XFDASHBOARD_POPUP_MENU_ITEM(menuItem));
-
-				g_signal_connect(menuItem,
-									"activated",
-									G_CALLBACK(_xfdashboard_quicklaunch_on_favourite_popup_menu_item_activate_window),
-									window);
-			}
-
 			/* Add a separator to split windows from other actions in pop-up menu */
 			menuItem=xfdashboard_popup_menu_item_separator_new();
 			clutter_actor_set_x_expand(menuItem, TRUE);
 			xfdashboard_popup_menu_add_item(XFDASHBOARD_POPUP_MENU(popup), XFDASHBOARD_POPUP_MENU_ITEM(menuItem));
-
-			/* Release allocated resources */
-			g_list_free(sortedList);
-			g_object_unref(windowTracker);
 		}
 
 		/* Add menu item to launch application if it is not running */
@@ -797,7 +692,14 @@ static void _xfdashboard_quicklaunch_on_favourite_popup_menu(XfdashboardQuicklau
 								appInfo);
 		}
 
-// TODO: Add actions from GAppInfo
+		/* Add application actions */
+		if(xfdashboard_application_button_add_popup_menu_items_for_actions(appButton, XFDASHBOARD_POPUP_MENU(popup))>0)
+		{
+			/* Add a separator to split windows from other actions in pop-up menu */
+			menuItem=xfdashboard_popup_menu_item_separator_new();
+			clutter_actor_set_x_expand(menuItem, TRUE);
+			xfdashboard_popup_menu_add_item(XFDASHBOARD_POPUP_MENU(popup), XFDASHBOARD_POPUP_MENU_ITEM(menuItem));
+		}
 
 		/* Add "Remove from favourites" if application button is for a favourite application */
 		if(xfdashboard_stylable_has_class(XFDASHBOARD_STYLABLE(appButton), "favourite-app"))
@@ -1638,7 +1540,7 @@ static void _xfdashboard_quicklaunch_update_icons_from_property(XfdashboardQuick
 	/* Now re-add all application icons for current favourites */
 	for(i=0; i<priv->favourites->len; i++)
 	{
-		/* Create application button from desktop file and hide label in quicklaunch */
+		/* Get desktop file to create application button for in quicklaunch */
 		desktopFile=(GValue*)g_ptr_array_index(priv->favourites, i);
 
 		desktopFilename=g_value_get_string(desktopFile);
@@ -1649,6 +1551,12 @@ static void _xfdashboard_quicklaunch_update_icons_from_property(XfdashboardQuick
 				if(!appInfo) appInfo=xfdashboard_desktop_app_info_new_from_desktop_id(desktopFilename);
 			}
 
+		/* If we could not get application information for desktop file, do not
+		 * create the application button.
+		 */
+		if(!appInfo) continue;
+
+		/* Create application button from desktop file */
 		actor=_xfdashboard_quicklaunch_create_favourite_actor(self, appInfo);
 		clutter_actor_show(actor);
 		clutter_actor_insert_child_below(CLUTTER_ACTOR(self), actor, priv->separatorFavouritesToDynamic);

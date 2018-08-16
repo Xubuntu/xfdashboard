@@ -1,3 +1,588 @@
+commit 1940b1a5ea2c00898ef74ef2d6df75debaed86e8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 7 10:27:46 2018 +0200
+
+    Add missing POTFILES files and fix distcheck warning for automake (I believe it affects version 1.15+)
+
+commit a92f3f30f80c3430dab8c33732b86b73846b2ebc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 7 08:01:40 2018 +0200
+
+    Fix warning when old and/or new monitor in signal handler is NULL at windows view
+
+commit 7ac04e13ac3b698d60998e0725e00c4d0e0f060f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 7 07:55:31 2018 +0200
+
+    Fix warning in "hot-corner" plugin when window tracker returns NULL for active window
+
+commit 0c506e79e000d3a5d9a7c5c0a96fb53b47feefb8
+Merge: 0b531cf 35cbe7d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 1 06:30:18 2018 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 0b531cfdbdbc7ea016290cf71a94561f06707d62
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 1 06:29:41 2018 +0200
+
+    I18n: Updated translations (tr)
+
+commit 35cbe7df8aca834bea546d5e12c71568c6d4900d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jul 26 15:17:05 2018 +0200
+
+    Fix handling signal "workspace-changed" for windows
+
+commit 51715621ccb230669fe38d50ac03b732880508e1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jul 13 07:24:38 2018 +0200
+
+    Fix serveral signal signatures (closures, marshal, signal handlers/callbacks) for XfdashboardWindowTrackerWindow and its derived sub-classes (e.g. XfdashboardWindowTrackerWindowX11).
+    
+    Another fix for issue GH #149
+
+commit 3d5680d810044e310f631813953cfd4f6350df58
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 28 06:58:25 2018 +0200
+
+    I18n: Updated translations (de)
+
+commit ed3770703ea9c7b7609b090e6b08a10e78c6b9ec
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Jun 28 06:57:00 2018 +0200
+
+    Add debug messages to XfdashboardLiveWorkspace and its decision if a window is visible or not
+
+commit 0a1fe71d54d443a272af410bfca3748d9b089e33
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 26 19:09:07 2018 +0200
+
+    Adjust XfdashboardLiveWindowSimple to make use of new signal "closed" for windows. Also added new property "destroy-on-close" to XfdashboardLiveWindowSimple which is set to TRUE by default. If this property is set to TRUE the actor will be automatically destroyed when the window was closed.
+    
+    Could (hopefully) fix issue GH #149
+
+commit 84e5d8587bcd2c5b8643d2873a7e0364039b11f1
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 26 16:22:25 2018 +0200
+
+    Typo fixes:
+    
+    enviroment → environment
+    criterias → criteria
+    colum → column
+    
+    Thanks to Unit 193 :)
+
+commit 1c22ad3fc0d763c55be9259bbcbe494bd684ea06
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 26 15:37:55 2018 +0200
+
+    Adjust stage to make use of new signal "closed" for windows.
+
+commit 85d4e6c02f91bdd67d365ec27c7a840fc5d48d66
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Jun 26 07:45:54 2018 +0200
+
+    Implement new signal "closed" at window interface XfdashboardWindowTrackerWindow and implement a default signal handler at window manager interface XfdashboardWindowTracker also which emits the new windows' "closed" signal and will be inherited by all backend by default.
+
+commit cbed0b6e6ac8540ef290a3367a8f6e81850b342c
+Merge: 032ac3a 13ecc64
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 18 11:18:20 2018 +0200
+
+    Merge branch 'master' of github.com:gmc-holle/xfdashboard
+
+commit 032ac3a37fefaa3b95ecf624996bf6048a02cd65
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 18 11:16:50 2018 +0200
+
+    Do not create application button for desktop file not found.
+
+commit 92f8511ef80a32455245d3d20fc9cd95fda7023b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 18 11:06:36 2018 +0200
+
+    Add signal 'style-revalidated' to interface XfdashboardStylable
+    
+    This signal is emitted when the style information for a XfdashboardStylable derived object was invalidated and the new style information was calculated and applied. This signal is mostly useful for stylable (inheriting XfdashboardStylable interface) non-actor (no sub-class of #XfdashboardActor) objects to also invalidate their style information and to get them recalculated and applied if they depend on the stylable object which emitted the signal. Connected XfdashboardDynamicTableLayout layout manager to this signal.
+    
+    This commit fixes issue GH #168
+
+commit 9c352b2d269862452f26496470455c637c5867fd
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 18 08:44:49 2018 +0200
+
+    Make XfdashboardDynamicTableLayout stylable and add a new (stylable) property "fixed-columns" to disable dynamic allocation of columns depending on largest width of a visible child and enforce a fixed number of columns. Setting this property to 0 (default) will disable this feature.
+    
+    This commit addresses issue GH #168
+
+commit 13ecc6455bf018b0cb63289052021a18220fb5c5
+Merge: c332913 2710e40
+Author: gmc-holle <nomad@froevel.de>
+Date:   Sat May 5 15:18:56 2018 +0200
+
+    Merge pull request #170 from gsantner/gsantner_master
+    
+    Add blue theme screenshot
+
+commit 2710e40c6f47fc26dfacf44abf88f0bfa261fce3
+Author: Gregor Santner <gsantner@mailbox.org>
+Date:   Fri May 4 18:17:21 2018 +0200
+
+    Add blue theme screenshot
+    
+    * fixes #162
+
+commit c332913e59442114925c6004e2ce97201bcf0d2f
+Merge: b712d58 61059de
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 4 10:05:48 2018 +0200
+
+    Merge github.com:gmc-holle/xfdashboard
+
+commit b712d58692b9dc261a58991a0585dd5343e57d86
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 4 10:04:14 2018 +0200
+
+    Fix overriding a binding in hash table as g_hash_table_insert preserves the already stored key and frees the passed one but g_hash_table_replace will free the already stored key and use the passed key instead.
+    
+    This commit addresses issue GH #167
+
+commit 518691b1472640b0fa18de776b8bc86795e3c341
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 4 09:42:58 2018 +0200
+
+    Changed loading key bindings to one-or-nothing to incremental loading.
+    
+    The default behaviour how bindings are loaded has been changed. Previsouly it tried to the first bindings configuration file from these location (in this order): The full path defined at environment variable XFDASHBOARD_BINDINGS_POOL_FILE (if debug mode was enable at configure script), the user's configuration folder (usually $HOME/.config/xfdashboard) and at last the system-wide folder. Now it tries to laod the system-wide one first, then the one at user's configuration folder and merges all bindings loaded from there to the one already loaded. At last it check if the environment variable is set (no need for debug mode anymore) and loads the bindings from this file and merges them.
+    
+    This commit addresses issue GH #167
+
+commit 61059defdcd4312232351da266702dab0b37a341
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri May 4 09:42:58 2018 +0200
+
+    Changed loading key bindings to one-or-nothing to incremental loading.
+    
+    The default behaviour how bindings are loaded has been changed. Previsouly it tried to the first bindings configuration file from these location (in this order): The full path defined at environment variable XFDASHBOARD_BINDINGS_POOL_FILE (if debug mode was enable at configure script), the user's configuration folder (usually $HOME/.config/xfdashboard) and at last the system-wide folder. Now it tries to laod the system-wide one first, then the one at user's configuration folder and merges all bindings loaded from there to the one already loaded. At last it check if the environment variable is set (no need for debug mode anymore) and loads the bindings from this file and merges them.
+    
+    This commit addresses issue GH #164
+
+commit 06be04a59426aa26baae851e16630585a4e73af0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 27 06:40:32 2018 +0200
+
+    Fix typo
+
+commit d8e717765174d05e3be66e1f4724f33387024ecc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 27 06:38:23 2018 +0200
+
+    Add property to search result container items in icon view mode to get the icon also displayed as in list mode.
+
+commit fad37c87c85985fa5f42a115446f7e96472ef77b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Mar 26 08:07:10 2018 +0200
+
+    Fix indention
+
+commit 0ee69571f929b44430ba44fd347f6444c8636333
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Feb 9 10:19:37 2018 +0100
+
+    Remove debug messages
+
+commit 11886db92b89f2e34adc18293e46eeb9d2d2ce4f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Feb 9 10:16:41 2018 +0100
+
+    Hardening creation of singleton except window tracker related ones as they are too dynamic.
+
+commit ab61859bb14c7eb7b71125546dfc1c447aba9f46
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 6 16:37:35 2018 +0100
+
+    Fix signal signature (closure) for signal "actor-created" at XfdashboardStage.
+    
+    This commit fixes for issue GH #165
+
+commit 2461f52972d301b6b20a9272d056518265d13ae3
+Merge: 880c74a 5c1ea09
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 24 07:12:27 2017 +0100
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 880c74ae8a8a6f11731f30e8daa77eeadd5a2720
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 24 07:10:10 2017 +0100
+
+    Fix translatable string
+    
+    Fixes issue GH #163
+
+commit 5c1ea09e09d087225703abede8f01f9e3f53c2ca
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Nov 23 06:29:55 2017 +0100
+
+    Fix typo
+
+commit aef30c8f92ba77651c93c60b4c6af0211cd4fc26
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 21 17:35:08 2017 +0100
+
+    Fix typo
+
+commit a5dc96881907ed6c96acd5c78a0fad80675f3771
+Merge: cfddbc5 553b28a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 21 14:08:27 2017 +0100
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit cfddbc5d96c91f771afd150d74b2814e6ae10869
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 21 14:01:31 2017 +0100
+
+    Prevent showing "show X more results..." text in button when showing all results was requested regardless if number of results exceed a calculated maximum.
+    
+    Hopefully fixes issue GH #152
+
+commit 553b28af33e9d042de7212164378796f88ef4fe3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Nov 13 07:37:26 2017 +0100
+
+    I18n: Updated translations (tr,sr)
+
+commit 5d88f0556f500554ccf500bd8fb7bbaa2cf9932d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 7 17:43:25 2017 +0100
+
+    Support keywords in applications search provider
+    
+    This commit fixes issue GH #159
+
+commit c687cfc42fc59a2e46cad9658a9f7e289655f3e5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Nov 2 08:40:40 2017 +0100
+
+    Only load actions and keywords on first access
+    
+    To reduce I/O when secondary source is used only load actions and keywords on first access and not at start-up or each reload of menu item
+
+commit 68d63b2d024d7ae47e12cdb582d3e05a3f548dd4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 27 11:51:55 2017 +0200
+
+    Fix escaping text before setting it at label
+
+commit 276205099956c4e4ba9e7728c8d3107dc8057cc6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 27 11:24:14 2017 +0200
+
+    Remove trailing separator because no other menu items will follow - never.
+    
+    This commit addresses issue GH #160
+
+commit dbdc57dcc0c8dac6f433b8c6b91f7272a6fb5358
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 27 11:21:56 2017 +0200
+
+    Add pop-up menu to menu items in result actors of application search provider in search view
+    
+    The pop-up menus used at application buttons (result actors of application seaarch provider) in search view is mostly the same as used in quicklaunch, except that the menu items to add or remove the application from quicklaunch are not included.
+    
+    This commit addresses issue GH #160
+
+commit d8fb82a62c7681300f2de3cdbb3d3f8d01df1704
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 27 11:03:18 2017 +0200
+
+    Add pop-up menu to menu items in applications view
+    
+    The pop-up menus used at application buttons in applications view is mostly the same as used in quicklaunch, except that the menu items to add or remove the application from quicklaunch are not included.
+    
+    This commit addresses issue GH #160
+
+commit 100cb33edb488dcb8bfd89d84ca644265e0f7403
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 27 10:16:11 2017 +0200
+
+    Split out pop-up menu setup functions from XfdashboardQuicklaunch to XfdashboardApplicationButton to make these functions reusable at other actor classes.
+    
+    This commit addresses issue GH #160
+
+commit cc5fb119af0e5cfafea8d6d50b7f84ee1913cfef
+Merge: 95cfd98 bfa435d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Oct 26 08:11:48 2017 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 95cfd982cce89b7e3a380d6b21495e48aaef5408
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Oct 26 08:09:52 2017 +0200
+
+    Cancel active pop-up menu when application was suspended
+    
+    An active pop-up menu did not get notified when a daemonized instance was suspended. The result was that if the application resumed, the pop-up menu was still active. But that is not expected by the user. So cancel pop-up menu now when application suspends.
+    
+    This commit addresses issue GH #158
+
+commit bfa435d421946807c030690d9ffbb46a0526bcf9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Oct 25 16:18:23 2017 +0200
+
+    I18n: Updated translations (tr)
+
+commit 408be5e5d59453fe41e91c45973cc0808f532480
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Oct 25 10:41:50 2017 +0200
+
+    Add support for keywords in desktop entry
+    
+    This commit addresses issue GH #159
+
+commit 75bed1592fbbb0cd0fabd11521c74e76a53713b8
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Oct 25 10:15:57 2017 +0200
+
+    Implement fallback code path to get application actions of a desktop entry
+    
+    Garcon prior to version 0.6.0 does not provide accessor function for application actions of a desktop entry and the first version providing these function returns the action in an unpredictable order but not the order as listed in "Action" keyword of desktop entry. So we need to load the secondary source and grab them ourselve.
+    
+    The secondary source in XfdashboardDesktopAppInfo is called so although it is the same file as used for GarconMenuItem. But it is not the same source because the file is loaded via a GKeyFile object to get access to entries not provided by garcon or implemented in an unusable way for xfdashboard.
+    
+    This commit addresses issue GH #158
+
+commit 42d4d0567b5bb5e28f6ba353fcb6ed76cfd136eb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 24 18:27:06 2017 +0200
+
+    Add simple '--version' command-line parameter to determine the version of xfdashboard running.
+    
+    * If this option is used and no instance is running, show version and quit
+    * If this option is used and an instance is running (usually the daemon) then show version of xfdashboard executed with this option is the terminal where it is executed and the daemon is show in the terminal (or in ~/.xsession-errors) where the daemon is runnning
+    
+    It is really a very simple version requesting option.
+
+commit bc6cee87160f546ea8281d9f342414c61753d599
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 24 17:53:48 2017 +0200
+
+    Quit (or suspend) application when an application action in pop-up menu was selected.
+    
+    This commit addresses issue GH #158
+
+commit d89727410c8de8456c2723e9bb730562fa033e65
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 24 17:49:31 2017 +0200
+
+    Prevent background image layer to be deleted when workspace is changed at XfdashboardLiveWorkspace and show background image layer when desktop window can be found when changing background image type to desktop.
+    
+    This commit should fix issue GH #148
+
+commit 58e2c25e06ddc5e67bd6da922145cd256bcaa429
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Oct 23 12:23:18 2017 +0200
+
+    Fix function arguments for pop-up menu item callbacks in XfdashboardQuicklaunch
+
+commit 15b5708e57cf54fa19fbc980ad24185f34031711
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Oct 23 12:17:57 2017 +0200
+
+    Implemented actions into pop-up menu of application buttons at quicklaunch
+    
+    This commit finally closes issue GH #158
+
+commit f89e417b417c4f37b837c688322a8ec17491a1f6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Oct 23 09:25:18 2017 +0200
+
+    Remove wrong documentation block as this file is not documented at all yet
+
+commit 403bb4b03dfa1bc0584c86dbe0339e6a8c433242
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Oct 23 07:38:08 2017 +0200
+
+    Revert commit 1b02280bb6999d3c68f8fdaa25a1cde5e428ec0b as it renders pop-up menu at application buttons in quicklaunch unreachable.
+    
+    This commit moved pop-up menus being shown only on left-clicks (and touchscreen taps) instead of right clicks and the left click is first handled by application button activation event handler, usually starting the application and quitting xfdashboard. So pop-up menus are never reached.
+    
+    Reverting this commit turns on right-clicks again.
+
+commit f7e9436237c95ce7d0ccc49ad2ce05b9f2029b9c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 20 09:47:11 2017 +0200
+
+    Fix typo in API documentation
+
+commit 2784f55276608deadbdcb9145bebcabaf13a50f5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 20 09:37:22 2017 +0200
+
+    On reload of a desktop entry (XfdashboardDesktopAppInfo) also update path to binary executable file of the application
+
+commit 972389e2ef4116ac8c01cb8a2dd721b981ddf1a9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 20 09:32:41 2017 +0200
+
+    Load application actions in XfdashboardDesktopAppInfo
+    
+    This commit addresses issue GH #158
+
+commit f279ee6ac0e451920f76daaffd0f1d8de7f0d065
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Oct 20 07:13:50 2017 +0200
+
+    Add new informational object XfdashboardDesktopAppInfoAction containing information about a desktop entry's actions.
+    
+    This commit addresses issue GH #158
+
+commit ee9d672442c7cc4eca485542c8353f53dcab8efa
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Oct 19 08:40:17 2017 +0200
+
+    Fix typo in API documentation
+
+commit 78c1b3d9c1bb3dce9e279e7f04a92f6257e748af
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 17 14:26:13 2017 +0200
+
+    Add correct marshaler signature to marshal.list and usage of closure in XfdashboardSearchResultContainer::item-clicked as variants have their own type for generation by glib-genmarshal. Declaring a variant as object may cause closure assertion at some systems and item-clicked signals are not emitted anymore which then cause problems in activation in search results.
+
+commit 211b3639e468acc97a435374e9fff3b6e519aba4
+Merge: b04152d 4ca56f5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 10 09:06:52 2017 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit b04152d2d4df0852cf557e7d069570b4e22a6ca3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Oct 10 09:06:10 2017 +0200
+
+    I18n: Updated translations (lt, fr, es, de, ca, el, sr, he, tr, it_IT, pl) and new translations (ja)
+
+commit 4ca56f59dd47bbea6a9c6c351ce0d576206348dd
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Oct 5 10:55:06 2017 +0200
+
+    Fix function to lookup X11 window from GDK window for a ClutterStage in GDK backend
+    
+    When xfdashboard is run in daemon mode the stage window will be created on first visible state. That means that looking up GDK window for a stage will return NULL at start-up until the stage is shown for the very first time. When iterating through the stages and determining GDK windows we need to respect this, otherwise xfdashboard crashes in daemon mode at start-up when resolving a NULL pointer of GDK window to a X11 window ID (XID).
+
+commit 3b8b8c26e60234a9ad1b1659a733a187842ca030
+Merge: dc60c81 7860d9e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Oct 4 10:29:21 2017 +0200
+
+    Merge branch 'master' of github.com:gmc-holle/xfdashboard
+
+commit dc60c81a8d546be4a1711090c26f2a99750907d2
+Merge: 8973b5a a4564d3
+Author: gmc-holle <nomad@froevel.de>
+Date:   Wed Oct 4 10:23:30 2017 +0200
+
+    Merge pull request #157 from TheZoq2/master
+    
+    Make xfdashboard touchscreen-aware.
+    
+    Thanks to TheZoq2 for his work :)
+    
+    Fixes issue GH #157
+
+commit 7860d9ec38f61af395dc2087452c1e85f9966d75
+Merge: 8973b5a a4564d3
+Author: gmc-holle <nomad@froevel.de>
+Date:   Wed Oct 4 10:23:30 2017 +0200
+
+    Merge pull request #157 from TheZoq2/master
+    
+    Make xfdashboard touchscreen-aware.
+    
+    Thanks to TheToq2 for his work :)
+    
+    Fixes issue GH #157
+
+commit a4564d3291e5e67d86c990570de9348aad28b772
+Author: TheZoq2 <frans.skarman@gmail.com>
+Date:   Wed Oct 4 09:28:34 2017 +0200
+
+    Rename touch utility function and add return value to documentation
+
+commit 64c2d0a2abf505840e41f2370c926787b3517ddb
+Author: TheZoq2 <frans.skarman@gmail.com>
+Date:   Tue Oct 3 16:46:12 2017 +0200
+
+    Use tabs instead of spaces in popup menu item button
+
+commit d08dc18dfc86dc9e471d63d99e30b92860a1130b
+Author: TheZoq2 <frans.skarman@gmail.com>
+Date:   Tue Oct 3 16:45:37 2017 +0200
+
+    Correct usage of tabs instead of spaces for indentation
+
+commit 4c4d42ff3e51a5478355f639cf1e43ee3d2e21f1
+Author: TheZoq2 <frans.skarman@gmail.com>
+Date:   Tue Oct 3 16:42:19 2017 +0200
+
+    Add utility function for checking if a click action was a touch or a left click
+
+commit 1b8d11a9dee9c7b762b47e2a8beb1b1e01df5090
+Author: TheZoq2 <frans.skarman@gmail.com>
+Date:   Tue Oct 3 15:55:17 2017 +0200
+
+    add touch handling to popup-menu
+
+commit 1b02280bb6999d3c68f8fdaa25a1cde5e428ec0b
+Author: TheZoq2 <frans.skarman@gmail.com>
+Date:   Tue Oct 3 15:52:52 2017 +0200
+
+    Add touch handling to quicklaunch
+
+commit 6473ccb132b6623e579e7ae1b1cf3f2091bdcb80
+Author: TheZoq2 <frans.skarman@gmail.com>
+Date:   Tue Oct 3 15:30:28 2017 +0200
+
+    Add touch handling to buttons
+
+commit 6d84a1a8ac7dda40a3389de35708f02d9b4cc8f2
+Author: TheZoq2 <frans.skarman@gmail.com>
+Date:   Tue Oct 3 15:19:32 2017 +0200
+
+    Revert "Allow clicking buttons on a touch screen" in order to implement
+    it outside ClickAction
+    
+    This reverts commit 3b82a21980bd674175fae78aede158e92e2723d6.
+
+commit 3b82a21980bd674175fae78aede158e92e2723d6
+Author: TheZoq2 <frans.skarman@gmail.com>
+Date:   Mon Oct 2 17:05:41 2017 +0200
+
+    Allow clicking buttons on a touch screen
+
+commit 8973b5aa68ad1fea1a47f93209ef5e0880deb4c9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 19 08:09:34 2017 +0200
+
+    Update README for changes in requirements
+
+commit a0d3640adc3d224b6428e368e1a53bac556040ea
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 19 07:48:38 2017 +0200
+
+    Post-release version bump to 0.7.5
+
+commit 3e8032db20b49e161716e79eb90d5d54fa7c22fb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 19 07:45:11 2017 +0200
+
+    Bump version to 0.7.4
+
 commit 85080c9c9f6c40ea55d60eecae047e9a91ba5d4b
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Tue Sep 19 06:53:02 2017 +0200
