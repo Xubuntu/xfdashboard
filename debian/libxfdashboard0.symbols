@@ -26,6 +26,8 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_actor_set_can_focus@Base 0.6.0
  xfdashboard_actor_set_effects@Base 0.6.0
  xfdashboard_anchor_point_get_type@Base 0.6.0
+ xfdashboard_application_button_add_popup_menu_items_for_actions@Base 0.7.5
+ xfdashboard_application_button_add_popup_menu_items_for_windows@Base 0.7.5
  xfdashboard_application_button_execute@Base 0.6.0
  xfdashboard_application_button_get_app_info@Base 0.6.0
  xfdashboard_application_button_get_display_name@Base 0.6.0
@@ -156,6 +158,7 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_click_action_get_coords@Base 0.6.0
  xfdashboard_click_action_get_state@Base 0.6.0
  xfdashboard_click_action_get_type@Base 0.6.0
+ xfdashboard_click_action_is_left_button_or_tap@Base 0.7.5
  xfdashboard_click_action_new@Base 0.6.0
  xfdashboard_click_action_release@Base 0.6.0
  xfdashboard_collapse_box_get_collapse_orientation@Base 0.6.0
@@ -191,9 +194,20 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_debug_flags@Base 0.7.4
  xfdashboard_debug_message@Base 0.7.4
  xfdashboard_debug_messagev@Base 0.7.4
+ xfdashboard_desktop_app_info_action_get_command@Base 0.7.5
+ xfdashboard_desktop_app_info_action_get_icon_name@Base 0.7.5
+ xfdashboard_desktop_app_info_action_get_name@Base 0.7.5
+ xfdashboard_desktop_app_info_action_get_type@Base 0.7.5
+ xfdashboard_desktop_app_info_action_set_command@Base 0.7.5
+ xfdashboard_desktop_app_info_action_set_icon_name@Base 0.7.5
+ xfdashboard_desktop_app_info_action_set_name@Base 0.7.5
+ xfdashboard_desktop_app_info_get_actions@Base 0.7.5
  xfdashboard_desktop_app_info_get_file@Base 0.6.0
+ xfdashboard_desktop_app_info_get_keywords@Base 0.7.5
  xfdashboard_desktop_app_info_get_type@Base 0.6.0
  xfdashboard_desktop_app_info_is_valid@Base 0.6.0
+ xfdashboard_desktop_app_info_launch_action@Base 0.7.5
+ xfdashboard_desktop_app_info_launch_action_by_name@Base 0.7.5
  xfdashboard_desktop_app_info_new_from_desktop_id@Base 0.6.0
  xfdashboard_desktop_app_info_new_from_file@Base 0.6.0
  xfdashboard_desktop_app_info_new_from_menu_item@Base 0.6.0
@@ -211,12 +225,14 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_dump_actor@Base 0.6.0
  xfdashboard_dynamic_table_layout_get_column_spacing@Base 0.6.0
  xfdashboard_dynamic_table_layout_get_columns@Base 0.6.0
+ xfdashboard_dynamic_table_layout_get_fixed_columns@Base 0.7.5
  xfdashboard_dynamic_table_layout_get_number_children@Base 0.6.0
  xfdashboard_dynamic_table_layout_get_row_spacing@Base 0.6.0
  xfdashboard_dynamic_table_layout_get_rows@Base 0.6.0
  xfdashboard_dynamic_table_layout_get_type@Base 0.6.0
  xfdashboard_dynamic_table_layout_new@Base 0.6.0
  xfdashboard_dynamic_table_layout_set_column_spacing@Base 0.6.0
+ xfdashboard_dynamic_table_layout_set_fixed_columns@Base 0.7.5
  xfdashboard_dynamic_table_layout_set_row_spacing@Base 0.6.0
  xfdashboard_dynamic_table_layout_set_spacing@Base 0.6.0
  xfdashboard_emblem_effect_get_anchor_point@Base 0.6.0
@@ -332,11 +348,13 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_live_window_set_show_subwindows@Base 0.7.4
  xfdashboard_live_window_set_title_actor_padding@Base 0.6.0
  xfdashboard_live_window_simple_display_type_get_type@Base 0.7.4
+ xfdashboard_live_window_simple_get_destroy_on_close@Base 0.7.5
  xfdashboard_live_window_simple_get_display_type@Base 0.7.4
  xfdashboard_live_window_simple_get_type@Base 0.7.4
  xfdashboard_live_window_simple_get_window@Base 0.7.4
  xfdashboard_live_window_simple_new@Base 0.7.4
  xfdashboard_live_window_simple_new_for_window@Base 0.7.4
+ xfdashboard_live_window_simple_set_destroy_on_close@Base 0.7.5
  xfdashboard_live_window_simple_set_display_type@Base 0.7.4
  xfdashboard_live_window_simple_set_window@Base 0.7.4
  xfdashboard_live_workspace_get_background_image_type@Base 0.6.0
