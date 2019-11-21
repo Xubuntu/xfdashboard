@@ -1,2 +1,2 @@
 version=3
-https://archive.xfce.org/src/apps/xfdashboard/([\d\.]+)/ xfdashboard-([\d.]+)\.tar\.bz2
+https://archive.xfce.org/src/apps/xfdashboard/(\d[\d\.]+)/ xfdashboard-([\d.]+)\.tar\.bz2
