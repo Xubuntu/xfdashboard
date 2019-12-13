@@ -2,7 +2,7 @@
  * search-manager: Single-instance managing search providers and
  *                 handles search requests
  * 
- * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,19 +38,15 @@
 
 
 /* Define this class in GObject system */
-G_DEFINE_TYPE(XfdashboardSearchManager,
-				xfdashboard_search_manager,
-				G_TYPE_OBJECT)
-
-/* Private structure - access only by public API if needed */
-#define XFDASHBOARD_SEARCH_MANAGER_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE((obj), XFDASHBOARD_TYPE_SEARCH_MANAGER, XfdashboardSearchManagerPrivate))
-
 struct _XfdashboardSearchManagerPrivate
 {
 	/* Instance related */
 	GList		*registeredProviders;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE(XfdashboardSearchManager,
+							xfdashboard_search_manager,
+							G_TYPE_OBJECT)
 
 /* Signals */
 enum
@@ -231,9 +227,6 @@ static void xfdashboard_search_manager_class_init(XfdashboardSearchManagerClass 
 	gobjectClass->dispose=_xfdashboard_search_manager_dispose;
 	gobjectClass->finalize=_xfdashboard_search_manager_finalize;
 
-	/* Set up private structure */
-	g_type_class_add_private(klass, sizeof(XfdashboardSearchManagerPrivate));
-
 	/* Define signals */
 	XfdashboardSearchManagerSignals[SIGNAL_REGISTERED]=
 		g_signal_new("registered",
@@ -267,7 +260,7 @@ static void xfdashboard_search_manager_init(XfdashboardSearchManager *self)
 {
 	XfdashboardSearchManagerPrivate		*priv;
 
-	priv=self->priv=XFDASHBOARD_SEARCH_MANAGER_GET_PRIVATE(self);
+	priv=self->priv=xfdashboard_search_manager_get_instance_private(self);
 
 	/* Set default values */
 	priv->registeredProviders=NULL;
@@ -324,7 +317,7 @@ gboolean xfdashboard_search_manager_register(XfdashboardSearchManager *self, con
 	data=_xfdashboard_search_manager_entry_new(inID, inProviderType);
 	if(!data)
 	{
-		g_warning(_("Failed to register seaarch provider %s of type %s"),
+		g_warning(_("Failed to register search provider %s of type %s"),
 					inID,
 					g_type_name(inProviderType));
 		return(FALSE);

@@ -2,7 +2,7 @@
  * popup-menu: A pop-up menu with menu items performing an action when an menu
  *             item was clicked
  * 
- * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,15 +69,6 @@
 /* Define this class in GObject system */
 static void _xfdashboard_popup_menu_focusable_iface_init(XfdashboardFocusableInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE(XfdashboardPopupMenu,
-						xfdashboard_popup_menu,
-						XFDASHBOARD_TYPE_BACKGROUND,
-						G_IMPLEMENT_INTERFACE(XFDASHBOARD_TYPE_FOCUSABLE, _xfdashboard_popup_menu_focusable_iface_init));
-
-/* Private structure - access only by public API if needed */
-#define XFDASHBOARD_POPUP_MENU_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE((obj), XFDASHBOARD_TYPE_POPUP_MENU, XfdashboardPopupMenuPrivate))
-
 struct _XfdashboardPopupMenuPrivate
 {
 	/* Properties related */
@@ -107,6 +98,12 @@ struct _XfdashboardPopupMenuPrivate
 
 	guint							suspendSignalID;
 };
+
+G_DEFINE_TYPE_WITH_CODE(XfdashboardPopupMenu,
+						xfdashboard_popup_menu,
+						XFDASHBOARD_TYPE_BACKGROUND,
+						G_ADD_PRIVATE(XfdashboardPopupMenu)
+						G_IMPLEMENT_INTERFACE(XFDASHBOARD_TYPE_FOCUSABLE, _xfdashboard_popup_menu_focusable_iface_init));
 
 /* Properties */
 enum
@@ -934,9 +931,6 @@ static void xfdashboard_popup_menu_class_init(XfdashboardPopupMenuClass *klass)
 
 	clutterActorClass->allocate=_xfdashboard_popup_menu_allocate;
 
-	/* Set up private structure */
-	g_type_class_add_private(klass, sizeof(XfdashboardPopupMenuPrivate));
-
 	/* Define properties */
 	/**
 	 * XfdashboardPopupMenu:destroy-on-cancel:
@@ -1138,7 +1132,7 @@ static void xfdashboard_popup_menu_init(XfdashboardPopupMenu *self)
 	XfdashboardPopupMenuPrivate		*priv;
 	ClutterLayoutManager			*layout;
 
-	priv=self->priv=XFDASHBOARD_POPUP_MENU_GET_PRIVATE(self);
+	priv=self->priv=xfdashboard_popup_menu_get_instance_private(self);
 
 	/* Set up default values */
 	priv->destroyOnCancel=FALSE;

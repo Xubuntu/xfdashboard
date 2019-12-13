@@ -1,7 +1,7 @@
 /*
  * utils: Common functions, helpers and definitions
  * 
- * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,6 +133,7 @@ gchar** xfdashboard_split_string(const gchar *inString, const gchar *inDelimiter
 gboolean xfdashboard_is_valid_id(const gchar *inString);
 
 gchar* xfdashboard_get_enum_value_name(GType inEnumClass, gint inValue);
+gint xfdashboard_get_enum_value_from_nickname(GType inEnumClass, const gchar *inNickname);
 
 void xfdashboard_dump_actor(ClutterActor *inActor);
 

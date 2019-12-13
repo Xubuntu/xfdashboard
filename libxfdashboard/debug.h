@@ -1,7 +1,7 @@
 /*
  * debug: Helpers for debugging
  * 
- * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ G_BEGIN_DECLS
  * @XFDASHBOARD_DEBUG_IMAGES: Images related debug message (image cache etc.)
  * @XFDASHBOARD_DEBUG_WINDOWS: Windows related debug message (window tracker, workspaces, windows, monitors etc.)
  * @XFDASHBOARD_DEBUG_PLUGINS: Plug-ins related debug message (plugin manager and plugin base class)
+ * @XFDASHBOARD_DEBUG_ANIMATION: Animation related debug message
  *
  * Debug categories
  */
@@ -57,6 +58,7 @@ typedef enum /*< skip,flags,prefix=XFDASHBOARD_DEBUG >*/
 	XFDASHBOARD_DEBUG_IMAGES		= 1 << 5,
 	XFDASHBOARD_DEBUG_WINDOWS		= 1 << 6,
 	XFDASHBOARD_DEBUG_PLUGINS		= 1 << 7,
+	XFDASHBOARD_DEBUG_ANIMATION		= 1 << 8
 } XfdashboardDebugFlags;
 
 #ifdef XFDASHBOARD_ENABLE_DEBUG

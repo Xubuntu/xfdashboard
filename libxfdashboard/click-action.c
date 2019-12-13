@@ -10,7 +10,7 @@
  *
  *               See bug: https://bugzilla.gnome.org/show_bug.cgi?id=714993
  * 
- * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
  *         original by Emmanuele Bassi <ebassi@linux.intel.com>
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -120,14 +120,6 @@
 
 
 /* Define this class in GObject system */
-G_DEFINE_TYPE(XfdashboardClickAction,
-				xfdashboard_click_action,
-				CLUTTER_TYPE_ACTION);
-
-/* Private structure - access only by public API if needed */
-#define XFDASHBOARD_CLICK_ACTION_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE((obj), XFDASHBOARD_TYPE_CLICK_ACTION, XfdashboardClickActionPrivate))
-
 struct _XfdashboardClickActionPrivate
 {
 	/* Properties related */
@@ -153,6 +145,10 @@ struct _XfdashboardClickActionPrivate
 	gfloat					pressX;
 	gfloat					pressY;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE(XfdashboardClickAction,
+							xfdashboard_click_action,
+							CLUTTER_TYPE_ACTION);
 
 /* Properties */
 enum
@@ -352,10 +348,10 @@ static gboolean _xfdashboard_click_action_on_captured_event(XfdashboardClickActi
 	switch(clutter_event_type(inEvent))
 	{
 		case CLUTTER_TOUCH_END:
-			hasButton=FALSE;
-
 		case CLUTTER_BUTTON_RELEASE:
 			if(!priv->isHeld) return(CLUTTER_EVENT_STOP);
+
+			hasButton=(clutter_event_type(inEvent)==CLUTTER_TOUCH_END ? FALSE : TRUE);
 
 			if((hasButton && clutter_event_get_button(inEvent)!=priv->pressButton) ||
 				(hasButton && clutter_event_get_click_count(inEvent)!=1) ||
@@ -457,9 +453,9 @@ static gboolean _xfdashboard_click_action_on_event(XfdashboardClickAction *self,
 	switch(clutter_event_type(inEvent))
 	{
 		case CLUTTER_TOUCH_BEGIN:
-			hasButton=FALSE;
-
 		case CLUTTER_BUTTON_PRESS:
+			hasButton=(clutter_event_type(inEvent)==CLUTTER_TOUCH_BEGIN ? FALSE : TRUE);
+
 			/* We only handle single clicks if it is pointer device */
 			if(hasButton && clutter_event_get_click_count(inEvent)!=1)
 			{
@@ -652,9 +648,6 @@ static void xfdashboard_click_action_class_init(XfdashboardClickActionClass *kla
 	gobjectClass->set_property=_xfdashboard_click_action_set_property;
 	gobjectClass->get_property=_xfdashboard_click_action_get_property;
 
-	/* Set up private structure */
-	g_type_class_add_private(klass, sizeof (XfdashboardClickActionPrivate));
-
 	/* Define properties */
 	/**
 	 * XfdashboardClickAction:pressed:
@@ -784,7 +777,7 @@ static void xfdashboard_click_action_init(XfdashboardClickAction *self)
 {
 	XfdashboardClickActionPrivate	*priv;
 
-	priv=self->priv=XFDASHBOARD_CLICK_ACTION_GET_PRIVATE(self);
+	priv=self->priv=xfdashboard_click_action_get_instance_private(self);
 
 	/* Set up default values */
 	priv->longPressThreshold=-1;

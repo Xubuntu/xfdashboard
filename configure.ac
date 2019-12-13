@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [7])
-m4_define([xfdashboard_version_micro], [5])
-m4_define([xfdashboard_version_build], [1940b1a])
+m4_define([xfdashboard_version_micro], [7])
+m4_define([xfdashboard_version_build], [5383d20])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -24,8 +24,8 @@ dnl *** Minimum package version needed ***
 dnl **************************************
 m4_define([wnck_minimum_version], [3.0])
 m4_define([clutter_minimum_version], [1.12.0])
-m4_define([glib_minimum_version], [2.32])
-m4_define([gio_minimum_version], [2.32])
+m4_define([glib_minimum_version], [2.38])
+m4_define([gio_minimum_version], [2.38])
 m4_define([garcon_minimum_version], [0.2.0])
 m4_define([xfconf_minimum_version], [4.13.0])
 m4_define([xfconf_legacy_minimum_version], [4.10.0])
@@ -45,7 +45,7 @@ dnl ***************************
 dnl *** Initialize autoconf ***
 dnl ***************************
 AC_COPYRIGHT([Copyright (c) 2012-2016 Stephan Haller <nomad@froevel.de>])
-AC_INIT([xfdashboard], [xfdashboard_version], [http://goodies.xfce.org/projects/applications/xfdashboard/start], [xfdashboard])
+AC_INIT([xfdashboard], [xfdashboard_version], [http://docs.xfce.org/apps/xfdashboard/start], [xfdashboard])
 AC_PREREQ([2.50])
 AC_REVISION([xfdashboard_version_build])
 
@@ -127,7 +127,7 @@ AC_SUBST(LIBM)
 dnl ******************************
 dnl *** Check for i18n support ***
 dnl ******************************
-XDT_I18N([ca da de el es fr he it_IT ja kk lt pl sr tr ])
+XDT_I18N([ca da de el es fr gl he it_IT ja kk lt pl ru ru_RU sr tr ])
 
 dnl *******************************
 dnl *** Check for X11 installed ***

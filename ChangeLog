@@ -1,3 +1,229 @@
+commit 5383d2059c58db12b7170b00ca1573352ec21fae
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Dec 3 09:20:34 2019 +0100
+
+    Bump version to 0.7.7
+
+commit ad4630e1fd00029dba57dbc6887883c4e7874a24
+Author: Kevin Bowen <kevin.bowen@gmail.com>
+Date:   Fri Nov 29 07:53:14 2019 -0800
+
+    Update URLs from goodies.x.o to docs.x.o
+
+commit 6a6178126159a50556e1db1aefb9a6eadca1984b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Dec 2 10:56:57 2019 +0100
+
+    Fixed packing missing animation.xml file in themes (16230, GH#184)
+
+commit de9960dbf6c37147f8b433c687f8fbe61ed70764
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Dec 2 10:37:02 2019 +0100
+
+    I18n: New translations (gl, ru, ru_RU)
+
+commit cb8660a32ff5a914618d869f18e44e504432558f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 29 12:43:47 2019 +0100
+
+    Post-release version bump to 0.7.7
+
+commit 6b9cee9313868cfd9723fb31bd1369ee7f935922
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 29 12:33:08 2019 +0100
+
+    Bump version to 0.7.6
+
+commit 6d29d10f82fdcb091f9a37e6cbbdac0c256f918f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 29 12:31:59 2019 +0100
+
+    Update AppData
+
+commit 2b43efd6d91874da6b174693f96eff3adb91f9fc
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 29 12:19:04 2019 +0100
+
+    I18n: Updated translations (kk, ja, da, ca, lt, fr, sr, he, el, es, de, it_IT, pl, tr)
+
+commit 7ad2098817378c1435bf5ab33d52ca9c6c17d951
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 19 12:11:46 2019 +0100
+
+    Correct sender in animation.xml, copy animation XML file to all themes and enable animations
+
+commit 22b53df22b0b07b68379883fe7b0dc181ab7036b
+Merge: 2555e50 054f0ee
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 19 11:48:37 2019 +0100
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 054f0eeed0520a6319a9ed049eab7ae25c4c79af
+Merge: 6b649f5 eab8eec
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 15 14:13:14 2019 +0100
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 6b649f55f995c9ef3fff56f9ff26b490a9c120af
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Nov 15 14:12:38 2019 +0100
+
+    Complete animation XML parser and create animation XML file for default theme (xfdashboard)
+
+commit 2555e50cfd5e2823db0d8ab9e1993c350c4cc102
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 5 12:58:35 2019 +0100
+
+    Fix code comments
+
+commit eab8eecc8a54c66938f15e9932adf260acd0a36c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 5 12:02:01 2019 +0100
+
+    Add settings option to allow user to enable or disable animations at all
+
+commit a37944e150ee0f1aa7c7d8d062bc12b3b2a62850
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Nov 5 11:40:55 2019 +0100
+
+    Allow user to decide if animations should be enabled at all via Xfconf settings
+
+commit 0fa7008e0e8c7485347135fdd6b037561ef31937
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Oct 23 18:45:42 2019 +0200
+
+    Add hard-coded animation for expand and collapse of XfdashboardCollapse
+
+commit 62e05fa4fe66c1567a4e5a9a8284b59616f1fb12
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 28 10:41:22 2019 +0200
+
+    Fix "implicit-fallthrough" compiler warnings in libxfdashboard/click-action.c
+
+commit 27e3a7cc82ceba90c25862cd5a63bf1dfad6355b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 21 15:23:10 2019 +0200
+
+    Raise minimum version of Glib to 2.38 for replacements of deprecated g_type_class_add_private() function
+
+commit ce312b202dad48407277a17473a6f2627b1cc3d4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 21 15:18:48 2019 +0200
+
+    Fix runtime warning "garcon_menu_directory_equal: assertion 'GARCON_IS_MENU_DIRECTORY (other)' failed" in function _xfdashboard_applications_menu_model_find_similar_menu at libxfdashboard/applications-menu-model.c
+
+commit 8c90fcdbc048a8a692ab89db75fde8deea8c2325
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 21 15:11:11 2019 +0200
+
+    XfdashboardActor: update for g_type_class_add_private() deprecation and silence compiler warning at libxfdashboard/actor.c
+
+commit 063a27ac17f08449c548432f2d1660895d400604
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 21 14:37:12 2019 +0200
+
+    Silence compiler warning at libxfdashboard/stage.c
+
+commit a1e59c117533f7818ebd02def2366dda95e0baf2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 21 14:32:43 2019 +0200
+
+    settings: update for g_type_class_add_private() deprecation
+
+commit 7cade62603e2981fc9bde05b5b7fd0d34f5302f2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 21 14:28:21 2019 +0200
+
+    plugins: update for g_type_class_add_private() deprecation
+
+commit 3e610bd2a421f78e6f73c16e48193f1408f6c24f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 21 13:50:32 2019 +0200
+
+    libxfdashboard: update for g_type_class_add_private() deprecation
+
+commit 6454eff2aa7f9b55f56c7b058e9a727e5e5933c9
+Merge: 7add693 c911f32
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 21 08:57:18 2019 +0200
+
+    Merge branch 'master' of github.com:gmc-holle/xfdashboard
+
+commit 7add6935a002b3efbee4c2e00f23f805dea06950
+Merge: dfba993 05defe0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 21 08:44:40 2019 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 05defe0300813901d1f484e5ee1a48b4a0b3a55b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 20 14:10:34 2019 +0200
+
+    Yes, it is 2019 ... at least since nearly eight months ;)
+
+commit c911f32221e49d96396b897dc9723e94a0b3527e
+Merge: 61676fd 934ebbc
+Author: gmc-holle <nomad@froevel.de>
+Date:   Thu May 2 13:48:11 2019 +0200
+
+    Merge pull request #180 from damufo/master
+    
+    Update search-manager.c
+
+commit 934ebbc77e0e63fc5fe8e4fe2c48ea38eb5db307
+Author: Daniel Muñiz Fontoira <dani@damufo.com>
+Date:   Wed May 1 23:26:11 2019 +0200
+
+    Update search-manager.c
+    
+    Spell fix
+
+commit dfba9936e9c5ebc0a37da27b4c64437d6d5db8ed
+Merge: 1d97cd3 61676fd
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Apr 29 13:20:45 2019 +0200
+
+    Merge branch 'master' of ssh://git.xfce.org/apps/xfdashboard
+
+commit 61676fd951baa8b3b5829b91207e7b4684c90b72
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Nov 26 15:03:47 2018 +0100
+
+    Add an invalid desktop file for a desktop ID to application database to prevent that a valid desktop file for the same desktop ID will be found at path of lower prioritory which will then be store in the database as no entry exists at that point of time. The first entry found - valid or invalid - has the highest priority. Later all invalid desktop IDs in the application database are removed before populated.
+    
+    Should fix the expected behaviour at GH #169
+
+commit 1d97cd3377a703853a53c403684bc567bf383b88
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 14 12:46:56 2018 +0200
+
+    I18n: Updated translations (tr)
+    
+    Besides french the second 100% completed translation yet :)
+
+commit 9f6a2d283d2967f0a07f763fdb54b90777b69cb9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Aug 14 12:46:56 2018 +0200
+
+    I18n: Updated translations (tr)
+    
+    First 100% completed translation :)
+
+commit a7851d82ec89b3cd49952c6022813bbe6b8b0bc9
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 8 12:35:19 2018 +0200
+
+    Post-release version bump to 0.7.6
+
+commit 42291830e32441591bf1ee9055c8f91e37fa8fbe
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Aug 8 12:34:09 2018 +0200
+
+    Bump version to 0.7.5
+
 commit 1940b1a5ea2c00898ef74ef2d6df75debaed86e8
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Tue Aug 7 10:27:46 2018 +0200

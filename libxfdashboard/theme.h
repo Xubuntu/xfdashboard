@@ -2,7 +2,7 @@
  * theme: Top-level theme object (parses key file and manages loading
  *        resources like css style files, xml layout files etc.)
  * 
- * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #include <libxfdashboard/theme-css.h>
 #include <libxfdashboard/theme-layout.h>
 #include <libxfdashboard/theme-effects.h>
+#include <libxfdashboard/theme-animation.h>
 
 G_BEGIN_DECLS
 
@@ -96,6 +97,7 @@ gboolean xfdashboard_theme_load(XfdashboardTheme *self,
 XfdashboardThemeCSS* xfdashboard_theme_get_css(XfdashboardTheme *self);
 XfdashboardThemeLayout* xfdashboard_theme_get_layout(XfdashboardTheme *self);
 XfdashboardThemeEffects* xfdashboard_theme_get_effects(XfdashboardTheme *self);
+XfdashboardThemeAnimation* xfdashboard_theme_get_animation(XfdashboardTheme *self);
 
 G_END_DECLS
 
