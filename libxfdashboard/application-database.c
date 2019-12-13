@@ -2,7 +2,7 @@
  * application-database: A singelton managing desktop files and menus
  *                       for installed applications
  * 
- * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,14 +35,6 @@
 
 
 /* Define this class in GObject system */
-G_DEFINE_TYPE(XfdashboardApplicationDatabase,
-				xfdashboard_application_database,
-				G_TYPE_OBJECT)
-
-/* Private structure - access only by public API if needed */
-#define XFDASHBOARD_APPLICATION_DATABASE_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE((obj), XFDASHBOARD_TYPE_APPLICATION_DATABASE, XfdashboardApplicationDatabasePrivate))
-
 struct _XfdashboardApplicationDatabasePrivate
 {
 	/* Properties related */
@@ -57,6 +49,10 @@ struct _XfdashboardApplicationDatabasePrivate
 	GHashTable			*applications;
 	GList				*appDirMonitors;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE(XfdashboardApplicationDatabase,
+							xfdashboard_application_database,
+							G_TYPE_OBJECT)
 
 /* Properties */
 enum
@@ -891,8 +887,18 @@ static gboolean _xfdashboard_application_database_load_applications_recursive(Xf
 				}
 					else
 					{
+						/* Although desktop file for desktop ID is invalid, add
+						 * it to the database to prevent that a valid desktop file
+						 * for the same desktop ID will be found at path of lower
+						 * prioritory which will then be store in the database as
+						 * no entry exists. The first entry found - valid or invalid -
+						 * has the highest priority. Later the caller has to ensure
+						 * that all invalid desktop IDs in the database will be removed.
+						 */
+						g_hash_table_insert(*ioDesktopAppInfos, g_strdup(desktopID), g_object_ref(appInfo));
+
 						XFDASHBOARD_DEBUG(self, APPLICATIONS,
-											"Not adding invalid desktop file '%s%s%s' with desktop ID '%s' at search path '%s'",
+											"Adding and mark invalid desktop file '%s%s%s' with desktop ID '%s' at search path '%s'",
 											path,
 											G_DIR_SEPARATOR_S,
 											childName,
@@ -1070,6 +1076,30 @@ static gboolean _xfdashboard_application_database_load_applications(XfdashboardA
 
 		if(directory) g_object_unref(directory);
 	}
+
+	/* Remove invalid desktop IDs from database */
+	if(apps)
+	{
+		GHashTableIter								appsIter;
+		const gchar									*desktopID;
+		XfdashboardDesktopAppInfo					*appInfo;
+
+		g_hash_table_iter_init(&appsIter, apps);
+		while(g_hash_table_iter_next(&appsIter, (gpointer*)&desktopID, (gpointer*)&appInfo))
+		{
+			/* If value for key is invalid then remove this entry now */
+			if(!xfdashboard_desktop_app_info_is_valid(appInfo))
+			{
+				XFDASHBOARD_DEBUG(self, APPLICATIONS,
+									"Removing invalid desktop ID '%s' from application database",
+									desktopID);
+
+				/* Remove entry from hash table via the iterator */
+				g_hash_table_iter_remove(&appsIter);
+			}
+		}
+	}
+
 	XFDASHBOARD_DEBUG(self, APPLICATIONS,
 						"Loaded %u applications desktop files",
 						g_hash_table_size(apps));
@@ -1323,9 +1353,6 @@ static void xfdashboard_application_database_class_init(XfdashboardApplicationDa
 	gobjectClass->finalize=_xfdashboard_application_database_finalize;
 	gobjectClass->get_property=_xfdashboard_application_database_get_property;
 
-	/* Set up private structure */
-	g_type_class_add_private(klass, sizeof(XfdashboardApplicationDatabasePrivate));
-
 	/* Define properties */
 	XfdashboardApplicationDatabaseProperties[PROP_IS_LOADED]=
 		g_param_spec_boolean("is-loaded",
@@ -1380,7 +1407,7 @@ static void xfdashboard_application_database_init(XfdashboardApplicationDatabase
 	const gchar* const						*systemPaths;
 	gchar									*path;
 
-	priv=self->priv=XFDASHBOARD_APPLICATION_DATABASE_GET_PRIVATE(self);
+	priv=self->priv=xfdashboard_application_database_get_instance_private(self);
 
 	/* Set default values */
 	priv->isLoaded=FALSE;

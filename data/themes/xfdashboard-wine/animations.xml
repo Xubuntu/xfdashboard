@@ -1,0 +1,17 @@
+<animations>
+	<trigger id="expand-workspace" sender="XfdashboardCollapseBox" signal="expand">
+		<timeline delay="0" duration="500" mode="ease-out-cubic">
+			<apply>
+				<property name="width" />
+			</apply>
+		</timeline>
+	</trigger>
+
+	<trigger id="collapse-workspace" sender="XfdashboardCollapseBox" signal="collapse">
+		<timeline delay="0" duration="500" mode="ease-in-cubic">
+			<apply>
+				<property name="width" />
+			</apply>
+		</timeline>
+	</trigger>
+</animations>

@@ -2,7 +2,7 @@
  * plugin: A plugin class managing loading the shared object as well as
  *         initializing and setting up extensions to this application
  * 
- * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,14 +46,6 @@ typedef enum /*< skip,prefix=XFDASHBOARD_PLUGIN_STATE >*/
 
 
 /* Define this class in GObject system */
-G_DEFINE_TYPE(XfdashboardPlugin,
-				xfdashboard_plugin,
-				G_TYPE_TYPE_MODULE)
-
-/* Private structure - access only by public API if needed */
-#define XFDASHBOARD_PLUGIN_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE((obj), XFDASHBOARD_TYPE_PLUGIN, XfdashboardPluginPrivate))
-
 struct _XfdashboardPluginPrivate
 {
 	/* Properties related */
@@ -77,6 +69,10 @@ struct _XfdashboardPluginPrivate
 	gchar						*lastLoadingError;
 
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE(XfdashboardPlugin,
+							xfdashboard_plugin,
+							G_TYPE_TYPE_MODULE)
 
 /* Properties */
 enum
@@ -804,9 +800,6 @@ static void xfdashboard_plugin_class_init(XfdashboardPluginClass *klass)
 	gobjectClass->get_property=_xfdashboard_plugin_get_property;
 	gobjectClass->dispose=_xfdashboard_plugin_dispose;
 
-	/* Set up private structure */
-	g_type_class_add_private(klass, sizeof(XfdashboardPluginPrivate));
-
 	/* Define properties */
 	XfdashboardPluginProperties[PROP_FILENAME]=
 		g_param_spec_string("filename",
@@ -930,7 +923,7 @@ static void xfdashboard_plugin_init(XfdashboardPlugin *self)
 {
 	XfdashboardPluginPrivate	*priv;
 
-	priv=self->priv=XFDASHBOARD_PLUGIN_GET_PRIVATE(self);
+	priv=self->priv=xfdashboard_plugin_get_instance_private(self);
 
 	/* Set up default values */
 	priv->filename=NULL;

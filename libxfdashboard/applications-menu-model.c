@@ -2,7 +2,7 @@
  * applications-menu-model: A list model containing menu items
  *                          of applications
  * 
- * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,14 +35,6 @@
 
 
 /* Define these classes in GObject system */
-G_DEFINE_TYPE(XfdashboardApplicationsMenuModel,
-				xfdashboard_applications_menu_model,
-				XFDASHBOARD_TYPE_MODEL)
-
-/* Private structure - access only by public API if needed */
-#define XFDASHBOARD_APPLICATIONS_MENU_MODEL_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE((obj), XFDASHBOARD_TYPE_APPLICATIONS_MENU_MODEL, XfdashboardApplicationsMenuModelPrivate))
-
 struct _XfdashboardApplicationsMenuModelPrivate
 {
 	/* Instance related */
@@ -51,6 +43,10 @@ struct _XfdashboardApplicationsMenuModelPrivate
 	XfdashboardApplicationDatabase	*appDB;
 	guint							reloadRequiredSignalID;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE(XfdashboardApplicationsMenuModel,
+							xfdashboard_applications_menu_model,
+							XFDASHBOARD_TYPE_MODEL)
 
 /* Signals */
 enum
@@ -276,25 +272,33 @@ static GarconMenu* _xfdashboard_applications_menu_model_find_similar_menu(Xfdash
 	foundMenu=NULL;
 	for(iter=inFillData->populatedMenus; iter && !foundMenu; iter=g_slist_next(iter))
 	{
-		GarconMenu				*menu;
+		GarconMenu				*iterMenu;
 
 		/* Get menu element from list */
-		menu=GARCON_MENU(iter->data);
+		iterMenu=GARCON_MENU(iter->data);
 
 		/* We can only process menus which have the same parent menu as the
 		 * requested menu and they need to be visible.
 		 */
-		if(garcon_menu_get_parent(menu) &&
-			garcon_menu_element_get_visible(GARCON_MENU_ELEMENT(menu)))
+		if(garcon_menu_get_parent(iterMenu) &&
+			garcon_menu_element_get_visible(GARCON_MENU_ELEMENT(iterMenu)))
 		{
 			gboolean			isSimilar;
+			GarconMenuDirectory	*iterMenuDirectory;
+			GarconMenuDirectory	*menuDirectory;
 
 			/* Check if both menus share the same directory. That will be the
 			 * case if iterator point to the menu which was given as function
 			 * parameter. So it's safe just to iterate through.
 			 */
-			isSimilar=garcon_menu_directory_equal(garcon_menu_get_directory(menu),
-													garcon_menu_get_directory(inMenu));
+			iterMenuDirectory=garcon_menu_get_directory(iterMenu);
+			menuDirectory=garcon_menu_get_directory(inMenu);
+
+			isSimilar=FALSE;
+			if(iterMenuDirectory && menuDirectory)
+			{
+				isSimilar=garcon_menu_directory_equal(iterMenuDirectory, menuDirectory);
+			}
 
 			/* If both menus do not share the same directory, check if they
 			 * match in name, description and icon.
@@ -313,7 +317,7 @@ static GarconMenu* _xfdashboard_applications_menu_model_find_similar_menu(Xfdash
 				if(isSimilar)
 				{
 					left=garcon_menu_element_get_name(GARCON_MENU_ELEMENT(inMenu));
-					right=garcon_menu_element_get_name(GARCON_MENU_ELEMENT(menu));
+					right=garcon_menu_element_get_name(GARCON_MENU_ELEMENT(iterMenu));
 					if(g_strcmp0(left, right)!=0) isSimilar=FALSE;
 				}
 
@@ -322,7 +326,7 @@ static GarconMenu* _xfdashboard_applications_menu_model_find_similar_menu(Xfdash
 				if(isSimilar)
 				{
 					left=garcon_menu_element_get_comment(GARCON_MENU_ELEMENT(inMenu));
-					right=garcon_menu_element_get_comment(GARCON_MENU_ELEMENT(menu));
+					right=garcon_menu_element_get_comment(GARCON_MENU_ELEMENT(iterMenu));
 					if(g_strcmp0(left, right)!=0) isSimilar=FALSE;
 				}
 
@@ -331,13 +335,13 @@ static GarconMenu* _xfdashboard_applications_menu_model_find_similar_menu(Xfdash
 				if(isSimilar)
 				{
 					left=garcon_menu_element_get_icon_name(GARCON_MENU_ELEMENT(inMenu));
-					right=garcon_menu_element_get_icon_name(GARCON_MENU_ELEMENT(menu));
+					right=garcon_menu_element_get_icon_name(GARCON_MENU_ELEMENT(iterMenu));
 					if(g_strcmp0(left, right)!=0) isSimilar=FALSE;
 				}
 			}
 
 			/* If we get and we found a similar menu set result to return */
-			if(isSimilar) foundMenu=menu;
+			if(isSimilar) foundMenu=iterMenu;
 		}
 	}
 
@@ -440,7 +444,7 @@ static void _xfdashboard_applications_menu_model_fill_model_collect_menu(Xfdashb
 
 			item=_xfdashboard_applications_menu_model_item_new();
 			item->sequenceID=inFillData->sequenceID;
-			if(inMenu) item->menuElement=g_object_ref(inMenu);
+			if(inMenu) item->menuElement=GARCON_MENU_ELEMENT(g_object_ref(inMenu));
 			if(inParentMenu) item->parentMenu=g_object_ref(inParentMenu);
 			if(section) item->section=g_object_ref(section);
 			if(title) item->title=g_strdup(title);
@@ -610,9 +614,6 @@ static void xfdashboard_applications_menu_model_class_init(XfdashboardApplicatio
 
 	gobjectClass->dispose=_xfdashboard_applications_menu_model_dispose;
 
-	/* Set up private structure */
-	g_type_class_add_private(klass, sizeof(XfdashboardApplicationsMenuModelPrivate));
-
 	/* Define signals */
 	XfdashboardApplicationsMenuModelSignals[SIGNAL_LOADED]=
 		g_signal_new("loaded",
@@ -633,7 +634,7 @@ static void xfdashboard_applications_menu_model_init(XfdashboardApplicationsMenu
 {
 	XfdashboardApplicationsMenuModelPrivate	*priv;
 
-	priv=self->priv=XFDASHBOARD_APPLICATIONS_MENU_MODEL_GET_PRIVATE(self);
+	priv=self->priv=xfdashboard_applications_menu_model_get_instance_private(self);
 
 	/* Set up default values */
 	priv->rootMenu=NULL;

@@ -1,7 +1,7 @@
 /*
  * general: General settings of application
  * 
- * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,14 +33,6 @@
 
 
 /* Define this class in GObject system */
-G_DEFINE_TYPE(XfdashboardSettingsGeneral,
-				xfdashboard_settings_general,
-				G_TYPE_OBJECT)
-
-/* Private structure - access only by public API if needed */
-#define XFDASHBOARD_SETTINGS_GENERAL_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE((obj), XFDASHBOARD_TYPE_SETTINGS_GENERAL, XfdashboardSettingsGeneralPrivate))
-
 struct _XfdashboardSettingsGeneralPrivate
 {
 	/* Properties related */
@@ -59,7 +51,12 @@ struct _XfdashboardSettingsGeneralPrivate
 	GtkWidget		*widgetScrollEventChangesWorkspace;
 	GtkWidget		*widgetDelaySearchTimeout;
 	GtkWidget		*widgetAllowSubwindows;
+	GtkWidget		*widgetEnableAnimations;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE(XfdashboardSettingsGeneral,
+							xfdashboard_settings_general,
+							G_TYPE_OBJECT)
 
 /* Properties */
 enum
@@ -106,6 +103,9 @@ static GParamSpec* XfdashboardSettingsGeneralProperties[PROP_LAST]={ 0, };
 
 #define ALLOW_SUBWINDOWS_XFCONF_PROP						"/allow-subwindows"
 #define DEFAULT_ALLOW_SUBWINDOWS							TRUE
+
+#define ENABLE_ANIMATIONS_XFCONF_PROP						"/enable-animations"
+#define DEFAULT_ENABLE_ANIMATIONS							TRUE
 
 
 typedef struct _XfdashboardSettingsGeneralNameValuePair		XfdashboardSettingsGeneralNameValuePair;
@@ -630,6 +630,14 @@ static void _xfdashboard_settings_general_set_builder(XfdashboardSettingsGeneral
 							G_TYPE_BOOLEAN,
 							priv->widgetAllowSubwindows,
 							"active");
+
+	priv->widgetEnableAnimations=GTK_WIDGET(gtk_builder_get_object(priv->builder, "enable-animations"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->widgetEnableAnimations), DEFAULT_ENABLE_ANIMATIONS);
+	xfconf_g_property_bind(priv->xfconfChannel,
+							ENABLE_ANIMATIONS_XFCONF_PROP,
+							G_TYPE_BOOLEAN,
+							priv->widgetEnableAnimations,
+							"active");
 }
 
 /* IMPLEMENTATION: GObject */
@@ -718,9 +726,6 @@ static void xfdashboard_settings_general_class_init(XfdashboardSettingsGeneralCl
 	gobjectClass->set_property=_xfdashboard_settings_general_set_property;
 	gobjectClass->get_property=_xfdashboard_settings_general_get_property;
 
-	/* Set up private structure */
-	g_type_class_add_private(klass, sizeof(XfdashboardSettingsGeneralPrivate));
-
 	/* Define properties */
 	XfdashboardSettingsGeneralProperties[PROP_BUILDER]=
 		g_param_spec_object("builder",
@@ -739,7 +744,7 @@ static void xfdashboard_settings_general_init(XfdashboardSettingsGeneral *self)
 {
 	XfdashboardSettingsGeneralPrivate	*priv;
 
-	priv=self->priv=XFDASHBOARD_SETTINGS_GENERAL_GET_PRIVATE(self);
+	priv=self->priv=xfdashboard_settings_general_get_instance_private(self);
 
 	/* Set default values */
 	priv->builder=NULL;

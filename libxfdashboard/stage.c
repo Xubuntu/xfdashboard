@@ -1,7 +1,7 @@
 /*
  * stage: Global stage of application
  * 
- * Copyright 2012-2017 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,14 +57,6 @@
 
 
 /* Define this class in GObject system */
-G_DEFINE_TYPE(XfdashboardStage,
-				xfdashboard_stage,
-				CLUTTER_TYPE_STAGE)
-
-/* Private structure - access only by public API if needed */
-#define XFDASHBOARD_STAGE_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE((obj), XFDASHBOARD_TYPE_STAGE, XfdashboardStagePrivate))
-
 struct _XfdashboardStagePrivate
 {
 	/* Properties related */
@@ -99,6 +91,10 @@ struct _XfdashboardStagePrivate
 
 	XfdashboardFocusManager					*focusManager;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE(XfdashboardStage,
+							xfdashboard_stage,
+							CLUTTER_TYPE_STAGE)
 
 /* Properties */
 enum
@@ -955,8 +951,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 
 					/* Release allocated resources */
 					_xfdashboard_stage_theme_interface_data_free(interface);
-					g_list_foreach(interfaces, (GFunc)_xfdashboard_stage_theme_interface_data_free, NULL);
-					g_list_free(interfaces);
+					g_list_free_full(interfaces, (GDestroyNotify)_xfdashboard_stage_theme_interface_data_free);
 
 					return;
 				}
@@ -970,8 +965,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 
 					/* Release allocated resources */
 					_xfdashboard_stage_theme_interface_data_free(interface);
-					g_list_foreach(interfaces, (GFunc)_xfdashboard_stage_theme_interface_data_free, NULL);
-					g_list_free(interfaces);
+					g_list_free_full(interfaces, (GDestroyNotify)_xfdashboard_stage_theme_interface_data_free);
 
 					return;
 				}
@@ -1001,8 +995,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 
 						/* Release allocated resources */
 						_xfdashboard_stage_theme_interface_data_free(interface);
-						g_list_foreach(interfaces, (GFunc)_xfdashboard_stage_theme_interface_data_free, NULL);
-						g_list_free(interfaces);
+						g_list_free_full(interfaces, (GDestroyNotify)_xfdashboard_stage_theme_interface_data_free);
 
 						return;
 					}
@@ -1035,8 +1028,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 
 				/* Release allocated resources */
 				_xfdashboard_stage_theme_interface_data_free(interface);
-				g_list_foreach(interfaces, (GFunc)_xfdashboard_stage_theme_interface_data_free, NULL);
-				g_list_free(interfaces);
+				g_list_free_full(interfaces, (GDestroyNotify)_xfdashboard_stage_theme_interface_data_free);
 
 				return;
 			}
@@ -1050,8 +1042,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 
 				/* Release allocated resources */
 				_xfdashboard_stage_theme_interface_data_free(interface);
-				g_list_foreach(interfaces, (GFunc)_xfdashboard_stage_theme_interface_data_free, NULL);
-				g_list_free(interfaces);
+				g_list_free_full(interfaces, (GDestroyNotify)_xfdashboard_stage_theme_interface_data_free);
 
 				return;
 			}
@@ -1348,8 +1339,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 	}
 
 	/* Release allocated resources */
-	g_list_foreach(interfaces, (GFunc)_xfdashboard_stage_theme_interface_data_free, NULL);
-	g_list_free(interfaces);
+	g_list_free_full(interfaces, (GDestroyNotify)_xfdashboard_stage_theme_interface_data_free);
 
 	/* Set focus */
 	_xfdashboard_stage_set_focus(self);
@@ -1814,9 +1804,6 @@ static void xfdashboard_stage_class_init(XfdashboardStageClass *klass)
 	gobjectClass->set_property=_xfdashboard_stage_set_property;
 	gobjectClass->get_property=_xfdashboard_stage_get_property;
 
-	/* Set up private structure */
-	g_type_class_add_private(klass, sizeof(XfdashboardStagePrivate));
-
 	/* Define properties */
 	XfdashboardStageProperties[PROP_BACKGROUND_IMAGE_TYPE]=
 		g_param_spec_enum("background-image-type",
@@ -1925,7 +1912,7 @@ static void xfdashboard_stage_init(XfdashboardStage *self)
 	ClutterConstraint			*heightConstraint;
 	ClutterColor				transparent;
 
-	priv=self->priv=XFDASHBOARD_STAGE_GET_PRIVATE(self);
+	priv=self->priv=xfdashboard_stage_get_instance_private(self);
 
 	/* Set default values */
 	priv->focusManager=xfdashboard_focus_manager_get_default();
