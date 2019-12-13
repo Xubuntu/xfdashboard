@@ -1,4 +1,5 @@
 libxfdashboard.so.0 libxfdashboard0 #MINVER#
+* Build-Depends-Package: libxfdashboard-dev
  XfdashboardClickActionProperties@Base 0.6.0
  XfdashboardClickActionSignals@Base 0.6.0
  XfdashboardDragActionProperties@Base 0.6.0
@@ -26,6 +27,10 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_actor_set_can_focus@Base 0.6.0
  xfdashboard_actor_set_effects@Base 0.6.0
  xfdashboard_anchor_point_get_type@Base 0.6.0
+ xfdashboard_animation_get_id@Base 0.7.7
+ xfdashboard_animation_get_type@Base 0.7.7
+ xfdashboard_animation_new@Base 0.7.7
+ xfdashboard_animation_run@Base 0.7.7
  xfdashboard_application_button_add_popup_menu_items_for_actions@Base 0.7.5
  xfdashboard_application_button_add_popup_menu_items_for_windows@Base 0.7.5
  xfdashboard_application_button_execute@Base 0.6.0
@@ -286,6 +291,7 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_focusable_set_selection@Base 0.6.0
  xfdashboard_focusable_supports_selection@Base 0.6.0
  xfdashboard_focusable_unset_focus@Base 0.6.0
+ xfdashboard_get_enum_value_from_nickname@Base 0.7.7
  xfdashboard_get_enum_value_name@Base 0.6.0
  xfdashboard_get_stage_of_actor@Base 0.6.0
  xfdashboard_image_content_force_load@Base 0.6.0
@@ -645,6 +651,12 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_text_box_set_text_color@Base 0.6.0
  xfdashboard_text_box_set_text_font@Base 0.6.0
  xfdashboard_text_box_set_text_va@Base 0.6.0
+ xfdashboard_theme_animation_add_file@Base 0.7.7
+ xfdashboard_theme_animation_create@Base 0.7.7
+ xfdashboard_theme_animation_error_enum_get_type@Base 0.7.7
+ xfdashboard_theme_animation_error_quark@Base 0.7.7
+ xfdashboard_theme_animation_get_type@Base 0.7.7
+ xfdashboard_theme_animation_new@Base 0.7.7
  xfdashboard_theme_css_add_file@Base 0.6.0
  xfdashboard_theme_css_error_enum_get_type@Base 0.6.0
  xfdashboard_theme_css_error_quark@Base 0.6.0
@@ -659,6 +671,7 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_theme_effects_new@Base 0.6.0
  xfdashboard_theme_error_enum_get_type@Base 0.6.0
  xfdashboard_theme_error_quark@Base 0.6.0
+ xfdashboard_theme_get_animation@Base 0.7.7
  xfdashboard_theme_get_comment@Base 0.6.0
  xfdashboard_theme_get_css@Base 0.6.0
  xfdashboard_theme_get_display_name@Base 0.6.0
@@ -693,6 +706,12 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_tooltip_action_get_type@Base 0.6.0
  xfdashboard_tooltip_action_new@Base 0.6.0
  xfdashboard_tooltip_action_set_text@Base 0.6.0
+ xfdashboard_transition_group_add_transition@Base 0.7.7
+ xfdashboard_transition_group_get_transitions@Base 0.7.7
+ xfdashboard_transition_group_get_type@Base 0.7.7
+ xfdashboard_transition_group_new@Base 0.7.7
+ xfdashboard_transition_group_remove_all@Base 0.7.7
+ xfdashboard_transition_group_remove_transition@Base 0.7.7
  xfdashboard_traverse_actor@Base 0.7.4
  xfdashboard_view_child_ensure_visible@Base 0.6.0
  xfdashboard_view_child_needs_scroll@Base 0.6.0
