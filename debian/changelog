@@ -1,3 +1,18 @@
+xfdashboard (0.7.7-0ubuntu1) devel; urgency=medium
+
+  * d/watch: Update for upstream's move to mirrorbit.
+  * New upstream version 0.7.7
+    - Update symbols, adding Build-Depends-Package.
+  * d/compat, d/control:
+    - Drop d/compat in favor of debhelper-compat, bump to 12.
+  * d/control;
+    - Set R³ to no.
+    - Update Homepage field.
+  * d/copyright: Update years.
+  * Update Standards-Version to 4.4.1.
+
+ -- Unit 193 <unit193@ubuntu.com>  Thu, 19 Dec 2019 20:30:50 -0500
+
 xfdashboard (0.7.5-0ubuntu1) devel; urgency=medium
 
   * New upstream version 0.7.5
