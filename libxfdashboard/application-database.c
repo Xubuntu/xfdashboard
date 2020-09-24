@@ -2,7 +2,7 @@
  * application-database: A singelton managing desktop files and menus
  *                       for installed applications
  * 
- * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1600,7 +1600,7 @@ GAppInfo* xfdashboard_application_database_lookup_desktop_id(XfdashboardApplicat
 }
 
 /* Get path to desktop file for requested desktop ID.
- * Returns NULL if no desktop file at any search path can be found.
+ * Returns NULL if desktop file is invalid or was not found at any search path.
  */
 gchar* xfdashboard_application_database_get_file_from_desktop_id(const gchar *inDesktopID)
 {
@@ -1609,7 +1609,19 @@ gchar* xfdashboard_application_database_get_file_from_desktop_id(const gchar *in
 	gchar							*foundDesktopFile;
 
 	g_return_val_if_fail(inDesktopID && *inDesktopID, NULL);
-	g_return_val_if_fail(g_str_has_suffix(inDesktopID, ".desktop"), NULL);
+
+	/* Get singleton of application database */
+	appDB=xfdashboard_application_database_get_default();
+
+	/* Requested desktop ID must have ".desktop" suffix */
+	if(!g_str_has_suffix(inDesktopID, ".desktop"))
+	{
+		XFDASHBOARD_DEBUG(appDB, APPLICATIONS,
+							"Skipping non-desktop file '%s'",
+							inDesktopID);
+		g_object_unref(appDB);
+		return(NULL);
+	}
 
 	/* Find the desktop file for a desktop ID isn't as easy as it sounds.
 	 * Especially if the desktop file contains at least one dash. The dash
@@ -1636,9 +1648,6 @@ gchar* xfdashboard_application_database_get_file_from_desktop_id(const gchar *in
 	 *     is any search path left.
 	 * 5.) If this step is reached, no desktop file was found.
 	 */
-
-	/* Get singleton of application database */
-	appDB=xfdashboard_application_database_get_default();
 
 	/* Get search paths */
 	searchPaths=xfdashboard_application_database_get_application_search_paths(appDB);

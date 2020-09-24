@@ -113,6 +113,7 @@ am__DEPENDENCIES_1 =
 xfdashboard_settings_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) \
 	$(top_builddir)/libxfdashboard/libxfdashboard.la
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -415,6 +416,7 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -451,6 +453,7 @@ xfdashboard_settings_CFLAGS = \
 	$(CLUTTER_CFLAGS) \
 	$(LIBXFCONF_CFLAGS) \
 	$(LIBXFCE4UTIL_CFLAGS) \
+	$(LIBXFCE4UI_CFLAGS) \
 	$(PLATFORM_CFLAGS)
 
 xfdashboard_settings_LDADD = \
@@ -458,6 +461,7 @@ xfdashboard_settings_LDADD = \
 	$(CLUTTER_LIBS) \
 	$(LIBXFCONF_LIBS) \
 	$(LIBXFCE4UTIL_LIBS) \
+	$(LIBXFCE4UI_LIBS) \
 	$(LIBM) \
 	$(top_builddir)/libxfdashboard/libxfdashboard.la
 
@@ -479,9 +483,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu settings/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign settings/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu settings/Makefile
+	  $(AUTOMAKE) --foreign settings/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \

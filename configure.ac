@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [7])
-m4_define([xfdashboard_version_micro], [7])
-m4_define([xfdashboard_version_build], [5383d20])
+m4_define([xfdashboard_version_micro], [8])
+m4_define([xfdashboard_version_build], [503b2bc])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -44,7 +44,7 @@ m4_define([xfdashboard_debug_default], [ifelse(xfdashboard_version_tag(), [git],
 dnl ***************************
 dnl *** Initialize autoconf ***
 dnl ***************************
-AC_COPYRIGHT([Copyright (c) 2012-2016 Stephan Haller <nomad@froevel.de>])
+AC_COPYRIGHT([Copyright (c) 2012-2020 Stephan Haller <nomad@froevel.de>])
 AC_INIT([xfdashboard], [xfdashboard_version], [http://docs.xfce.org/apps/xfdashboard/start], [xfdashboard])
 AC_PREREQ([2.50])
 AC_REVISION([xfdashboard_version_build])
@@ -53,7 +53,7 @@ dnl ***************************
 dnl *** Initialize automake ***
 dnl ***************************
 AM_CONFIG_HEADER([config.h])
-AM_INIT_AUTOMAKE([1.8 no-dist-gzip dist-bzip2 tar-ustar])
+AM_INIT_AUTOMAKE([1.8 no-dist-gzip dist-bzip2 tar-ustar foreign])
 AM_MAINTAINER_MODE()
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_CONFIG_MACRO_DIR([m4])
@@ -127,7 +127,7 @@ AC_SUBST(LIBM)
 dnl ******************************
 dnl *** Check for i18n support ***
 dnl ******************************
-XDT_I18N([ca da de el es fr gl he it_IT ja kk lt pl ru ru_RU sr tr ])
+XDT_I18N([ca da de el es fr gl he ie it_IT ja kk lt pl ru ru_RU sr sv_SE tr])
 
 dnl *******************************
 dnl *** Check for X11 installed ***
@@ -334,6 +334,7 @@ libxfdashboard/libxfdashboard.pc
 libxfdashboard/Makefile
 plugins/Makefile
 plugins/clock-view/Makefile
+plugins/example-search-provider/Makefile
 plugins/gnome-shell-search-provider/Makefile
 plugins/hot-corner/Makefile
 plugins/middle-click-window-close/Makefile

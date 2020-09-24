@@ -2,7 +2,7 @@
  * collapse-box: A collapsable container for one actor
  *               with capability to expand
  * 
- * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,6 +81,9 @@ void xfdashboard_collapse_box_set_collapsed_size(XfdashboardCollapseBox *self, g
 
 XfdashboardOrientation xfdashboard_collapse_box_get_collapse_orientation(XfdashboardCollapseBox *self);
 void xfdashboard_collapse_box_set_collapse_orientation(XfdashboardCollapseBox *self, XfdashboardOrientation inOrientation);
+
+gfloat xfdashboard_collapse_box_get_collapse_progress(XfdashboardCollapseBox *self);
+void xfdashboard_collapse_box_set_collapse_progress(XfdashboardCollapseBox *self, gfloat inProgress);
 
 G_END_DECLS
 

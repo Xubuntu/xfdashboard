@@ -1,7 +1,7 @@
 /*
  * search-view: A view showing applications matching search criteria
  * 
- * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -771,6 +771,7 @@ static guint _xfdashboard_search_view_perform_search(XfdashboardSearchView *self
 	 * this search.
 	 */
 	reselectProvider=NULL;
+	reselectDirection=XFDASHBOARD_SELECTION_TARGET_NEXT;
 	reselectOldSelection=xfdashboard_focusable_get_selection(XFDASHBOARD_FOCUSABLE(self));
 	if(reselectOldSelection)
 	{
@@ -887,7 +888,8 @@ static guint _xfdashboard_search_view_perform_search(XfdashboardSearchView *self
 	/* Reselect first or last item at provider if we remembered the provider where
 	 * the item should be reselected and if selection has changed while updating results.
 	 */
-	if(reselectProvider)
+	if(reselectProvider &&
+		reselectProvider->container)
 	{
 		ClutterActor							*selection;
 

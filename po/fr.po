@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# jc1 <jc1.quebecos@gmail.com>, 2015-2016,2019
+# jc1 <jc1.quebecos@gmail.com>, 2015-2016,2019-2020
 # jc <jc>, 2015
 # jc <jc>, 2015-2016, 2016
 msgid ""
@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: xfdashboard\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-12-10 12:29+0100\n"
-"PO-Revision-Date: 2019-10-20 22:03+0000\n"
+"PO-Revision-Date: 2020-01-12 15:30+0000\n"
 "Last-Translator: jc1 <jc1.quebecos@gmail.com>\n"
 "Language-Team: French (http://www.transifex.com/xfdashboard/xfdashboard/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -108,13 +108,13 @@ msgstr "Cette version stable introduit de nombreuses nouvelles fonctionnalités 
 
 #: ../data/appdata/xfdashboard.appdata.xml.in.h:13
 msgid "This unstable development fixes crashes in search view."
-msgstr ""
+msgstr "Ce développement instable corrige les plantages en mode recherche."
 
 #: ../data/appdata/xfdashboard.appdata.xml.in.h:14
 msgid ""
 "This unstable development fixes running this application in daemon mode and "
 "unpredictable reselections in search view."
-msgstr ""
+msgstr "Ce développement instable corrige l'exécution de cette application en mode démon et des resélections imprévisibles dans la vue de recherche."
 
 #: ../data/appdata/xfdashboard.appdata.xml.in.h:15
 msgid ""
@@ -358,7 +358,7 @@ msgstr "Priorité de la création du contenu de la fenêtre"
 
 #: ../data/data/preferences.ui.h:26
 msgid "Show child windows in main windows"
-msgstr ""
+msgstr "Afficher les fenêtres enfants dans les fenêtres principales"
 
 #: ../data/data/preferences.ui.h:27
 msgid ""
@@ -584,12 +584,12 @@ msgstr "Liste de chaînes séparées par des espaces avec des ID d'effets fixés
 #: ../libxfdashboard/application-button.c:247
 #, c-format
 msgid "Could not get information about application '%s'"
-msgstr ""
+msgstr "Impossible d'obtenir des informations sur l'application « %s »"
 
 #: ../libxfdashboard/application-button.c:255
 #, c-format
 msgid "Could not get application action for application '%s'"
-msgstr ""
+msgstr "Impossible d'obtenir l'action de l'application pour l'application « %s »"
 
 #: ../libxfdashboard/application-button.c:266
 #, c-format
@@ -830,7 +830,7 @@ msgstr "Impossible de charger les liaisons : %s"
 
 #: ../libxfdashboard/application.c:427
 msgid "Could not setup window tracker backend"
-msgstr ""
+msgstr "Impossible de configurer le backend du tracker de fenêtre"
 
 #: ../libxfdashboard/application.c:435
 msgid "Could not initialize application database"
@@ -893,7 +893,7 @@ msgstr ""
 
 #: ../libxfdashboard/application.c:585
 msgid "Show version"
-msgstr ""
+msgstr "Afficher la version"
 
 #: ../libxfdashboard/application.c:604
 msgid "A Gnome Shell like dashboard for Xfce4 - version "
@@ -934,11 +934,11 @@ msgstr "Drapeau signalant si l'application est suspendue actuellement"
 
 #: ../libxfdashboard/application.c:1237
 msgid "Stage"
-msgstr ""
+msgstr "Scène"
 
 #: ../libxfdashboard/application.c:1238
 msgid "The stage object of application"
-msgstr ""
+msgstr "L'objet scénique de l'application"
 
 #: ../libxfdashboard/application.c:1249 ../libxfdashboard/theme.c:733
 msgid "Theme name"
@@ -1010,13 +1010,13 @@ msgstr "Impossible de charger les statistiques du moteur de recherche d'applicat
 #: ../libxfdashboard/applications-view.c:396
 #: ../libxfdashboard/quicklaunch.c:662
 msgid "No application information available for clicked application button."
-msgstr ""
+msgstr "Aucune information disponible pour l'application pour le bouton application cliqué."
 
 #: ../libxfdashboard/applications-search-provider.c:842
 #: ../libxfdashboard/applications-view.c:420
 #: ../libxfdashboard/quicklaunch.c:685
 msgid "Launch"
-msgstr ""
+msgstr "Lancer"
 
 #. Set up view
 #. Add "applications" button
@@ -1423,7 +1423,7 @@ msgstr "Impossible de créer un parseur pour le fichier %s"
 #: ../libxfdashboard/bindings-pool.c:899
 #, c-format
 msgid "Could not set up hash-table at parser data for file %s"
-msgstr "Impossible de mettre en place la table de hash pour les données de l'analyseur pour le fichier %s"
+msgstr "Impossible de mettre en place la table de hachage pour les données de l'analyseur pour le fichier %s"
 
 #: ../libxfdashboard/bindings-pool.c:929
 #, c-format
@@ -1433,7 +1433,7 @@ msgstr "Etat de liaison inattendue fixé à des données de l'analyseur pour le 
 #: ../libxfdashboard/bindings-pool.c:1102
 #, c-format
 msgid "Could not set up hash-table to store bindings"
-msgstr ""
+msgstr "Impossible de configurer la table de hachage pour stocker les liaisons"
 
 #: ../libxfdashboard/bindings-pool.c:1209
 #, c-format
@@ -1635,20 +1635,20 @@ msgstr "Nom"
 
 #: ../libxfdashboard/desktop-app-info-action.c:194
 msgid "Name of the action"
-msgstr ""
+msgstr "Nom de l'action"
 
 #: ../libxfdashboard/desktop-app-info-action.c:206
 #: ../libxfdashboard/emblem-effect.c:478 ../libxfdashboard/label.c:1271
 msgid "Icon name"
-msgstr "Nom icône"
+msgstr "Nom de l'icône"
 
 #: ../libxfdashboard/desktop-app-info-action.c:207
 msgid "Icon name of action"
-msgstr ""
+msgstr "Nom de l'icône de l'action"
 
 #: ../libxfdashboard/desktop-app-info-action.c:219
 msgid "Application command of action"
-msgstr ""
+msgstr "Commande d'action de l'application"
 
 #: ../libxfdashboard/drag-action.c:935 ../libxfdashboard/popup-menu.c:962
 msgid "Source"
@@ -1715,7 +1715,7 @@ msgstr "Nombre actuel de colonnes dans cette mise en page"
 
 #: ../libxfdashboard/dynamic-table-layout.c:904
 msgid "Fixed columns"
-msgstr ""
+msgstr "Colonnes fixes"
 
 #: ../libxfdashboard/dynamic-table-layout.c:905
 msgid "Fixed number of columns to use in this layout"
@@ -1977,7 +1977,7 @@ msgstr "Espacement entre le texte et l'icône"
 
 #: ../libxfdashboard/label.c:1263
 msgid "Label style"
-msgstr ""
+msgstr "Texte style"
 
 #: ../libxfdashboard/label.c:1264
 msgid "Style of button showing text and/or icon"
@@ -2078,19 +2078,19 @@ msgstr "Fenêtre"
 
 #: ../libxfdashboard/live-window-simple.c:513
 msgid "The window to show"
-msgstr "La fenêtre pour montrer"
+msgstr "La fenêtre à montrer"
 
 #: ../libxfdashboard/live-window-simple.c:519
 msgid "Display type"
-msgstr ""
+msgstr "Type d'affichage"
 
 #: ../libxfdashboard/live-window-simple.c:520
 msgid "How to display the window"
-msgstr ""
+msgstr "Comment afficher la fenêtre"
 
 #: ../libxfdashboard/live-window-simple.c:527
 msgid "Destroy on close"
-msgstr ""
+msgstr "Détruire à la fermeture"
 
 #: ../libxfdashboard/live-window-simple.c:528
 msgid "If this actor should be destroy when window was closed"
@@ -2125,7 +2125,7 @@ msgstr "Rembourrage du titre acteur à acteur fenêtre en pixels"
 
 #: ../libxfdashboard/live-window.c:1098
 msgid "Show sub-windows"
-msgstr ""
+msgstr "Afficher les sous-fenêtres"
 
 #: ../libxfdashboard/live-window.c:1099
 msgid "Whether to show sub-windows of this main window"
@@ -2133,7 +2133,7 @@ msgstr ""
 
 #: ../libxfdashboard/live-window.c:1105
 msgid "Allow sub-windows"
-msgstr ""
+msgstr "Autoriser les sous-fenêtres"
 
 #: ../libxfdashboard/live-window.c:1106
 msgid "Whether to show sub-windows if requested by theme"
@@ -2145,7 +2145,7 @@ msgstr "Espace de travail"
 
 #: ../libxfdashboard/live-workspace.c:1007
 msgid "The workspace to show"
-msgstr "L'espace de travail pour montrer"
+msgstr "L'espace de travail à montrer"
 
 #: ../libxfdashboard/live-workspace.c:1013
 #: ../libxfdashboard/stage-interface.c:366
@@ -2186,7 +2186,7 @@ msgstr "Le nombre de lignes que ce modèle contient"
 
 #: ../libxfdashboard/model.c:301
 msgid "Sort set"
-msgstr ""
+msgstr "Ensemble de tri"
 
 #: ../libxfdashboard/model.c:302
 msgid "Whether a sorting function is set or not"
@@ -2194,7 +2194,7 @@ msgstr ""
 
 #: ../libxfdashboard/model.c:308
 msgid "Filter set"
-msgstr ""
+msgstr "Ensemble de filtres"
 
 #: ../libxfdashboard/model.c:309
 msgid "Whether a filter is set or not"
@@ -2406,7 +2406,7 @@ msgstr ""
 
 #: ../libxfdashboard/popup-menu-item-separator.c:379
 msgid "Minimum height"
-msgstr ""
+msgstr "Hauteur minimale"
 
 #: ../libxfdashboard/popup-menu-item-separator.c:380
 msgid "Forced minimum height request for the actor"
@@ -2414,27 +2414,27 @@ msgstr ""
 
 #: ../libxfdashboard/popup-menu-item-separator.c:393
 msgid "Line horizontal alignment"
-msgstr ""
+msgstr "Alignement horizontal de la ligne"
 
 #: ../libxfdashboard/popup-menu-item-separator.c:394
 msgid "The horizontal alignment of the actor within its allocation"
-msgstr ""
+msgstr "L'alignement horizontal de l'acteur dans son allocation"
 
 #: ../libxfdashboard/popup-menu-item-separator.c:407
 msgid "Line vertical alignment"
-msgstr ""
+msgstr "Alignement vertical de la ligne"
 
 #: ../libxfdashboard/popup-menu-item-separator.c:408
 msgid "The vertical alignment of the actor within its allocation"
-msgstr ""
+msgstr "L'alignement vertical de l'acteur dans son allocation"
 
 #: ../libxfdashboard/popup-menu-item-separator.c:421
 msgid "Line length"
-msgstr ""
+msgstr "Longueur de ligne"
 
 #: ../libxfdashboard/popup-menu-item-separator.c:422
 msgid "Fraction of length of line"
-msgstr ""
+msgstr "Fraction de longueur de la ligne"
 
 #: ../libxfdashboard/popup-menu-item-separator.c:434
 msgid "Line width"
@@ -2462,7 +2462,7 @@ msgstr ""
 
 #: ../libxfdashboard/popup-menu.c:949
 msgid "Destroy on cancel"
-msgstr ""
+msgstr "Détruire à l'annulation"
 
 #: ../libxfdashboard/popup-menu.c:950
 msgid ""
@@ -2476,7 +2476,7 @@ msgstr ""
 
 #: ../libxfdashboard/popup-menu.c:974
 msgid "Show title"
-msgstr ""
+msgstr "Montrer le titre"
 
 #: ../libxfdashboard/popup-menu.c:975
 msgid "Flag indicating if the title of this pop-up menu should be shown"
@@ -2492,7 +2492,7 @@ msgstr ""
 
 #: ../libxfdashboard/popup-menu.c:998
 msgid "Show title icon"
-msgstr ""
+msgstr "Montrer l'icône du titre"
 
 #: ../libxfdashboard/popup-menu.c:999
 msgid ""
@@ -2509,11 +2509,11 @@ msgstr "Nom de l'icône à thème ou nom de fichier de l'icône utilisé dans le
 
 #: ../libxfdashboard/popup-menu.c:1023
 msgid "Title GIcon"
-msgstr ""
+msgstr "Titre GIcon"
 
 #: ../libxfdashboard/popup-menu.c:1024
 msgid "The GIcon of icon used in title"
-msgstr ""
+msgstr "Le GIcon de l'icône utilisée dans le titre"
 
 #: ../libxfdashboard/popup-menu.c:1698
 #, c-format
@@ -2573,11 +2573,11 @@ msgstr "Favori « %s » ajouté"
 
 #: ../libxfdashboard/quicklaunch.c:708
 msgid "Remove from favourites"
-msgstr ""
+msgstr "Supprimer des favoris"
 
 #: ../libxfdashboard/quicklaunch.c:722
 msgid "Add to favourites"
-msgstr ""
+msgstr "Ajouter aux favoris"
 
 #: ../libxfdashboard/quicklaunch.c:2688
 #: ../libxfdashboard/workspace-selector.c:902
@@ -3397,7 +3397,7 @@ msgstr "l'ID référencé « %s » n'a pas pu être résolu"
 #: ../libxfdashboard/theme-layout.c:1957
 #, c-format
 msgid "File %s - "
-msgstr ""
+msgstr "Fichier %s - "
 
 #: ../libxfdashboard/theme-layout.c:1968
 #, c-format
@@ -3691,19 +3691,19 @@ msgstr ""
 
 #: ../libxfdashboard/window-tracker-window.c:189
 msgid "State"
-msgstr ""
+msgstr "État"
 
 #: ../libxfdashboard/window-tracker-window.c:190
 msgid "The state of window"
-msgstr ""
+msgstr "L'état de la fenêtre"
 
 #: ../libxfdashboard/window-tracker-window.c:197
 msgid "Actions"
-msgstr ""
+msgstr "Actions"
 
 #: ../libxfdashboard/window-tracker-window.c:198
 msgid "The possible actions at window"
-msgstr ""
+msgstr "Les actions possibles à la fenêtre"
 
 #: ../libxfdashboard/window-tracker-window.c:787
 #: ../libxfdashboard/window-tracker-window.c:828
@@ -3798,7 +3798,7 @@ msgstr "Si cette vue ne devrait afficher seulement les fenêtres du moniteur où
 
 #: ../libxfdashboard/windows-view.c:2055
 msgid "Filter workspace windows"
-msgstr ""
+msgstr "Filtrer les fenêtres de l'espace de travail"
 
 #: ../libxfdashboard/windows-view.c:2056
 msgid "Whether this view should only show windows of active workspace"
@@ -3871,13 +3871,13 @@ msgstr "Gardez fenêtre en plein écran sur le moniteur primaire parce le gestio
 #: ../libxfdashboard/x11/window-tracker-backend-x11.c:448
 #: ../libxfdashboard/x11/window-tracker-backend-x11.c:461
 msgid "Could not get real stage window to find stage"
-msgstr ""
+msgstr "Impossible d'obtenir la fenêtre de la scène réelle pour trouver la scène"
 
 #: ../libxfdashboard/gdk/window-tracker-backend-gdk.c:532
 #: ../libxfdashboard/gdk/window-tracker-backend-gdk.c:650
 #: ../libxfdashboard/x11/window-tracker-backend-x11.c:507
 msgid "Could not get real stage window to show"
-msgstr ""
+msgstr "Impossible de montrer la fenêtre de la scène réelle"
 
 #: ../libxfdashboard/x11/window-content-x11.c:218
 msgid "No default X11 display found in GDK to check X extensions"
@@ -4066,7 +4066,7 @@ msgstr "Le point de l'ancre de l'icône de la fenêtre non représentée"
 
 #: ../libxfdashboard/x11/window-tracker-backend-x11.c:619
 msgid "Could not get real stage window to hide"
-msgstr ""
+msgstr "Impossible de masquer la fenêtre de la scène réelle"
 
 #. IMPLEMENTATION: Private variables and methods
 #: ../libxfdashboard/x11/window-tracker-window-x11.c:113
@@ -4089,7 +4089,7 @@ msgstr ""
 
 #: ../libxfdashboard/x11/window-tracker-window-x11.c:1286
 msgid "The mapped wnck window"
-msgstr ""
+msgstr "La fenêtre wnck tracé"
 
 #. IMPLEMENTATION: Private variables and methods
 #: ../libxfdashboard/x11/window-tracker-workspace-x11.c:89
@@ -4105,7 +4105,7 @@ msgstr ""
 
 #: ../libxfdashboard/x11/window-tracker-workspace-x11.c:393
 msgid "The mapped wnck workspace"
-msgstr ""
+msgstr "L'espace de travail wnck tracé"
 
 #: ../libxfdashboard/x11/window-tracker-x11.c:221
 #, c-format
@@ -4197,7 +4197,7 @@ msgstr "Choisissez la couleur pour le fond de la seconde main"
 
 #: ../plugins/clock-view/plugin.c:313
 msgid "Adds a new view showing a clock"
-msgstr ""
+msgstr "Ajoute une nouvelle vue montrant une horloge"
 
 #. Show error message
 #: ../plugins/gnome-shell-search-provider/gnome-shell-search-provider.c:213
@@ -4402,11 +4402,11 @@ msgstr "Active xfdashboard lorsque le pointeur est déplacé vers un coin de l'�
 
 #: ../plugins/middle-click-window-close/plugin.c:71
 msgid "Middle-click window close"
-msgstr ""
+msgstr "Clic du milieu ferme la fenêtre"
 
 #: ../plugins/middle-click-window-close/plugin.c:72
 msgid "Closes windows in windows view by middle-click"
-msgstr ""
+msgstr "Ferme les fenêtres dans la vue fenêtre par un clic du milieu"
 
 #: ../settings/general.c:120
 msgid "Do nothing"
@@ -4537,4 +4537,4 @@ msgstr "Impossible de créer une instance de l'application"
 msgid ""
 "Could not restart application because existing instance seems still to be "
 "running."
-msgstr ""
+msgstr "Impossible de redémarrer l'application car l'instance existante semble toujours en cours d'exécution."

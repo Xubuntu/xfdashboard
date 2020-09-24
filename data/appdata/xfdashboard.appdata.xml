@@ -13,6 +13,7 @@
 	<summary xml:lang="fr">Peut-être un shell GNOME comme un tableau de bord pour Xfce</summary>
 	<summary xml:lang="gl">Un panel de control parecido ao intérprete de ordes Gnome para Xfce</summary>
 	<summary xml:lang="he">אולי לוח מחוונים דומה Gnome עבור Xfce</summary>
+	<summary xml:lang="ie">Un panel de control por Xfce in li stil de Gnome shell</summary>
 	<summary xml:lang="lt">Galbūt, į Gnome apvalkalą panašus skydelis, skirtas Xfce</summary>
 	<summary xml:lang="ru">Интерфейс GNOME shell, для среды Xfce</summary>
 	<summary xml:lang="sr">Полетник Иксфце-а који подсећа на Гномову шкољку</summary>
@@ -58,6 +59,7 @@
 			<caption xml:lang="fr">Applications de navigation</caption>
 			<caption xml:lang="gl">Navegación por aplicativos</caption>
 			<caption xml:lang="he">סיור באפליקציות</caption>
+			<caption xml:lang="ie">Navigation inter applicationes</caption>
 			<caption xml:lang="pl">Przeglądanie aplikacji</caption>
 			<caption xml:lang="ru">Просмотр приложений</caption>
 			<caption xml:lang="sr">Преглед програма</caption>
@@ -74,6 +76,7 @@
 			<caption xml:lang="fr">Applications de recherche</caption>
 			<caption xml:lang="gl">Busca de aplicativos</caption>
 			<caption xml:lang="he">חיפוש אפליקציות</caption>
+			<caption xml:lang="ie">Sercha por applicationes</caption>
 			<caption xml:lang="ja">アプリケーションを検索</caption>
 			<caption xml:lang="pl">Wyszukiwanie aplikacji</caption>
 			<caption xml:lang="ru">Поиск приложений</caption>
@@ -110,6 +113,11 @@
 	</keywords>
 
 	<releases>
+		<release version="0.7.7" timestamp="1600772127">
+			<description>
+				<p>This unstable development adds more animations as well as some smaller fixes.</p>
+			</description>
+		</release>
 		<release version="0.7.6" timestamp="1575026916">
 			<description>
 				<p>This unstable development adds animations.</p>
