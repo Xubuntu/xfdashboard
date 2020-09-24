@@ -5,7 +5,8 @@ ACLOCAL_AMFLAGS=-I m4
 EXTRA_DIST = \
 	intltool-extract.in \
 	intltool-merge.in \
-	intltool-update.in
+	intltool-update.in \
+	README.md
 
 DISTCLEANFILES = \
 	intltool-extract \
@@ -19,6 +20,9 @@ SUBDIRS = \
 	plugins \
 	settings \
 	xfdashboard
+
+distuninstallcheck_listfiles =                                          \
+        find . -type f -print | grep -v ./share/icons/hicolor/icon-theme.cache
 
 distclean-local:
 	rm -rf *.cache

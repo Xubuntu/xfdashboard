@@ -1,3 +1,232 @@
+commit 503b2bc2e3fdf172060e766e1d27c1eb2acbd639
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 22 12:57:44 2020 +0200
+
+    Update AppData
+
+commit ffdb4e548c5fd4d4d32c294dd1038d301cf7e94d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Sep 22 12:41:40 2020 +0200
+
+    Fix crash when reselecting a search result item on search update but the container as destroyed while updating
+
+commit e646b3c12d7a1c0e281efbcd3c4879ba5e396fb5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Sep 20 09:05:39 2020 +0200
+
+    I18n: Add new localization (it_IT, ru_RU, sv_SE)
+
+commit 7c957765ffcbf658df54135cc44cf125b476b04e
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Sep 18 13:47:46 2020 +0200
+
+    Add object class documentation for XfdashboardAnimation
+
+commit 64eb2174fbe7fb9a3e79af6e1aff0aed626d191b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Sep 18 11:02:44 2020 +0200
+
+    Added convenience functions to create and free animation default values (initial/final) and use them ;)
+
+commit 4d4d98e9ff79441658fe3f00ac6a8d1e9a3d5403
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 17 14:36:12 2020 +0200
+
+    Remove some left-overs of "TODO:"
+
+commit 59f2ce20f8c62baa0368826d78fa07cb51fc6f19
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 17 14:35:22 2020 +0200
+
+    Remove code switch for explicit allocation animation as it is the new default (and the only one ;) )
+
+commit 2dc68ba89e791ee0f0ee15080fdf3022beeb8e17
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 17 14:34:03 2020 +0200
+
+    Also remove code block for second implemetation of implicit allocation animation
+
+commit 3ed6d4df2b139d490fbbf4a4f0424bf01374597a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 17 14:32:01 2020 +0200
+
+    Remove code blocks for first allocation animation implementation
+
+commit 7aaebebdf74cccd6a4eef225f2484990adc6732a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 17 14:28:50 2020 +0200
+
+    Remove debug messages for explicit allocation animation
+
+commit 5646575297abf190c4a18d6521e8a665a3f5a427
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Sep 17 14:25:44 2020 +0200
+
+    Changed from implicit allocation animation to explicit allocation animation model. That means that the xfdashboard_actor_enable_allocation_animation_once() must be called to get the actor be animation for one allocation change if the theme defines an animation for it.
+
+commit 84b5f00a8d301a45a796a64ac2bf7f64923fe15f
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Aug 17 12:38:41 2020 +0200
+
+    Respect fixed position of children when (re-)layouting
+
+commit 67a2105d65a2f3325a8cfe6d88a5689489ed0fc7
+Merge: fc843c9 3faeb6d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Aug 17 11:44:28 2020 +0200
+
+    Merge branch 'master' of ssh://gitlab.xfce.org/apps/xfdashboard
+
+commit fc843c92d561176ad8463a1189f39a4be7b1ed2b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Aug 17 11:42:20 2020 +0200
+
+    Skip libxfdashboard/enums.c in POTFILES as it is auto-generated and will not contain any translatable strings (#3)
+    
+    Note: From now on "#123" refers to an issue at gitlab.xfce.org and not to a bug reported at Xfce's Bugzilla
+
+commit 798013f6dc4e79abb7c8db264883460da8c46380
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Aug 17 11:28:50 2020 +0200
+
+    Speed up (decrease duration) of allocation animation of live windows at default theme.
+
+commit cc0700ae028111df0a966c588e62ec52d787d8a6
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Aug 17 11:26:36 2020 +0200
+
+    Seems that I completed my "more-than-one-year-of-headache" mission no. Animation for move and/or resize (via allocation) should work now. Note to me: Maybe the layout manager need some love now to respect fixed positions at least.
+
+commit 3faeb6de63b7167c97f67d2134f1d99b0414f013
+Author: Andre Miranda <andreldm@xfce.org>
+Date:   Thu Jun 25 19:26:34 2020 -0300
+
+    Remove po files not present in Transifex
+
+commit 426fb26500273ed4f72e637cd4500973feaaae48
+Author: Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
+Date:   Mon May 18 12:11:16 2020 +0200
+
+    Add basic GitLab pipeline
+
+commit 25bc0db921860f14d46b5ccb50a3c33d4d950037
+Author: Romain Bouvier <skunnyk@alteroot.org>
+Date:   Mon May 18 10:04:40 2020 +0200
+
+    Fix make distcheck
+    
+    - Now we can enable CI for the project !
+
+commit eeae0cbad6f87b94de75dd277c2fd44306b9e70a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed May 13 07:42:40 2020 +0200
+
+    Yepp again I forgot to update the year ;)
+
+commit ef72029dc3aa1c94bd00efb80075d73d99424df5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed May 13 07:40:11 2020 +0200
+
+    Following main Xfce project by switching to "foreign" mode for automake
+    
+    - This way, we don't need to provide a README file, now that we start to
+      switch to README.md for markdown readme on gitlab
+    - "[..] differences between the gnu and foreign flavours is
+      that the former requires the presence of a number of files in the
+    top-level of the projects": https://autotools.io/automake/options.html
+    - It also stop warning when using GNU make syntax, but we already
+      mandate gnu make, so it's not a problem
+
+commit 2c1d467a511e1ff635f71667b0ed02ad83d9c781
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu May 7 08:31:43 2020 +0200
+
+    Added dummy example search provider plugin. It's main purpose is to provide a skeleton for creating new search provider plugins.
+
+commit f20aa9742a3c0effbbffb5922a705afd428f05c5
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Apr 6 12:28:26 2020 +0200
+
+    Replace returning valid but empty animation in xfdashboard_theme_animation_create() with NULL pointer
+
+commit 04c149e68df56cf576285f118b020a5b490a3040
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Apr 6 12:16:48 2020 +0200
+
+    Adding support to animate actor when it will be shown or hidden
+
+commit ba4ebddda5031c1683c6eddef8fa28435b67c46d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 25 08:12:00 2020 +0100
+
+    Refactor internal code to add and remove animations at actors to make them commonly usable.
+
+commit 7cd6b31daf608dba73d06a713e3606069dc94640
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Mar 24 06:58:47 2020 +0100
+
+    Adding support to animate actor when it was shown for the first time
+
+commit b21788cda48ffe0f4932caa7d41c30af7a9fa470
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Mar 15 16:48:47 2020 +0100
+
+    Fix typo
+
+commit 5bdb0022a7420322e586c52cefe4e2060860cfba
+Author: DanielChabrowski <danchabrowski@gmail.com>
+Date:   Sat Mar 14 19:30:45 2020 +0100
+
+    Fix compilation - undeclared self
+
+commit ee2c3b3bfadfa6bbd328ecee4aced1ad49446df4
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Feb 10 09:51:27 2020 +0100
+
+    Silence critical warnings when requsting a desktop file for a non-desktop ID but add debug messages.
+
+commit b55c16fe0e5eab207f449911a91078fbca78ab1b
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Feb 4 10:35:40 2020 +0100
+
+    Free list of animation when actor is disposed (remaining TODO ;) )
+
+commit 232b866b6a3aff2f44ae6f3b070967a8161a16c3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Fri Jan 31 15:46:47 2020 +0100
+
+    Adding support to animate actor when a class or a pseudo-class was added or removed.
+
+commit 9c8a56389fcdec0b26436734c3103910d1fb4d22
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 20 13:51:05 2020 +0100
+
+    Add signals to interface XfdashboardStylable for adding and removing classes and pseudo-classes
+
+commit a675c2d1ce75e0d2cf7e90acbf098b9f37143e50
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 13 12:35:04 2020 +0100
+
+    I18n: New translations (ie) and updated translations (fr)
+
+commit b1350679c35f9513650fe6f2c4c7f2b4965cfe99
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 13 12:28:17 2020 +0100
+
+    Add help button to xfdashboard-settings standalone dialog (not plugged into xfce4-settings-manager). Fixes bug #16332.
+
+commit d3d1912d59a70e58c4bca18ca96bc4dea4c5fae3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Mon Jan 13 11:58:33 2020 +0100
+
+    Support help button in xfce4-settings-manager. One fix for bug #16332
+
+commit f5ab2716b0f80da6efdc23c4e572fa0563471726
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Tue Dec 3 09:50:53 2019 +0100
+
+    Post-release version bump to 0.7.8
+
 commit 5383d2059c58db12b7170b00ca1573352ec21fae
 Author: Stephan Haller <nomad@froevel.de>
 Date:   Tue Dec 3 09:20:34 2019 +0100

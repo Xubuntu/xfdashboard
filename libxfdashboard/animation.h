@@ -1,7 +1,7 @@
 /*
  * animation: A animation for an actor
  * 
- * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,8 @@
 #include <clutter/clutter.h>
 
 #include <libxfdashboard/actor.h>
+#include <libxfdashboard/css-selector.h>
+
 
 G_BEGIN_DECLS
 
@@ -51,7 +53,8 @@ typedef struct _XfdashboardAnimationPrivate		XfdashboardAnimationPrivate;
  *
  * The #XfdashboardAnimation structure contains only private data and
  * should be accessed using the provided API
- */struct _XfdashboardAnimation
+ */
+struct _XfdashboardAnimation
 {
 	/*< private >*/
 	/* Parent instance */
@@ -75,30 +78,52 @@ struct _XfdashboardAnimationClass
 	/*< public >*/
 	/* Virtual functions */
 	void (*add_animation)(XfdashboardAnimation *self, ClutterActor *inActor, ClutterTransition *inTransition);
-	void (*started)(XfdashboardAnimation *self);
-	void (*stopped)(XfdashboardAnimation *self);
+	void (*animation_done)(XfdashboardAnimation *self);
 };
+
+/**
+ * XfdashboardAnimationValue:
+ * @selector: A #XfdashboardCssSelector to find matchhing actors for the property's value in animation or %NULL to match sender
+ * @property: A string containing the name of the property this value belongs to
+ * @value: A #GValue containing the value for the property
+ *
+ */
+struct _XfdashboardAnimationValue
+{
+	XfdashboardCssSelector				*selector;
+	gchar								*property;
+	GValue								*value;
+};
+
+typedef struct _XfdashboardAnimationValue		XfdashboardAnimationValue;
 
 /* Public API */
 GType xfdashboard_animation_get_type(void) G_GNUC_CONST;
 
 XfdashboardAnimation* xfdashboard_animation_new(XfdashboardActor *inSender, const gchar *inSignal);
+XfdashboardAnimation* xfdashboard_animation_new_with_values(XfdashboardActor *inSender,
+															const gchar *inSignal,
+															XfdashboardAnimationValue **inDefaultInitialValues,
+															XfdashboardAnimationValue **inDefaultFinalValues);
+
+XfdashboardAnimation* xfdashboard_animation_new_by_id(XfdashboardActor *inSender, const gchar *inID);
+XfdashboardAnimation* xfdashboard_animation_new_by_id_with_values(XfdashboardActor *inSender,
+															const gchar *inID,
+															XfdashboardAnimationValue **inDefaultInitialValues,
+															XfdashboardAnimationValue **inDefaultFinalValues);
 
 const gchar* xfdashboard_animation_get_id(XfdashboardAnimation *self);
 
-/**
- * XfdashboardAnimationDoneCallback:
- * @inAnimation: The animation which completed
- * @inUserData: Data passed to the function, set with xfdashboard_animation_run()
- *
- * A callback called when animation, started by xfdashboard_animation_run(),
- * has completed and will be destroyed.
- */
-typedef void (*XfdashboardAnimationDoneCallback)(XfdashboardAnimation *inAnimation, gpointer inUserData);
+gboolean xfdashboard_animation_is_empty(XfdashboardAnimation *self);
 
-void xfdashboard_animation_run(XfdashboardAnimation *self,
-								XfdashboardAnimationDoneCallback inCallback,
-								gpointer inUserData);
+void xfdashboard_animation_run(XfdashboardAnimation *self);
+
+void xfdashboard_animation_ensure_complete(XfdashboardAnimation *self);
+
+void xfdashboard_animation_dump(XfdashboardAnimation *self);
+
+XfdashboardAnimationValue** xfdashboard_animation_defaults_new(gint inNumberValues, ...);
+void xfdashboard_animation_defaults_free(XfdashboardAnimationValue **inDefaultValues);
 
 G_END_DECLS
 

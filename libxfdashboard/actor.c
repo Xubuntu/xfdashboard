@@ -1,7 +1,7 @@
 /*
  * actor: Abstract base actor
  * 
- * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,9 +32,11 @@
 #include <libxfdashboard/application.h>
 #include <libxfdashboard/stylable.h>
 #include <libxfdashboard/focusable.h>
+#include <libxfdashboard/animation.h>
 #include <libxfdashboard/utils.h>
 #include <libxfdashboard/compat.h>
 #include <libxfdashboard/debug.h>
+#include <math.h>
 
 
 /* Define this class in GObject system */
@@ -46,19 +48,41 @@ void xfdashboard_actor_class_init(XfdashboardActorClass *klass);
 void xfdashboard_actor_init(XfdashboardActor *self);
 void xfdashboard_actor_base_class_finalize(XfdashboardActorClass *klass);
 
+typedef enum
+{
+	XFDASHBOARD_ACTOR_ANIMATION_NONE=0,
+	XFDASHBOARD_ACTOR_ANIMATION_RUNNING=1 << 0,
+	XFDASHBOARD_ACTOR_ANIMATION_SKIP_DONE=1 << 1,
+} XfdashboardActorAnimationFlags;
+
 struct _XfdashboardActorPrivate
 {
 	/* Properties related */
-	gboolean		canFocus;
-	gchar			*effects;
+	gboolean				canFocus;
+	gchar					*effects;
 
-	gchar			*styleClasses;
-	gchar			*stylePseudoClasses;
+	gchar					*styleClasses;
+	gchar					*stylePseudoClasses;
 
 	/* Instance related */
-	GHashTable		*lastThemeStyleSet;
-	gboolean		forceStyleRevalidation;
-	gboolean		isFirstParent;
+	gboolean						inDestruction;
+
+	GHashTable						*lastThemeStyleSet;
+	gboolean						forceStyleRevalidation;
+
+	gboolean						isFirstParent;
+
+	gboolean						firstTimeMapped;
+	XfdashboardAnimation			*firstTimeMappedAnimation;
+
+	GSList							*animations;
+
+	ClutterActorBox					*allocationTrackBox;
+
+	gboolean						doAllocationAnimation;
+	XfdashboardAnimation			*allocationAnimation;
+	ClutterActorBox					*allocationInitialBox;
+	ClutterActorBox					*allocationFinalBox;
 };
 
 /* Properties */
@@ -79,14 +103,46 @@ enum
 static GParamSpec* XfdashboardActorProperties[PROP_LAST]={ 0, };
 
 /* IMPLEMENTATION: Private variables and methods */
-static GParamSpecPool		*_xfdashboard_actor_stylable_properties_pool=NULL;
+#define ALLOCATION_ANIMATION_SIGNAL		"move-resize"
+
+typedef struct _XfdashboardActorAnimationEntry		XfdashboardActorAnimationEntry;
+struct _XfdashboardActorAnimationEntry
+{
+	gboolean									inDestruction;
+	gchar										*signal;
+	XfdashboardAnimation						*animation;
+};
 
 #define XFDASHBOARD_ACTOR_PARAM_SPEC_REF		(_xfdashboard_actor_param_spec_ref_quark())
+
+static GParamSpecPool		*_xfdashboard_actor_stylable_properties_pool=NULL;
+
 
 /* Quark declarations */
 static GQuark _xfdashboard_actor_param_spec_ref_quark(void)
 {
 	return(g_quark_from_static_string("xfdashboard-actor-param-spec-ref-quark"));
+}
+
+
+/* Free an animation entry */
+static void _xfdashboard_actor_animation_entry_free(XfdashboardActorAnimationEntry *inData)
+{
+	g_return_if_fail(inData);
+
+	/* Do not free anything if this entry is already in destruction */
+	if(inData->inDestruction) return;
+
+	/* Set flag that this data will be freed now as this function could
+	 * be called recursive (e.g. by other signal handlers) resulting
+	 * in double-free.
+	 */
+	inData->inDestruction=TRUE;
+
+	/* Release allocated resources */
+	if(inData->animation) g_object_unref(inData->animation);
+	if(inData->signal) g_free(inData->signal);
+	g_free(inData);
 }
 
 /* Invalidate all stylable children recursively beginning at given actor */
@@ -159,19 +215,76 @@ static gboolean _xfdashboard_actor_hashtable_is_duplicate_key(gpointer inKey,
 	return(g_hash_table_lookup_extended(otherHashtable, inKey, NULL, NULL));
 }
 
+/* 'created' animation has completed */
+static void _xfdashboard_actor_first_time_created_animation_done(XfdashboardAnimation *inAnimation,
+																	gpointer inUserData)
+{
+	XfdashboardActor				*self;
+	XfdashboardActorPrivate			*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_ANIMATION(inAnimation));
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inUserData));
+
+	self=XFDASHBOARD_ACTOR(inUserData);
+	priv=self->priv;
+
+	/* Mark completed first-time animation as removed */
+	priv->firstTimeMappedAnimation=NULL;
+}
+
 /* Actor was mapped or unmapped */
 static void _xfdashboard_actor_on_mapped_changed(GObject *inObject,
 													GParamSpec *inSpec,
 													gpointer inUserData)
 {
-	XfdashboardActor		*self;
+	XfdashboardActor			*self;
+	XfdashboardActorPrivate		*priv;
 
 	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inObject));
 
 	self=XFDASHBOARD_ACTOR(inObject);
+	priv=self->priv;
 
-	/* Invalide styling to get it recomputed */
-	xfdashboard_stylable_invalidate(XFDASHBOARD_STYLABLE(self));
+	/* If actor was mapped, invalidate styling and check for first-time animation */
+	if(clutter_actor_is_mapped(CLUTTER_ACTOR(self)))
+	{
+		/* Invalide styling to get it recomputed if actor was mapped */
+		xfdashboard_stylable_invalidate(XFDASHBOARD_STYLABLE(self));
+
+		/* If actor was mapped for the first time then check if an animation
+		 * should be created and run.
+		 */
+		if(!priv->firstTimeMapped)
+		{
+			g_assert(!priv->firstTimeMappedAnimation);
+
+			/* Lookup animation for create signal and if any found (i.e. has an ID),
+			 * run it.
+			 */
+			priv->firstTimeMappedAnimation=xfdashboard_animation_new(XFDASHBOARD_ACTOR(self), "created");
+			if(!priv->firstTimeMappedAnimation ||
+				!xfdashboard_animation_get_id(priv->firstTimeMappedAnimation) ||
+				xfdashboard_animation_is_empty(priv->firstTimeMappedAnimation))
+			{
+				/* Empty or invalid animation, so release allocated resources and return */
+				if(priv->firstTimeMappedAnimation) g_object_unref(priv->firstTimeMappedAnimation);
+				priv->firstTimeMappedAnimation=NULL;
+
+				return;
+			}
+
+			/* Start animation */
+			g_signal_connect_after(priv->firstTimeMappedAnimation, "animation-done", G_CALLBACK(_xfdashboard_actor_first_time_created_animation_done), self);
+			xfdashboard_animation_run(priv->firstTimeMappedAnimation);
+			XFDASHBOARD_DEBUG(self, ANIMATION,
+									"Found and starting animation '%s' for created signal at actor %s",
+									xfdashboard_animation_get_id(priv->firstTimeMappedAnimation),
+									G_OBJECT_TYPE_NAME(self));
+
+			/* Set flag that first-time visible happened at this actor */
+			priv->firstTimeMapped=TRUE;
+		}
+	}
 }
 
 /* Actor was (re)named */
@@ -486,8 +599,10 @@ static void _xfdashboard_actor_stylable_invalidate(XfdashboardStylable *inStylab
 	/* Only recompute style for mapped actors or if revalidation was forced */
 	if(!priv->forceStyleRevalidation && !clutter_actor_is_mapped(CLUTTER_ACTOR(self))) return;
 
-	/* Get theme CSS */
+	/* Get theme */
 	theme=xfdashboard_application_get_theme(NULL);
+
+	/* Get theme CSS */
 	themeCSS=xfdashboard_theme_get_css(theme);
 
 	/* First get list of all stylable properties of this and parent classes.
@@ -708,6 +823,228 @@ static void _xfdashboard_actor_stylable_invalidate(XfdashboardStylable *inStylab
 	g_object_thaw_notify(G_OBJECT(self));
 }
 
+/* Animation has completed, so remove from list */
+static void _xfdashboard_actor_animation_done(XfdashboardAnimation *inAnimation,
+												gpointer inUserData)
+{
+	XfdashboardActor				*self;
+	XfdashboardActorPrivate			*priv;
+	GSList							*iter;
+	XfdashboardActorAnimationEntry	*data;
+
+	g_return_if_fail(XFDASHBOARD_IS_ANIMATION(inAnimation));
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inUserData));
+
+	self=XFDASHBOARD_ACTOR(inUserData);
+	priv=self->priv;
+
+	/* Lookup animation done in list of animation and remove animation entry */
+	for(iter=priv->animations; iter; iter=g_slist_next(iter))
+	{
+		/* Get animation entry at iterator */
+		data=(XfdashboardActorAnimationEntry*)iter->data;
+		if(!data) continue;
+
+		/* Check if animation entry matches the animation done */
+		if(data->animation==inAnimation)
+		{
+			XFDASHBOARD_DEBUG(self, ANIMATION,
+									"Removing stopped animation '%s'",
+									xfdashboard_animation_get_id(data->animation));
+
+			/* Remove entry from list, but set pointer to animation in entry
+			 * to NULL to avoid unreffing an already disposed or finalized
+			 * object instance.
+			 */
+			priv->animations=g_slist_remove_link(priv->animations, iter);
+
+			data->animation=NULL;
+			_xfdashboard_actor_animation_entry_free(data);
+			g_slist_free_1(iter);
+		}
+	}
+}
+
+/* Remove animations for signal and (pseudo-)class */
+static void _xfdashboard_actor_remove_animation(XfdashboardActor *self,
+												const gchar *inAnimationSignal)
+{
+	XfdashboardActorPrivate			*priv;
+	GSList							*iter;
+	XfdashboardActorAnimationEntry	*data;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(self));
+	g_return_if_fail(inAnimationSignal && *inAnimationSignal);
+
+	priv=self->priv;
+
+	/* Iterate through list of animation and lookup animation for signal. If an
+	 * animation is found, stop it. It will be remove from list of animations
+	 * automatically.
+	 */
+	for(iter=priv->animations; iter; iter=g_slist_next(iter))
+	{
+		/* Get animation entry at iterator */
+		data=(XfdashboardActorAnimationEntry*)iter->data;
+		if(!data) continue;
+
+		/* Check if animation entry matches the signal to lookup */
+		if(g_strcmp0(data->signal, inAnimationSignal)==0)
+		{
+			XFDASHBOARD_DEBUG(self, ANIMATION,
+									"Stopping and removing animation '%s' for signal '%s'",
+									xfdashboard_animation_get_id(data->animation),
+									inAnimationSignal);
+
+			/* Stop animation by unreffing object instance which calls the
+			 * done callback _xfdashboard_actor_animation_done() of animation.
+			 */
+			g_object_unref(data->animation);
+		}
+	}
+}
+
+/* Lookup animations for signal and (pseudo-)class and run animation at actor */
+static XfdashboardAnimation* _xfdashboard_actor_add_animation(XfdashboardActor *self,
+																const gchar *inAnimationSignal)
+{
+	XfdashboardActorPrivate			*priv;
+	XfdashboardAnimation			*animation;
+	XfdashboardActorAnimationEntry	*data;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_ACTOR(self), NULL);
+	g_return_val_if_fail(inAnimationSignal && *inAnimationSignal, NULL);
+
+	priv=self->priv;
+
+	/* Do not lookup and add animations if actor is in destruction now */
+	if(priv->inDestruction) return(NULL);
+
+	/* Lookup animation for signal-(pseudo-)class combination and if any found
+	 * (i.e. has an ID) add it to list of animations of actor and run it.
+	 */
+	animation=xfdashboard_animation_new(XFDASHBOARD_ACTOR(self), inAnimationSignal);
+	if(!animation ||
+		xfdashboard_animation_is_empty(animation))
+	{
+		/* Release animation and return NULL */
+		if(animation) g_object_unref(animation);
+		return(NULL);
+	}
+
+	/* Check for duplicate animation */
+	if(clutter_actor_get_transition(CLUTTER_ACTOR(self), xfdashboard_animation_get_id(animation)))
+	{
+		XFDASHBOARD_DEBUG(self, ANIMATION,
+								"Duplicate animation found for signal '%s'",
+								inAnimationSignal);
+
+		/* Release animation and return NULL */
+		g_object_unref(animation);
+		return(NULL);
+	}
+
+	/* Create animation entry data and add to list of animations */
+	data=g_new0(XfdashboardActorAnimationEntry, 1);
+	if(!data)
+	{
+		g_critical(_("Cannot allocate memory for animation entry for animation '%s' with signal '%s'"),
+					xfdashboard_animation_get_id(animation),
+					inAnimationSignal);
+
+		/* Release animation and return NULL */
+		g_object_unref(animation);
+		return(NULL);
+	}
+
+	data->signal=g_strdup(inAnimationSignal);
+	data->animation=animation;
+
+	priv->animations=g_slist_prepend(priv->animations, data);
+
+	/* Start animation */
+	g_signal_connect_after(animation, "animation-done", G_CALLBACK(_xfdashboard_actor_animation_done), self);
+	xfdashboard_animation_run(animation);
+	XFDASHBOARD_DEBUG(self, ANIMATION,
+							"Found and starting animation '%s' for signal '%s'",
+							xfdashboard_animation_get_id(animation),
+							inAnimationSignal);
+
+	return(animation);
+}
+
+/* Signal handler for "class-added" signal of stylable interface */
+static void _xfdashboard_actor_stylable_class_added(XfdashboardStylable *inStylable, const gchar *inClass)
+{
+	gchar			*animationSignal;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inStylable));
+
+	/* Remove any animation that was added when this class was removed */
+	animationSignal=g_strdup_printf("class-removed:%s", inClass);
+	_xfdashboard_actor_remove_animation(XFDASHBOARD_ACTOR(inStylable), animationSignal);
+	g_free(animationSignal);
+
+	/* Create animation for this class added */
+	animationSignal=g_strdup_printf("class-added:%s", inClass);
+	_xfdashboard_actor_add_animation(XFDASHBOARD_ACTOR(inStylable), animationSignal);
+	g_free(animationSignal);
+}
+
+/* Signal handler for "class-removed" signal of stylable interface */
+static void _xfdashboard_actor_stylable_class_removed(XfdashboardStylable *inStylable, const gchar *inClass)
+{
+	gchar			*animationSignal;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inStylable));
+
+	/* Remove any animation that was added when this class was added */
+	animationSignal=g_strdup_printf("class-added:%s", inClass);
+	_xfdashboard_actor_remove_animation(XFDASHBOARD_ACTOR(inStylable), animationSignal);
+	g_free(animationSignal);
+
+	/* Create animation for this class removed */
+	animationSignal=g_strdup_printf("class-removed:%s", inClass);
+	_xfdashboard_actor_add_animation(XFDASHBOARD_ACTOR(inStylable), animationSignal);
+	g_free(animationSignal);
+}
+
+/* Signal handler for "pseudo-class-added" signal of stylable interface */
+static void _xfdashboard_actor_stylable_pseudo_class_added(XfdashboardStylable *inStylable, const gchar *inClass)
+{
+	gchar			*animationSignal;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inStylable));
+
+	/* Remove any animation that was added when this pseudo-class was removed */
+	animationSignal=g_strdup_printf("pseudo-class-removed:%s", inClass);
+	_xfdashboard_actor_remove_animation(XFDASHBOARD_ACTOR(inStylable), animationSignal);
+	g_free(animationSignal);
+
+	/* Create animation for this pseudo-class added */
+	animationSignal=g_strdup_printf("pseudo-class-added:%s", inClass);
+	_xfdashboard_actor_add_animation(XFDASHBOARD_ACTOR(inStylable), animationSignal);
+	g_free(animationSignal);
+}
+
+/* Signal handler for "pseudo-class-removed" signal of stylable interface */
+static void _xfdashboard_actor_stylable_pseudo_class_removed(XfdashboardStylable *inStylable, const gchar *inClass)
+{
+	gchar			*animationSignal;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inStylable));
+
+	/* Remove any animation that was added when this pseudo-class was added */
+	animationSignal=g_strdup_printf("pseudo-class-added:%s", inClass);
+	_xfdashboard_actor_remove_animation(XFDASHBOARD_ACTOR(inStylable), animationSignal);
+	g_free(animationSignal);
+
+	/* Create animation for this pseudo-class removed */
+	animationSignal=g_strdup_printf("pseudo-class-removed:%s", inClass);
+	_xfdashboard_actor_add_animation(XFDASHBOARD_ACTOR(inStylable), animationSignal);
+	g_free(animationSignal);
+}
+
 /* Interface initialization
  * Set up default functions
  */
@@ -718,12 +1055,127 @@ static void _xfdashboard_actor_stylable_iface_init(XfdashboardStylableInterface 
 	iface->get_parent=_xfdashboard_actor_stylable_get_parent;
 	iface->get_classes=_xfdashboard_actor_stylable_get_classes;
 	iface->set_classes=_xfdashboard_actor_stylable_set_classes;
+	iface->class_added=_xfdashboard_actor_stylable_class_added;
+	iface->class_removed=_xfdashboard_actor_stylable_class_removed;
 	iface->get_pseudo_classes=_xfdashboard_actor_stylable_get_pseudo_classes;
 	iface->set_pseudo_classes=_xfdashboard_actor_stylable_set_pseudo_classes;
+	iface->pseudo_class_added=_xfdashboard_actor_stylable_pseudo_class_added;
+	iface->pseudo_class_removed=_xfdashboard_actor_stylable_pseudo_class_removed;
 	iface->invalidate=_xfdashboard_actor_stylable_invalidate;
 }
 
 /* IMPLEMENTATION: ClutterActor */
+
+/* Allocation animation ended */
+static void _xfdashboard_actor_on_allocation_animation_done(XfdashboardAnimation *inAnimation,
+															gpointer inUserData)
+{
+	XfdashboardActor				*self;
+	XfdashboardActorPrivate			*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_ANIMATION(inAnimation));
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inUserData));
+
+	self=XFDASHBOARD_ACTOR(inUserData);
+	priv=self->priv;
+
+	/* Release allocated resources */
+	priv->allocationAnimation=NULL;
+}
+
+/* Actor's allocation changed */
+static void _xfdashboard_actor_on_allocation_changed(ClutterActor *inActor,
+														const ClutterActorBox *inAllocationBox,
+														ClutterAllocationFlags inFlags,
+														gpointer inUserData)
+{
+	XfdashboardActor				*self;
+	XfdashboardActorPrivate			*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inActor));
+	g_return_if_fail(inAllocationBox);
+
+	self=XFDASHBOARD_ACTOR(inActor);
+	priv=self->priv;
+
+	/* Track allocation changes */
+	priv->allocationTrackBox->x1=inAllocationBox->x1;
+	priv->allocationTrackBox->x2=inAllocationBox->x2;
+	priv->allocationTrackBox->y1=inAllocationBox->y1;
+	priv->allocationTrackBox->y2=inAllocationBox->y2;
+
+	/* Check if allocation animation was requested explicitly */
+	if(priv->doAllocationAnimation)
+	{
+		XfdashboardAnimation		*animation;
+		XfdashboardAnimationValue	**initials;
+		XfdashboardAnimationValue	**finals;
+
+		/* Stop currently running animation if any */
+		if(priv->allocationAnimation)
+		{
+			/* Stop animation */
+			g_object_unref(priv->allocationAnimation);
+		}
+
+		/* Set up default initial values for animation */
+		g_assert(priv->allocationInitialBox!=NULL);
+		initials=xfdashboard_animation_defaults_new(4,
+													"x", G_TYPE_FLOAT, priv->allocationInitialBox->x1,
+													"y", G_TYPE_FLOAT, priv->allocationInitialBox->y1,
+													"width", G_TYPE_FLOAT, clutter_actor_box_get_width(priv->allocationInitialBox),
+													"height", G_TYPE_FLOAT, clutter_actor_box_get_height(priv->allocationInitialBox));
+
+		/* Set up default final values for animation */
+		finals=xfdashboard_animation_defaults_new(4,
+													"x", G_TYPE_FLOAT, inAllocationBox->x1,
+													"y", G_TYPE_FLOAT, inAllocationBox->y1,
+													"width", G_TYPE_FLOAT, clutter_actor_box_get_width(inAllocationBox),
+													"height", G_TYPE_FLOAT, clutter_actor_box_get_height(inAllocationBox));
+
+		/* Create and start animation */
+		animation=xfdashboard_animation_new_with_values(self,
+														ALLOCATION_ANIMATION_SIGNAL,
+														initials,
+														finals);
+		if(animation)
+		{
+			/* If animation is not empty, start it now */
+			if(!xfdashboard_animation_is_empty(animation))
+			{
+				/* Remember the allocation animation */
+				priv->allocationAnimation=animation;
+
+				/* Start animation */
+				g_signal_connect_after(animation,
+										"animation-done",
+										G_CALLBACK(_xfdashboard_actor_on_allocation_animation_done),
+										inActor);
+				xfdashboard_animation_run(priv->allocationAnimation);
+
+				/* Take an extra reference on animation to keep it alive
+				 * when it is unreferenced later this function.
+				 */
+				g_object_ref(priv->allocationAnimation);
+			}
+
+			/* Unreference animation, so it will either be disposed
+			 * because it was empty or it will survive because it
+			 * was started and an extra reference was taken.
+			 */
+			g_object_unref(animation);
+		}
+
+		/* Free default initial and final values */
+		xfdashboard_animation_defaults_free(initials);
+		xfdashboard_animation_defaults_free(finals);
+
+		/* Unset flag indicating an allocation animation was requested,
+		 * as it was handled now.
+		 */
+		priv->doAllocationAnimation=FALSE;
+	}
+}
 
 /* Pointer left actor */
 static gboolean _xfdashboard_actor_leave_event(ClutterActor *inActor, ClutterCrossingEvent *inEvent)
@@ -774,9 +1226,10 @@ static gboolean _xfdashboard_actor_enter_event(ClutterActor *inActor, ClutterCro
 /* Actor was (re)parented */
 static void _xfdashboard_actor_parent_set(ClutterActor *inActor, ClutterActor *inOldParent)
 {
-	XfdashboardActor			*self;
-	XfdashboardActorPrivate		*priv;
-	ClutterActorClass			*parentClass;
+	XfdashboardActor				*self;
+	XfdashboardActorPrivate			*priv;
+	ClutterActorClass				*parentClass;
+	ClutterActor					*parent;
 
 	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inActor));
 
@@ -790,12 +1243,15 @@ static void _xfdashboard_actor_parent_set(ClutterActor *inActor, ClutterActor *i
 		parentClass->parent_set(inActor, inOldParent);
 	}
 
+	/* Get new parent of actor */
+	parent=clutter_actor_get_parent(inActor);
+
 	/* Check if it is a newly created actor which is parented for the first time.
 	 * Then emit 'actor-created' signal on stage.
 	 */
 	if(priv->isFirstParent &&
 		!inOldParent &&
-		clutter_actor_get_parent(inActor))
+		parent)
 	{
 		ClutterActor			*stage;
 
@@ -817,7 +1273,64 @@ static void _xfdashboard_actor_parent_set(ClutterActor *inActor, ClutterActor *i
 	_xfdashboard_actor_invalidate_recursive(CLUTTER_ACTOR(self));
 }
 
-/* Actor is shown */
+/* Actor will be shown */
+static XfdashboardAnimation* _xfdashboard_actor_replace_animation(XfdashboardActor *self,
+																	const gchar *inOldSignal,
+																	const gchar *inNewSignal)
+{
+	XfdashboardActorPrivate				*priv;
+	XfdashboardAnimation				*oldAnimation;
+	XfdashboardAnimation				*newAnimation;
+	GSList								*iter;
+	XfdashboardActorAnimationEntry		*data;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_ACTOR(self), NULL);
+	g_return_val_if_fail(inOldSignal && *inOldSignal, NULL);
+	g_return_val_if_fail(inNewSignal && *inNewSignal, NULL);
+
+	priv=self->priv;
+	oldAnimation=NULL;
+	newAnimation=NULL;
+
+	/* Iterate through list of animation and lookup animation for old signal */
+	for(iter=priv->animations; iter; iter=g_slist_next(iter))
+	{
+		/* Get animation entry at iterator */
+		data=(XfdashboardActorAnimationEntry*)iter->data;
+		if(!data) continue;
+
+		/* Check if animation entry matches the signal to lookup */
+		if(g_strcmp0(data->signal, inOldSignal)!=0) continue;
+
+		/* Found animation, so stop further iterations */
+		oldAnimation=data->animation;
+	}
+
+	/* Get animation for new signal to replace old one */
+	newAnimation=_xfdashboard_actor_add_animation(self, inNewSignal);
+
+	/* If an animation for old signal, stop it */
+	if(oldAnimation)
+	{
+		/* If no new animation will be started, ensure old one completes
+		 * before it will be removed.
+		 */
+		if(!newAnimation ||
+			!xfdashboard_animation_get_id(newAnimation))
+		{
+			xfdashboard_animation_ensure_complete(oldAnimation);
+		}
+
+		/* Stop old animation by unreffing object instance which calls the
+		 * done callback _xfdashboard_actor_animation_done() of animation.
+		 */
+		g_object_unref(oldAnimation);
+	}
+
+	/* Return new animation which replaced old one */
+	return(newAnimation);
+}
+
 static void _xfdashboard_actor_show(ClutterActor *inActor)
 {
 	XfdashboardActor		*self;
@@ -841,30 +1354,49 @@ static void _xfdashboard_actor_show(ClutterActor *inActor)
 	{
 		xfdashboard_stylable_add_pseudo_class(XFDASHBOARD_STYLABLE(self), "hover");
 	}
+
+	/* Stop any animation started for "hiding" actor which may be still running,
+	 * and lookup the one should be run when actor gets visible */
+	_xfdashboard_actor_replace_animation(self, "hide", "show");
 }
 
-/* Actor is hidden */
+/* Actor will be hidden */
+static void _xfdashboard_actor_hide_on_animation_done(XfdashboardActor *inActor, gpointer inUserData)
+{
+	ClutterActorClass		*parentClass;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inActor));
+
+	/* Call parent's virtual function to hide actor */
+	parentClass=CLUTTER_ACTOR_CLASS(xfdashboard_actor_parent_class);
+	if(parentClass->hide)
+	{
+		parentClass->hide(CLUTTER_ACTOR(inActor));
+	}
+}
+
 static void _xfdashboard_actor_hide(ClutterActor *inActor)
 {
 	XfdashboardActor		*self;
-	ClutterActorClass		*parentClass;
+	XfdashboardAnimation	*animation;
 
 	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inActor));
 
 	self=XFDASHBOARD_ACTOR(inActor);
 
-	/* Call parent's virtual function */
-	parentClass=CLUTTER_ACTOR_CLASS(xfdashboard_actor_parent_class);
-	if(parentClass->hide)
-	{
-		parentClass->hide(inActor);
-	}
-
 	/* Actor is hidden now so remove pseudo-class ":hover" because pointer cannot
 	 * be in an actor hidden.
 	 */
 	xfdashboard_stylable_remove_pseudo_class(XFDASHBOARD_STYLABLE(self), "hover");
+
+	/* Stop any animation started for "showing" actor which may be still running,
+	 * and lookup the one should be run when actor gets hidden.
+	 */
+	animation=_xfdashboard_actor_replace_animation(self, "show", "hide");
+	if(animation) g_signal_connect_swapped(animation, "animation-done", G_CALLBACK(_xfdashboard_actor_hide_on_animation_done), self);
+		else _xfdashboard_actor_hide_on_animation_done(self, NULL);
 }
+
 
 /* IMPLEMENTATION: GObject */
 
@@ -873,6 +1405,9 @@ static void _xfdashboard_actor_dispose(GObject *inObject)
 {
 	XfdashboardActor			*self=XFDASHBOARD_ACTOR(inObject);
 	XfdashboardActorPrivate		*priv=self->priv;
+
+	/* Set flag that actor will be destructed */
+	priv->inDestruction=TRUE;
 
 	/* Release allocated variables */
 	if(priv->effects)
@@ -898,6 +1433,38 @@ static void _xfdashboard_actor_dispose(GObject *inObject)
 		g_hash_table_destroy(priv->lastThemeStyleSet);
 		priv->lastThemeStyleSet=NULL;
 	}
+
+	if(priv->firstTimeMappedAnimation)
+	{
+		g_object_unref(priv->firstTimeMappedAnimation);
+		priv->firstTimeMappedAnimation=NULL;
+	}
+
+	if(priv->animations)
+	{
+		g_slist_free_full(priv->animations, (GDestroyNotify)_xfdashboard_actor_animation_entry_free);
+		priv->animations=NULL;
+	}
+
+	if(priv->allocationAnimation)
+	{
+		g_object_unref(priv->allocationAnimation);
+		priv->allocationAnimation=NULL;
+	}
+
+	if(priv->allocationInitialBox)
+	{
+		clutter_actor_box_free(priv->allocationInitialBox);
+		priv->allocationInitialBox=NULL;
+	}
+
+	if(priv->allocationTrackBox)
+	{
+		clutter_actor_box_free(priv->allocationTrackBox);
+		priv->allocationTrackBox=NULL;
+	}
+
+	priv->doAllocationAnimation=FALSE;
 
 	/* Call parent's class dispose method */
 	G_OBJECT_CLASS(xfdashboard_actor_parent_class)->dispose(inObject);
@@ -1050,17 +1617,26 @@ void xfdashboard_actor_init(XfdashboardActor *self)
 	priv=self->priv=xfdashboard_actor_get_instance_private(self);
 
 	/* Set up default values */
+	priv->inDestruction=FALSE;
 	priv->canFocus=FALSE;
 	priv->effects=NULL;
 	priv->styleClasses=NULL;
 	priv->stylePseudoClasses=NULL;
 	priv->lastThemeStyleSet=NULL;
 	priv->isFirstParent=TRUE;
+	priv->firstTimeMapped=FALSE;
+	priv->firstTimeMappedAnimation=NULL;
+	priv->animations=NULL;
+	priv->doAllocationAnimation=FALSE;
+	priv->allocationAnimation=NULL;
+	priv->allocationInitialBox=NULL;
+	priv->allocationTrackBox=clutter_actor_box_new(0, 0, 0, 0);
 
 	/* Connect signals */
 	g_signal_connect(self, "notify::mapped", G_CALLBACK(_xfdashboard_actor_on_mapped_changed), NULL);
 	g_signal_connect(self, "notify::name", G_CALLBACK(_xfdashboard_actor_on_name_changed), NULL);
 	g_signal_connect(self, "notify::reactive", G_CALLBACK(_xfdashboard_actor_on_reactive_changed), NULL);
+	g_signal_connect(self, "allocation-changed", G_CALLBACK(_xfdashboard_actor_on_allocation_changed), NULL);
 }
 
 /* IMPLEMENTATION: GType */
@@ -1307,4 +1883,31 @@ void xfdashboard_actor_invalidate(XfdashboardActor *self)
 	g_return_if_fail(XFDASHBOARD_IS_ACTOR(self));
 
 	self->priv->forceStyleRevalidation=TRUE;
+}
+
+/* Requests to start an animation at next allocation change
+ * if theme defines an animation for move/resize.
+ */
+void xfdashboard_actor_enable_allocation_animation_once(XfdashboardActor *self)
+{
+	XfdashboardActorPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(self));
+
+	priv=self->priv;
+
+	/* Do nothing if this flag for requesting animation was already set */
+	if(priv->doAllocationAnimation) return;
+
+	/* Set flag to create and start animation at next allocation change */
+	priv->doAllocationAnimation=TRUE;
+
+	/* Use last tracked allocation as initial allocation box */
+	if(priv->allocationInitialBox)
+	{
+		clutter_actor_box_free(priv->allocationInitialBox);
+		priv->allocationInitialBox=NULL;
+	}
+
+	priv->allocationInitialBox=clutter_actor_box_copy(priv->allocationTrackBox);
 }

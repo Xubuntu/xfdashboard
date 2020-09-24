@@ -5,7 +5,7 @@
  *                      child actors) and scaled to fit the allocation
  *                      of the actor holding all child actors.
  * 
- * Copyright 2012-2019 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,8 @@
 #include <clutter/clutter.h>
 #include <math.h>
 
+#include <libxfdashboard/actor.h>
+#include <libxfdashboard/animation.h>
 #include <libxfdashboard/compat.h>
 
 
@@ -78,6 +80,7 @@ enum
 };
 
 static GParamSpec* XfdashboardScaledTableLayoutProperties[PROP_LAST]={ 0, };
+
 
 /* IMPLEMENTATION: Private variables and methods */
 
@@ -308,6 +311,9 @@ static void _xfdashboard_scaled_table_layout_allocate(ClutterLayoutManager *self
 	clutter_actor_iter_init(&iter, CLUTTER_ACTOR(inContainer));
 	while(clutter_actor_iter_next(&iter, &child))
 	{
+		gboolean							fixedPosition;
+		gfloat								fixedX, fixedY;
+
 		if(!clutter_actor_is_visible(child)) continue;
 
 		/* Get natural size of actor */
@@ -366,11 +372,27 @@ static void _xfdashboard_scaled_table_layout_allocate(ClutterLayoutManager *self
 				scaledChildHeight=0.0f;
 			}
 
-		/* Set new allocation of child */
-		childAllocation.x1=ceil(x+((cellWidth-scaledChildWidth)/2.0f));
-		childAllocation.y1=ceil(y+((cellHeight-scaledChildHeight)/2.0f));
+		/* Set new allocation of child but respect fixed position of actor */
+		g_object_get(child,
+						"fixed-position-set", &fixedPosition,
+						"fixed-x", &fixedX,
+						"fixed-y", &fixedY,
+						NULL);
+
+		if(fixedPosition)
+		{
+			childAllocation.x1=ceil(fixedX);
+			childAllocation.y1=ceil(fixedY);
+		}
+			else
+			{
+				childAllocation.x1=ceil(x+((cellWidth-scaledChildWidth)/2.0f));
+				childAllocation.y1=ceil(y+((cellHeight-scaledChildHeight)/2.0f));
+			}
+
 		childAllocation.x2=ceil(childAllocation.x1+scaledChildWidth);
 		childAllocation.y2=ceil(childAllocation.y1+scaledChildHeight);
+
 		clutter_actor_allocate(child, &childAllocation, inFlags);
 
 		/* Set up for next child */
