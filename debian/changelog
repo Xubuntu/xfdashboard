@@ -1,3 +1,14 @@
+xfdashboard (0.7.8-0ubuntu1) devel; urgency=medium
+
+  * New upstream version 0.7.8.
+  * d/copyright: Update years.
+  * d/docs: README → README.md.
+  * d/libxfdashboard0.symbols: Update for new version.
+  * d/watch: Use uscan special strings.
+  * Update Standards-Version to 4.5.0.
+
+ -- Unit 193 <unit193@ubuntu.com>  Wed, 23 Sep 2020 20:10:16 -0400
+
 xfdashboard (0.7.7-0ubuntu1) devel; urgency=medium
 
   * d/watch: Update for upstream's move to mirrorbit.
