@@ -14,6 +14,7 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_action_button_set_target@Base 0.6.0
  xfdashboard_actor_base_class_finalize@Base 0.6.0
  xfdashboard_actor_class_init@Base 0.6.0
+ xfdashboard_actor_enable_allocation_animation_once@Base 0.7.8
  xfdashboard_actor_get_can_focus@Base 0.6.0
  xfdashboard_actor_get_effects@Base 0.6.0
  xfdashboard_actor_get_stylable_properties@Base 0.6.0
@@ -27,9 +28,17 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_actor_set_can_focus@Base 0.6.0
  xfdashboard_actor_set_effects@Base 0.6.0
  xfdashboard_anchor_point_get_type@Base 0.6.0
+ xfdashboard_animation_defaults_free@Base 0.7.8
+ xfdashboard_animation_defaults_new@Base 0.7.8
+ xfdashboard_animation_dump@Base 0.7.8
+ xfdashboard_animation_ensure_complete@Base 0.7.8
  xfdashboard_animation_get_id@Base 0.7.7
  xfdashboard_animation_get_type@Base 0.7.7
+ xfdashboard_animation_is_empty@Base 0.7.8
  xfdashboard_animation_new@Base 0.7.7
+ xfdashboard_animation_new_by_id@Base 0.7.8
+ xfdashboard_animation_new_by_id_with_values@Base 0.7.8
+ xfdashboard_animation_new_with_values@Base 0.7.8
  xfdashboard_animation_run@Base 0.7.7
  xfdashboard_application_button_add_popup_menu_items_for_actions@Base 0.7.5
  xfdashboard_application_button_add_popup_menu_items_for_windows@Base 0.7.5
@@ -167,11 +176,13 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_click_action_new@Base 0.6.0
  xfdashboard_click_action_release@Base 0.6.0
  xfdashboard_collapse_box_get_collapse_orientation@Base 0.6.0
+ xfdashboard_collapse_box_get_collapse_progress@Base 0.7.8
  xfdashboard_collapse_box_get_collapsed@Base 0.6.0
  xfdashboard_collapse_box_get_collapsed_size@Base 0.6.0
  xfdashboard_collapse_box_get_type@Base 0.6.0
  xfdashboard_collapse_box_new@Base 0.6.0
  xfdashboard_collapse_box_set_collapse_orientation@Base 0.6.0
+ xfdashboard_collapse_box_set_collapse_progress@Base 0.7.8
  xfdashboard_collapse_box_set_collapsed@Base 0.6.0
  xfdashboard_collapse_box_set_collapsed_size@Base 0.6.0
  xfdashboard_corners_get_type@Base 0.6.0
@@ -653,9 +664,11 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_text_box_set_text_va@Base 0.6.0
  xfdashboard_theme_animation_add_file@Base 0.7.7
  xfdashboard_theme_animation_create@Base 0.7.7
+ xfdashboard_theme_animation_create_by_id@Base 0.7.8
  xfdashboard_theme_animation_error_enum_get_type@Base 0.7.7
  xfdashboard_theme_animation_error_quark@Base 0.7.7
  xfdashboard_theme_animation_get_type@Base 0.7.7
+ xfdashboard_theme_animation_lookup_id@Base 0.7.8
  xfdashboard_theme_animation_new@Base 0.7.7
  xfdashboard_theme_css_add_file@Base 0.6.0
  xfdashboard_theme_css_error_enum_get_type@Base 0.6.0
