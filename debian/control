@@ -19,7 +19,7 @@ Build-Depends: debhelper-compat (= 12),
  pkg-config,
  xfce4-dev-tools
 Rules-Requires-Root: no
-Standards-Version: 4.4.1
+Standards-Version: 4.5.0
 Homepage: https://docs.xfce.org/apps/xfdashboard/start
 Vcs-Browser: https://git.launchpad.net/~xubuntu-dev/+git/xfdashboard
 Vcs-Git: https://git.launchpad.net/~xubuntu-dev/+git/xfdashboard
