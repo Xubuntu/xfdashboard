@@ -264,7 +264,7 @@ static void _xfdashboard_view_selector_on_view_removed(XfdashboardViewSelector *
 		view=g_object_get_data(G_OBJECT(child), "view");
 		if(XFDASHBOARD_IS_VIEW(view) && XFDASHBOARD_VIEW(view)==inView)
 		{
-			clutter_actor_destroy(child);
+			xfdashboard_actor_destroy(child);
 		}
 	}
 }
@@ -381,8 +381,8 @@ static void xfdashboard_view_selector_class_init(XfdashboardViewSelectorClass *k
 	 */
 	XfdashboardViewSelectorProperties[PROP_VIEWPAD]=
 		g_param_spec_object("viewpad",
-								_("Viewpad"),
-								_("The viewpad this selector belongs to"),
+								"Viewpad",
+								"The viewpad this selector belongs to",
 								XFDASHBOARD_TYPE_VIEWPAD,
 								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
@@ -393,8 +393,8 @@ static void xfdashboard_view_selector_class_init(XfdashboardViewSelectorClass *k
 	 */
 	XfdashboardViewSelectorProperties[PROP_SPACING]=
 		g_param_spec_float("spacing",
-							_("Spacing"),
-							_("The spacing between views and scrollbars"),
+							"Spacing",
+							"The spacing between views and scrollbars",
 							0.0f, G_MAXFLOAT,
 							0.0f,
 							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
@@ -406,8 +406,8 @@ static void xfdashboard_view_selector_class_init(XfdashboardViewSelectorClass *k
 	 */
 	XfdashboardViewSelectorProperties[PROP_ORIENTATION]=
 		g_param_spec_enum("orientation",
-							_("Orientation"),
-							_("Orientation of view selector"),
+							"Orientation",
+							"Orientation of view selector",
 							CLUTTER_TYPE_ORIENTATION,
 							CLUTTER_ORIENTATION_HORIZONTAL,
 							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
@@ -545,7 +545,7 @@ void xfdashboard_view_selector_set_viewpad(XfdashboardViewSelector *self, Xfdash
 	if(priv->viewpad)
 	{
 		/* Destroy all children */
-		clutter_actor_destroy_all_children(CLUTTER_ACTOR(self));
+		xfdashboard_actor_destroy_all_children(CLUTTER_ACTOR(self));
 
 		/* Release old viewpad */
 		g_signal_handlers_disconnect_by_data(priv->viewpad, self);

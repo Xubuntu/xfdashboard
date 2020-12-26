@@ -1,0 +1,817 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+# Translators:
+# se7entime <se7entime@disroot.org>, 2020
+# Xfce Bot <transifex@xfce.org>, 2020
+# Ardjuna <Asyura.x@gmail.com>, 2020
+# Nick Schermer <nick@xfce.org>, 2020
+# Kukuh Syafaat <syafaatkukuh@gmail.com>, 2020
+# Triyan W. Nugroho <triyan.wn@gmail.com>, 2020
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-11-17 12:52+0100\n"
+"PO-Revision-Date: 2020-10-07 10:59+0000\n"
+"Last-Translator: Triyan W. Nugroho <triyan.wn@gmail.com>, 2020\n"
+"Language-Team: Indonesian (https://www.transifex.com/xfce/teams/16840/id/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: id\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: ../data/xfdashboard.desktop.in.in.h:1
+#: ../data/xfdashboard-autostart.desktop.in.in.h:1
+msgid "Xfdashboard"
+msgstr "Xfdashboard"
+
+#: ../data/xfdashboard.desktop.in.in.h:2
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:1
+msgid "Maybe a Gnome shell like dashboard for Xfce"
+msgstr "Sebuah dasbor mirip Gnome shell untuk Xfce"
+
+#: ../data/xfdashboard-autostart.desktop.in.in.h:2
+msgid "Start xfdashboard as daemon in background"
+msgstr "Jalankan xfdashboard sebagai jurik di latar belakang"
+
+#: ../data/xfdashboard-settings.desktop.in.in.h:1
+msgid "Xfdashboard settings"
+msgstr "Pengaturan xfdashboard"
+
+#: ../data/xfdashboard-settings.desktop.in.in.h:2
+msgid "Configure xfdashboard"
+msgstr "Konfigurasi xfdashboard"
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:2
+msgid ""
+"Xfdashboard provides a GNOME shell dashboard like interface for use with "
+"Xfce desktop."
+msgstr ""
+"Xfdashboard menyediakan sebuah antarmuka mirip dasbor GNOME shell untuk "
+"digunakan dengan desktop Xfce."
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:3
+msgid ""
+"It can be configured to run to any keyboard shortcut and when executed "
+"provides an overview of applications currently open enabling the user to "
+"switch between different applications. The search feature works like Xfce's "
+"app finder which makes it convenient to search for and start applications."
+msgstr ""
+"Xfdashboard dapat dikonfigurasi untuk dijalankan melalui suatu pintasan "
+"papan tik, dan ketika dijalankan, akan menyediakan sebuah ikhtisar aplikasi-"
+"aplikasi yang sedang terbuka, memungkinkan pengguna untuk berpindah antar "
+"aplikasi yang berbeda. Fitur pencarian bekerja seperti pencari aplikasi Xfce"
+" yang memudahkan untuk mencari dan menjalankan aplikasi."
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:4
+msgid "Browsing applications"
+msgstr "Meramban aplikasi"
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:5
+msgid "Searching applications"
+msgstr "Mencari aplikasi"
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:6
+msgid "This release candidate adds also more animations as well as fixes."
+msgstr ""
+"Kandidat rilis ini juga menambahkan beberapa animasi di samping perbaikan-"
+"perbaikan."
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:7
+msgid ""
+"This unstable development adds more animations as well as some smaller "
+"fixes."
+msgstr ""
+"Pengembangan tak stabil ini menambahkan lebih banyak animasi di samping "
+"beberapa perbaikan kecil."
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:8
+msgid "This unstable development adds animations."
+msgstr "Pengembangan tak stabil ini menambahkan beberapa animasi."
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:9
+msgid ""
+"This unstable development adds support for touchpads and application actions"
+" (Jumplists, Quicklists) as well as new and updated translations."
+msgstr ""
+"Pengembangan tak stabil ini menambahkan dukungan untuk lapik sentuh dan "
+"aksi-aksi aplikasi (Daftar Lompat, Daftar Cepat) di samping terjemahan baru "
+"dan yang diperbarui."
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:10
+msgid ""
+"This unstable development adds lots of new and updated translations and "
+"support for newer xfconf versions."
+msgstr ""
+"Pengembangan tak stabil ini menambahkan banyak terjemahan baru dan yang "
+"diperbarui, serta dukungan untuk versi xfconf yang lebih baru."
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:11
+msgid ""
+"This unstable development implements a new experimental backend for GDK as "
+"well as it supports user stylesheets now."
+msgstr ""
+"Pengembangan tak stabil ini mengimplementasikan sebuah backend eksperimental"
+" baru untuk GDK, serta mendukung lembar gaya pengguna."
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:12
+msgid ""
+"This unstable development improves loading performance of images and icon, "
+"adds a fine-grained debugging system and introduces an interface for "
+"multiple backends but only X11 is still the one only one supported."
+msgstr ""
+"Pengembangan tak stabil ini meningkatkan performa pemuatan gambar dan ikon, "
+"menambahkan sebuah sistem pengawakutuan yang diperbaiki dan memperkenalkan "
+"sebuah antarmuka untuk beberapa backend namun saat ini hanya X11 yang "
+"didukung."
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:13
+msgid ""
+"This unstable development introduces child windows shown next to the main "
+"window."
+msgstr ""
+"Pengembangan tak stabil ini memperkenalkan jendela anak yang ditampilkan di "
+"sebelah jendela utama."
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:14
+msgid ""
+"This stable version fixes a bug setting the correct default applications at "
+"first use."
+msgstr ""
+"Versi stabil ini memperbaiki sebuah kutu yang mengatur aplikasi bawaan yang "
+"tepat pada saat pertama kali digunakan."
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:15
+msgid "This unstable development introduces pop-up menus."
+msgstr "Pengembangan tak stabil ini memperkenalkan menu pop-up."
+
+#: ../data/appdata/xfdashboard.appdata.xml.in.h:16
+msgid ""
+"This stable version introduces lots of new features like plugins and "
+"application tracker. It also contains a huge collection of other larger and "
+"smaller improvements."
+msgstr ""
+"Versi stabil ini memperkenalkan banyak fitur-fitur baru seperti plugin dan "
+"pelacak aplikasi. Juga berisi sejumlah besar peningkatan, baik peningkatan "
+"besar maupun kecil."
+
+#: ../data/data/preferences.ui.h:1
+msgid "<span size=\"large\"><b>Xfdashboard settings</b></span>"
+msgstr "<span size=\"large\"><b>Pengaturan Xfdashboard</b></span>"
+
+#: ../data/data/preferences.ui.h:2
+msgid "Configure plugin"
+msgstr "Konfigurasi plugin"
+
+#: ../data/data/preferences.ui.h:3
+msgid ""
+"<span size=\"large\"><b>Xfdashboard settings</b></span>\n"
+"Configure xfdashboard"
+msgstr ""
+"<span size=\"large\"><b>Pengaturan Xfdashboard</b></span>\n"
+"Konfigurasi xfdashboard"
+
+#: ../data/data/preferences.ui.h:5
+msgid "<b>General settings:</b>"
+msgstr "<b>Pengaturan umum:</b>"
+
+#: ../data/data/preferences.ui.h:6
+msgid "Reset search view when resumed"
+msgstr "Setel ulang tampilan pencarian saat dilanjutkan"
+
+#: ../data/data/preferences.ui.h:7
+msgid ""
+"If enabled the search view will be resetted when xfdashboard is resumed. That means the active view is switched back to last view active before last search was started and search box will be emptied.\n"
+"\n"
+"<b>NOTE:</b> This setting only takes effect if xfdashboard is running in daemon mode. "
+msgstr ""
+"Jika diaktifkan, tampilan pencarian akan disetel ulang ketika xfdashboard dilanjutkan. Ini berarti tampilan aktif akan dikembalikan ke tampilan terakhir yang aktif sebelum pencarian terakhir dimulai dan kotak pencarian akan dikosongkan.\n"
+"\n"
+"<b>CATATAN:</b> Pengaturan ini hanya akan berpengaruh jika xfdashboard berjalan pada mode jurik. "
+
+#: ../data/data/preferences.ui.h:10
+msgid ""
+"When xfdashboard resumes the selected view will be activated.\n"
+"\n"
+"<b>NOTE:</b> This setting only takes effect if xfdashboard is running in daemon mode."
+msgstr ""
+"Ketika xfdashboard dilanjutkan, tampilan terpilih akan diaktifkan.\n"
+"\n"
+"<b>CATATAN:</b> Pengaturan ini hanya akan berpengaruh jika xfdashboard berjalan pada mode jurik."
+
+#: ../data/data/preferences.ui.h:13
+msgid "Switch to view when resumed:"
+msgstr "Berpindah ke tampilan saat dilanjutkan:"
+
+#: ../data/data/preferences.ui.h:14
+msgid ""
+"Sets the minimum time a notification is being shown.\n"
+"\n"
+"The duration is calculated by the length of the text to show in notification. This setting allows you to specify how long the notification must be shown at least."
+msgstr ""
+"Mengatur waktu minimum sebuah notifikasi ditampilkan.\n"
+"\n"
+"Durasi dihitung berdasarkan panjang teks yang akan ditampilkan di notifikasi. Pengaturan ini memungkinkan Anda untuk menentukan berapa lama notifikasi akan ditampilkan."
+
+#: ../data/data/preferences.ui.h:17
+msgid "Minimum notification timeout:"
+msgstr "Batas waktu minimum notifikasi:"
+
+#: ../data/data/preferences.ui.h:18
+msgid "Enable workaround for minimized windows"
+msgstr "Aktifkan solusi sementara untuk jendela yang diminimalkan"
+
+#: ../data/data/preferences.ui.h:19
+msgid ""
+"When enabled a workaround for minimized windows will be tried to get still images of these windows by restoring them shortly and minimizing them again.\n"
+"\n"
+"<b>NOTE:</b> Be aware that this is a <u>workaround</u> and your minimized windows could stay unminimized, change workspace etc."
+msgstr ""
+"Jika diaktifkan, solusi sementara untuk jendela yang diminimalkan akan coba diaplikasikan untuk mendapatkan gambar jendela ini dengan mengembalikan mereka secara cepat dan meminimalkannya lagi.\n"
+"\n"
+"<b>Catatan:</b>Perhatikan bahwa ini adalah <u>solusi sementara</u> dan jendela yang diminimalkan bisa tetap kembali tak diminimalkan, berpindah ruang kerja, dll."
+
+#: ../data/data/preferences.ui.h:22
+msgid ""
+"This value defines how fast the window content should be created. While the value 'immediate' tells xfdashboard to create the window content at the time it is requested, all other values will set up a queue and value defines how fast the queue will be processed.\n"
+"\n"
+"<b>NOTE:</b> Only change this value from 'immediate' to other value if your graphics card, driver or system is too slow to create the window contents immediately. You have to try each value to find the one fitting your system."
+msgstr ""
+"Nilai ini mendefinisikan seberapa cepat isi jendela harus dibuat. Nilai 'langsung' memberitahu xfdashboard untuk membuat konten jendela pada saat diminta, sedangkan nilai-nilai lain akan mengatur antrian dan nilainya mendefinisikan seberapa cepat antrian akan diproses.\n"
+"\n"
+"<b>Catatan:</b> Hanya ubah nilai ini dari 'langsung' ke nilai lain jika kartu grafis, penggerak atau sistem Anda terlalu lambat untuk membuat isi jendela segera. Anda harus mencoba setiap nilai untuk menemukan pengaturan yang pas pada sistem Anda."
+
+#: ../data/data/preferences.ui.h:25
+msgid "Priority of window content creation"
+msgstr "Prioritas pembuatan konten jendela"
+
+#: ../data/data/preferences.ui.h:26
+msgid "Show child windows in main windows"
+msgstr "Tampilkan jendela anak di jendela utama"
+
+#: ../data/data/preferences.ui.h:27
+msgid ""
+"When enabled all live window previews will also show their child windows. "
+"Disabling this option will increase performance on slower machines."
+msgstr ""
+"Jika diaktifkan, semua pratinjau langsung jendela juga akan menampilkan "
+"jendela anak mereka. Menonaktifkan opsi ini akan meningkatkan kinerja pada "
+"mesin yang lebih lambat."
+
+#: ../data/data/preferences.ui.h:28
+msgid "Always start a new instance for application"
+msgstr "Selalu mulai instansi baru untuk aplikasi"
+
+#: ../data/data/preferences.ui.h:29
+msgid ""
+"When enabled and an icon in quicklaunch is clicked it will always start a new instance of the application.\n"
+"\n"
+"When not enabled it will select the last known active window of the running application instance. If application is not running, a new instance will be started."
+msgstr ""
+"Jika diaktifkan dan ikon di quiklaunch diklik, akan selalu memulai instansi baru dari aplikasi.\n"
+"\n"
+"Ketika tidak diaktifkan, ia akan memilih jendela aktif terakhir yang diketahui dari instansi aplikasi yang berjalan. Jika aplikasi tidak berjalan, instansi baru akan dimulai."
+
+#: ../data/data/preferences.ui.h:32
+msgid "Enable animations"
+msgstr "Aktifkan animasi"
+
+#: ../data/data/preferences.ui.h:33
+msgid "If enabled theme-defined animations will be shown."
+msgstr "Jika diaktifkan, animasi sesuai tema akan ditampilkan."
+
+#: ../data/data/preferences.ui.h:34
+msgid "<b>Applications view:</b>"
+msgstr "<b>Tampilan aplikasi:</b>"
+
+#: ../data/data/preferences.ui.h:35
+msgid "Show menu for all installed applications"
+msgstr "Tampilkan menu untuk semua aplikasi terpasang"
+
+#: ../data/data/preferences.ui.h:36
+msgid ""
+"When enabled an \"all applications\" menu containing all installed "
+"applications will be shown at applications view"
+msgstr ""
+"Jika diaktifkan, menu \"semua aplikasi\" yang berisi semua aplikasi yang "
+"terpasang akan ditampilkan pada tampilan aplikasi"
+
+#: ../data/data/preferences.ui.h:37
+msgid "<b>Windows view:</b>"
+msgstr "<b>Tampilan jendela:</b>"
+
+#: ../data/data/preferences.ui.h:38
+msgid "Mouse wheel changes workspace"
+msgstr "Roda tetikus mengubah area kerja"
+
+#: ../data/data/preferences.ui.h:39
+msgid ""
+"When enabled any scroll event, like mouse-wheel up and down, at the windows "
+"view will change the active workspace. This behaviour is the same as in "
+"workspace selector."
+msgstr ""
+"Jika diaktifkan, setiap kali menggulir, seperti menggulir roda tetikus ke "
+"atas dan ke bawah, di tampilan jendela akan mengubah ruang kerja aktif. "
+"Perilaku ini sama seperti di pemilih ruang kerja."
+
+#: ../data/data/preferences.ui.h:40
+msgid "<b>Search view:</b>"
+msgstr "<b>Tampilan pencarian:</b>"
+
+#: ../data/data/preferences.ui.h:41
+msgid ""
+"Sets the interval the search should be delayed by after the first character "
+"was entered."
+msgstr ""
+"Setel interval penundaan pencarian setelah karakter pertama dimasukkan."
+
+#: ../data/data/preferences.ui.h:42
+msgid "Delay initial search interval:"
+msgstr "Interval awal penundaan pencarian:"
+
+#: ../data/data/preferences.ui.h:43
+msgid "General"
+msgstr "Umum"
+
+#: ../data/data/preferences.ui.h:44
+msgid "<b>Name:</b>"
+msgstr "<b>Nama:</b>"
+
+#: ../data/data/preferences.ui.h:45
+msgid "<b>Author:</b>"
+msgstr "<b>Penulis:</b>"
+
+#: ../data/data/preferences.ui.h:46
+msgid "<b>Version:</b>"
+msgstr "<b>Versi:</b>"
+
+#: ../data/data/preferences.ui.h:47
+msgid "<b>Description:</b>"
+msgstr "<b>Keterangan:</b>"
+
+#: ../data/data/preferences.ui.h:48
+msgid "Themes"
+msgstr "Tema"
+
+#: ../data/data/preferences.ui.h:49
+msgid "<b>License:</b>"
+msgstr "<b>Lisensi:</b>"
+
+#: ../data/data/preferences.ui.h:50
+msgid "Plugins"
+msgstr "Plugin"
+
+#: ../data/themes/xfdashboard/xfdashboard.theme.in.in.h:1
+msgid "xfdashboard"
+msgstr "xfdashboard"
+
+#: ../data/themes/xfdashboard/xfdashboard.theme.in.in.h:2
+msgid "Default theme for xfdashboard"
+msgstr "Tema bawaan untuk xfdashboard"
+
+#: ../data/themes/xfdashboard-auber/xfdashboard.theme.in.in.h:1
+msgid "xfdashboard-auber"
+msgstr "xfdashboard-auber"
+
+#: ../data/themes/xfdashboard-auber/xfdashboard.theme.in.in.h:2
+msgid "Aubergine theme for xfdashboard"
+msgstr "Tema Aubergine untuk xfdashboard"
+
+#: ../data/themes/xfdashboard-blue/xfdashboard.theme.in.in.h:1
+msgid "xfdashboard-blue"
+msgstr "xfdashboard-blue"
+
+#: ../data/themes/xfdashboard-blue/xfdashboard.theme.in.in.h:2
+msgid "Blue theme for xfdashboard"
+msgstr "Tema biru untuk xfdashboard"
+
+#: ../data/themes/xfdashboard-dark/xfdashboard.theme.in.in.h:1
+msgid "xfdashboard-dark"
+msgstr "xfdashboard-dark"
+
+#: ../data/themes/xfdashboard-dark/xfdashboard.theme.in.in.h:2
+msgid "Dark theme for xfdashboard"
+msgstr "Tema gelap untuk xfdashboard"
+
+#: ../data/themes/xfdashboard-mint/xfdashboard.theme.in.in.h:1
+msgid "xfdashboard-mint"
+msgstr "xfdashboard-mint"
+
+#: ../data/themes/xfdashboard-mint/xfdashboard.theme.in.in.h:2
+msgid "Fresh-green flavored theme for xfdashboard"
+msgstr "Tema rasa hijau-segar untuk xfdashboard"
+
+#: ../data/themes/xfdashboard-moranga/xfdashboard.theme.in.in.h:1
+msgid "xfdashboard-moranga"
+msgstr "xfdashboard-moranga"
+
+#: ../data/themes/xfdashboard-moranga/xfdashboard.theme.in.in.h:2
+msgid "Moranga theme for xfdashboard"
+msgstr "Tema Moranga untuk xfdashboard"
+
+#: ../data/themes/xfdashboard-wine/xfdashboard.theme.in.in.h:1
+msgid "xfdashboard-wine"
+msgstr "xfdashboard-wine"
+
+#: ../data/themes/xfdashboard-wine/xfdashboard.theme.in.in.h:2
+msgid "Red wine theme for xfdashboard"
+msgstr "Tema anggur merah untuk xfdashboard"
+
+#: ../libxfdashboard/application-button.c:262
+#, c-format
+msgid "Could not execute action '%s' for application '%s': %s"
+msgstr "Tak dapat mengeksekusi aksi '%s' untuk aplikasi '%s': %s"
+
+#: ../libxfdashboard/application-button.c:265 ../settings/plugins.c:826
+#: ../settings/main.c:63
+msgid "Unknown error"
+msgstr "Galat tak dikenal"
+
+#: ../libxfdashboard/application-button.c:282
+#, c-format
+msgid "Executed action '%s' for application '%s'"
+msgstr "Mengeksekusi aksi '%s' untuk aplikasi '%s'"
+
+#: ../libxfdashboard/application-button.c:743
+#: ../libxfdashboard/application-button.c:761
+#: ../libxfdashboard/applications-search-provider.c:754
+#: ../libxfdashboard/applications-view.c:334
+#: ../libxfdashboard/quicklaunch.c:352 ../libxfdashboard/quicklaunch.c:400
+#: ../libxfdashboard/quicklaunch.c:458
+#, c-format
+msgid "Launching application '%s' failed: %s"
+msgstr "Meluncurkan aplikasi '%s' gagal: %s"
+
+#: ../libxfdashboard/application-button.c:745
+#: ../libxfdashboard/quicklaunch.c:354
+msgid "No information available for application"
+msgstr "Tak ada informasi yang tersedia untuk aplikasi"
+
+#: ../libxfdashboard/application-button.c:763
+#: ../libxfdashboard/application.c:308 ../libxfdashboard/application.c:618
+#: ../libxfdashboard/applications-search-provider.c:756
+#: ../libxfdashboard/applications-view.c:336
+#: ../libxfdashboard/quicklaunch.c:460
+msgid "unknown error"
+msgstr "galat tak diketahui"
+
+#: ../libxfdashboard/application-button.c:774
+#: ../libxfdashboard/applications-search-provider.c:767
+#: ../libxfdashboard/applications-view.c:347
+#: ../libxfdashboard/quicklaunch.c:471
+#, c-format
+msgid "Application '%s' launched"
+msgstr "Aplikasi '%s' diluncurkan"
+
+#: ../libxfdashboard/application.c:306
+#, c-format
+msgid "Could not load theme '%s': %s"
+msgstr "Tak dapat memuat tema '%s': %s"
+
+#: ../libxfdashboard/application.c:527
+#, c-format
+msgid "Welcome to %s (%s)!"
+msgstr "Selamat datang di %s (%s)!"
+
+#: ../libxfdashboard/application.c:529
+#, c-format
+msgid "Welcome to %s!"
+msgstr "Selamat datang di %s!"
+
+#: ../libxfdashboard/application.c:576
+msgid "Fork to background"
+msgstr "Cabangkan di latar belakang"
+
+#: ../libxfdashboard/application.c:577
+msgid "Quit running instance"
+msgstr "Keluar dari aplikasi yang sedang berjalan"
+
+#: ../libxfdashboard/application.c:578
+msgid "Restart running instance"
+msgstr "Jalankan ulang aplikasi yang sedang berjalan"
+
+#: ../libxfdashboard/application.c:579
+msgid ""
+"Toggles visibility if running instance was started in daemon mode otherwise "
+"it quits running non-daemon instance"
+msgstr ""
+"Ubah visibilitas jika instansi yang berjalan dimulai dalam mode jurik, jika "
+"tidak, instansi non-jurik akan dihentikan"
+
+#: ../libxfdashboard/application.c:580
+msgid "The ID of view to switch to on startup or resume"
+msgstr "ID tampilan untuk beralih saat mulai atau melanjutkan"
+
+#: ../libxfdashboard/application.c:581
+msgid "Show version"
+msgstr "Tampilkan versi"
+
+#: ../libxfdashboard/application.c:600
+msgid "A Gnome Shell like dashboard for Xfce4 - version "
+msgstr "Sebuah dasbor mirip Gnome Shell untuk Xfce4 - versi "
+
+#. Show error
+#: ../libxfdashboard/application.c:617
+#, c-format
+msgid "%s\n"
+msgstr "%s\n"
+
+#: ../libxfdashboard/applications-search-provider.c:838
+#: ../libxfdashboard/applications-view.c:417
+#: ../libxfdashboard/quicklaunch.c:682
+msgid "Launch"
+msgstr "Luncurkan"
+
+#. Set up view
+#. Add "applications" button
+#: ../libxfdashboard/applications-search-provider.c:1175
+#: ../libxfdashboard/applications-view.c:1587
+#: ../libxfdashboard/quicklaunch.c:3288
+msgid "Applications"
+msgstr "Aplikasi"
+
+#: ../libxfdashboard/applications-view.c:545
+#: ../libxfdashboard/applications-view.c:546
+#: ../libxfdashboard/applications-view.c:657
+#: ../libxfdashboard/applications-view.c:658
+msgid "Back"
+msgstr "Kembali"
+
+#: ../libxfdashboard/applications-view.c:545
+#: ../libxfdashboard/applications-view.c:657
+msgid "Go back to previous menu"
+msgstr "Kembali ke menu sebelumnya"
+
+#: ../libxfdashboard/applications-view.c:685
+#: ../libxfdashboard/applications-view.c:686
+msgid "All applications"
+msgstr "Semua aplikasi"
+
+#: ../libxfdashboard/applications-view.c:685
+msgid "List of all installed applications"
+msgstr "Tampilkan daftar semua aplikasi terpasang"
+
+#: ../libxfdashboard/quicklaunch.c:402
+msgid "No windows to activate for application"
+msgstr "Tak ada jendela untuk mengaktifkan aplikasi"
+
+#: ../libxfdashboard/quicklaunch.c:525 ../libxfdashboard/quicklaunch.c:1261
+#: ../libxfdashboard/quicklaunch.c:2130
+#, c-format
+msgid "Favourite '%s' removed"
+msgstr "Favorit '%s' dihapus"
+
+#: ../libxfdashboard/quicklaunch.c:624 ../libxfdashboard/quicklaunch.c:943
+#: ../libxfdashboard/quicklaunch.c:2063
+#, c-format
+msgid "Favourite '%s' added"
+msgstr "Favorit '%s' ditambahkan"
+
+#: ../libxfdashboard/quicklaunch.c:705
+msgid "Remove from favourites"
+msgstr "Hapus dari favorit"
+
+#: ../libxfdashboard/quicklaunch.c:719
+msgid "Add to favourites"
+msgstr "Tambahkan ke favorit"
+
+#. Next add trash button to box but initially hidden and register as drop
+#. target
+#: ../libxfdashboard/quicklaunch.c:3295
+msgid "Remove"
+msgstr "Hapus"
+
+#: ../libxfdashboard/search-result-container.c:664
+#: ../libxfdashboard/search-result-container.c:1734
+#, c-format
+msgid "Show %d more results..."
+msgstr "Tampilkan %d hasil lebih..."
+
+#. Get text to set at "all"-label
+#: ../libxfdashboard/search-result-container.c:686
+#, c-format
+msgid "Show all %d results..."
+msgstr "Tampilkan keseluruhan %d hasil..."
+
+#: ../libxfdashboard/search-view.c:979
+#, c-format
+msgid "No results found for '%s'"
+msgstr "Tak ada hasil yang ditemukan untuk '%s'"
+
+#. Set up view (Note: Search view is disabled by default!)
+#: ../libxfdashboard/search-view.c:1715
+msgid "Search"
+msgstr "Cari"
+
+#: ../libxfdashboard/stage.c:1124
+msgid "Just type to search..."
+msgstr "Cukup ketik untuk melakukan pencarian..."
+
+#. Set up view
+#: ../libxfdashboard/windows-view.c:2317
+msgid "Windows"
+msgstr "Jendela"
+
+#. Set up view
+#: ../plugins/clock-view/clock-view.c:307 ../plugins/clock-view/plugin.c:312
+msgid "Clock"
+msgstr "Jam"
+
+#. Add widget to choose hour color
+#: ../plugins/clock-view/plugin.c:208
+msgid "Hour color:"
+msgstr "Warna jam:"
+
+#: ../plugins/clock-view/plugin.c:218
+msgid "Choose color for hour hand"
+msgstr "Pilih warna untuk jarum jam"
+
+#. Add widget to choose minute color
+#: ../plugins/clock-view/plugin.c:223
+msgid "Minute color:"
+msgstr "Warna menit:"
+
+#: ../plugins/clock-view/plugin.c:233
+msgid "Choose color for minute hand"
+msgstr "Pilih warna untuk jarum menit"
+
+#. Add widget to choose second color
+#: ../plugins/clock-view/plugin.c:238
+msgid "Second color:"
+msgstr "Warna detik:"
+
+#: ../plugins/clock-view/plugin.c:248
+msgid "Choose color for second hand"
+msgstr "Pilih warna untuk jarum detik"
+
+#. Add widget to choose minute color
+#: ../plugins/clock-view/plugin.c:253
+msgid "Background color:"
+msgstr "Warna latar belakang:"
+
+#: ../plugins/clock-view/plugin.c:263
+msgid "Choose color for background of second hand"
+msgstr "Pilih warna latar belakang untuk jarum detik"
+
+#: ../plugins/clock-view/plugin.c:313
+msgid "Adds a new view showing a clock"
+msgstr "Menambahkan tampilan baru yang menampilkan sebuah jam"
+
+#: ../plugins/example-search-provider/example-search-provider.c:73
+msgid "Example search"
+msgstr "Contoh pencarian"
+
+#: ../plugins/example-search-provider/plugin.c:75
+msgid "Example search provider"
+msgstr "Contoh penyedia pencarian"
+
+#: ../plugins/example-search-provider/plugin.c:76
+msgid "This is just a useless example search provider plugin"
+msgstr "Ini hanyalah sebuah contoh plugin penyedia pencarian yang tak berguna"
+
+#: ../plugins/gnome-shell-search-provider/plugin.c:433
+msgid "Gnome-Shell search provider"
+msgstr "Penyedia pencarian Gnome-Shell"
+
+#: ../plugins/gnome-shell-search-provider/plugin.c:434
+msgid "Uses Gnome-Shell search providers as source for searches"
+msgstr ""
+"Menggunakan penyedia pencarian Gnome-Shell sebagai sumber untuk pencarian"
+
+#: ../plugins/hot-corner/plugin.c:268
+msgid "s"
+msgstr "s"
+
+#: ../plugins/hot-corner/plugin.c:272 ../settings/general.c:379
+msgid "ms"
+msgstr "ms"
+
+#: ../plugins/hot-corner/plugin.c:276 ../settings/general.c:128
+#: ../settings/general.c:383
+msgid "Immediately"
+msgstr "Segera"
+
+#. Add widget to choose activation corner
+#: ../plugins/hot-corner/plugin.c:339
+msgid "Activation corner:"
+msgstr "Sudut aktivasi:"
+
+#. Add widget to choose activation radius
+#: ../plugins/hot-corner/plugin.c:375
+msgid "Radius of activation corner:"
+msgstr "Radius sudut aktivasi:"
+
+#. Add widget to choose activation duration
+#: ../plugins/hot-corner/plugin.c:393
+msgid "Timeout to activate:"
+msgstr "Tenggat waktu untuk mengaktifkan:"
+
+#. Add widget to limit checks to primary monitor only or to all monitors
+#: ../plugins/hot-corner/plugin.c:415
+msgid "Primary monitor only"
+msgstr "Hanya monitor utama"
+
+#: ../plugins/hot-corner/plugin.c:467
+msgid "Hot corner"
+msgstr "Sudut panas"
+
+#: ../plugins/hot-corner/plugin.c:468
+msgid ""
+"Activates xfdashboard when pointer is moved to a configured corner of "
+"monitor"
+msgstr ""
+"Mengaktifkan xfdashboard ketika penunjuk dipindahkan ke sudut monitor yang "
+"dikonfigurasi"
+
+#: ../plugins/middle-click-window-close/plugin.c:71
+msgid "Middle-click window close"
+msgstr "Menutup jendela dengan klik-tengah"
+
+#: ../plugins/middle-click-window-close/plugin.c:72
+msgid "Closes windows in windows view by middle-click"
+msgstr "Menutup jendela pada tampilan jendela dengan klik-tengah"
+
+#: ../settings/general.c:120
+msgid "Do nothing"
+msgstr "Tak lakukan apapun"
+
+#: ../settings/general.c:121
+msgid "Windows view"
+msgstr "Tampilan jendela"
+
+#: ../settings/general.c:122
+msgid "Applications view"
+msgstr "Tampilan aplikasi"
+
+#: ../settings/general.c:129
+msgid "High"
+msgstr "Tinggi"
+
+#: ../settings/general.c:130
+msgid "Normal"
+msgstr "Normal"
+
+#: ../settings/general.c:131
+msgid "Low"
+msgstr "Rendah"
+
+#: ../settings/general.c:324
+msgid "seconds"
+msgstr "detik"
+
+#: ../settings/plugins.c:222
+#, c-format
+msgid "Configure plugin: %s"
+msgstr "Konfigurasi plugin: %s"
+
+#. Create error message to store in list
+#: ../settings/plugins.c:825
+#, c-format
+msgid ""
+"<b>Plugin could not be loaded.</b>\n"
+"\n"
+"%s"
+msgstr ""
+"<b>Plugin tak dapat dimuat.</b>\n"
+"\n"
+"%s"
+
+#: ../settings/plugins.c:1032
+msgid "Name"
+msgstr "Nama"
+
+#: ../settings/themes.c:781
+msgid "Theme"
+msgstr "Tema"
+
+#: ../settings/main.c:46
+msgid "Settings manager socket"
+msgstr "Soket manajer pengaturan"
+
+#: ../settings/main.c:46
+msgid "SOCKET ID"
+msgstr "SOCKET_ID"
+
+#: ../settings/main.c:47
+msgid "Version information"
+msgstr "Informasi versi"
+
+#. Initialize GTK+
+#: ../settings/main.c:57
+msgid "."
+msgstr "."
+
+#: ../settings/main.c:61
+#, c-format
+msgid ""
+"%s: %s\n"
+"Try %s --help to see a full list of available command line options.\n"
+msgstr ""
+"%s: %s\n"
+"Gunakan %s --help untuk melihat senarai lengkap opsi baris perintah yang tersedia.\n"

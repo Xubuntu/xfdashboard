@@ -239,7 +239,18 @@ static void _xfdashboard_live_window_simple_on_closed(XfdashboardLiveWindowSimpl
 		XFDASHBOARD_DEBUG(self, WINDOWS,
 							"Window '%s' was closed and auto-destruction of actor was requested",
 							xfdashboard_window_tracker_window_get_name(priv->window));
-		clutter_actor_destroy(CLUTTER_ACTOR(self));
+
+		if(xfdashboard_actor_destroy(CLUTTER_ACTOR(self)))
+		{
+			/* Release allocated resources early, before the dispose function
+			 * is called, if an animation was started as the window is now gone!
+			 */
+			if(priv->window)
+			{
+				g_signal_handlers_disconnect_by_data(priv->window, self);
+				priv->window=NULL;
+			}
+		}
 	}
 }
 
@@ -502,23 +513,23 @@ static void xfdashboard_live_window_simple_class_init(XfdashboardLiveWindowSimpl
 	/* Define properties */
 	XfdashboardLiveWindowSimpleProperties[PROP_WINDOW]=
 		g_param_spec_object("window",
-								_("Window"),
-								_("The window to show"),
+								"Window",
+								"The window to show",
 								XFDASHBOARD_TYPE_WINDOW_TRACKER_WINDOW,
 								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	XfdashboardLiveWindowSimpleProperties[PROP_DISPLAY_TYPE]=
 		g_param_spec_enum("display-type",
-							_("Display type"),
-							_("How to display the window"),
+							"Display type",
+							"How to display the window",
 							XFDASHBOARD_TYPE_LIVE_WINDOW_SIMPLE_DISPLAY_TYPE,
 							XFDASHBOARD_LIVE_WINDOW_SIMPLE_DISPLAY_TYPE_LIVE_PREVIEW,
 							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	XfdashboardLiveWindowSimpleProperties[PROP_DESTROY_ON_CLOSE]=
 		g_param_spec_boolean("destroy-on-close",
-								_("Destroy on close"),
-								_("If this actor should be destroy when window was closed"),
+								"Destroy on close",
+								"If this actor should be destroy when window was closed",
 								TRUE,
 								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 

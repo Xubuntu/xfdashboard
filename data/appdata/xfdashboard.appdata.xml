@@ -5,44 +5,78 @@
 	<project_license>GPL-2.0+</project_license>
 	<name>xfdashboard</name>
 	<summary>Maybe a Gnome shell like dashboard for Xfce</summary>
+	<summary xml:lang="bg">Табло за управление за Xfce подобно на „Gnome Shell“</summary>
 	<summary xml:lang="ca">Potser un tauler de control similar a Gnome Shell per a Xfce</summary>
 	<summary xml:lang="da">Måske et instrumentbræt til Xfce i stil med det der findes i GNOME Shell</summary>
 	<summary xml:lang="de">Ein Gnome Shell ähnliches Dashboard für Xfce</summary>
 	<summary xml:lang="el">Ενδεχομένως ένα ταμπλό δραστηριοτήτων όμοιο με αυτό του κελύφους Gnome</summary>
 	<summary xml:lang="es">Tal vez un intérprete de órdenes a modo de panel para Xfce</summary>
-	<summary xml:lang="fr">Peut-être un shell GNOME comme un tableau de bord pour Xfce</summary>
+	<summary xml:lang="fr">Peut-être un tableau de bord façon Gnome pour Xfce</summary>
 	<summary xml:lang="gl">Un panel de control parecido ao intérprete de ordes Gnome para Xfce</summary>
 	<summary xml:lang="he">אולי לוח מחוונים דומה Gnome עבור Xfce</summary>
+	<summary xml:lang="id">Sebuah dasbor mirip Gnome shell untuk Xfce</summary>
 	<summary xml:lang="ie">Un panel de control por Xfce in li stil de Gnome shell</summary>
 	<summary xml:lang="lt">Galbūt, į Gnome apvalkalą panašus skydelis, skirtas Xfce</summary>
+	<summary xml:lang="nb">Et oversiktsprogram for Xfce som kanskje ligner på Gnome-skallet</summary>
+	<summary xml:lang="nl">Een bedieningspaneel voor Xfce dat lijkt op dat van Gnome Shell.</summary>
+	<summary xml:lang="pl">Pulpit nawigacyjny dla Xfce podobny do powłoki Gnome</summary>
+	<summary xml:lang="pt">Talvez um painel de controlo como o Gnome shell para o Xfce</summary>
+	<summary xml:lang="pt_BR">Talvez um painel semelhante ao shell do Gnome para o Xfce</summary>
 	<summary xml:lang="ru">Интерфейс GNOME shell, для среды Xfce</summary>
+	<summary xml:lang="sl">Morda nadzorna plošča podobna Gnome lupini za Xfce</summary>
+	<summary xml:lang="sq">Një pult për Xfce-në, i ngjashëm ndoshta me shellin Gnome</summary>
 	<summary xml:lang="sr">Полетник Иксфце-а који подсећа на Гномову шкољку</summary>
-	<summary xml:lang="tr">Xfce için belki Gnome shell'e benzeyen bir kumanda paneli</summary>
+	<summary xml:lang="sv">Kanske en Gnome shell liknande dashboard för Xfce</summary>
+	<summary xml:lang="tr">Xfce için belki Gnome shell'e benzeyen kumanda paneli</summary>
+	<summary xml:lang="zh_CN">也许是一个适用于 Xfce，像仪表板的 Gnome shell</summary>
 
 	<description>
 		<p>Xfdashboard provides a GNOME shell dashboard like interface for use with Xfce desktop.</p>
+		<p xml:lang="bg">Xfdashboard предлага GNOME shell подобно табло за управление, предназначено за Xfce.</p>
 		<p xml:lang="ca">Xfdashboard proporciona una interfície de tauler de control similar a Gnome Shell per utilitzar amb l'escriptori Xfce.</p>
 		<p xml:lang="da">Xfdashboard giver en grænseflade med et instrumentbræt til Xfce-skrivebordet i stil med det der findes i GNOME Shell.</p>
 		<p xml:lang="de">Xfdashboard bietet ein GNOME Shell ähnliches Dashboard Interface für die Benützung mit dem Xfce Desktop an.</p>
 		<p xml:lang="el">To Xfdashboard παρέχει μια διεπαφή όμοια με την επισκόπηση δραστηριοτήτων του κελύφους GNOME προς χρήση με το περιβάλλον εργασίας Xfce.</p>
 		<p xml:lang="es">Xfdashboard provee un Intérprete de panel como el de GNOME para usarse en el entorno de escritorio Xfce.</p>
-		<p xml:lang="fr">Xfdashboard fournit un tableau de bord shell GNOME comme interface pour une utilisation avec le bureau Xfce.</p>
+		<p xml:lang="fr">Xfdashboard fournit une interface de tableau de bord façon GNOME Shell pour une utilisation avec le bureau Xfce.</p>
 		<p xml:lang="gl">O Xfdashboard fornece un interprete de ordes de panel de control Gnome para usar no escritorio Xfce</p>
+		<p xml:lang="he">Xfdashboard מספק ממשק דומה ללוח מחוונים של מעטפת GNOME לשימוש עם שולחן עבודה Xfce.</p>
+		<p xml:lang="id">Xfdashboard menyediakan sebuah antarmuka mirip dasbor GNOME shell untuk digunakan dengan desktop Xfce.</p>
 		<p xml:lang="lt">Xfdashboard pateikia į Gnome apvalkalo skydelį panašią sąsają, skirtą naudoti Xfce darbalaukyje.</p>
+		<p xml:lang="nb">Xfdashboard er et oversiktsprogram som ligner på GNOME-skallet, og kan brukes sammen med skrivebordsmiljøet Xfce.</p>
+		<p xml:lang="nl">Xfdashboard is vergelijkbaar met het GNOME Shell-dashboard.</p>
 		<p xml:lang="pl">Xfdashboard dostarcza interfejs wzorowany na panelu powłoki GNOME do użycia w Xfce.</p>
-		<p xml:lang="ru">Xfdashboard предоставляет панель инструментов оболочки GNOME, как интерфейс для XFCE</p>
+		<p xml:lang="pt">O Xfdashboard fornece uma interface semelhante ao painel de controlo do GNOME para utilização com o ambiente de trabalho Xfce.</p>
+		<p xml:lang="pt_BR">O Xfdashboard fornece um painel do shell do GNOME como interface para uso com a área de trabalho do Xfce.</p>
+		<p xml:lang="ru">Xfdashboard представляет собой аналог обзорного режима GNOME shell для использования в окружении Xfce.</p>
+		<p xml:lang="sl">Xfdashboard za namizje Xfce ponuja vmesnik v obliki nadzorne plošče, ki je podobna GNOME lupini</p>
+		<p xml:lang="sq">Xfdashboard furnizon një pult të ngjashëm me shellin GNOME për përdorim me desktopin Xfce.</p>
 		<p xml:lang="sr">Полетник Иксфце-а је сучеље попут Гномове шкољке за употребу на радној површи Иксфце-а.</p>
-		<p xml:lang="tr">Xfdashboard, Xfce masaüstüyle birlikte kullanılmak üzere bir GNOME kabuğu gösterge tablası gibi bir arabirim sağlar.</p>
+		<p xml:lang="sv">Xfdashboard tillhandahåller ett GNOME shell liknande gränssnitt för användning med Xfce-skrivbordet.</p>
+		<p xml:lang="tr">Xfdashboard, Xfce masaüstüyle kullanmak için GNOME kabuğu kumanda paneli benzeri arayüz sağlar.</p>
+		<p xml:lang="zh_CN">Xfdashboard 提供了一个 GNOME shell 仪表盘的接口，用于与Xfce桌面使用。</p>
 		<p>It can be configured to run to any keyboard shortcut and when executed provides an overview of applications currently open enabling the user to switch between different applications. The search feature works like Xfce's app finder which makes it convenient to search for and start applications.</p>
+		<p xml:lang="bg">Той може да бъде конфигуриран да стартира всеки на пряк път и когато се изпълни предоставя преглед на приложенията, които в момента са отворени, което позволява на потребителя да превключва между различни приложения. Функцията за търсене работи като търсачката на програми на Xfce, което го прави удобен за търсене и стартиране на приложения.</p>
 		<p xml:lang="da">Det kan konfigureres til at køre med en hvilken som helst tastaturgenvej og når den udføres vises en oversigt med programmer som er åbne så brugeren kan skifte mellem dem. Søgefunktionaliteten virker ligesom i Xfce's programfinder hvilket gør det nemt at søge efter og starte programmer.</p>
+		<p xml:lang="de">Es kann so konfiguriert werden, dass es auf jedem beliebigen Tastenkürzel läuft und bei der Ausführung einen Überblick über die derzeit geöffneten Anwendungen bietet, so dass der Benutzer zwischen verschiedenen Anwendungen wechseln kann. Die Suchfunktion funktioniert wie der App-Finder von Xfce, was das Suchen und Starten von Anwendungen bequem macht.</p>
 		<p xml:lang="el">Μπορεί να ρυθμιστεί ώστε να εκτελείται με οποιαδήποτε εντολή και όταν εκτελείται παρέχει μια επισκόπηση των ανοιχτών εφαρμογών δίνοντας στο χρήστη τη δυνατότητα εναλλαγής μεταξύ διαφορετικών εφαρμογών. Η λειτουργία αναζήτησης λειτουργεί όπως η εύρεση εφαρμογών του Xfce πράγμα που καθιστά βολική την αναζήτηση και εκκίνηση εφαρμογών.</p>
 		<p xml:lang="es">Puede ser configurado para funcionar con cualquier combinación de teclas y cuando se ejecuta proporciona una visión general de las aplicaciones que estén abiertas permitendo al usuario cambiar entre diferentes aplicaciones. La función de búsqueda funciona como el buscador de aplicaciones de Xfce que hace que sea conveniente para buscar e iniciar aplicaciones.</p>
 		<p xml:lang="fr">Il peut être configuré pour fonctionner avec n'importe quel raccourci clavier et lorsqu'il est exécuté donne un aperçu des applications actuellement ouvertes permettant à l'utilisateur de basculer entre différentes applications. La fonction de recherche fonctionne comme l'application Finder de Xfce qui le rend pratique pour rechercher et démarrer des applications.</p>
 		<p xml:lang="gl">Pode configurarse para se executar con calquera atallo de teclado e cando se executa fornece unha visión xeral dos aplicativos que están abertos permitindo ao usuario cambiar entre diferentes aplicativos. A función de busca funciona como buscador de aplicativos do Xfce o que fai que sexa útil para buscar e iniciar aplicativos.</p>
+		<p xml:lang="he">הוא ניתן להגדרה כך שירוץ מכל קיצור דרך במקלדת וכאשר מופעל הוא מספק סקירה של ישומים שכרגע פתוחים ומאפשר למשתמש לעבור בין ישומים שונים. תכונת החיפוש עובדת כמו מוצא הישומים של Xfce והופכת לנח חיפוש והתחלה של ישומים.</p>
+		<p xml:lang="id">Xfdashboard dapat dikonfigurasi untuk dijalankan melalui suatu pintasan papan tik, dan ketika dijalankan, akan menyediakan sebuah ikhtisar aplikasi-aplikasi yang sedang terbuka, memungkinkan pengguna untuk berpindah antar aplikasi yang berbeda. Fitur pencarian bekerja seperti pencari aplikasi Xfce yang memudahkan untuk mencari dan menjalankan aplikasi.</p>
+		<p xml:lang="nb">Det kan settes opp til å kjøre programmer med hurtigtaster. Når oversiktsprogrammet starter viser det en liste over åpne programmer slik at man kan bytte mellom dem. Søkefunksjonen tilsvarer programfinneren i Xfce, og gjør det enkelt å søke etter og starte programmer.</p>
+		<p xml:lang="nl">Het kan worden ingesteld om elke gewenste sneltoets uit te voeren en biedt een overzicht van thans geopende toepassingen, zodat de gebruiker tussen verschillende toepassingen kan schakelen. De zoekfunctie werkt als de toepassingenzoeker van Xfce, wat het makkelijk maakt om toepassingen te zoeken en te starten.</p>
 		<p xml:lang="pl">Może zostać skonfigurowany do uruchomienia pod dowolnym skrótem klawiszowym. Kiedy uruchomiony, wyświetla podgląd uruchomionych aplikacji i pozwala na przełączanie pomiędzy nimi. Funkcja wyszukiwania działa podobnie do Wyszukiwarki aplikacji Xfce, pozwalając szybciej uruchomić aplikacje.</p>
+		<p xml:lang="pt">Pode ser configurado para executar qualquer tecla de atalho e, quando executado, fornece uma visão geral das aplicações abertas no momento, permitindo que o utilizador alterne entre as diferentes aplicações. O recurso de pesquisa funciona como o localizador de aplicações do Xfce, o que torna mais conveniente pesquisar e iniciar aplicações.</p>
+		<p xml:lang="pt_BR">Ele pode ser configurado para ser executado em qualquer atalho do teclado e, quando executado, fornece uma visão geral dos aplicativos atualmente abertos, permitindo que o usuário alterne entre diferentes aplicativos. O recurso de pesquisa funciona como o localizador de aplicativos do Xfce, o que facilita a pesquisa e o início de aplicativos.</p>
 		<p xml:lang="ru">Он может быть сконфигурирован для работы с любым сочетанием клавиш и при выполнении обеспечивает обзор приложений открытых в настоящее время, позволяет пользователю переключаться между различными приложениями. Функция поиска работает как xfce App finder, что делает его удобным для поиска и запуска приложений.</p>
+		<p xml:lang="sl">Mogoče ga je nastaviti  za zaganjanje poljubnih bližnjiv na tipkovnici in ko je zagnan ponuja pregled nad trenutno odprtimi aplikacijami, kar omogoča uporabniku preklapljanje med njimi. Iskalnik deluje kakor Xfce iskalnik programov, zaradi česar je primeren za iskanje in zagon apliakcij.</p>
+		<p xml:lang="sq">Mund të formësohet për t’u vënë në punë me çfarëdo shkurtoreje tastiere dhe, kur ekzekutohet, furnizon një përmbledhje të aplikacioneve aktualisht të hapura, duke i bërë të mundur përdoruesit të kalojë nga një aplikacion në tjetrin. Veçoria e kërkimit funksionon në mënyrë të ngjashme me gjetësin e aplikacioneve të Xfce-së, çka e bën të lehtë kërkimin dhe nisjen e aplikacioneve.</p>
 		<p xml:lang="sr">Може се подесити да се покреће на било коју пречицу дугмади, и када се изврши даје преглед тренутно отворених програма, омогућујући кориснику да прелази са једног програма на други. Претрага ради попут претраживача програма за Иксфце што чини полетника згодним за претрагу и покретање програма.</p>
-		<p xml:lang="tr">Herhangi bir klavye kısayoluna gidecek şekilde yapılandırılabilir ve yürütülürken, kullanıcıların farklı uygulamalar arasında geçiş yapabilmeleri için halen açık olan uygulamalara genel bir bakış sağlar. Arama özelliği, uygulamaları aramak ve başlatmak için uygun Xfce'nin uygulama bulucusu gibi çalışır.</p>
+		<p xml:lang="sv">Det kan konfigureras till att köra godtyckliga tangentbordsgenvägar, och ger vid körning en översikt av öppna program, vilket låter användaren växla mellan olika program. Sökfunktionen fungerar precis som Xfces programsökning, vilket gör det smidigt att söka efter och starta program.</p>
+		<p xml:lang="tr">Başlatıldığında, açık uygulamaları göstererek kullanıcının farklı uygulamalar arasında geçiş yapmasını sağlar ve herhangi bir klavye kısayolunu çalıştırmak üzere yapılandırılabilir. Arama özelliği, Xfce'nin uygulama bulucusu gibi çalışır, böylece uygulamaları başlatmak ve aramak kolaylaşır.</p>
+		<p xml:lang="zh_CN">可以将其配置为运行到任何键盘快捷键，并且在执行时可以概述当前打开的应用程序，从而使用户可以在不同的应用程序之间进行切换。 搜索功能的作用类似于 Xfce 的 app finder，它使搜索和启动应用程序变得非常方便。</p>
 	</description>
 
 	<screenshots>
@@ -51,6 +85,7 @@
 		</screenshot>
 		<screenshot>
 			<caption>Browsing applications</caption>
+			<caption xml:lang="bg">Преглед на програмите</caption>
 			<caption xml:lang="ca">Navegació per les aplicacions</caption>
 			<caption xml:lang="da">Gennemser programmer</caption>
 			<caption xml:lang="de">Anwendungen durchsuchen</caption>
@@ -59,15 +94,26 @@
 			<caption xml:lang="fr">Applications de navigation</caption>
 			<caption xml:lang="gl">Navegación por aplicativos</caption>
 			<caption xml:lang="he">סיור באפליקציות</caption>
+			<caption xml:lang="id">Meramban aplikasi</caption>
 			<caption xml:lang="ie">Navigation inter applicationes</caption>
+			<caption xml:lang="lt">Programų naršymas</caption>
+			<caption xml:lang="nb">Blar gjennom programmer</caption>
+			<caption xml:lang="nl">Toepassingen verkennen</caption>
 			<caption xml:lang="pl">Przeglądanie aplikacji</caption>
+			<caption xml:lang="pt">A explorar aplicações</caption>
+			<caption xml:lang="pt_BR">Navegando em aplicativos</caption>
 			<caption xml:lang="ru">Просмотр приложений</caption>
+			<caption xml:lang="sl">Brskanje po aplikacijah</caption>
+			<caption xml:lang="sq">Aplikacione shfletimi</caption>
 			<caption xml:lang="sr">Преглед програма</caption>
-			<caption xml:lang="tr">Uygulamar taranıyor</caption>
+			<caption xml:lang="sv">Bläddra bland program</caption>
+			<caption xml:lang="tr">Uygulamalara göz atma</caption>
+			<caption xml:lang="zh_CN">浏览应用</caption>
 			<image>http://docs.xfce.org/_media/apps/xfdashboard/applications-view.png</image>
 		</screenshot>
 		<screenshot>
 			<caption>Searching applications</caption>
+			<caption xml:lang="bg">Търсене на програми</caption>
 			<caption xml:lang="ca">Cerca d'aplicacions</caption>
 			<caption xml:lang="da">Søger efter programmer</caption>
 			<caption xml:lang="de">Suche Anwendungen</caption>
@@ -76,12 +122,22 @@
 			<caption xml:lang="fr">Applications de recherche</caption>
 			<caption xml:lang="gl">Busca de aplicativos</caption>
 			<caption xml:lang="he">חיפוש אפליקציות</caption>
+			<caption xml:lang="id">Mencari aplikasi</caption>
 			<caption xml:lang="ie">Sercha por applicationes</caption>
 			<caption xml:lang="ja">アプリケーションを検索</caption>
+			<caption xml:lang="lt">Programų paieška</caption>
+			<caption xml:lang="nb">Søker etter programmer</caption>
+			<caption xml:lang="nl">Toepassingen zoeken</caption>
 			<caption xml:lang="pl">Wyszukiwanie aplikacji</caption>
+			<caption xml:lang="pt">A procurar aplicações</caption>
+			<caption xml:lang="pt_BR">Procurando aplicativos</caption>
 			<caption xml:lang="ru">Поиск приложений</caption>
+			<caption xml:lang="sl">Iskanje aplikacij</caption>
+			<caption xml:lang="sq">Aplikacione kërkimi</caption>
 			<caption xml:lang="sr">Претрага програма</caption>
-			<caption xml:lang="tr">Uygulamalar aranıyor</caption>
+			<caption xml:lang="sv">Sök efter program</caption>
+			<caption xml:lang="tr">Uygulamaları arama</caption>
+			<caption xml:lang="zh_CN">搜索应用</caption>
 			<image>http://docs.xfce.org/_media/apps/xfdashboard/search-view.png</image>
 		</screenshot>
 	</screenshots>
@@ -113,82 +169,33 @@
 	</keywords>
 
 	<releases>
-		<release version="0.7.7" timestamp="1600772127">
+		<release version="0.8.0" timestamp="1608711235">
 			<description>
-				<p>This unstable development adds more animations as well as some smaller fixes.</p>
-			</description>
-		</release>
-		<release version="0.7.6" timestamp="1575026916">
-			<description>
-				<p>This unstable development adds animations.</p>
-			</description>
-		</release>
-		<release version="0.7.5" timestamp="1533679200">
-			<description>
-				<p>This unstable development adds support for touchpads and application actions (Jumplists, Quicklists) as well as new and updated translations.</p>
-			</description>
-		</release>
-		<release version="0.7.4" timestamp="1505796460">
-			<description>
-				<p>This unstable development adds lots of new and updated translations and support for newer xfconf versions.</p>
-				<p xml:lang="fr">Ce développement instable ajoute de nombreuses traductions nouvelles et des mises à jour et prend en charge les nouvelles versions de xfconf.</p>
-				<p xml:lang="gl">Esta versión inestábel de desenvolvemento engade moitas traducións novas e actualizadas e compatibilidade para novas versións de xfconf.</p>
-				<p xml:lang="ru">Проект добавляет много новых и обновленных переводов и поддержку для новых версий xfconf.</p>
-				<p xml:lang="tr">Bu kararsız gelişme, yeni xfconf sürümleri için birçok yeni ve güncellenmiş çeviri ve destek ekler.</p>
-			</description>
-		</release>
-		<release version="0.7.3" timestamp="1499409263">
-			<description>
-				<p>This unstable development implements a new experimental backend for GDK as well as it supports user stylesheets now.</p>
-				<p xml:lang="fr">Ce développement instable implémente un nouvel arrière-plan expérimental pour GDK et prend désormais en charge les feuilles de style utilisateur.</p>
-				<p xml:lang="gl">Esta versión inestábel de desenvolvemento engade de xeito experimental unha nova infraestrutura para GDK así como a compatibilidade para follas de estilo de usuario.</p>
-				<p xml:lang="ru">Проект реализует новый экспериментальный бэкэнд для GDK, а также поддерживает пользовательские таблицы стилей.</p>
-				<p xml:lang="tr">Bu kararsız gelişme, GDK için yeni bir deneysel arka plan uygular ve kullanıcı tarzlarını artık desteklemektedir.</p>
-			</description>
-		</release>
-		<release version="0.7.2" timestamp="1494826045">
-			<description>
-				<p>This unstable development improves loading performance of images and icon, adds a fine-grained debugging system and introduces an interface for multiple backends but only X11 is still the one only one supported.</p>
-				<p xml:lang="fr">Ce développement instable améliore les performances de chargement des images et des icônes, ajoute un système de débogage à granularité fine et introduit une interface pour plusieurs moteurs de traitement, mais seul X11 est toujours celui qui est pris en charge.</p>
-				<p xml:lang="gl">Esta versión inestábel de desenvolvemento mellora o desempeño de carga de imaxes e iconas. Engade un sistema de depuración de polo miudo e introduce unha interface para varias infraestruturas pero só o X11 segue sendo o único soportado.</p>
-				<p xml:lang="ru">Проект повышает производительность загрузки изображений и значков, добавляет систему детальной отладки и вводит интерфейс для нескольких бэкэндов, но поддерживается только один X11.</p>
-				<p xml:lang="tr">Bu kararsız gelişme, görüntülerin ve simgenin yüklenme performansını geliştirir, ince taneli bir hata ayıklama sistemi ekler ve çoklu arka planlar için bir arabirim sunar, ancak yalnızca X11 destekli olan yalnızca bir tanesidir.</p>
-			</description>
-		</release>
-		<release version="0.7.1" timestamp="1488792398">
-			<description>
-				<p>This unstable development introduces child windows shown next to the main window.</p>
-				<p xml:lang="fr">Ce développement instable introduit les fenêtres enfants affichées à côté de la fenêtre principale.</p>
-				<p xml:lang="gl">Esta versión inestábel de desenvolvemento insire sub xanelas amosadas á beira da xanela principal.</p>
-				<p xml:lang="ru">Проект представляет дочерние окна, показанные рядом с главным окном.</p>
-				<p xml:lang="tr">Bu kararsız gelişme, ana pencerenin yanında gösterilen çocuk pencerelerini tanıtır.</p>
-			</description>
-		</release>
-		<release version="0.6.1" timestamp="1482422594">
-			<description>
-				<p>This stable version fixes a bug setting the correct default applications at first use.</p>
-				<p xml:lang="fr">Cette version stable corrige un bogue définissant les applications par défaut correctes lors de la première utilisation.</p>
-				<p xml:lang="gl">Esta versión inestábel amaña un erro na configuración dos aplicativos predeterminados no primeiro uso.</p>
-				<p xml:lang="ru">Эта версия исправляет ошибку определения правильных приложений по умолчанию при первом использовании.</p>
-				<p xml:lang="tr">Bu kararlı sürüm, ilk kullanımda doğru varsayılan uygulamaları ayarlayan bir hatayı düzeltir.</p>
-			</description>
-		</release>
-		<release version="0.7.0" timestamp="1473183039">
-			<description>
-				<p>This unstable development introduces pop-up menus.</p>
-				<p xml:lang="fr">Ce développement instable introduit des menus contextuels.</p>
-				<p xml:lang="gl">Esta versión inestábel de desenvolvemento engade menús emerxentes.</p>
-				<p xml:lang="ru">Проект представляет всплывающие меню.</p>
-				<p xml:lang="tr">Bu kararsız gelişme, açılır menüler sunuyor.</p>
+				<p>This stable version introduces lots of new features like animations, pop-up menus, multiple backend and support for jumplists etc. It also includes lots of new and updated translations.</p>
 			</description>
 		</release>
 		<release version="0.6.0" timestamp="1463772864">
 			<description>
 				<p>This stable version introduces lots of new features like plugins and application tracker. It also contains a huge collection of other larger and smaller improvements.</p>
+				<p xml:lang="bg">Тази стабилна версия въвежда много нови функции като добавки и приложение за проследяване. Той също така съдържа огромна колекция от други по-големи и по-малки подобрения.</p>
+				<p xml:lang="da">Denne stabile version introducerer massere af nye funktionaliteter såsom plugins og programsporer. Det indeholder også en stor samling af andre større og mindre forbedringer.</p>
+				<p xml:lang="de">Diese stabile Version führt viele neue Funktionen wie Plugins und Application Tracker ein. Sie enthält auch eine riesige Sammlung anderer größerer und kleinerer Verbesserungen.</p>
+				<p xml:lang="es">Esta versión estable introduce muchas nuevas funcionalidades como complementos y buscador de aplicaciones. También contiene una vasta colección de otras mejoras mayores y menores.</p>
 				<p xml:lang="fr">Cette version stable introduit de nombreuses nouvelles fonctionnalités telles que les greffons et le suivi des applications. Il contient également une énorme collection d'autres améliorations plus ou moins grandes.</p>
 				<p xml:lang="gl">Esta versión estábel insire moitas funcións novas, como engadidos e seguimento de aplicativos. Tamén contén unha inxente cantidade de grandes e pequenas melloras.</p>
+				<p xml:lang="he">הגרסה היציבה הזו מציגה הרבה מאפיינים חדשים כמו תוספים ועוקב ישומים. היא גם מכילה אוסף עצום של שיפורים גדולים וקטנים.</p>
+				<p xml:lang="id">Versi stabil ini memperkenalkan banyak fitur-fitur baru seperti plugin dan pelacak aplikasi. Juga berisi sejumlah besar peningkatan, baik peningkatan besar maupun kecil.</p>
+				<p xml:lang="nb">Denne stabile utgivelsen innfører en del ny funksjonalitet slik som tillegg og programsporing. Den har dessuten mange andre små og store forbedringer.</p>
+				<p xml:lang="nl">Deze stabiele versie introduceert vele nieuwe functies zoals invoegsels en een toepassingentraceerder. Hij bevat ook een enorme hoeveelheid grotere en kleinere andere verbeteringen. </p>
+				<p xml:lang="pl">Ta stabilna wersja wprowadza wiele nowych funkcji, takich jak wtyczki i narzędzie do śledzenia programów. Zawiera również ogromną kolekcję innych większych i mniejszych ulepszeń.</p>
+				<p xml:lang="pt">Esta versão estável introduz muitas características novas como plugins e rastreio de aplicações. Contém também uma enorme coleção de outras melhorias maiores e menores.</p>
+				<p xml:lang="pt_BR">Esta versão estável introduz várias novos recursos como plug-ins e o rastreador de aplicativos. Ela também contém uma enorme coleção de outras melhorias grandes e pequenas.</p>
 				<p xml:lang="ru">Эта версия представляет множество новых функций, таких как плагины и трекер приложений. Он также содержит огромную коллекцию других больших и маленьких улучшений.</p>
+				<p xml:lang="sl">Ta stabilna različica uvaja mnogo novih funkciji, kot so vtičniki in sledilniki aplikacijam. Vsebuje tudi velik nabor manjših in večjih izboljšav.</p>
+				<p xml:lang="sq">Ky version i qëndrueshëm sjell plotë veçori të reja, të tilla si ndjekës shtojcash dhe aplikacionesh. Përmban gjithashtu një koleksion të stërmadh përmirësimesh të tjera më të mëdha dhe më të vogla.</p>
+				<p xml:lang="sv">Den här stabila versionen introducerar många nya funktioner, som insticksprogram och programspårare. Den innehåller också en omfattande lista av andra större och mindre förbättringar.</p>
 				<p xml:lang="tr">Bu kararlı sürüm, eklentiler ve uygulama izleyici gibi birçok yeni özellik sunar. Aynı zamanda diğer büyük ve küçük geliştirmelerden oluşan devasa bir koleksiyon da içerir.</p>
+				<p xml:lang="zh_CN">此稳定版本引入了许多新的特性(比如插件和应用追踪器).它还包含大量较大或较小的改进。</p>
 			</description>
 		</release>
 	</releases>

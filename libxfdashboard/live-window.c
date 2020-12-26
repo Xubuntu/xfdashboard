@@ -224,7 +224,7 @@ static void _xfdashboard_live_window_on_subwindow_actor_workspace_changed(Xfdash
 	 * destroy it.
 	 */
 	actor=_xfdashboard_live_window_find_subwindow_actor(self, window);
-	if(actor) clutter_actor_destroy(actor);
+	if(actor) xfdashboard_actor_destroy(actor);
 }
 
 /* A sub-window changed its state, so check if this sub-window should not be
@@ -251,7 +251,7 @@ static void _xfdashboard_live_window_on_subwindow_actor_state_changed(Xfdashboar
 	 * destroy it.
 	 */
 	actor=_xfdashboard_live_window_find_subwindow_actor(self, window);
-	if(actor) clutter_actor_destroy(actor);
+	if(actor) xfdashboard_actor_destroy(actor);
 }
 
 /* A sub-window actor is going to be destroyed, so clean up */
@@ -527,7 +527,7 @@ static void _xfdashboard_live_window_setup_subwindows_layer(XfdashboardLiveWindo
 	/* Destroy all sub-windows and do not create sub-windows actor if showing
 	 * them was disabled.
 	 */
-	clutter_actor_destroy_all_children(priv->actorSubwindowsLayer);
+	xfdashboard_actor_destroy_all_children(priv->actorSubwindowsLayer);
 	if(!priv->allowSubwindows || !priv->showSubwindows) return;
 
 	/* Create sub-window actors for the windows belonging to this one */
@@ -1064,39 +1064,39 @@ static void xfdashboard_live_window_class_init(XfdashboardLiveWindowClass *klass
 	/* Define properties */
 	XfdashboardLiveWindowProperties[PROP_WINDOW_NUMBER]=
 		g_param_spec_uint("window-number",
-							_("Window number"),
-							_("The assigned window number. If set to non-zero the close button will be hidden and the window number will be shown instead. If set to zero the close button will be shown again."),
+							"Window number",
+							"The assigned window number. If set to non-zero the close button will be hidden and the window number will be shown instead. If set to zero the close button will be shown again.",
 							0, 10,
 							0,
 							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	XfdashboardLiveWindowProperties[PROP_CLOSE_BUTTON_PADDING]=
 		g_param_spec_float("close-padding",
-							_("Close button padding"),
-							_("Padding of close button to window actor in pixels"),
+							"Close button padding",
+							"Padding of close button to window actor in pixels",
 							0.0f, G_MAXFLOAT,
 							0.0f,
 							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	XfdashboardLiveWindowProperties[PROP_TITLE_ACTOR_PADDING]=
 		g_param_spec_float("title-padding",
-							_("Title actor padding"),
-							_("Padding of title actor to window actor in pixels"),
+							"Title actor padding",
+							"Padding of title actor to window actor in pixels",
 							0.0f, G_MAXFLOAT,
 							0.0f,
 							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	XfdashboardLiveWindowProperties[PROP_SHOW_SUBWINDOWS]=
 		g_param_spec_boolean("show-subwindows",
-								_("Show sub-windows"),
-								_("Whether to show sub-windows of this main window"),
+								"Show sub-windows",
+								"Whether to show sub-windows of this main window",
 								TRUE,
 								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	XfdashboardLiveWindowProperties[PROP_ALLOW_SUBWINDOWS]=
 		g_param_spec_boolean("allow-subwindows",
-								_("Allow sub-windows"),
-								_("Whether to show sub-windows if requested by theme"),
+								"Allow sub-windows",
+								"Whether to show sub-windows if requested by theme",
 								DEFAULT_ALLOW_SUBWINDOWS,
 								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 

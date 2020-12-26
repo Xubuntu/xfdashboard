@@ -33,6 +33,8 @@
 #include <libxfdashboard/compat.h>
 #include <libxfdashboard/debug.h>
 
+#include <libxfce4util/libxfce4util.h>
+
 
 /* Define this class in GObject system */
 static void _xfdashboard_desktop_app_info_gappinfo_iface_init(GAppInfoIface *iface);
@@ -135,10 +137,10 @@ static gboolean _xfdashboard_desktop_app_info_load_secondary_source(XfdashboardD
 										&error))
 		{
 			/* Show warning */
-			g_warning(_("Could not load secondary source %s for desktop ID '%s': %s"),
+			g_warning("Could not load secondary source %s for desktop ID '%s': %s",
 						secondarySourceFilename,
 						priv->desktopID,
-						error ? error->message : _("Unknown error"));
+						error ? error->message : "Unknown error");
 
 			/* Release allocated resources */
 			if(error) g_error_free(error);
@@ -242,7 +244,7 @@ static void _xfdashboard_desktop_app_info_update_actions(XfdashboardDesktopAppIn
 			itemActionName=(const gchar*)(iter->data);
 			if(!itemActionName)
 			{
-				g_warning(_("Cannot create application action because of empty action name for desktop ID '%s'"),
+				g_warning("Cannot create application action because of empty action name for desktop ID '%s'",
 							priv->desktopID);
 				continue;
 			}
@@ -250,7 +252,7 @@ static void _xfdashboard_desktop_app_info_update_actions(XfdashboardDesktopAppIn
 			itemAction=garcon_menu_item_get_action(priv->item, itemActionName);
 			if(!itemAction)
 			{
-				g_warning(_("Cannot create application action for desktop ID '%s'"),
+				g_warning("Cannot create application action for desktop ID '%s'",
 							priv->desktopID);
 				continue;
 			}
@@ -307,7 +309,7 @@ static void _xfdashboard_desktop_app_info_update_actions(XfdashboardDesktopAppIn
 			XFDASHBOARD_DEBUG(self, APPLICATIONS,
 								"Could not fetch list of actions from secondary source for desktop ID '%s': %s",
 								priv->desktopID,
-								error ? error->message : _("Unknown error"));
+								error ? error->message : "Unknown error");
 
 			/* Release allocated resources */
 			if(error) g_error_free(error);
@@ -340,7 +342,7 @@ static void _xfdashboard_desktop_app_info_update_actions(XfdashboardDesktopAppIn
 									"Could not get name of action '%s' from secondary source for desktop ID '%s': %s",
 									*iter,
 									priv->desktopID,
-									error ? error->message : _("Unknown error"));
+									error ? error->message : "Unknown error");
 
 				/* Release allocated resources */
 				if(itemActionGroup) g_free(itemActionGroup);
@@ -462,7 +464,7 @@ static void _xfdashboard_desktop_app_info_update_keywords(XfdashboardDesktopAppI
 			XFDASHBOARD_DEBUG(self, APPLICATIONS,
 								"Could not fetch list of keywords from secondary source for desktop ID '%s': %s",
 								priv->desktopID,
-								error ? error->message : _("Unknown error"));
+								error ? error->message : "Unknown error");
 
 			/* Release allocated resources */
 			if(error) g_error_free(error);
@@ -655,6 +657,8 @@ static void _xfdashboard_desktop_app_info_set_file(XfdashboardDesktopAppInfo *se
 		}
 }
 
+#if !LIBXFCE4UTIL_CHECK_VERSION(4, 15, 2)
+
 /* Launch application with URIs in given context */
 static void _xfdashboard_desktop_app_info_expand_macros_add_file(const gchar *inURI, GString *ioExpanded)
 {
@@ -829,6 +833,8 @@ static gboolean _xfdashboard_desktop_app_info_expand_macros(XfdashboardDesktopAp
 	return(TRUE);
 }
 
+#endif
+
 /* Child process for launching application was spawned but application
  * was not executed yet so we can set up environment etc. now.
  * 
@@ -865,6 +871,8 @@ static void _xfdashboard_desktop_app_info_on_child_spawned(gpointer inUserData)
 		g_setenv("GIO_LAUNCHED_DESKTOP_FILE_PID", pid, TRUE);
 	}
 }
+
+#if !LIBXFCE4UTIL_CHECK_VERSION(4, 15, 2)
 
 static gboolean _xfdashboard_desktop_app_info_launch_appinfo_internal(XfdashboardDesktopAppInfo *self,
 																		const gchar *inCommand,
@@ -908,7 +916,7 @@ static gboolean _xfdashboard_desktop_app_info_launch_appinfo_internal(Xfdashboar
 		g_set_error_literal(outError,
 								G_IO_ERROR,
 								G_IO_ERROR_FAILED,
-								_("Unable to expand macros at command-line."));
+								"Unable to expand macros at command-line.");
 
 		/* Release allocated resources */
 		if(expanded) g_string_free(expanded, TRUE);
@@ -986,7 +994,7 @@ static gboolean _xfdashboard_desktop_app_info_launch_appinfo_internal(Xfdashboar
 		else if(!g_file_test(workingDirectory, G_FILE_TEST_IS_DIR))
 		{
 			/* Working directory does not exist or is not a directory */
-			g_warning(_("Working directory '%s' does not exist. It won't be used when launching '%s'."),
+			g_warning("Working directory '%s' does not exist. It won't be used when launching '%s'.",
 						workingDirectory,
 						*argv);
 
@@ -1131,6 +1139,287 @@ static gboolean _xfdashboard_desktop_app_info_launch_appinfo_internal(Xfdashboar
 
 	return(success);
 }
+
+#else
+
+static gboolean _xfdashboard_desktop_app_info_launch_appinfo_internal(XfdashboardDesktopAppInfo *self,
+																		const gchar *inCommand,
+																		GList *inURIs,
+																		GAppLaunchContext *inContext,
+																		GError **outError)
+{
+	XfdashboardDesktopAppInfoPrivate			*priv;
+	GString									*string;
+	gchar										*expanded;
+	gchar										*uri;
+	gchar										*filename;
+	gchar										*display;
+	gchar										*startupNotificationID;
+	gchar										*desktopFile;
+	const gchar									*workingDirectory;
+	const gchar									*name;
+	gboolean									success;
+	GPid										launchedPID;
+	gint										argc;
+	gchar										**argv;
+	GError										*error;
+	XfdashboardDesktopAppInfoChildSetupData		childSetup;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_DESKTOP_APP_INFO(self), FALSE);
+	g_return_val_if_fail(inCommand && *inCommand, FALSE);
+	g_return_val_if_fail(!inContext || G_IS_APP_LAUNCH_CONTEXT(inContext), FALSE);
+	g_return_val_if_fail(outError && *outError==NULL, FALSE);
+
+	priv=self->priv;
+	display=NULL;
+	startupNotificationID=NULL;
+	desktopFile=NULL;
+	success=FALSE;
+	argc=0;
+	argv=NULL;
+	error=NULL;
+
+	/* Get command-line with expanded macros */
+	name=garcon_menu_item_get_name(priv->item);
+	uri=garcon_menu_item_get_uri(priv->item);
+	expanded=xfce_expand_desktop_entry_field_codes(inCommand, (GSList*)inURIs,
+																								garcon_menu_item_get_icon_name(priv->item),
+																								name, uri,
+																								garcon_menu_item_requires_terminal(priv->item));
+  g_free(uri);
+
+	if(!expanded)
+	{
+		/* Set error */
+		g_set_error_literal(outError,
+								G_IO_ERROR,
+								G_IO_ERROR_FAILED,
+								"Unable to expand macros at command-line.");
+
+		/* Return error state */
+		return(FALSE);
+	}
+
+	/* If URIs was provided but not used (exec key does not contain %f, %F, %u, %U)
+	 * append first URI to expanded inCommand-line.
+	 */
+	if(inURIs && !g_regex_match_simple("%[fu]", inCommand, G_REGEX_CASELESS, 0))
+	{
+		string=g_string_new(expanded);
+		g_free(expanded);
+		g_string_append_c(string, ' ');
+		filename=g_filename_from_uri(inURIs->data, NULL, NULL);
+		xfce_append_quoted(string, filename);
+		g_free(filename);
+		expanded=g_string_free(string, FALSE);
+	}
+
+	/* Get command-line arguments as string list */
+	if(!g_shell_parse_argv(expanded, &argc, &argv, &error))
+	{
+		/* Propagate error */
+		g_propagate_error(outError, error);
+
+		/* Release allocated resources */
+		if(argv) g_strfreev(argv);
+		if(expanded) g_free(expanded);
+
+		/* Return error state */
+		return(FALSE);
+	}
+
+	/* Set up launch context, e.g. display and startup notification */
+	if(inContext)
+	{
+		GList									*filesToLaunch;
+		GList									*iter;
+
+		/* Create GFile objects for URIs */
+		filesToLaunch=NULL;
+		for(iter=inURIs; iter; iter=g_list_next(iter))
+		{
+			GFile						*file;
+
+			file=g_file_new_for_uri((const gchar*)iter->data);
+			filesToLaunch=g_list_prepend(filesToLaunch, file);
+		}
+		filesToLaunch=g_list_reverse(filesToLaunch);
+
+		/* Get display where to launch application at */
+		display=g_app_launch_context_get_display(inContext,
+													G_APP_INFO(self),
+													filesToLaunch);
+
+		/* Get startup notification ID if it is supported by application */
+		if(garcon_menu_item_supports_startup_notification(priv->item))
+		{
+			startupNotificationID=g_app_launch_context_get_startup_notify_id(inContext,
+																				G_APP_INFO(self),
+																				filesToLaunch);
+		}
+
+		/* Release allocated resources */
+		g_list_free_full(filesToLaunch, g_object_unref);
+	}
+
+	/* Get working directory and test if directory exists */
+	workingDirectory=garcon_menu_item_get_path(priv->item);
+	if(!workingDirectory || !*workingDirectory)
+	{
+		/* Working directory was either NULL or is an empty string,
+		 * so do not set working directory.
+		 */
+		workingDirectory=NULL;
+	}
+		else if(!g_file_test(workingDirectory, G_FILE_TEST_IS_DIR))
+		{
+			/* Working directory does not exist or is not a directory */
+			g_warning("Working directory '%s' does not exist. It won't be used when launching '%s'.",
+						workingDirectory,
+						*argv);
+
+			/* Do not set working directory */
+			workingDirectory=NULL;
+		}
+
+	/* Get desktop file of application to launch */
+	desktopFile=g_file_get_path(priv->file);
+
+	/* Launch application */
+	childSetup.display=display;
+	childSetup.startupNotificationID=startupNotificationID;
+	childSetup.desktopFile=desktopFile;
+	success=g_spawn_async(workingDirectory,
+							argv,
+							NULL,
+							G_SPAWN_SEARCH_PATH,
+							_xfdashboard_desktop_app_info_on_child_spawned,
+							&childSetup,
+							&launchedPID,
+							&error);
+	if(success)
+	{
+		GDBusConnection							*sessionBus;
+
+		XFDASHBOARD_DEBUG(self, APPLICATIONS,
+							"Launching %s succeeded with PID %ld.",
+							name, (long)launchedPID);
+
+		/* Open connection to DBUS session bus and send notification about
+		 * successful launch of application. Then flush and close DBUS
+		 * session bus connection.
+		 */
+		sessionBus=g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+		if(sessionBus)
+		{
+			GDBusMessage						*message;
+			GVariantBuilder						uris;
+			GVariantBuilder						extras;
+			GList								*iter;
+			const gchar							*desktopFileID;
+			const gchar							*gioDesktopFile;
+			const gchar							*programName;
+
+			/* Build list of URIs */
+			g_variant_builder_init(&uris, G_VARIANT_TYPE("as"));
+			for(iter=inURIs; iter; iter=g_list_next(iter))
+			{
+				g_variant_builder_add(&uris, "s", (const gchar*)iter->data);
+			}
+
+			/* Build list of extra information */
+			g_variant_builder_init(&extras, G_VARIANT_TYPE("a{sv}"));
+			if(startupNotificationID &&
+				g_utf8_validate(startupNotificationID, -1, NULL))
+			{
+				g_variant_builder_add(&extras,
+										"{sv}",
+										"startup-id",
+										g_variant_new("s", startupNotificationID));
+			}
+
+			gioDesktopFile=g_getenv("GIO_LAUNCHED_DESKTOP_FILE");
+			if(gioDesktopFile)
+			{
+				g_variant_builder_add(&extras,
+										"{sv}",
+										"origin-desktop-file",
+										g_variant_new_bytestring(gioDesktopFile));
+			}
+
+			programName=g_get_prgname();
+			if(programName)
+			{
+				g_variant_builder_add(&extras,
+										"{sv}",
+										"origin-prgname",
+										g_variant_new_bytestring(programName));
+			}
+
+			g_variant_builder_add(&extras,
+									"{sv}",
+									"origin-pid",
+									g_variant_new("x", (gint64)getpid()));
+
+			if(priv->desktopID) desktopFileID=priv->desktopID;
+				else if(priv->file) desktopFileID=desktopFile;
+				else desktopFileID="";
+
+			message=g_dbus_message_new_signal("/org/gtk/gio/DesktopAppInfo",
+												"org.gtk.gio.DesktopAppInfo",
+												"Launched");
+			g_dbus_message_set_body(message,
+										g_variant_new
+										(
+											"(@aysxasa{sv})",
+											g_variant_new_bytestring(desktopFileID),
+											display ? display : "",
+											(gint64)launchedPID,
+											&uris,
+											&extras
+										));
+			g_dbus_connection_send_message(sessionBus,
+											message,
+											0,
+											NULL,
+											NULL);
+
+			g_object_unref(message);
+
+			/* It is safe to unreference DBUS session bus object after
+			 * calling flush function even if the flush function is
+			 * a asynchronous function because it takes its own reference
+			 * on the session bus to keep it alive until flush is complete.
+			 */
+			g_dbus_connection_flush(sessionBus, NULL, NULL, NULL);
+			g_object_unref(sessionBus);
+		}
+	}
+		else
+		{
+			g_warning("Launching %s failed!", name);
+
+			/* Propagate error */
+			g_propagate_error(outError, error);
+
+			/* Tell context about failed application launch */
+			if(startupNotificationID)
+			{
+				g_app_launch_context_launch_failed(inContext, startupNotificationID);
+			}
+		}
+
+	/* Release allocated resources */
+	if(expanded) g_free(expanded);
+	if(argv) g_strfreev(argv);
+	if(desktopFile) g_free(desktopFile);
+	if(startupNotificationID) g_free(startupNotificationID);
+	if(display) g_free(display);
+
+	return(success);
+}
+
+#endif
 
 /* IMPLEMENTATION: Interface GAppInfo */
 
@@ -1612,22 +1901,22 @@ static void xfdashboard_desktop_app_info_class_init(XfdashboardDesktopAppInfoCla
 	/* Define properties */
 	XfdashboardDesktopAppInfoProperties[PROP_VALID]=
 		g_param_spec_boolean("valid",
-								_("Valid"),
-								_("Flag indicating whether this desktop application information is valid or not"),
+								"Valid",
+								"Flag indicating whether this desktop application information is valid or not",
 								FALSE,
 								G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
 	XfdashboardDesktopAppInfoProperties[PROP_DESKTOP_ID]=
 		g_param_spec_string("desktop-id",
-								_("Desktop ID"),
-								_("Name of desktop ID"),
+								"Desktop ID",
+								"Name of desktop ID",
 								NULL,
 								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
 	XfdashboardDesktopAppInfoProperties[PROP_FILE]=
 		g_param_spec_object("file",
-							_("File"),
-							_("The desktop file"),
+							"File",
+							"The desktop file",
 							G_TYPE_FILE,
 							G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
@@ -1686,7 +1975,7 @@ GAppInfo* xfdashboard_desktop_app_info_new_from_desktop_id(const gchar *inDeskto
 	desktopFilename=xfdashboard_application_database_get_file_from_desktop_id(inDesktopID);
 	if(!desktopFilename)
 	{
-		g_warning(_("Desktop ID '%s' not found"), inDesktopID);
+		g_warning("Desktop ID '%s' not found", inDesktopID);
 		return(NULL);
 	}
 
@@ -1817,9 +2106,9 @@ gboolean xfdashboard_desktop_app_info_reload(XfdashboardDesktopAppInfo *self)
 		success=garcon_menu_item_reload(priv->item, NULL, &error);
 		if(!success)
 		{
-			g_warning(_("Could not reload desktop application information for '%s': %s"),
+			g_warning("Could not reload desktop application information for '%s': %s",
 						garcon_menu_item_get_name(priv->item),
-						error ? error->message : _("Unknown error"));
+						error ? error->message : "Unknown error");
 			if(error) g_error_free(error);
 		}
 
@@ -1930,7 +2219,7 @@ gboolean xfdashboard_desktop_app_info_launch_action_by_name(XfdashboardDesktopAp
 		g_set_error(outError,
 					G_IO_ERROR,
 					G_IO_ERROR_NOT_FOUND,
-					_("Invalid application action '%s' to execute for desktop ID '%s'"),
+					"Invalid application action '%s' to execute for desktop ID '%s'",
 					inActionName,
 					priv->desktopID);
 
@@ -1946,10 +2235,10 @@ gboolean xfdashboard_desktop_app_info_launch_action_by_name(XfdashboardDesktopAp
 																	outError);
 	if(!success)
 	{
-		g_warning(_("Could launch action '%s' for desktop ID '%s': %s"),
+		g_warning("Could launch action '%s' for desktop ID '%s': %s",
 					xfdashboard_desktop_app_info_action_get_name(action),
 					self->priv->desktopID,
-					(outError && *outError) ? (*outError)->message : _("Unknown error"));
+					(outError && *outError) ? (*outError)->message : "Unknown error");
 	}
 
 	/* Return success result of launching action */
