@@ -14,7 +14,10 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_action_button_set_target@Base 0.6.0
  xfdashboard_actor_base_class_finalize@Base 0.6.0
  xfdashboard_actor_class_init@Base 0.6.0
+ xfdashboard_actor_destroy@Base 0.8.0
+ xfdashboard_actor_destroy_all_children@Base 0.8.0
  xfdashboard_actor_enable_allocation_animation_once@Base 0.7.8
+ xfdashboard_actor_get_allocation_box@Base 0.8.0
  xfdashboard_actor_get_can_focus@Base 0.6.0
  xfdashboard_actor_get_effects@Base 0.6.0
  xfdashboard_actor_get_stylable_properties@Base 0.6.0
@@ -24,6 +27,7 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_actor_install_stylable_property@Base 0.6.0
  xfdashboard_actor_install_stylable_property_by_name@Base 0.6.0
  xfdashboard_actor_invalidate@Base 0.6.0
+ xfdashboard_actor_iter_destroy@Base 0.8.0
  xfdashboard_actor_new@Base 0.6.0
  xfdashboard_actor_set_can_focus@Base 0.6.0
  xfdashboard_actor_set_effects@Base 0.6.0
@@ -34,6 +38,7 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_animation_ensure_complete@Base 0.7.8
  xfdashboard_animation_get_id@Base 0.7.7
  xfdashboard_animation_get_type@Base 0.7.7
+ xfdashboard_animation_has_animation@Base 0.8.0
  xfdashboard_animation_is_empty@Base 0.7.8
  xfdashboard_animation_new@Base 0.7.7
  xfdashboard_animation_new_by_id@Base 0.7.8
