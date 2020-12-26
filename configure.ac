@@ -13,9 +13,9 @@ dnl ***************************
 dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
-m4_define([xfdashboard_version_minor], [7])
-m4_define([xfdashboard_version_micro], [8])
-m4_define([xfdashboard_version_build], [503b2bc])
+m4_define([xfdashboard_version_minor], [8])
+m4_define([xfdashboard_version_micro], [0])
+m4_define([xfdashboard_version_build], [9c6d3d3])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -127,7 +127,7 @@ AC_SUBST(LIBM)
 dnl ******************************
 dnl *** Check for i18n support ***
 dnl ******************************
-XDT_I18N([ca da de el es fr gl he ie it_IT ja kk lt pl ru ru_RU sr sv_SE tr])
+XDT_I18N([ca el ie it_IT ja kk ru_RU sv_SE pl sr bg lt sq de gl nl da es id nb sl tr zh_CN fr he pt sv pt_BR ru ])
 
 dnl *******************************
 dnl *** Check for X11 installed ***
@@ -314,14 +314,11 @@ data/appdata/Makefile
 data/data/Makefile
 data/icons/Makefile
 data/icons/16x16/Makefile
-data/icons/22x22/Makefile
 data/icons/24x24/Makefile
 data/icons/32x32/Makefile
 data/icons/48x48/Makefile
-data/icons/64x64/Makefile
-data/icons/96x96/Makefile
 data/icons/128x128/Makefile
-data/icons/256x256/Makefile
+data/icons/scalable/Makefile
 data/themes/Makefile
 data/themes/xfdashboard/Makefile
 data/themes/xfdashboard-auber/Makefile

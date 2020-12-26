@@ -31,7 +31,7 @@
  *
  * The plugin manager will look up each plugin at the following paths and order:
  *
- * - Path specified in evironment variable XFDASHBOARD_PLUGINS_PATH
+ * - Paths specified in environment variable XFDASHBOARD_PLUGINS_PATH (colon-seperated list)
  * - $XDG_DATA_HOME/xfdashboard/plugins
  * - (install prefix)/lib/xfdashboard/plugins
  */
@@ -161,6 +161,11 @@ static gchar* _xfdashboard_plugins_manager_find_plugin_path(XfdashboardPluginsMa
 		path=g_strdup_printf("%s%s%s.%s", iterPath, G_DIR_SEPARATOR_S, inPluginName, G_MODULE_SUFFIX);
 		if(!path) continue;
 
+		XFDASHBOARD_DEBUG(self, PLUGINS,
+							"Trying path %s for plugin '%s'",
+							path,
+							inPluginName);
+
 		/* Check if file exists and return it if we does */
 		if(g_file_test(path, G_FILE_TEST_IS_REGULAR))
 		{
@@ -270,7 +275,7 @@ static gboolean _xfdashboard_plugins_manager_load_plugin(XfdashboardPluginsManag
 		g_set_error(outError,
 					XFDASHBOARD_PLUGIN_ERROR,
 					XFDASHBOARD_PLUGIN_ERROR_ERROR,
-					_("Could not find module for plugin ID '%s'"),
+					"Could not find module for plugin ID '%s'",
 					inPluginID);
 
 		/* Return error */
@@ -411,9 +416,9 @@ static void _xfdashboard_plugins_manager_on_enabled_plugins_changed(XfdashboardP
 				if(!_xfdashboard_plugins_manager_load_plugin(self, pluginID, &error))
 				{
 					/* Show error message */
-					g_warning(_("Could not load plugin '%s': %s"),
+					g_warning("Could not load plugin '%s': %s",
 								pluginID,
-								error ? error->message : _("Unknown error"));
+								error ? error->message : "Unknown error");
 
 					/* Release allocated resources */
 					if(error)
@@ -685,7 +690,15 @@ gboolean xfdashboard_plugins_manager_setup(XfdashboardPluginsManager *self)
 	envPath=g_getenv("XFDASHBOARD_PLUGINS_PATH");
 	if(envPath)
 	{
-		_xfdashboard_plugins_manager_add_search_path(self, envPath);
+		gchar						**paths;
+
+		iter=paths=g_strsplit(envPath, ":", -1);
+		while(*iter)
+		{
+			_xfdashboard_plugins_manager_add_search_path(self, *iter);
+			iter++;
+		}
+		g_strfreev(paths);
 	}
 
 	path=g_build_filename(g_get_user_data_dir(), "xfdashboard", "plugins", NULL);
@@ -715,9 +728,9 @@ gboolean xfdashboard_plugins_manager_setup(XfdashboardPluginsManager *self)
 		if(!_xfdashboard_plugins_manager_load_plugin(self, pluginID, &error))
 		{
 			/* Show error message */
-			g_warning(_("Could not load plugin '%s': %s"),
+			g_warning("Could not load plugin '%s': %s",
 						pluginID,
-						error ? error->message : _("Unknown error"));
+						error ? error->message : "Unknown error");
 
 			/* Release allocated resources */
 			if(error)

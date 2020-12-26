@@ -48,21 +48,14 @@ void xfdashboard_actor_class_init(XfdashboardActorClass *klass);
 void xfdashboard_actor_init(XfdashboardActor *self);
 void xfdashboard_actor_base_class_finalize(XfdashboardActorClass *klass);
 
-typedef enum
-{
-	XFDASHBOARD_ACTOR_ANIMATION_NONE=0,
-	XFDASHBOARD_ACTOR_ANIMATION_RUNNING=1 << 0,
-	XFDASHBOARD_ACTOR_ANIMATION_SKIP_DONE=1 << 1,
-} XfdashboardActorAnimationFlags;
-
 struct _XfdashboardActorPrivate
 {
 	/* Properties related */
-	gboolean				canFocus;
-	gchar					*effects;
+	gboolean						canFocus;
+	gchar							*effects;
 
-	gchar					*styleClasses;
-	gchar					*stylePseudoClasses;
+	gchar							*styleClasses;
+	gchar							*stylePseudoClasses;
 
 	/* Instance related */
 	gboolean						inDestruction;
@@ -79,6 +72,7 @@ struct _XfdashboardActorPrivate
 
 	ClutterActorBox					*allocationTrackBox;
 
+	gboolean						disallowAllocationAnimation;
 	gboolean						doAllocationAnimation;
 	XfdashboardAnimation			*allocationAnimation;
 	ClutterActorBox					*allocationInitialBox;
@@ -230,6 +224,9 @@ static void _xfdashboard_actor_first_time_created_animation_done(XfdashboardAnim
 
 	/* Mark completed first-time animation as removed */
 	priv->firstTimeMappedAnimation=NULL;
+
+	/* Allow allocation animation again */
+	priv->disallowAllocationAnimation=FALSE;
 }
 
 /* Actor was mapped or unmapped */
@@ -237,8 +234,8 @@ static void _xfdashboard_actor_on_mapped_changed(GObject *inObject,
 													GParamSpec *inSpec,
 													gpointer inUserData)
 {
-	XfdashboardActor			*self;
-	XfdashboardActorPrivate		*priv;
+	XfdashboardActor					*self;
+	XfdashboardActorPrivate				*priv;
 
 	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inObject));
 
@@ -256,33 +253,63 @@ static void _xfdashboard_actor_on_mapped_changed(GObject *inObject,
 		 */
 		if(!priv->firstTimeMapped)
 		{
+			XfdashboardAnimationValue	**initials;
+			XfdashboardAnimationValue	**finals;
+			ClutterActorBox				finalBox={ 0, };
+
 			g_assert(!priv->firstTimeMappedAnimation);
-
-			/* Lookup animation for create signal and if any found (i.e. has an ID),
-			 * run it.
-			 */
-			priv->firstTimeMappedAnimation=xfdashboard_animation_new(XFDASHBOARD_ACTOR(self), "created");
-			if(!priv->firstTimeMappedAnimation ||
-				!xfdashboard_animation_get_id(priv->firstTimeMappedAnimation) ||
-				xfdashboard_animation_is_empty(priv->firstTimeMappedAnimation))
-			{
-				/* Empty or invalid animation, so release allocated resources and return */
-				if(priv->firstTimeMappedAnimation) g_object_unref(priv->firstTimeMappedAnimation);
-				priv->firstTimeMappedAnimation=NULL;
-
-				return;
-			}
-
-			/* Start animation */
-			g_signal_connect_after(priv->firstTimeMappedAnimation, "animation-done", G_CALLBACK(_xfdashboard_actor_first_time_created_animation_done), self);
-			xfdashboard_animation_run(priv->firstTimeMappedAnimation);
-			XFDASHBOARD_DEBUG(self, ANIMATION,
-									"Found and starting animation '%s' for created signal at actor %s",
-									xfdashboard_animation_get_id(priv->firstTimeMappedAnimation),
-									G_OBJECT_TYPE_NAME(self));
 
 			/* Set flag that first-time visible happened at this actor */
 			priv->firstTimeMapped=TRUE;
+
+			/* If an animation for "created" signal exists, then set up animation */
+			if(xfdashboard_animation_has_animation(self, "created"))
+			{
+				/* Set up default initial values for animation */
+				initials=xfdashboard_animation_defaults_new(4,
+															"x", G_TYPE_FLOAT, 0.0f,
+															"y", G_TYPE_FLOAT, 0.0f,
+															"width", G_TYPE_FLOAT, 0.0f,
+															"height", G_TYPE_FLOAT, 0.0f);
+
+				/* Set up default final values for animation */
+				xfdashboard_actor_get_allocation_box(self, &finalBox);
+				finals=xfdashboard_animation_defaults_new(4,
+															"x", G_TYPE_FLOAT, finalBox.x1,
+															"y", G_TYPE_FLOAT, finalBox.y1,
+															"width", G_TYPE_FLOAT, clutter_actor_box_get_width(&finalBox),
+															"height", G_TYPE_FLOAT, clutter_actor_box_get_height(&finalBox));
+
+				/* Lookup animation for create signal and set up values for allocation */
+				priv->firstTimeMappedAnimation=xfdashboard_animation_new_with_values(self, "created", initials, finals);
+
+				/* Free default initial and final values */
+				xfdashboard_animation_defaults_free(initials);
+				xfdashboard_animation_defaults_free(finals);
+
+				/* Run animation if found */
+				if(!priv->firstTimeMappedAnimation ||
+					!xfdashboard_animation_get_id(priv->firstTimeMappedAnimation) ||
+					xfdashboard_animation_is_empty(priv->firstTimeMappedAnimation))
+				{
+					/* Empty or invalid animation, so release allocated resources and return */
+					if(priv->firstTimeMappedAnimation) g_object_unref(priv->firstTimeMappedAnimation);
+					priv->firstTimeMappedAnimation=NULL;
+
+					return;
+				}
+
+				/* Disallow allocation animation if not set in 'created' animation */
+				priv->disallowAllocationAnimation=TRUE;
+
+				/* Start animation */
+				g_signal_connect_after(priv->firstTimeMappedAnimation, "animation-done", G_CALLBACK(_xfdashboard_actor_first_time_created_animation_done), self);
+				xfdashboard_animation_run(priv->firstTimeMappedAnimation);
+				XFDASHBOARD_DEBUG(self, ANIMATION,
+										"Found and starting animation '%s' for created signal at actor %s",
+										xfdashboard_animation_get_id(priv->firstTimeMappedAnimation),
+										G_OBJECT_TYPE_NAME(self));
+			}
 		}
 	}
 }
@@ -734,7 +761,7 @@ static void _xfdashboard_actor_stylable_invalidate(XfdashboardStylable *inStylab
 		}
 			else
 			{
-				g_warning(_("Could not transform CSS string value for property '%s' to type %s of class %s"),
+				g_warning("Could not transform CSS string value for property '%s' to type %s of class %s",
 							styleName, g_type_name(G_PARAM_SPEC_VALUE_TYPE(realParamSpec)), G_OBJECT_CLASS_NAME(klass));
 			}
 
@@ -948,7 +975,7 @@ static XfdashboardAnimation* _xfdashboard_actor_add_animation(XfdashboardActor *
 	data=g_new0(XfdashboardActorAnimationEntry, 1);
 	if(!data)
 	{
-		g_critical(_("Cannot allocate memory for animation entry for animation '%s' with signal '%s'"),
+		g_critical("Cannot allocate memory for animation entry for animation '%s' with signal '%s'",
 					xfdashboard_animation_get_id(animation),
 					inAnimationSignal);
 
@@ -1099,13 +1126,21 @@ static void _xfdashboard_actor_on_allocation_changed(ClutterActor *inActor,
 	priv=self->priv;
 
 	/* Track allocation changes */
-	priv->allocationTrackBox->x1=inAllocationBox->x1;
-	priv->allocationTrackBox->x2=inAllocationBox->x2;
-	priv->allocationTrackBox->y1=inAllocationBox->y1;
-	priv->allocationTrackBox->y2=inAllocationBox->y2;
+	if(G_LIKELY(priv->allocationTrackBox))
+	{
+		priv->allocationTrackBox->x1=inAllocationBox->x1;
+		priv->allocationTrackBox->x2=inAllocationBox->x2;
+		priv->allocationTrackBox->y1=inAllocationBox->y1;
+		priv->allocationTrackBox->y2=inAllocationBox->y2;
+	}
+		else
+		{
+			priv->allocationTrackBox=clutter_actor_box_copy(inAllocationBox);
+		}
 
-	/* Check if allocation animation was requested explicitly */
-	if(priv->doAllocationAnimation)
+		/* Check if allocation animation was requested explicitly */
+	if(priv->doAllocationAnimation &&
+		!priv->disallowAllocationAnimation)
 	{
 		XfdashboardAnimation		*animation;
 		XfdashboardAnimationValue	**initials;
@@ -1169,12 +1204,12 @@ static void _xfdashboard_actor_on_allocation_changed(ClutterActor *inActor,
 		/* Free default initial and final values */
 		xfdashboard_animation_defaults_free(initials);
 		xfdashboard_animation_defaults_free(finals);
-
-		/* Unset flag indicating an allocation animation was requested,
-		 * as it was handled now.
-		 */
-		priv->doAllocationAnimation=FALSE;
 	}
+
+	/* Unset flag indicating an allocation animation was requested,
+	 * as it was handled now or prevented if disallowed.
+	 */
+	priv->doAllocationAnimation=FALSE;
 }
 
 /* Pointer left actor */
@@ -1578,16 +1613,16 @@ void xfdashboard_actor_class_init(XfdashboardActorClass *klass)
 	/* Define properties */
 	XfdashboardActorProperties[PROP_CAN_FOCUS]=
 		g_param_spec_boolean("can-focus",
-								_("Can focus"),
-								_("This flag indicates if this actor can be focused"),
+								"Can focus",
+								"This flag indicates if this actor can be focused",
 								FALSE,
 								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 	g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_CAN_FOCUS, XfdashboardActorProperties[PROP_CAN_FOCUS]);
 
 	XfdashboardActorProperties[PROP_EFFECTS]=
 		g_param_spec_string("effects",
-								_("Effects"),
-								_("List of space-separated strings with IDs of effects set at this actor"),
+								"Effects",
+								"List of space-separated strings with IDs of effects set at this actor",
 								NULL,
 								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 	g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_EFFECTS, XfdashboardActorProperties[PROP_EFFECTS]);
@@ -1627,10 +1662,11 @@ void xfdashboard_actor_init(XfdashboardActor *self)
 	priv->firstTimeMapped=FALSE;
 	priv->firstTimeMappedAnimation=NULL;
 	priv->animations=NULL;
+	priv->disallowAllocationAnimation=FALSE;
 	priv->doAllocationAnimation=FALSE;
 	priv->allocationAnimation=NULL;
 	priv->allocationInitialBox=NULL;
-	priv->allocationTrackBox=clutter_actor_box_new(0, 0, 0, 0);
+	priv->allocationTrackBox=NULL;
 
 	/* Connect signals */
 	g_signal_connect(self, "notify::mapped", G_CALLBACK(_xfdashboard_actor_on_mapped_changed), NULL);
@@ -1909,5 +1945,148 @@ void xfdashboard_actor_enable_allocation_animation_once(XfdashboardActor *self)
 		priv->allocationInitialBox=NULL;
 	}
 
+	if(G_UNLIKELY(!priv->allocationTrackBox))
+	{
+		priv->allocationTrackBox=clutter_actor_box_new(0.0f, 0.0f, 0.0f, 0.0f);
+	}
+
 	priv->allocationInitialBox=clutter_actor_box_copy(priv->allocationTrackBox);
+}
+
+/* Calling clutter_actor_get_allocation_box() is dangerous with animationa
+ * because it may modify the internal state of the position and size of
+ * an actor used for initial values for position and size at the animation
+ * to run. Therefore this safe function exists which returns the last allocation
+ * set to this actor.
+ */
+void xfdashboard_actor_get_allocation_box(XfdashboardActor *self, ClutterActorBox *outAllocationBox)
+{
+	XfdashboardActorPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(self));
+
+	priv=self->priv;
+
+	/* Get current allocation box from actor the unsafe way if tracked allocation box
+	 * must be initialized.
+	 */
+	if(G_UNLIKELY(!priv->allocationTrackBox))
+	{
+		priv->allocationTrackBox=clutter_actor_box_new(0.0f, 0.0f, 0.0f, 0.0f);
+		clutter_actor_get_allocation_box(CLUTTER_ACTOR(self), priv->allocationTrackBox);
+	}
+
+	/* Copy tracked allocation box to result */
+	if(G_LIKELY(outAllocationBox))
+	{
+		outAllocationBox->x1=priv->allocationTrackBox->x1;
+		outAllocationBox->x2=priv->allocationTrackBox->x2;
+		outAllocationBox->y1=priv->allocationTrackBox->y1;
+		outAllocationBox->y2=priv->allocationTrackBox->y2;
+	}
+}
+
+/* Destroys an actor but checks first if an animation should be played.
+ * If an animation for this actor exists, it will be played and after it
+ * has ended, it will be destroyed. If no animation exists, the actor will
+ * be destroyed immediately.
+ */
+static void _xfdashboard_actor_on_destroy_animation_done(XfdashboardAnimation *inAnimation,
+															gpointer inUserData)
+{
+	ClutterActor				*self;
+
+	g_return_if_fail(XFDASHBOARD_IS_ANIMATION(inAnimation));
+	g_return_if_fail(CLUTTER_IS_ACTOR(inUserData));
+
+	self=CLUTTER_ACTOR(inUserData);
+
+	/* Destroy animation has ended, so destroy actor now for real */
+	clutter_actor_destroy(self);
+}
+
+gboolean xfdashboard_actor_destroy(ClutterActor *self)
+{
+	XfdashboardAnimation		*animation;
+	gboolean					animationStarted;
+
+	g_return_val_if_fail(CLUTTER_IS_ACTOR(self), FALSE);
+
+	animation=NULL;
+	animationStarted=FALSE;
+
+	/* Check if an animation exists but only for actors derived from XfdashboardActor */
+	if(XFDASHBOARD_IS_ACTOR(self))
+	{
+		animation=xfdashboard_animation_new(XFDASHBOARD_ACTOR(self), "destroy");
+	}
+
+	if(animation &&
+		!xfdashboard_animation_is_empty(animation))
+	{
+		/* Connect signal to destroy actor when animation has ended */
+		g_signal_connect_after(animation,
+								"animation-done",
+								G_CALLBACK(_xfdashboard_actor_on_destroy_animation_done),
+								self);
+
+		/* Set CSS pseudo-class that this actor is going to be destroyed */
+		xfdashboard_stylable_add_pseudo_class(XFDASHBOARD_STYLABLE(self), "destroying");
+
+		/* Start destroy animation and set flag that animation was
+		 * found and started.
+		 */
+		xfdashboard_animation_run(animation);
+		animationStarted=TRUE;
+
+		/* Take extra reference to keep animation alive as it will be
+		 * unreferenced when cleaning allocated resources.
+		 */
+		g_object_ref(animation);
+	}
+		else
+		{
+			/* No animation exists so destroy actor immediately */
+			clutter_actor_destroy(self);
+		}
+
+	/* Clean allocated resources */
+	if(animation) g_object_unref(animation);
+
+	/* Return TRUE if animation was found and started or FALSE if no
+	 * animation was found and actor as destroyed immediately.
+	 */
+	return(animationStarted);
+}
+
+void xfdashboard_actor_destroy_all_children(ClutterActor *self)
+{
+	ClutterActorIter		iter;
+
+	g_return_if_fail(CLUTTER_IS_ACTOR(self));
+
+	/* Iterate through children and destroy them */
+	g_object_freeze_notify(G_OBJECT(self));
+
+	clutter_actor_iter_init(&iter, self);
+	while(clutter_actor_iter_next(&iter, NULL))
+	{
+		xfdashboard_actor_iter_destroy(&iter);
+	}
+
+	g_object_thaw_notify(G_OBJECT(self));
+}
+
+gboolean xfdashboard_actor_iter_destroy(ClutterActorIter *self)
+{
+	/* Do not know currently how to wrap this safely, so just call
+	 * clutter_actor_iter_destroy() and return FALSE as no animation
+	 * was found (because we did not check ;) ).
+	 */
+	clutter_actor_iter_destroy(self);
+
+	/* Return TRUE if animation was found and started or FALSE if no
+	 * animation was found and actor as destroyed immediately.
+	 */
+	return(FALSE);
 }
