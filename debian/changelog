@@ -1,3 +1,10 @@
+xfdashboard (0.8.1-0ubuntu1) devel; urgency=medium
+
+  * d/watch: Only track stable releases.
+  * New upstream version 0.8.1.
+
+ -- Unit 193 <unit193@ubuntu.com>  Tue, 16 Mar 2021 19:31:57 -0400
+
 xfdashboard (0.8.0-0ubuntu1) devel; urgency=medium
 
   * New upstream version 0.8.0.
