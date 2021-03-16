@@ -88,7 +88,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = data/appdata
+subdir = data/metainfo
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -144,8 +144,8 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(appdatadir)"
-DATA = $(appdata_DATA)
+am__installdirs = "$(DESTDIR)$(metainfodir)"
+DATA = $(metainfo_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 am__DIST_COMMON = $(srcdir)/Makefile.in
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -384,15 +384,15 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-appdatadir = $(datadir)/appdata
-appdata_DATA = $(appdata_in_files:.xml.in=.xml)
-appdata_in_files = xfdashboard.appdata.xml.in
+metainfodir = $(datadir)/metainfo
+metainfo_DATA = $(metainfo_in_files:.xml.in=.xml)
+metainfo_in_files = org.xfce.xfdashboard.metainfo.xml.in
 EXTRA_DIST = \
-        $(appdata_DATA) \
-        xfdashboard.appdata.xml.in
+        $(metainfo_DATA) \
+        org.xfce.xfdashboard.metainfo.xml.in
 
 DISTCLEANFILES = \
-        $(appdata_in_files:.xml.in=.xml)
+        $(metainfo_in_files:.xml.in=.xml)
 
 all: all-am
 
@@ -406,9 +406,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign data/appdata/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign data/metainfo/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign data/appdata/Makefile
+	  $(AUTOMAKE) --foreign data/metainfo/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -432,27 +432,27 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-appdataDATA: $(appdata_DATA)
+install-metainfoDATA: $(metainfo_DATA)
 	@$(NORMAL_INSTALL)
-	@list='$(appdata_DATA)'; test -n "$(appdatadir)" || list=; \
+	@list='$(metainfo_DATA)'; test -n "$(metainfodir)" || list=; \
 	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(appdatadir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(appdatadir)" || exit 1; \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(metainfodir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(metainfodir)" || exit 1; \
 	fi; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
 	done | $(am__base_list) | \
 	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(appdatadir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(appdatadir)" || exit $$?; \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(metainfodir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(metainfodir)" || exit $$?; \
 	done
 
-uninstall-appdataDATA:
+uninstall-metainfoDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(appdata_DATA)'; test -n "$(appdatadir)" || list=; \
+	@list='$(metainfo_DATA)'; test -n "$(metainfodir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(appdatadir)'; $(am__uninstall_files_from_dir)
+	dir='$(DESTDIR)$(metainfodir)'; $(am__uninstall_files_from_dir)
 tags TAGS:
 
 ctags CTAGS:
@@ -497,7 +497,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(appdatadir)"; do \
+	for dir in "$(DESTDIR)$(metainfodir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -551,7 +551,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-appdataDATA
+install-data-am: install-metainfoDATA
 
 install-dvi: install-dvi-am
 
@@ -595,22 +595,21 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-appdataDATA
+uninstall-am: uninstall-metainfoDATA
 
 .MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	cscopelist-am ctags-am distclean distclean-generic \
 	distclean-libtool distdir dvi dvi-am html html-am info info-am \
-	install install-am install-appdataDATA install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags-am uninstall \
-	uninstall-am uninstall-appdataDATA
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-metainfoDATA install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
+	ps ps-am tags-am uninstall uninstall-am uninstall-metainfoDATA
 
 .PRECIOUS: Makefile
 

@@ -53,5 +53,5 @@ Layout=xfdashboard.xml;xfdashboard-secondary.xml
 Effects=effects.xml
 Animations=animations.xml
 Author=lacios
-Version=0.7.91git.eb5530b
+Version=0.8.1git.ff012dd
 Screenshot=screenshot-xfdashboard-wine.png
