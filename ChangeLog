@@ -1,3 +1,63 @@
+commit 9bb4a9af6fdcf2ec2c1e05665b8b0483094b9d5c
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 4 13:12:58 2021 +0100
+
+    Bump version to 0.8.1
+
+commit 2e5874126d2eed1807cc86ed0c1a93f3d4271a26
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Dec 27 13:40:16 2020 +0100
+
+    Fix path in POTFILES.* (fix for issue #4)
+
+commit ff012dd0c489dc185bc43814185903ed49fb01cb
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Mar 3 12:45:56 2021 +0100
+
+    Fix releasing unreleased GIcon object at dispose function of XfdashboardLabel
+
+commit 5ed33770900cdd9d168198bfbed131ba6e66eed3
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Dec 27 13:38:20 2020 +0100
+
+    Dekstop files must match the new rDNS application name (org.xfce.xfdashboard) (fix for issue #4)
+
+commit 70a54efc231b5ee0605adf60c7b6a8f033ec167a
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Dec 27 13:31:13 2020 +0100
+
+    Missed a place which refers still to appdata instead of new metainfo subfolder (fix for issue #4)
+
+commit ff5297947ffe62d4944ef363394a3fc5dd633773
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Dec 27 13:29:26 2020 +0100
+
+    Rename subfolder appdata to metainfo and update ignore list for git (fix for issue #4)
+
+commit 8e4bc7a5200cf7a7bcdfc5032c76eeab25fbd33d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Dec 27 13:26:12 2020 +0100
+
+    Rename xfdashboard to more unique identifier org.xfce.xfdashboard which matches the rDNS for the application icon and install AppStream data to /usr/share/metainfo instead of /usr/share/appdata (fix for issue #4)
+
+commit 61f98d9394dee7b53bea1b510499c5349b3544b2
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Sun Dec 27 13:23:12 2020 +0100
+
+    Change AppInfo to match AppStream specification (fix for issue #4)
+
+commit 8d3a2728dac4fa71dca0cc493e66317ce2472ad0
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Thu Mar 4 12:58:36 2021 +0100
+
+    Post-release version bump to 0.8.1
+
+commit 3b6e7a1fae5b6850ffd2b1037496f731ddd6ef5d
+Author: Stephan Haller <nomad@froevel.de>
+Date:   Wed Dec 23 09:20:25 2020 +0100
+
+    Bump version to 0.8.0
+
 commit 9c6d3d3d944c676bd39edae3560603868a4ed5c3
 Author: ivmazurenko <ivmazurenko@yandex.ru>
 Date:   Thu Dec 10 00:46:53 2020 +0100

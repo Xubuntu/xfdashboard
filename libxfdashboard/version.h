@@ -65,7 +65,7 @@
  * linked against at application run time.
  * (e.g. in libxfdashboard version 0.7.1 this is 1.)
  */
-#define LIBXFDASHBOARD_MICRO_VERSION (0)
+#define LIBXFDASHBOARD_MICRO_VERSION (1)
 
 /**
  * LIBXFDASHBOARD_CHECK_VERSION:

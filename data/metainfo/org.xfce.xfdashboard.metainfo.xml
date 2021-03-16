@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-	<id>xfdashboard.desktop</id>
+	<id>org.xfce.xfdashboard.desktop</id>
 	<metadata_license>CC-BY-3.0</metadata_license>
 	<project_license>GPL-2.0+</project_license>
 	<name>xfdashboard</name>
@@ -81,7 +81,7 @@
 
 	<screenshots>
 		<screenshot type="default">
-			<image>http://docs.xfce.org/_media/apps/xfdashboard/starting-up.png</image>
+			<image>https://docs.xfce.org/_media/apps/xfdashboard/starting-up.png</image>
 		</screenshot>
 		<screenshot>
 			<caption>Browsing applications</caption>
@@ -109,7 +109,7 @@
 			<caption xml:lang="sv">Bläddra bland program</caption>
 			<caption xml:lang="tr">Uygulamalara göz atma</caption>
 			<caption xml:lang="zh_CN">浏览应用</caption>
-			<image>http://docs.xfce.org/_media/apps/xfdashboard/applications-view.png</image>
+			<image>https://docs.xfce.org/_media/apps/xfdashboard/applications-view.png</image>
 		</screenshot>
 		<screenshot>
 			<caption>Searching applications</caption>
@@ -138,14 +138,14 @@
 			<caption xml:lang="sv">Sök efter program</caption>
 			<caption xml:lang="tr">Uygulamaları arama</caption>
 			<caption xml:lang="zh_CN">搜索应用</caption>
-			<image>http://docs.xfce.org/_media/apps/xfdashboard/search-view.png</image>
+			<image>https://docs.xfce.org/_media/apps/xfdashboard/search-view.png</image>
 		</screenshot>
 	</screenshots>
 
 	<url type="homepage">http://docs.xfce.org/apps/xfdashboard/start/</url>
-	<url type="bugtracker">https://bugzilla.xfce.org</url>
+	<url type="bugtracker">https://gitlab.xfce.org/apps/xfdashboard/-/issues</url>
 	<url type="bugtracker">https://github.com/gmc-holle/xfdashboard/issues</url>
-	<url type="help">http://docs.xfce.org/apps/xfdashboard/manual</url>
+	<url type="help">https://docs.xfce.org/apps/xfdashboard/manual</url>
 
 	<project_group>XFCE</project_group>
 
@@ -154,6 +154,8 @@
 	<provides>
 		<binary>xfdashboard</binary>
 	</provides>
+
+	<launchable type="desktop-id">org.xfce.xfdashboard.desktop</launchable>
 
 	<kudos>
 		<kudo>HiDpiIcon</kudo>
@@ -169,9 +171,38 @@
 	</keywords>
 
 	<releases>
+		<release version="0.8.1" timestamp="1614859879">
+			<description>
+				<p>This stable version fixes a bug and replaces AppInfo with AppStream metainfo.</p>
+			</description>
+		</release>
 		<release version="0.8.0" timestamp="1608711235">
 			<description>
 				<p>This stable version introduces lots of new features like animations, pop-up menus, multiple backend and support for jumplists etc. It also includes lots of new and updated translations.</p>
+			</description>
+		</release>
+		<release version="0.6.1" timestamp="1482422594">
+			<description>
+				<p>This stable version fixes a bug setting the correct default applications at first use.</p>
+				<p xml:lang="bg">Тази стабилна версия коригира грешка при задаване на правилните приложения по подразбиране при ползване за първи път.</p>
+				<p xml:lang="da">Denne stabile version retter en fejl ved indstilling af de korrekte standardprogrammer første gang det bruges.</p>
+				<p xml:lang="de">Diese stabile Version behebt einen Fehler bei der Einstellung der korrekten Standardanwendungen bei der ersten Benutzung.</p>
+				<p xml:lang="es">Esta versión estable arregla un error configurando las aplicaciones por defecto correctas en el primer uso.</p>
+				<p xml:lang="fr">Cette version stable corrige un bogue définissant les applications par défaut correctes lors de la première utilisation.</p>
+				<p xml:lang="gl">Esta versión inestábel amaña un erro na configuración dos aplicativos predeterminados no primeiro uso.</p>
+				<p xml:lang="he">הגרסה היציבה הזו מתקנת באג הקובע את ישומי ברירת המחדל הנכונים בשימוש ראשון.</p>
+				<p xml:lang="id">Versi stabil ini memperbaiki sebuah kutu yang mengatur aplikasi bawaan yang tepat pada saat pertama kali digunakan.</p>
+				<p xml:lang="nb">Denne stabile utgivelsen fikser en feil ved valg av forvalgte programmer ved første bruk.</p>
+				<p xml:lang="nl">Deze stabiele versie repareert een fout inzake het instellen van de juiste standaardtoepassingen bij eerste gebruik.</p>
+				<p xml:lang="pl">Ta stabilna wersja naprawia błąd ustawienia prawidłowych programów domyślnych przy pierwszym użyciu.</p>
+				<p xml:lang="pt">Esta versão estável corrige um erro que define as aplicações padrão corretas na primeira utilização.</p>
+				<p xml:lang="pt_BR">Esta versão estável corrige um problema ao definir os aplicativos padrões corretos no primeiro uso.</p>
+				<p xml:lang="ru">Эта версия исправляет ошибку определения правильных приложений по умолчанию при первом использовании.</p>
+				<p xml:lang="sl">Ta stabilna različica popravi hrošč ob nastavljanju privzete aplikacije ob prvi rabi.</p>
+				<p xml:lang="sq">Ky version i qëndrueshëm ndreq një të metë në ujdisjen e aplikacioneve të sakta parazgjedhje gjatë përdorimit të parë fare.</p>
+				<p xml:lang="sv">Den här stabila versionen åtgärdar ett fel med att ställa in korrekta förvalda program vid första uppstart.</p>
+				<p xml:lang="tr">Bu kararlı sürüm, ilk kullanımda doğru öntanımlı uygulamaları ayarlayan hatayı düzeltir.</p>
+				<p xml:lang="zh_CN">此稳定版本修复了在首次使用时设置正确的默认应用程序的错误。</p>
 			</description>
 		</release>
 		<release version="0.6.0" timestamp="1463772864">

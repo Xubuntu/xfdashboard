@@ -14,8 +14,8 @@ dnl *** Version information ***
 dnl ***************************
 m4_define([xfdashboard_version_major], [0])
 m4_define([xfdashboard_version_minor], [8])
-m4_define([xfdashboard_version_micro], [0])
-m4_define([xfdashboard_version_build], [9c6d3d3])
+m4_define([xfdashboard_version_micro], [1])
+m4_define([xfdashboard_version_build], [9bb4a9a])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -127,7 +127,7 @@ AC_SUBST(LIBM)
 dnl ******************************
 dnl *** Check for i18n support ***
 dnl ******************************
-XDT_I18N([ca el ie it_IT ja kk ru_RU sv_SE pl sr bg lt sq de gl nl da es id nb sl tr zh_CN fr he pt sv pt_BR ru ])
+XDT_I18N([])
 
 dnl *******************************
 dnl *** Check for X11 installed ***
@@ -310,7 +310,7 @@ AC_SUBST(XFDASHBOARD_REQUIRES)
 AC_OUTPUT([
 Makefile
 data/Makefile
-data/appdata/Makefile
+data/metainfo/Makefile
 data/data/Makefile
 data/icons/Makefile
 data/icons/16x16/Makefile
