@@ -6,7 +6,7 @@
  *                        within versions. We only need to use #ifdefs in
  *                        window tracker object and nowhere else in the code.
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #endif
 
 #include <glib-object.h>
+#include <clutter/x11/clutter-x11.h>
 
 #define WNCK_I_KNOW_THIS_IS_UNSTABLE
 #include <libwnck/libwnck.h>

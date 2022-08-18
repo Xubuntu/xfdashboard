@@ -348,7 +348,81 @@ _xfdashboard_marshal_VOID__STRING_BOOLEAN (GClosure     *closure,
             data2);
 }
 
-/* BOOLEAN:OBJECT (marshal.list:9) */
+/* VOID:STRING,PARAM (marshal.list:9) */
+void
+_xfdashboard_marshal_VOID__STRING_PARAM (GClosure     *closure,
+                                         GValue       *return_value G_GNUC_UNUSED,
+                                         guint         n_param_values,
+                                         const GValue *param_values,
+                                         gpointer      invocation_hint G_GNUC_UNUSED,
+                                         gpointer      marshal_data)
+{
+  typedef void (*GMarshalFunc_VOID__STRING_PARAM) (gpointer data1,
+                                                   gpointer arg1,
+                                                   gpointer arg2,
+                                                   gpointer data2);
+  GCClosure *cc = (GCClosure *) closure;
+  gpointer data1, data2;
+  GMarshalFunc_VOID__STRING_PARAM callback;
+
+  g_return_if_fail (n_param_values == 3);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_VOID__STRING_PARAM) (marshal_data ? marshal_data : cc->callback);
+
+  callback (data1,
+            g_marshal_value_peek_string (param_values + 1),
+            g_marshal_value_peek_param (param_values + 2),
+            data2);
+}
+
+/* BOOLEAN:VOID (marshal.list:10) */
+void
+_xfdashboard_marshal_BOOLEAN__VOID (GClosure     *closure,
+                                    GValue       *return_value,
+                                    guint         n_param_values,
+                                    const GValue *param_values,
+                                    gpointer      invocation_hint G_GNUC_UNUSED,
+                                    gpointer      marshal_data)
+{
+  typedef gboolean (*GMarshalFunc_BOOLEAN__VOID) (gpointer data1,
+                                                  gpointer data2);
+  GCClosure *cc = (GCClosure *) closure;
+  gpointer data1, data2;
+  GMarshalFunc_BOOLEAN__VOID callback;
+  gboolean v_return;
+
+  g_return_if_fail (return_value != NULL);
+  g_return_if_fail (n_param_values == 1);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_BOOLEAN__VOID) (marshal_data ? marshal_data : cc->callback);
+
+  v_return = callback (data1,
+                       data2);
+
+  g_value_set_boolean (return_value, v_return);
+}
+
+/* BOOLEAN:OBJECT (marshal.list:11) */
 void
 _xfdashboard_marshal_BOOLEAN__OBJECT (GClosure     *closure,
                                       GValue       *return_value,
@@ -387,7 +461,7 @@ _xfdashboard_marshal_BOOLEAN__OBJECT (GClosure     *closure,
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:OBJECT,ENUM (marshal.list:10) */
+/* BOOLEAN:OBJECT,ENUM (marshal.list:12) */
 void
 _xfdashboard_marshal_BOOLEAN__OBJECT_ENUM (GClosure     *closure,
                                            GValue       *return_value,
@@ -428,7 +502,7 @@ _xfdashboard_marshal_BOOLEAN__OBJECT_ENUM (GClosure     *closure,
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:OBJECT,FLOAT,FLOAT (marshal.list:11) */
+/* BOOLEAN:OBJECT,FLOAT,FLOAT (marshal.list:13) */
 void
 _xfdashboard_marshal_BOOLEAN__OBJECT_FLOAT_FLOAT (GClosure     *closure,
                                                   GValue       *return_value,
@@ -471,7 +545,7 @@ _xfdashboard_marshal_BOOLEAN__OBJECT_FLOAT_FLOAT (GClosure     *closure,
   g_value_set_boolean (return_value, v_return);
 }
 
-/* BOOLEAN:OBJECT,STRING,BOXED (marshal.list:12) */
+/* BOOLEAN:OBJECT,STRING,BOXED (marshal.list:14) */
 void
 _xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED (GClosure     *closure,
                                                    GValue       *return_value,
@@ -514,7 +588,52 @@ _xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED (GClosure     *closure,
   g_value_set_boolean (return_value, v_return);
 }
 
-/* OBJECT:VOID (marshal.list:13) */
+/* BOOLEAN:OBJECT,STRING,STRING,BOXED (marshal.list:15) */
+void
+_xfdashboard_marshal_BOOLEAN__OBJECT_STRING_STRING_BOXED (GClosure     *closure,
+                                                          GValue       *return_value,
+                                                          guint         n_param_values,
+                                                          const GValue *param_values,
+                                                          gpointer      invocation_hint G_GNUC_UNUSED,
+                                                          gpointer      marshal_data)
+{
+  typedef gboolean (*GMarshalFunc_BOOLEAN__OBJECT_STRING_STRING_BOXED) (gpointer data1,
+                                                                        gpointer arg1,
+                                                                        gpointer arg2,
+                                                                        gpointer arg3,
+                                                                        gpointer arg4,
+                                                                        gpointer data2);
+  GCClosure *cc = (GCClosure *) closure;
+  gpointer data1, data2;
+  GMarshalFunc_BOOLEAN__OBJECT_STRING_STRING_BOXED callback;
+  gboolean v_return;
+
+  g_return_if_fail (return_value != NULL);
+  g_return_if_fail (n_param_values == 5);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_BOOLEAN__OBJECT_STRING_STRING_BOXED) (marshal_data ? marshal_data : cc->callback);
+
+  v_return = callback (data1,
+                       g_marshal_value_peek_object (param_values + 1),
+                       g_marshal_value_peek_string (param_values + 2),
+                       g_marshal_value_peek_string (param_values + 3),
+                       g_marshal_value_peek_boxed (param_values + 4),
+                       data2);
+
+  g_value_set_boolean (return_value, v_return);
+}
+
+/* OBJECT:VOID (marshal.list:16) */
 void
 _xfdashboard_marshal_OBJECT__VOID (GClosure     *closure,
                                    GValue       *return_value,

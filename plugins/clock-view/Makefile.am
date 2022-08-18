@@ -7,7 +7,8 @@ AM_CPPFLAGS = \
 	-DG_LOG_DOMAIN=\"xfdashboard-plugin-clock_view\" \
 	-DLIBEXECDIR=\"$(libexecdir)\" \
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\" \
-	-DPLUGIN_ID=\"$(PLUGIN_ID)\"
+	-DPLUGIN_ID=\"$(PLUGIN_ID)\" \
+	$(XFDASHBOARD_DEBUG_CFLAGS)
 
 plugin_LTLIBRARIES = \
 	clock-view.la
@@ -23,7 +24,6 @@ clock_view_la_CFLAGS = \
 	$(LIBXFCE4UTIL_CFLAGS) \
 	$(GTK_CFLAGS) \
 	$(CLUTTER_CFLAGS) \
-	$(LIBXFCONF_CFLAGS) \
 	$(GARCON_CFLAGS) \
 	$(PLATFORM_CFLAGS)
 
@@ -40,7 +40,6 @@ clock_view_la_LIBADD = \
 	$(LIBXFCE4UTIL_LIBS) \
 	$(GTK_LIBS) \
 	$(CLUTTER_LIBS) \
-	$(LIBXFCONF_LIBS) \
 	$(GARCON_LIBS) \
 	$(top_builddir)/libxfdashboard/libxfdashboard.la
 

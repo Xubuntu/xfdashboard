@@ -32,7 +32,7 @@
 		</screenshot>
 	</screenshots>
 
-	<url type="homepage">http://docs.xfce.org/apps/xfdashboard/start/</url>
+	<url type="homepage">https://docs.xfce.org/apps/xfdashboard/start/</url>
 	<url type="bugtracker">https://gitlab.xfce.org/apps/xfdashboard/-/issues</url>
 	<url type="bugtracker">https://github.com/gmc-holle/xfdashboard/issues</url>
 	<url type="help">https://docs.xfce.org/apps/xfdashboard/manual</url>
@@ -61,6 +61,74 @@
 	</keywords>
 
 	<releases>
+		<release version="1.0.0" timestamp="1660301987">
+			<description>
+				<_p>This stable release is the first major one :)
+				</_p>
+			</description>
+		</release>
+		<release version="0.9.91" timestamp="1657872321">
+			<description>
+				<_p>This release candidate adds a new last-minute
+				feature with adding new actions for key binding
+				as weill as lots of bug fixes.
+				</_p>
+			</description>
+		</release>
+		<release version="0.9.90" timestamp="1646385254">
+			<description>
+				<_p>This release candidate adds a new property
+				"visibility" to all actors and fixes compiler
+				warnings.
+				</_p>
+			</description>
+		</release>
+		<release version="0.9.5" timestamp="1633152304">
+			<description>
+				<_p>This unstable development version fixes the
+				mode to run in background.
+				</_p>
+			</description>
+		</release>
+		<release version="0.9.4" timestamp="1632293693">
+			<description>
+				<_p>This unstable development version introduces
+				a new plugin to pin windows on secondary monitors
+				automatically.
+				</_p>
+			</description>
+		</release>
+		<release version="0.9.3" timestamp="1619428997">
+			<description>
+				<_p>This unstable development version improves window
+				placement and a new search plugin looking for matches
+				against the recently used documents.
+				</_p>
+			</description>
+		</release>
+		<release version="0.9.2" timestamp="1617869265">
+			<description>
+				<_p>This unstable development version completes gradients
+				with linear gradients for outline and background filling.
+				</_p>
+			</description>
+		</release>
+		<release version="0.9.1" timestamp="1616140047">
+			<description>
+				<_p>This unstable development version introduces completes
+				turning libxfdashboard into a real library and introduces
+				path gradients for outlines.
+				</_p>
+			</description>
+		</release>
+		<release version="0.9.0" timestamp="1614942988">
+			<description>
+				<_p>This unstable development version introduces nothing
+				user visible but begin moving libxfdashboard into a real
+				library.
+				</_p>
+			</description>
+		</release>
 		<release version="0.8.1" timestamp="1614859879">
 			<description>
 				<_p>This stable version fixes a bug and replaces AppInfo

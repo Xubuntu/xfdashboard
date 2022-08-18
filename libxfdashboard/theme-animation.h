@@ -1,7 +1,7 @@
 /*
  * theme-animation: A theme used for building animations by XML files
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,15 +80,29 @@ struct _XfdashboardThemeAnimationClass
 };
 
 /* Errors */
+/**
+ * XFDASHBOARD_THEME_ANIMATION_ERROR:
+ *
+ * Error domain for theme animation errors.
+ * Errors in this domain will be from the #XfdashboardThemeAnimationError enumeration.
+ */
 #define XFDASHBOARD_THEME_ANIMATION_ERROR				(xfdashboard_theme_animation_error_quark())
 
 GQuark xfdashboard_theme_animation_error_quark(void);
 
+/**
+ * XfdashboardThemeAnimationError:
+ * @XFDASHBOARD_THEME_ANIMATION_ERROR_ERROR: A general theme animation error
+ * @XFDASHBOARD_THEME_ANIMATION_ERROR_MALFORMED: The XML of theme animation is
+ *   malformed
+ *
+ * Error codes returned by loading theme animations.
+ */
 typedef enum /*< prefix=XFDASHBOARD_THEME_ANIMATION_ERROR >*/
 {
 	XFDASHBOARD_THEME_ANIMATION_ERROR_ERROR,
 	XFDASHBOARD_THEME_ANIMATION_ERROR_MALFORMED,
-} XfdashboardThemeAnimationErrorEnum;
+} XfdashboardThemeAnimationError;
 
 /* Public API */
 GType xfdashboard_theme_animation_get_type(void) G_GNUC_CONST;
@@ -101,15 +115,9 @@ gboolean xfdashboard_theme_animation_add_file(XfdashboardThemeAnimation *self,
 
 XfdashboardAnimation* xfdashboard_theme_animation_create(XfdashboardThemeAnimation *self,
 															XfdashboardActor *inSender,
-															const gchar *inSignal,
+															const gchar *inID,
 															XfdashboardAnimationValue **inDefaultInitialValues,
-															XfdashboardAnimationValue **inDefaultFinalValuess);
-
-XfdashboardAnimation* xfdashboard_theme_animation_create_by_id(XfdashboardThemeAnimation *self,
-																XfdashboardActor *inSender,
-																const gchar *inID,
-																XfdashboardAnimationValue **inDefaultInitialValues,
-																XfdashboardAnimationValue **inDefaultFinalValues);
+															XfdashboardAnimationValue **inDefaultFinalValues);
 
 gchar* xfdashboard_theme_animation_lookup_id(XfdashboardThemeAnimation *self,
 															XfdashboardActor *inSender,

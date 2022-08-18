@@ -2,7 +2,7 @@
  * applications-search-provider: Search provider for searching installed
  *                               applications
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
  * 
  */
 
+#undef ENABLE_STATISTICS_FILE
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -34,7 +36,7 @@
 
 #include <libxfdashboard/application-database.h>
 #include <libxfdashboard/application-button.h>
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/drag-action.h>
 #include <libxfdashboard/click-action.h>
 #include <libxfdashboard/popup-menu.h>
@@ -60,8 +62,7 @@ struct _XfdashboardApplicationsSearchProviderPrivate
 
 	GList											*allApps;
 
-	XfconfChannel									*xfconfChannel;
-	guint											xfconfSortModeBindingID;
+	GBinding										*sortModeBinding;
 	XfdashboardApplicationsSearchProviderSortMode	currentSortMode;
 };
 
@@ -82,14 +83,7 @@ enum
 static GParamSpec* XfdashboardApplicationsSearchProviderProperties[PROP_LAST]={ 0, };
 
 /* IMPLEMENTATION: Private variables and methods */
-#define SORT_MODE_XFCONF_PROP													"/components/applications-search-provider/sort-mode"
-
 #define DEFAULT_DELIMITERS														"\t\n\r "
-
-#define XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_FILE				"applications-search-provider-statistics.ini"
-#define XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_ENTRIES_GROUP		"Entries"
-#define XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_ENTRIES_COUNT		"Count"
-#define XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_USED_COUNTER_GROUP	"Used Counters"
 
 typedef struct _XfdashboardApplicationsSearchProviderGlobal			XfdashboardApplicationsSearchProviderGlobal;
 struct _XfdashboardApplicationsSearchProviderGlobal
@@ -103,6 +97,14 @@ struct _XfdashboardApplicationsSearchProviderGlobal
 
 	guint								maxUsedCounter;
 };
+
+#ifdef ENABLE_STATISTICS_FILE
+
+#define XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_FILE				"applications-search-provider-statistics.ini"
+#define XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_ENTRIES_GROUP		"Entries"
+#define XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_ENTRIES_COUNT		"Count"
+#define XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_USED_COUNTER_GROUP	"Used Counters"
+
 
 G_LOCK_DEFINE_STATIC(_xfdashboard_applications_search_provider_statistics_lock);
 XfdashboardApplicationsSearchProviderGlobal		_xfdashboard_applications_search_provider_statistics={0, };
@@ -174,7 +176,7 @@ static XfdashboardApplicationsSearchProviderStatistics* _xfdashboard_application
 }
 
 /* An application was launched successfully */
-static void _xfdashboard_applications_search_provider_on_application_launched(XfdashboardApplication *inApplication,
+static void _xfdashboard_applications_search_provider_on_application_launched(XfdashboardCore *inCore,
 																				GAppInfo *inAppInfo,
 																				gpointer inUserData)
 {
@@ -364,11 +366,19 @@ static gboolean _xfdashboard_applications_search_provider_load_statistics(Xfdash
 	/* Get path to statistics file to load statistics from */
 	if(!_xfdashboard_applications_search_provider_statistics.filename)
 	{
-		_xfdashboard_applications_search_provider_statistics.filename=
-			g_build_filename(g_get_user_data_dir(),
-								"xfdashboard",
-								XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_FILE,
-								NULL);
+		XfdashboardSettings									*settings;
+		const gchar											*dataPath;
+
+		settings=xfdashboard_core_get_settings(NULL);
+		dataPath=xfdashboard_settings_get_data_path(settings);
+
+		if(dataPath)
+		{
+			_xfdashboard_applications_search_provider_statistics.filename=
+				g_build_filename(dataPath,
+									XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_STATISTICS_FILE,
+									NULL);
+		}
 
 		if(!_xfdashboard_applications_search_provider_statistics.filename)
 		{
@@ -531,7 +541,7 @@ static gboolean _xfdashboard_applications_search_provider_load_statistics(Xfdash
 /* Destroy statistics for this search provider */
 static void _xfdashboard_applications_search_provider_destroy_statistics(void)
 {
-	XfdashboardApplication			*application;
+	XfdashboardCore					*core;
 	GError							*error;
 
 	error=NULL;
@@ -542,20 +552,20 @@ static void _xfdashboard_applications_search_provider_destroy_statistics(void)
 	/* Lock for thread-safety */
 	G_LOCK(_xfdashboard_applications_search_provider_statistics_lock);
 
-	/* Get application instance */
-	application=xfdashboard_application_get_default();
+	/* Get core instance */
+	core=xfdashboard_core_get_default();
 
-	/* Disconnect application "shutdown" signal handler */
+	/* Disconnect core "shutdown" signal handler */
 	if(_xfdashboard_applications_search_provider_statistics.shutdownSignalID)
 	{
-		g_signal_handler_disconnect(application, _xfdashboard_applications_search_provider_statistics.shutdownSignalID);
+		g_signal_handler_disconnect(core, _xfdashboard_applications_search_provider_statistics.shutdownSignalID);
 		_xfdashboard_applications_search_provider_statistics.shutdownSignalID=0;
 	}
 
-	/* Disconnect application "application-launched" signal handler */
+	/* Disconnect core "application-launched" signal handler */
 	if(_xfdashboard_applications_search_provider_statistics.applicationLaunchedSignalID)
 	{
-		g_signal_handler_disconnect(application, _xfdashboard_applications_search_provider_statistics.applicationLaunchedSignalID);
+		g_signal_handler_disconnect(core, _xfdashboard_applications_search_provider_statistics.applicationLaunchedSignalID);
 		_xfdashboard_applications_search_provider_statistics.applicationLaunchedSignalID=0;
 	}
 
@@ -590,7 +600,7 @@ static void _xfdashboard_applications_search_provider_destroy_statistics(void)
 /* Create and load statistics for this search provider if not done already */
 static void _xfdashboard_applications_search_provider_create_statistics(XfdashboardApplicationsSearchProvider *self)
 {
-	XfdashboardApplication			*application;
+	XfdashboardCore					*core;
 	GError							*error;
 
 	g_return_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(self));
@@ -650,19 +660,19 @@ static void _xfdashboard_applications_search_provider_create_statistics(Xfdashbo
 		return;
 	}
 
-	/* Get application instance */
-	application=xfdashboard_application_get_default();
+	/* Get core instance */
+	core=xfdashboard_core_get_default();
 
-	/* Connect to "shutdown" signal of application to clean up statistics */
+	/* Connect to "shutdown" signal of core to clean up statistics */
 	_xfdashboard_applications_search_provider_statistics.shutdownSignalID=
-		g_signal_connect(application,
-							"shutdown-final",
+		g_signal_connect(core,
+							"shutdown",
 							G_CALLBACK(_xfdashboard_applications_search_provider_destroy_statistics),
 							NULL);
 
-	/* Connect to "application-launched" signal of application to track app launches */
+	/* Connect to "application-launched" signal of core to track app launches */
 	_xfdashboard_applications_search_provider_statistics.applicationLaunchedSignalID=
-		g_signal_connect(application,
+		g_signal_connect(core,
 							"application-launched",
 							G_CALLBACK(_xfdashboard_applications_search_provider_on_application_launched),
 							NULL);
@@ -670,6 +680,7 @@ static void _xfdashboard_applications_search_provider_create_statistics(Xfdashbo
 	/* Unlock for thread-safety */
 	G_UNLOCK(_xfdashboard_applications_search_provider_statistics_lock);
 }
+#endif
 
 /* An application was added to database */
 static void _xfdashboard_applications_search_provider_on_application_added(XfdashboardApplicationsSearchProvider *self,
@@ -735,7 +746,7 @@ static void _xfdashboard_applications_search_provider_on_popup_menu_item_launch(
 	if(gicon) iconName=g_icon_to_string(gicon);
 
 	/* Check if we should launch that application or to open a new window */
-	appTracker=xfdashboard_application_tracker_get_default();
+	appTracker=xfdashboard_core_get_application_tracker(NULL);
 	if(!xfdashboard_application_tracker_is_running_by_app_info(appTracker, appInfo))
 	{
 		GAppLaunchContext			*context;
@@ -768,10 +779,10 @@ static void _xfdashboard_applications_search_provider_on_popup_menu_item_launch(
 									g_app_info_get_display_name(appInfo));
 
 				/* Emit signal for successful application launch */
-				g_signal_emit_by_name(xfdashboard_application_get_default(), "application-launched", appInfo);
+				g_signal_emit_by_name(xfdashboard_core_get_default(), "application-launched", appInfo);
 
 				/* Quit application */
-				xfdashboard_application_suspend_or_quit(NULL);
+				xfdashboard_core_quit(NULL);
 			}
 
 		/* Release allocated resources */
@@ -831,7 +842,7 @@ static void _xfdashboard_applications_search_provider_on_popup_menu(XfdashboardA
 		}
 
 		/* Add menu item to launch application if it is not running */
-		appTracker=xfdashboard_application_tracker_get_default();
+		appTracker=xfdashboard_core_get_application_tracker(NULL);
 		if(!xfdashboard_application_tracker_is_running_by_app_info(appTracker, appInfo))
 		{
 			menuItem=xfdashboard_popup_menu_item_button_new();
@@ -928,15 +939,15 @@ static gfloat _xfdashboard_applications_search_provider_score(XfdashboardApplica
 																gchar **inSearchTerms,
 																GAppInfo *inAppInfo)
 {
-	XfdashboardApplicationsSearchProviderPrivate		*priv;
-	gchar												*title;
-	gchar												*description;
-	GList												*keywords;
-	const gchar											*command;
-	const gchar											*value;
-	gint												matchesFound, matchesExpected;
-	gfloat												pointsSearch;
-	gfloat												score;
+	XfdashboardApplicationsSearchProviderPrivate			*priv;
+	gchar													*title;
+	gchar													*description;
+	GList													*keywords;
+	const gchar												*command;
+	const gchar												*value;
+	gint													matchesFound, matchesExpected;
+	gfloat													pointsSearch;
+	gfloat													score;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(self), -1.0f);
 	g_return_val_if_fail(G_IS_APP_INFO(inAppInfo), -1.0f);
@@ -979,8 +990,8 @@ static gfloat _xfdashboard_applications_search_provider_score(XfdashboardApplica
 
 	if(XFDASHBOARD_IS_DESKTOP_APP_INFO(inAppInfo))
 	{
-		GList											*appKeywords;
-		GList											*iter;
+		const GList											*appKeywords;
+		const GList											*iter;
 
 		appKeywords=xfdashboard_desktop_app_info_get_keywords(XFDASHBOARD_DESKTOP_APP_INFO(inAppInfo));
 		for(iter=appKeywords; iter; iter=g_list_next(iter))
@@ -993,9 +1004,9 @@ static gfloat _xfdashboard_applications_search_provider_score(XfdashboardApplica
 	pointsSearch=0.0f;
 	while(*inSearchTerms)
 	{
-		gboolean										termMatch;
-		gchar											*commandPos;
-		gfloat											pointsTerm;
+		gboolean											termMatch;
+		gchar												*commandPos;
+		gfloat												pointsTerm;
 
 		/* Reset "found" indicator and score of current search term */
 		termMatch=FALSE;
@@ -1060,9 +1071,8 @@ static gfloat _xfdashboard_applications_search_provider_score(XfdashboardApplica
 	 */
 	if(matchesFound>=matchesExpected)
 	{
-		gfloat											currentPoints;
-		gfloat											maxPoints;
-		XfdashboardApplicationsSearchProviderStatistics	*stats;
+		gfloat												currentPoints;
+		gfloat												maxPoints;
 
 		currentPoints=0.0f;
 		maxPoints=0.0f;
@@ -1076,17 +1086,21 @@ static gfloat _xfdashboard_applications_search_provider_score(XfdashboardApplica
 			maxPoints+=matchesExpected*1.0f;
 		}
 
+#ifdef ENABLE_STATISTICS_FILE
 		/* If used counter should be taken into calculation add the highest number
 		 * of any application to the highest points possible and also add the number
 		 * of launches of this application to the total points we got so far.
 		 */
 		if(priv->currentSortMode & XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_MOST_USED)
 		{
+			XfdashboardApplicationsSearchProviderStatistics	*stats;
+
 			maxPoints+=(_xfdashboard_applications_search_provider_statistics.maxUsedCounter*1.0f);
 
 			stats=_xfdashboard_applications_search_provider_statistics_get(g_app_info_get_id(inAppInfo));
 			if(stats) currentPoints+=(stats->usedCounter*1.0f);
 		}
+#endif
 
 		/* Calculate score but if maximum points is still zero we should do a simple
 		 * match by setting score to 1.
@@ -1165,8 +1179,10 @@ static void _xfdashboard_applications_search_provider_initialize(XfdashboardSear
 {
 	g_return_if_fail(XFDASHBOARD_IS_APPLICATIONS_SEARCH_PROVIDER(inProvider));
 
+#ifdef ENABLE_STATISTICS_FILE
 	/* Create and load statistics hash-table (will only be done once) */
 	_xfdashboard_applications_search_provider_create_statistics(XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER(inProvider));
+#endif
 }
 
 /* Get display name for this search provider */
@@ -1387,15 +1403,10 @@ static void _xfdashboard_applications_search_provider_dispose(GObject *inObject)
 		priv->allApps=NULL;
 	}
 
-	if(priv->xfconfSortModeBindingID)
+	if(priv->sortModeBinding)
 	{
-		xfconf_g_property_unbind(priv->xfconfSortModeBindingID);
-		priv->xfconfSortModeBindingID=0;
-	}
-
-	if(priv->xfconfChannel)
-	{
-		priv->xfconfChannel=NULL;
+		g_object_unref(priv->sortModeBinding);
+		priv->sortModeBinding=NULL;
 	}
 
 	/* Call parent's class dispose method */
@@ -1481,16 +1492,16 @@ static void xfdashboard_applications_search_provider_class_init(XfdashboardAppli
 static void xfdashboard_applications_search_provider_init(XfdashboardApplicationsSearchProvider *self)
 {
 	XfdashboardApplicationsSearchProviderPrivate	*priv;
+	XfdashboardSettings								*settings;
 
 	self->priv=priv=xfdashboard_applications_search_provider_get_instance_private(self);
 
 	/* Set up default values */
-	priv->xfconfChannel=xfdashboard_application_get_xfconf_channel(NULL);
 	priv->currentSortMode=XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_NONE;
 	priv->nextSortMode=XFDASHBOARD_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE_NONE;
 
 	/* Get application database */
-	priv->appDB=xfdashboard_application_database_get_default();
+	priv->appDB=xfdashboard_core_get_application_database(NULL);
 	priv->applicationAddedID=g_signal_connect_swapped(priv->appDB,
 														"application-added",
 														G_CALLBACK(_xfdashboard_applications_search_provider_on_application_added),
@@ -1503,13 +1514,14 @@ static void xfdashboard_applications_search_provider_init(XfdashboardApplication
 	/* Get list of all installed applications */
 	priv->allApps=xfdashboard_application_database_get_all_applications(priv->appDB);
 
-	/* Bind to xfconf to react on changes */
-	priv->xfconfSortModeBindingID=
-		xfconf_g_property_bind(priv->xfconfChannel,
-								SORT_MODE_XFCONF_PROP,
-								G_TYPE_UINT,
+	/* Bind to settings property to react on changes */
+	settings=xfdashboard_core_get_settings(NULL);
+	priv->sortModeBinding=
+		g_object_bind_property(settings,
+								"applications-search-sort-mode",
 								self,
-								"sort-mode");
+								"sort-mode",
+								G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
 }
 
 /* IMPLEMENTATION: Public API */

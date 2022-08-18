@@ -4,7 +4,7 @@
 /*
  * enums: Definitions of enumerations and flags used in GObject objects
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,10 @@
 
 G_BEGIN_DECLS
 
+/* enumerations from "animation.h" */
+GType xfdashboard_animation_create_flags_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_ANIMATION_CREATE_FLAGS	(xfdashboard_animation_create_flags_get_type())
+
 /* enumerations from "applications-search-provider.h" */
 GType xfdashboard_applications_search_provider_sort_mode_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_APPLICATIONS_SEARCH_PROVIDER_SORT_MODE	(xfdashboard_applications_search_provider_sort_mode_get_type())
@@ -46,6 +50,14 @@ GType xfdashboard_binding_flags_get_type(void) G_GNUC_CONST;
 /* enumerations from "bindings-pool.h" */
 GType xfdashboard_bindings_pool_error_enum_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_BINDINGS_POOL_ERROR_ENUM	(xfdashboard_bindings_pool_error_enum_get_type())
+
+/* enumerations from "core.h" */
+GType xfdashboard_core_error_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_CORE_ERROR	(xfdashboard_core_error_get_type())
+
+/* enumerations from "gradient-color.h" */
+GType xfdashboard_gradient_type_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_GRADIENT_TYPE	(xfdashboard_gradient_type_get_type())
 
 /* enumerations from "image-content.h" */
 GType xfdashboard_image_content_loading_state_get_type(void) G_GNUC_CONST;
@@ -66,26 +78,26 @@ GType xfdashboard_plugin_error_enum_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_PLUGIN_ERROR_ENUM	(xfdashboard_plugin_error_enum_get_type())
 
 /* enumerations from "theme-animation.h" */
-GType xfdashboard_theme_animation_error_enum_get_type(void) G_GNUC_CONST;
-#define XFDASHBOARD_TYPE_THEME_ANIMATION_ERROR_ENUM	(xfdashboard_theme_animation_error_enum_get_type())
+GType xfdashboard_theme_animation_error_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_THEME_ANIMATION_ERROR	(xfdashboard_theme_animation_error_get_type())
 
 /* enumerations from "theme-css.h" */
-GType xfdashboard_theme_css_error_enum_get_type(void) G_GNUC_CONST;
-#define XFDASHBOARD_TYPE_THEME_CSS_ERROR_ENUM	(xfdashboard_theme_css_error_enum_get_type())
+GType xfdashboard_theme_css_error_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_THEME_CSS_ERROR	(xfdashboard_theme_css_error_get_type())
 
 /* enumerations from "theme-effects.h" */
-GType xfdashboard_theme_effects_error_enum_get_type(void) G_GNUC_CONST;
-#define XFDASHBOARD_TYPE_THEME_EFFECTS_ERROR_ENUM	(xfdashboard_theme_effects_error_enum_get_type())
+GType xfdashboard_theme_effects_error_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_THEME_EFFECTS_ERROR	(xfdashboard_theme_effects_error_get_type())
 
 /* enumerations from "theme-layout.h" */
 GType xfdashboard_theme_layout_build_get_get_type(void) G_GNUC_CONST;
 #define XFDASHBOARD_TYPE_THEME_LAYOUT_BUILD_GET	(xfdashboard_theme_layout_build_get_get_type())
-GType xfdashboard_theme_layout_error_enum_get_type(void) G_GNUC_CONST;
-#define XFDASHBOARD_TYPE_THEME_LAYOUT_ERROR_ENUM	(xfdashboard_theme_layout_error_enum_get_type())
+GType xfdashboard_theme_layout_error_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_THEME_LAYOUT_ERROR	(xfdashboard_theme_layout_error_get_type())
 
 /* enumerations from "theme.h" */
-GType xfdashboard_theme_error_enum_get_type(void) G_GNUC_CONST;
-#define XFDASHBOARD_TYPE_THEME_ERROR_ENUM	(xfdashboard_theme_error_enum_get_type())
+GType xfdashboard_theme_error_get_type(void) G_GNUC_CONST;
+#define XFDASHBOARD_TYPE_THEME_ERROR	(xfdashboard_theme_error_get_type())
 
 /* enumerations from "types.h" */
 GType xfdashboard_view_mode_get_type(void) G_GNUC_CONST;

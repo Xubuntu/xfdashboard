@@ -2,7 +2,7 @@
  * application-database: A singelton managing desktop files and menus
  *                       for installed applications
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,8 +70,6 @@ struct _XfdashboardApplicationDatabaseClass
 
 /* Public API */
 GType xfdashboard_application_database_get_type(void) G_GNUC_CONST;
-
-XfdashboardApplicationDatabase* xfdashboard_application_database_get_default(void);
 
 gboolean xfdashboard_application_database_is_loaded(const XfdashboardApplicationDatabase *self);
 gboolean xfdashboard_application_database_load(XfdashboardApplicationDatabase *self, GError **outError);

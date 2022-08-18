@@ -5,6 +5,7 @@ AM_CPPFLAGS = \
 	-DPACKAGE_DATADIR=\"$(datadir)\" \
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\" \
 	-DPACKAGE_LIBDIR=\"$(libdir)\" \
+	$(XFDASHBOARD_DEBUG_CFLAGS) \
 	$(PLATFORM_CPPFLAGS)
 
 bin_PROGRAMS = \
@@ -39,6 +40,7 @@ xfdashboard_settings_LDADD = \
 	$(LIBXFCE4UTIL_LIBS) \
 	$(LIBXFCE4UI_LIBS) \
 	$(LIBM) \
+	$(top_builddir)/common/libxfconf-settings.la \
 	$(top_builddir)/libxfdashboard/libxfdashboard.la
 
 xfdashboard_settings_LDFLAGS = \

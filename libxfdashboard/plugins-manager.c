@@ -1,7 +1,7 @@
 /*
  * plugins-manager: Single-instance managing plugins
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,8 @@
 #include <glib/gi18n-lib.h>
 
 #include <libxfdashboard/plugin.h>
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
+#include <libxfdashboard/settings.h>
 #include <libxfdashboard/compat.h>
 #include <libxfdashboard/debug.h>
 
@@ -55,13 +56,13 @@ struct _XfdashboardPluginsManagerPrivate
 {
 	/* Instance related */
 	gboolean				isInited;
-	GList					*searchPaths;
 	GList					*plugins;
 
-	XfconfChannel			*xfconfChannel;
+	XfdashboardCore			*core;
+	guint					coreInitializedSignalID;
 
-	XfdashboardApplication	*application;
-	guint					applicationInitializedSignalID;
+	XfdashboardSettings		*settings;
+	guint					settingsEnabledPluginsNotifySignalID;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(XfdashboardPluginsManager,
@@ -69,71 +70,6 @@ G_DEFINE_TYPE_WITH_PRIVATE(XfdashboardPluginsManager,
 							G_TYPE_OBJECT)
 
 /* IMPLEMENTATION: Private variables and methods */
-#define ENABLED_PLUGINS_XFCONF_PROP			"/enabled-plugins"
-
-/* Single instance of plugin manager */
-static XfdashboardPluginsManager*			_xfdashboard_plugins_manager=NULL;
-
-/* Add path to search path but avoid duplicates */
-static gboolean _xfdashboard_plugins_manager_add_search_path(XfdashboardPluginsManager *self,
-																const gchar *inPath)
-{
-	XfdashboardPluginsManagerPrivate	*priv;
-	gchar								*normalizedPath;
-	GList								*iter;
-	gchar								*iterPath;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_PLUGINS_MANAGER(self), FALSE);
-	g_return_val_if_fail(inPath && *inPath, FALSE);
-
-	priv=self->priv;
-
-	/* Normalize requested path to add to list of search paths that means
-	 * that it should end with a directory seperator.
-	 */
-	if(!g_str_has_suffix(inPath, G_DIR_SEPARATOR_S))
-	{
-		normalizedPath=g_strjoin(NULL, inPath, G_DIR_SEPARATOR_S, NULL);
-	}
-		else normalizedPath=g_strdup(inPath);
-
-	/* Check if path is already in list of search paths */
-	for(iter=priv->searchPaths; iter; iter=g_list_next(iter))
-	{
-		/* Get search path at iterator */
-		iterPath=(gchar*)iter->data;
-
-		/* If the path at iterator matches the requested one that it is
-		 * already in list of search path, so return here with fail result.
-		 */
-		if(g_strcmp0(iterPath, normalizedPath)==0)
-		{
-			XFDASHBOARD_DEBUG(self, PLUGINS,
-								"Path '%s' was already added to search paths of plugin manager",
-								normalizedPath);
-
-			/* Release allocated resources */
-			if(normalizedPath) g_free(normalizedPath);
-
-			/* Return fail result */
-			return(FALSE);
-		}
-	}
-
-	/* If we get here the requested path is not in list of search path and
-	 * we can add it now.
-	 */
-	priv->searchPaths=g_list_append(priv->searchPaths, g_strdup(normalizedPath));
-	XFDASHBOARD_DEBUG(self, PLUGINS,
-						"Added path '%s' to search paths of plugin manager",
-						normalizedPath);
-
-	/* Release allocated resources */
-	if(normalizedPath) g_free(normalizedPath);
-
-	/* Return success result */
-	return(TRUE);
-}
 
 /* Find path to plugin */
 static gchar* _xfdashboard_plugins_manager_find_plugin_path(XfdashboardPluginsManager *self,
@@ -141,8 +77,7 @@ static gchar* _xfdashboard_plugins_manager_find_plugin_path(XfdashboardPluginsMa
 {
 	XfdashboardPluginsManagerPrivate	*priv;
 	gchar								*path;
-	GList								*iter;
-	gchar								*iterPath;
+	const gchar							**iter;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_PLUGINS_MANAGER(self), NULL);
 	g_return_val_if_fail(inPluginName && *inPluginName, NULL);
@@ -152,13 +87,11 @@ static gchar* _xfdashboard_plugins_manager_find_plugin_path(XfdashboardPluginsMa
 	/* Iterate through list of search paths, lookup file name containing plugin name
 	 * followed by suffix ".so" and return first path found.
 	 */
-	for(iter=priv->searchPaths; iter; iter=g_list_next(iter))
+	iter=xfdashboard_settings_get_plugin_search_paths(priv->settings);
+	while(iter && *iter)
 	{
-		/* Get search path at iterator */
-		iterPath=(gchar*)iter->data;
-
 		/* Create full path of search path and plugin name */
-		path=g_strdup_printf("%s%s%s.%s", iterPath, G_DIR_SEPARATOR_S, inPluginName, G_MODULE_SUFFIX);
+		path=g_strdup_printf("%s%s%s.%s", *iter, G_DIR_SEPARATOR_S, inPluginName, G_MODULE_SUFFIX);
 		if(!path) continue;
 
 		XFDASHBOARD_DEBUG(self, PLUGINS,
@@ -178,6 +111,9 @@ static gchar* _xfdashboard_plugins_manager_find_plugin_path(XfdashboardPluginsMa
 
 		/* Release allocated resources */
 		if(path) g_free(path);
+
+		/* Move iterator to next entry */
+		iter++;
 	}
 
 	/* If we get here we did not found any suitable file, so return NULL */
@@ -282,7 +218,7 @@ static gboolean _xfdashboard_plugins_manager_load_plugin(XfdashboardPluginsManag
 		return(FALSE);
 	}
 
-	/* Create and load plugin */
+	/* Create and initialize plugin */
 	plugin=xfdashboard_plugin_new(path, &error);
 	if(!plugin)
 	{
@@ -292,6 +228,11 @@ static gboolean _xfdashboard_plugins_manager_load_plugin(XfdashboardPluginsManag
 		/* Return error */
 		return(FALSE);
 	}
+
+	/* Plugin was loaded successfully so add it (at the end it is its
+	 * plugin settings) to core settings.
+	 */
+	xfdashboard_settings_add_plugin(priv->settings, plugin);
 
 	/* Enable plugin if early initialization is requested by plugin */
 	if(xfdashboard_plugin_get_flags(plugin) & XFDASHBOARD_PLUGIN_FLAG_EARLY_INITIALIZATION)
@@ -309,17 +250,16 @@ static gboolean _xfdashboard_plugins_manager_load_plugin(XfdashboardPluginsManag
 	return(TRUE);
 }
 
-/* Property for list of enabled plugins in xfconf has changed */
+/* Property for list of enabled plugins in settings has changed */
 static void _xfdashboard_plugins_manager_on_enabled_plugins_changed(XfdashboardPluginsManager *self,
 																	const gchar *inProperty,
 																	const GValue *inValue,
 																	gpointer inUserData)
 {
 	XfdashboardPluginsManagerPrivate	*priv;
-	gchar								**enabledPlugins;
+	const gchar							**enabledPlugins;
 
 	g_return_if_fail(XFDASHBOARD_IS_PLUGINS_MANAGER(self));
-	g_return_if_fail(XFCONF_IS_CHANNEL(inUserData));
 
 	priv=self->priv;
 
@@ -327,8 +267,7 @@ static void _xfdashboard_plugins_manager_on_enabled_plugins_changed(XfdashboardP
 	if(!priv->isInited) return;
 
 	/* Get new list of enabled plugins */
-	enabledPlugins=xfconf_channel_get_string_list(xfdashboard_application_get_xfconf_channel(NULL),
-													ENABLED_PLUGINS_XFCONF_PROP);
+	enabledPlugins=xfdashboard_settings_get_enabled_plugins(priv->settings);
 
 	/* Iterate through list of loaded plugin and check if it also in new list
 	 * of enabled plugins. If it is not then disable this plugin.
@@ -343,8 +282,8 @@ static void _xfdashboard_plugins_manager_on_enabled_plugins_changed(XfdashboardP
 		while(iter)
 		{
 			GList							*nextIter;
-			gchar							**listIter;
-			gchar							*listIterPluginID;
+			const gchar						**listIter;
+			const gchar						*listIterPluginID;
 			gboolean						found;
 
 			/* Get next item getting iterated before doing anything
@@ -395,8 +334,8 @@ static void _xfdashboard_plugins_manager_on_enabled_plugins_changed(XfdashboardP
 	 */
 	if(enabledPlugins)
 	{
-		gchar								**iter;
-		gchar								*pluginID;
+		const gchar							**iter;
+		const gchar							*pluginID;
 		GError								*error;
 		XfdashboardPlugin					*plugin;
 
@@ -449,9 +388,6 @@ static void _xfdashboard_plugins_manager_on_enabled_plugins_changed(XfdashboardP
 				}
 		}
 	}
-
-	/* Release allocated resources */
-	if(enabledPlugins) g_strfreev(enabledPlugins);
 }
 
 /* Application was fully initialized so enabled all loaded plugin except the
@@ -465,7 +401,7 @@ static void _xfdashboard_plugins_manager_on_application_initialized(XfdashboardP
 	XfdashboardPlugin					*plugin;
 
 	g_return_if_fail(XFDASHBOARD_IS_PLUGINS_MANAGER(self));
-	g_return_if_fail(XFDASHBOARD_IS_APPLICATION(inUserData));
+	g_return_if_fail(XFDASHBOARD_IS_CORE(inUserData));
 
 	priv=self->priv;
 
@@ -490,100 +426,81 @@ static void _xfdashboard_plugins_manager_on_application_initialized(XfdashboardP
 	}
 
 	/* Disconnect signal handler as this signal is emitted only once */
-	if(priv->application)
+	if(priv->core)
 	{
-		if(priv->applicationInitializedSignalID)
+		if(priv->coreInitializedSignalID)
 		{
-			g_signal_handler_disconnect(priv->application, priv->applicationInitializedSignalID);
-			priv->applicationInitializedSignalID=0;
+			g_signal_handler_disconnect(priv->core, priv->coreInitializedSignalID);
+			priv->coreInitializedSignalID=0;
 		}
 
-		priv->application=NULL;
+		priv->core=NULL;
 	}
 }
 
 /* IMPLEMENTATION: GObject */
 
-/* Construct this object */
-static GObject* _xfdashboard_plugins_manager_constructor(GType inType,
-															guint inNumberConstructParams,
-															GObjectConstructParam *inConstructParams)
-{
-	GObject									*object;
-
-	if(!_xfdashboard_plugins_manager)
-	{
-		object=G_OBJECT_CLASS(xfdashboard_plugins_manager_parent_class)->constructor(inType, inNumberConstructParams, inConstructParams);
-		_xfdashboard_plugins_manager=XFDASHBOARD_PLUGINS_MANAGER(object);
-	}
-		else
-		{
-			object=g_object_ref(G_OBJECT(_xfdashboard_plugins_manager));
-		}
-
-	return(object);
-}
-
 /* Dispose this object */
-static void _xfdashboard_plugins_manager_dispose_remove_plugin(gpointer inData)
-{
-	XfdashboardPlugin					*plugin;
-
-	g_return_if_fail(inData && XFDASHBOARD_IS_PLUGIN(inData));
-
-	plugin=XFDASHBOARD_PLUGIN(inData);
-
-	/* Disable plugin */
-	xfdashboard_plugin_disable(plugin);
-
-	/* Unload plugin */
-	g_type_module_unuse(G_TYPE_MODULE(plugin));
-}
-
 static void _xfdashboard_plugins_manager_dispose(GObject *inObject)
 {
 	XfdashboardPluginsManager			*self=XFDASHBOARD_PLUGINS_MANAGER(inObject);
 	XfdashboardPluginsManagerPrivate	*priv=self->priv;
 
 	/* Release allocated resources */
-	if(priv->application)
-	{
-		if(priv->applicationInitializedSignalID)
-		{
-			g_signal_handler_disconnect(priv->application, priv->applicationInitializedSignalID);
-			priv->applicationInitializedSignalID=0;
-		}
-
-		priv->application=NULL;
-	}
-
 	if(priv->plugins)
 	{
-		g_list_free_full(priv->plugins, (GDestroyNotify)_xfdashboard_plugins_manager_dispose_remove_plugin);
+		GList							*iter;
+
+		/* Disable all plugins, remove them from core settings and
+		 * unload them.
+		 */
+		for(iter=priv->plugins; iter; iter=g_list_next(iter))
+		{
+			XfdashboardPlugin			*plugin;
+
+			plugin=(XfdashboardPlugin*)iter->data;
+			if(plugin)
+			{
+				/* Disable plugin */
+				xfdashboard_plugin_disable(plugin);
+
+				/* Remove plugin settings from core settings */
+				if(priv->settings) xfdashboard_settings_remove_plugin(priv->settings, plugin);
+
+				/* Unload plugin */
+				g_type_module_unuse(G_TYPE_MODULE(plugin));
+			}
+		}
+
+		g_list_free(priv->plugins);
 		priv->plugins=NULL;
 	}
 
-	if(priv->searchPaths)
+	if(priv->core)
 	{
-		g_list_free_full(priv->searchPaths, g_free);
-		priv->searchPaths=NULL;
+		if(priv->coreInitializedSignalID)
+		{
+			g_signal_handler_disconnect(priv->core, priv->coreInitializedSignalID);
+			priv->coreInitializedSignalID=0;
+		}
+
+		priv->core=NULL;
+	}
+
+	if(priv->settings)
+	{
+		if(priv->settingsEnabledPluginsNotifySignalID)
+		{
+			g_signal_handler_disconnect(priv->settings, priv->settingsEnabledPluginsNotifySignalID);
+			priv->settingsEnabledPluginsNotifySignalID=0;
+		}
+
+		g_object_unref(priv->settings);
+		priv->settings=NULL;
 	}
 
 	/* Call parent's class dispose method */
 	G_OBJECT_CLASS(xfdashboard_plugins_manager_parent_class)->dispose(inObject);
-}
-
-/* Finalize this object */
-static void _xfdashboard_plugins_manager_finalize(GObject *inObject)
-{
-	/* Release allocated resources finally, e.g. unset singleton */
-	if(G_LIKELY(G_OBJECT(_xfdashboard_plugins_manager)==inObject))
-	{
-		_xfdashboard_plugins_manager=NULL;
-	}
-
-	/* Call parent's class dispose method */
-	G_OBJECT_CLASS(xfdashboard_plugins_manager_parent_class)->finalize(inObject);
 }
 
 /* Class initialization
@@ -595,9 +512,7 @@ static void xfdashboard_plugins_manager_class_init(XfdashboardPluginsManagerClas
 	GObjectClass		*gobjectClass=G_OBJECT_CLASS(klass);
 
 	/* Override functions */
-	gobjectClass->constructor=_xfdashboard_plugins_manager_constructor;
 	gobjectClass->dispose=_xfdashboard_plugins_manager_dispose;
-	gobjectClass->finalize=_xfdashboard_plugins_manager_finalize;
 }
 
 /* Object initialization
@@ -611,46 +526,30 @@ static void xfdashboard_plugins_manager_init(XfdashboardPluginsManager *self)
 
 	/* Set default values */
 	priv->isInited=FALSE;
-	priv->searchPaths=NULL;
 	priv->plugins=NULL;
-	priv->xfconfChannel=xfdashboard_application_get_xfconf_channel(NULL);
-	priv->application=xfdashboard_application_get_default();
+	priv->settings=g_object_ref(xfdashboard_core_get_settings(NULL));
 
-	/* Connect signal to get notified about changed of enabled-plugins
-	 * property in Xfconf.
+	/* Connect signal to get notified about changes of enabled-plugins
+	 * property in settings.
 	 */
-	g_signal_connect_swapped(priv->xfconfChannel,
-								"property-changed::"ENABLED_PLUGINS_XFCONF_PROP,
-								G_CALLBACK(_xfdashboard_plugins_manager_on_enabled_plugins_changed),
-								self);
+	priv->settingsEnabledPluginsNotifySignalID=
+		g_signal_connect_swapped(priv->settings,
+									"notify::enabled-plugins",
+									G_CALLBACK(_xfdashboard_plugins_manager_on_enabled_plugins_changed),
+									self);
 
 	/* Connect signal to get notified when application is fully initialized
 	 * to enable loaded plugins.
 	 */
-	priv->applicationInitializedSignalID=
-		g_signal_connect_swapped(priv->application,
+	priv->core=xfdashboard_core_get_default();
+	priv->coreInitializedSignalID=
+		g_signal_connect_swapped(priv->core,
 									"initialized",
 									G_CALLBACK(_xfdashboard_plugins_manager_on_application_initialized),
 									self);
 }
 
 /* IMPLEMENTATION: Public API */
-
-/**
- * xfdashboard_plugins_manager_get_default:
- *
- * Retrieves the singleton instance of #XfdashboardPluginsManager.
- *
- * Return value: (transfer full): The instance of #XfdashboardPluginsManager.
- *   Use g_object_unref() when done.
- */
-XfdashboardPluginsManager* xfdashboard_plugins_manager_get_default(void)
-{
-	GObject									*singleton;
-
-	singleton=g_object_new(XFDASHBOARD_TYPE_PLUGINS_MANAGER, NULL);
-	return(XFDASHBOARD_PLUGINS_MANAGER(singleton));
-}
 
 /**
  * xfdashboard_plugins_manager_setup:
@@ -670,10 +569,8 @@ XfdashboardPluginsManager* xfdashboard_plugins_manager_get_default(void)
 gboolean xfdashboard_plugins_manager_setup(XfdashboardPluginsManager *self)
 {
 	XfdashboardPluginsManagerPrivate	*priv;
-	gchar								*path;
-	const gchar							*envPath;
-	gchar								**enabledPlugins;
-	gchar								**iter;
+	const gchar							**enabledPlugins;
+	const gchar							**iter;
 	GError								*error;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_PLUGINS_MANAGER(self), FALSE);
@@ -684,39 +581,13 @@ gboolean xfdashboard_plugins_manager_setup(XfdashboardPluginsManager *self)
 	/* If plugin manager is already initialized then return immediately */
 	if(priv->isInited) return(TRUE);
 
-	/* Add search paths. Some paths may fail because they already exist
-	 * in list of search paths. So this should not fail this function.
-	 */
-	envPath=g_getenv("XFDASHBOARD_PLUGINS_PATH");
-	if(envPath)
-	{
-		gchar						**paths;
-
-		iter=paths=g_strsplit(envPath, ":", -1);
-		while(*iter)
-		{
-			_xfdashboard_plugins_manager_add_search_path(self, *iter);
-			iter++;
-		}
-		g_strfreev(paths);
-	}
-
-	path=g_build_filename(g_get_user_data_dir(), "xfdashboard", "plugins", NULL);
-	_xfdashboard_plugins_manager_add_search_path(self, path);
-	g_free(path);
-
-	path=g_build_filename(PACKAGE_LIBDIR, "xfdashboard", "plugins", NULL);
-	_xfdashboard_plugins_manager_add_search_path(self, path);
-	g_free(path);
-
 	/* Get list of enabled plugins and try to load them */
-	enabledPlugins=xfconf_channel_get_string_list(xfdashboard_application_get_xfconf_channel(NULL),
-													ENABLED_PLUGINS_XFCONF_PROP);
+	enabledPlugins=xfdashboard_settings_get_enabled_plugins(priv->settings);
 
 	/* Try to load all enabled plugin and collect each error occurred. */
 	for(iter=enabledPlugins; iter && *iter; iter++)
 	{
-		gchar							*pluginID;
+		const gchar					*pluginID;
 
 		/* Get plugin name */
 		pluginID=*iter;
@@ -751,9 +622,6 @@ gboolean xfdashboard_plugins_manager_setup(XfdashboardPluginsManager *self)
 	 * this plugin manager is initialized and return with TRUE result.
 	 */
 	priv->isInited=TRUE;
-
-	/* Release allocated resources */
-	if(enabledPlugins) g_strfreev(enabledPlugins);
 
 	return(TRUE);
 }

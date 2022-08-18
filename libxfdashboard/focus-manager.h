@@ -2,7 +2,7 @@
  * focus-manager: Single-instance managing focusable actors
  *                for keyboard navigation
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,8 +92,6 @@ struct _XfdashboardFocusManagerClass
 
 /* Public API */
 GType xfdashboard_focus_manager_get_type(void) G_GNUC_CONST;
-
-XfdashboardFocusManager* xfdashboard_focus_manager_get_default(void);
 
 void xfdashboard_focus_manager_register(XfdashboardFocusManager *self, XfdashboardFocusable *inFocusable);
 void xfdashboard_focus_manager_register_after(XfdashboardFocusManager *self, XfdashboardFocusable *inFocusable, XfdashboardFocusable *inAfterFocusable);

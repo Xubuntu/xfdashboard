@@ -1,7 +1,7 @@
 /*
  * search-view: A view showing applications matching search criteria
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,8 @@
 #include <libxfdashboard/search-result-container.h>
 #include <libxfdashboard/focus-manager.h>
 #include <libxfdashboard/enums.h>
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
+#include <libxfdashboard/settings.h>
 #include <libxfdashboard/compat.h>
 #include <libxfdashboard/debug.h>
 
@@ -77,7 +78,6 @@ struct _XfdashboardSearchViewPrivate
 
 	XfdashboardSearchViewSearchTerms	*lastTerms;
 
-	XfconfChannel						*xfconfChannel;
 	gboolean							delaySearch;
 	XfdashboardSearchViewSearchTerms	*delaySearchTerms;
 	gint								delaySearchTimeoutID;
@@ -86,6 +86,8 @@ struct _XfdashboardSearchViewPrivate
 	guint								repaintID;
 
 	XfdashboardFocusManager				*focusManager;
+
+	XfdashboardSettings					*settings;
 };
 
 G_DEFINE_TYPE_WITH_CODE(XfdashboardSearchView,
@@ -106,8 +108,6 @@ enum
 static guint XfdashboardSearchViewSignals[SIGNAL_LAST]={ 0, };
 
 /* IMPLEMENTATION: Private variables and methods */
-#define DELAY_SEARCH_TIMEOUT_XFCONF_PROP		"/components/search-view/delay-search-timeout"
-#define DEFAULT_DELAY_SEARCH_TIMEOUT			0
 
 struct _XfdashboardSearchViewProviderData
 {
@@ -174,7 +174,7 @@ static void _xfdashboard_search_view_search_terms_free(XfdashboardSearchViewSear
 {
 	g_return_if_fail(inData);
 
-#if DEBUG
+#ifdef DEBUG
 	/* Print a critical warning if more than one references to this object exist.
 	 * This is a debug message and should not be translated.
 	 */
@@ -240,7 +240,7 @@ static void _xfdashboard_search_view_provider_data_free(XfdashboardSearchViewPro
 {
 	g_return_if_fail(inData);
 
-#if DEBUG
+#ifdef DEBUG
 	/* Print a critical warning if more than one references to this object exist.
 	 * This is a debug message and should not be translated.
 	 */
@@ -468,8 +468,8 @@ static void _xfdashboard_search_view_on_result_item_clicked(XfdashboardSearchRes
 														searchTerms);
 	if(success)
 	{
-		/* Activating result item seems to be successfuly so quit application */
-		xfdashboard_application_suspend_or_quit(NULL);
+		/* Activating result item seems to be successfuly so request core to quit */
+		xfdashboard_core_quit(NULL);
 	}
 }
 
@@ -500,8 +500,8 @@ static void _xfdashboard_search_view_on_provider_icon_clicked(XfdashboardSearchR
 	success=xfdashboard_search_provider_launch_search(providerData->provider, searchTerms);
 	if(success)
 	{
-		/* Activating result item seems to be successfuly so quit application */
-		xfdashboard_application_suspend_or_quit(NULL);
+		/* Activating result item seems to be successfuly so request core to quit */
+		xfdashboard_core_quit(NULL);
 	}
 }
 
@@ -529,9 +529,9 @@ static void _xfdashboard_search_view_on_provider_container_destroyed(ClutterActo
 	 */
 	if(priv->selectionProvider==providerData)
 	{
-		ClutterActor						*oldSelection;
+		G_GNUC_UNUSED ClutterActor						*oldSelection;
 		ClutterActor						*newSelection;
-		XfdashboardSearchViewProviderData	*newSelectionProvider;
+		G_GNUC_UNUSED XfdashboardSearchViewProviderData	*newSelectionProvider;
 		GList								*currentProviderIter;
 		GList								*iter;
 		XfdashboardSearchViewProviderData	*iterProviderData;
@@ -827,7 +827,7 @@ static guint _xfdashboard_search_view_perform_search(XfdashboardSearchView *self
 	for(iter=providers; iter; iter=g_list_next(iter))
 	{
 		XfdashboardSearchViewProviderData		*providerData;
-		gboolean								canDoIncrementalSearch;
+		G_GNUC_UNUSED gboolean								canDoIncrementalSearch;
 		XfdashboardSearchResultSet				*providerNewResultSet;
 		XfdashboardSearchResultSet				*providerLastResultSet;
 
@@ -1584,8 +1584,6 @@ static void _xfdashboard_search_view_dispose(GObject *inObject)
 	XfdashboardSearchViewPrivate	*priv=self->priv;
 
 	/* Release allocated resources */
-	if(priv->xfconfChannel) priv->xfconfChannel=NULL;
-
 	if(priv->repaintID)
 	{
 		g_source_remove(priv->repaintID);
@@ -1633,6 +1631,12 @@ static void _xfdashboard_search_view_dispose(GObject *inObject)
 	{
 		g_object_unref(priv->focusManager);
 		priv->focusManager=NULL;
+	}
+
+	if(priv->settings)
+	{
+		g_object_unref(priv->settings);
+		priv->settings=NULL;
 	}
 
 	/* Call parent's class dispose method */
@@ -1700,16 +1704,16 @@ static void xfdashboard_search_view_init(XfdashboardSearchView *self)
 	self->priv=priv=xfdashboard_search_view_get_instance_private(self);
 
 	/* Set up default values */
-	priv->searchManager=xfdashboard_search_manager_get_default();
+	priv->searchManager=xfdashboard_core_get_search_manager(NULL);
 	priv->providers=NULL;
 	priv->lastTerms=NULL;
 	priv->delaySearch=TRUE;
 	priv->delaySearchTerms=NULL;
 	priv->delaySearchTimeoutID=0;
 	priv->selectionProvider=NULL;
-	priv->focusManager=xfdashboard_focus_manager_get_default();
+	priv->focusManager=xfdashboard_core_get_focus_manager(NULL);
 	priv->repaintID=0;
-	priv->xfconfChannel=xfdashboard_application_get_xfconf_channel(NULL);
+	priv->settings=g_object_ref(xfdashboard_core_get_settings(NULL));
 
 	/* Set up view (Note: Search view is disabled by default!) */
 	xfdashboard_view_set_name(XFDASHBOARD_VIEW(self), _("Search"));
@@ -1874,9 +1878,7 @@ void xfdashboard_search_view_update_search(XfdashboardSearchView *self, const gc
 	}
 
 	/* Check if search should be delayed ... */
-	delaySearchTimeout=xfconf_channel_get_uint(priv->xfconfChannel,
-												DELAY_SEARCH_TIMEOUT_XFCONF_PROP,
-												DEFAULT_DELAY_SEARCH_TIMEOUT);
+	delaySearchTimeout=xfdashboard_settings_get_delay_search_timeout(priv->settings);
 	if(delaySearchTimeout>0 && priv->delaySearch)
 	{
 		/* Remember search terms for delayed search */

@@ -1,7 +1,7 @@
 /*
  * windows-view: A view showing visible windows
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
 #include <libxfdashboard/live-window.h>
 #include <libxfdashboard/scaled-table-layout.h>
 #include <libxfdashboard/stage.h>
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/view.h>
 #include <libxfdashboard/drop-action.h>
 #include <libxfdashboard/quicklaunch.h>
@@ -65,8 +65,7 @@ struct _XfdashboardWindowsViewPrivate
 	ClutterLayoutManager				*layout;
 	gpointer							selectedItem;
 
-	XfconfChannel						*xfconfChannel;
-	guint								xfconfScrollEventChangingWorkspaceBindingID;
+	GBinding							*settingsScrollEventChangingWorkspaceBinding;
 	XfdashboardStageInterface			*scrollEventChangingWorkspaceStage;
 	guint								scrollEventChangingWorkspaceStageSignalID;
 
@@ -130,8 +129,6 @@ static XfdashboardLiveWindow* _xfdashboard_windows_view_create_actor(Xfdashboard
 static void _xfdashboard_windows_view_set_active_workspace(XfdashboardWindowsView *self, XfdashboardWindowTrackerWorkspace *inWorkspace);
 
 /* IMPLEMENTATION: Private variables and methods */
-#define SCROLL_EVENT_CHANGES_WORKSPACE_XFCONF_PROP		"/components/windows-view/scroll-event-changes-workspace"
-
 #define DEFAULT_VIEW_ICON								"view-fullscreen"
 #define DEFAULT_DRAG_HANDLE_SIZE						32.0f
 
@@ -817,8 +814,8 @@ static void _xfdashboard_windows_view_on_window_clicked(XfdashboardWindowsView *
 	/* Activate window */
 	xfdashboard_window_tracker_window_activate(window);
 
-	/* Quit application */
-	xfdashboard_application_suspend_or_quit(NULL);
+	/* Request core to quit */
+	xfdashboard_core_quit(NULL);
 }
 
 /* The close button of a live window was clicked */
@@ -1889,15 +1886,11 @@ static void _xfdashboard_windows_view_dispose(GObject *inObject)
 		priv->scrollEventChangingWorkspaceStage=NULL;
 	}
 
-	if(priv->xfconfChannel)
-	{
-		priv->xfconfChannel=NULL;
-	}
 
-	if(priv->xfconfScrollEventChangingWorkspaceBindingID)
+	if(priv->settingsScrollEventChangingWorkspaceBinding)
 	{
-		xfconf_g_property_unbind(priv->xfconfScrollEventChangingWorkspaceBindingID);
-		priv->xfconfScrollEventChangingWorkspaceBindingID=0;
+		g_object_unref(priv->settingsScrollEventChangingWorkspaceBinding);
+		priv->settingsScrollEventChangingWorkspaceBinding=NULL;
 	}
 
 	if(priv->workspace)
@@ -2293,17 +2286,17 @@ static void xfdashboard_windows_view_init(XfdashboardWindowsView *self)
 	XfdashboardWindowsViewPrivate		*priv;
 	ClutterAction						*action;
 	XfdashboardWindowTrackerWorkspace	*activeWorkspace;
+	XfdashboardSettings					*settings;
 
 	self->priv=priv=xfdashboard_windows_view_get_instance_private(self);
 
 	/* Set up default values */
-	priv->windowTracker=xfdashboard_window_tracker_get_default();
+	priv->windowTracker=xfdashboard_core_get_window_tracker(NULL);
 	priv->workspace=NULL;
 	priv->spacing=0.0f;
 	priv->preventUpscaling=FALSE;
 	priv->selectedItem=NULL;
 	priv->isWindowsNumberShown=FALSE;
-	priv->xfconfChannel=xfdashboard_application_get_xfconf_channel(NULL);
 	priv->isScrollEventChangingWorkspace=FALSE;
 	priv->scrollEventChangingWorkspaceStage=NULL;
 	priv->scrollEventChangingWorkspaceStageSignalID=0;
@@ -2331,12 +2324,14 @@ static void xfdashboard_windows_view_init(XfdashboardWindowsView *self)
 	g_signal_connect_swapped(action, "begin", G_CALLBACK(_xfdashboard_windows_view_on_drop_begin), self);
 	g_signal_connect_swapped(action, "drop", G_CALLBACK(_xfdashboard_windows_view_on_drop_drop), self);
 
-	/* Bind to xfconf to react on changes */
-	priv->xfconfScrollEventChangingWorkspaceBindingID=xfconf_g_property_bind(priv->xfconfChannel,
-																				SCROLL_EVENT_CHANGES_WORKSPACE_XFCONF_PROP,
-																				G_TYPE_BOOLEAN,
-																				self,
-																				"scroll-event-changes-workspace");
+	/* Bind to settings to react on changes */
+	settings=xfdashboard_core_get_settings(NULL);
+	priv->settingsScrollEventChangingWorkspaceBinding=
+		g_object_bind_property(settings,
+								"scroll-event-changes-workspace",
+								self,
+								"scroll-event-changes-workspace",
+								G_BINDING_SYNC_CREATE);
 
 	/* Connect signals */
 	g_signal_connect(self,

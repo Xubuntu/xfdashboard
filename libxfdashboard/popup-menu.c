@@ -2,7 +2,7 @@
  * popup-menu: A pop-up menu with menu items performing an action when an menu
  *             item was clicked
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@
 #include <libxfdashboard/focus-manager.h>
 #include <libxfdashboard/stylable.h>
 #include <libxfdashboard/window-tracker.h>
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/click-action.h>
 #include <libxfdashboard/bindings-pool.h>
 #include <libxfdashboard/button.h>
@@ -150,27 +150,25 @@ static void _xfdashboard_popup_menu_on_application_suspended_changed(Xfdashboard
 																		GParamSpec *inSpec,
 																		gpointer inUserData)
 {
-	XfdashboardPopupMenuPrivate		*priv;
-	XfdashboardApplication			*application;
+	XfdashboardCore					*core;
 	gboolean						isSuspended;
 
 	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU(self));
-	g_return_if_fail(XFDASHBOARD_IS_APPLICATION(inUserData));
+	g_return_if_fail(XFDASHBOARD_IS_CORE(inUserData));
 
-	priv=self->priv;
-	application=XFDASHBOARD_APPLICATION(inUserData);
+	core=XFDASHBOARD_CORE(inUserData);
 
 	/* Get application suspend state */
-	isSuspended=xfdashboard_application_is_suspended(application);
+	isSuspended=xfdashboard_core_is_suspended(core);
 
 	/* If application is suspended then cancel pop-up menu */
 	if(isSuspended)
 	{
 		XFDASHBOARD_DEBUG(self, ACTOR,
-							"Cancel active pop-up menu '%s' for source %s@%p because application was suspended",
+							"Cancel active pop-up menu '%s' for source %s@%p because core was suspended",
 							xfdashboard_popup_menu_get_title(self),
-							priv->source ? G_OBJECT_TYPE_NAME(priv->source) : "<nil>",
-							priv->source);
+							self->priv->source ? G_OBJECT_TYPE_NAME(self->priv->source) : "<nil>",
+							self->priv->source);
 
 		xfdashboard_popup_menu_cancel(self);
 	}
@@ -755,7 +753,7 @@ static void _xfdashboard_popup_menu_dispose(GObject *inObject)
 	/* Release our allocated variables */
 	if(priv->suspendSignalID)
 	{
-		g_signal_handler_disconnect(xfdashboard_application_get_default(), priv->suspendSignalID);
+		g_signal_handler_disconnect(xfdashboard_core_get_default(), priv->suspendSignalID);
 		priv->suspendSignalID=0;
 	}
 
@@ -1142,8 +1140,8 @@ static void xfdashboard_popup_menu_init(XfdashboardPopupMenu *self)
 	priv->isActive=FALSE;
 	priv->title=NULL;
 	priv->itemsContainer=NULL;
-	priv->windowTracker=xfdashboard_window_tracker_get_default();
-	priv->focusManager=xfdashboard_focus_manager_get_default();
+	priv->windowTracker=xfdashboard_core_get_window_tracker(NULL);
+	priv->focusManager=xfdashboard_core_get_focus_manager(NULL);
 	priv->oldFocusable=NULL;
 	priv->selectedItem=NULL;
 	priv->stage=NULL;
@@ -1187,11 +1185,11 @@ static void xfdashboard_popup_menu_init(XfdashboardPopupMenu *self)
 	xfdashboard_focus_manager_register(priv->focusManager, XFDASHBOARD_FOCUSABLE(self));
 
 	/* Add popup menu to stage */
-	priv->stage=xfdashboard_application_get_stage(xfdashboard_application_get_default());
+	priv->stage=xfdashboard_core_get_stage(xfdashboard_core_get_default());
 	clutter_actor_insert_child_above(CLUTTER_ACTOR(priv->stage), CLUTTER_ACTOR(self), NULL);
 
 	/* Connect signal to get notified when application suspends to cancel pop-up menu */
-	priv->suspendSignalID=g_signal_connect_swapped(xfdashboard_application_get_default(),
+	priv->suspendSignalID=g_signal_connect_swapped(xfdashboard_core_get_default(),
 													"notify::is-suspended",
 													G_CALLBACK(_xfdashboard_popup_menu_on_application_suspended_changed),
 													self);

@@ -1,7 +1,7 @@
 /*
  * clock-view-settings: Shared object instance holding settings for plugin
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ typedef struct _XfdashboardClockViewSettingsClass			XfdashboardClockViewSettings
 struct _XfdashboardClockViewSettings
 {
 	/* Parent instance */
-	GObject									parent_instance;
+	XfdashboardPluginSettings				parent_instance;
 
 	/* Private structure */
 	XfdashboardClockViewSettingsPrivate		*priv;
@@ -54,7 +54,7 @@ struct _XfdashboardClockViewSettingsClass
 {
 	/*< private >*/
 	/* Parent class */
-	GObjectClass							parent_class;
+	XfdashboardPluginSettingsClass			parent_class;
 };
 
 /* Public API */

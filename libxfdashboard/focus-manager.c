@@ -2,7 +2,7 @@
  * focus-manager: Single-instance managing focusable actors
  *                for keyboard navigation
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
 #include <libxfdashboard/marshal.h>
 #include <libxfdashboard/stylable.h>
 #include <libxfdashboard/bindings-pool.h>
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/compat.h>
 #include <libxfdashboard/debug.h>
 
@@ -70,9 +70,6 @@ enum
 static guint XfdashboardFocusManagerSignals[SIGNAL_LAST]={ 0, };
 
 /* IMPLEMENTATION: Private variables and methods */
-
-/* Single instance of focus manager */
-static XfdashboardFocusManager*		_xfdashboard_focus_manager=NULL;
 
 /* A registered focusable actor is going to be destroyed so unregister it */
 static void _xfdashboard_focus_manager_on_focusable_destroy(XfdashboardFocusManager *self,
@@ -323,26 +320,6 @@ static gboolean _xfdashboard_focus_manager_move_focus_previous(XfdashboardFocusM
 
 /* IMPLEMENTATION: GObject */
 
-/* Construct this object */
-static GObject* _xfdashboard_focus_manager_constructor(GType inType,
-														guint inNumberConstructParams,
-														GObjectConstructParam *inConstructParams)
-{
-	GObject									*object;
-
-	if(!_xfdashboard_focus_manager)
-	{
-		object=G_OBJECT_CLASS(xfdashboard_focus_manager_parent_class)->constructor(inType, inNumberConstructParams, inConstructParams);
-		_xfdashboard_focus_manager=XFDASHBOARD_FOCUS_MANAGER(object);
-	}
-		else
-		{
-			object=g_object_ref(G_OBJECT(_xfdashboard_focus_manager));
-		}
-
-	return(object);
-}
-
 /* Dispose this object */
 static void _xfdashboard_focus_manager_dispose_unregister_focusable(gpointer inData, gpointer inUserData)
 {
@@ -386,19 +363,6 @@ static void _xfdashboard_focus_manager_dispose(GObject *inObject)
 	G_OBJECT_CLASS(xfdashboard_focus_manager_parent_class)->dispose(inObject);
 }
 
-/* Finalize this object */
-static void _xfdashboard_focus_manager_finalize(GObject *inObject)
-{
-	/* Release allocated resources finally, e.g. unset singleton */
-	if(G_LIKELY(G_OBJECT(_xfdashboard_focus_manager)==inObject))
-	{
-		_xfdashboard_focus_manager=NULL;
-	}
-
-	/* Call parent's class dispose method */
-	G_OBJECT_CLASS(xfdashboard_focus_manager_parent_class)->finalize(inObject);
-}
-
 
 /* Class initialization
  * Override functions in parent classes and define properties
@@ -409,9 +373,7 @@ static void xfdashboard_focus_manager_class_init(XfdashboardFocusManagerClass *k
 	GObjectClass		*gobjectClass=G_OBJECT_CLASS(klass);
 
 	/* Override functions */
-	gobjectClass->constructor=_xfdashboard_focus_manager_constructor;
 	gobjectClass->dispose=_xfdashboard_focus_manager_dispose;
-	gobjectClass->finalize=_xfdashboard_focus_manager_finalize;
 
 	klass->focus_move_first=_xfdashboard_focus_manager_move_focus_first;
 	klass->focus_move_last=_xfdashboard_focus_manager_move_focus_last;
@@ -528,15 +490,6 @@ static void xfdashboard_focus_manager_init(XfdashboardFocusManager *self)
 }
 
 /* IMPLEMENTATION: Public API */
-
-/* Get single instance of manager */
-XfdashboardFocusManager* xfdashboard_focus_manager_get_default(void)
-{
-	GObject									*singleton;
-
-	singleton=g_object_new(XFDASHBOARD_TYPE_FOCUS_MANAGER, NULL);
-	return(XFDASHBOARD_FOCUS_MANAGER(singleton));
-}
 
 /* Register a focusable actor */
 void xfdashboard_focus_manager_register(XfdashboardFocusManager *self, XfdashboardFocusable *inFocusable)
@@ -730,6 +683,22 @@ GSList* xfdashboard_focus_manager_get_targets(XfdashboardFocusManager *self, con
 	priv=self->priv;
 	targets=NULL;
 
+	/* Provide backward-compatibility by checking target for old application
+	 * type by name (XfdashboardApplication).
+	 */
+	if(g_strcmp0("XfdashboardApplication", inTarget)==0)
+	{
+		static gboolean				warnedDeprecation=FALSE;
+
+		if(!warnedDeprecation)
+		{
+			g_warning("Bindings uses deprecated target 'XfdashboardApplication'. Please update to use target 'XfdashboardCore'.");
+			warnedDeprecation=TRUE;
+		}
+
+		inTarget="XfdashboardCore";
+	}
+
 	/* Get type of target */
 	targetType=g_type_from_name(inTarget);
 	if(!targetType)
@@ -744,10 +713,13 @@ GSList* xfdashboard_focus_manager_get_targets(XfdashboardFocusManager *self, con
 		targets=g_slist_append(targets, g_object_ref(self));
 	}
 
-	/* Check if class name of requested target points to application */
-	if(g_type_is_a(XFDASHBOARD_TYPE_APPLICATION, targetType))
+	/* Check if class name of requested target points to core
+	 * and provide backward-compatibility by checking for old
+	 * application object by name.
+	 */
+	if(g_type_is_a(XFDASHBOARD_TYPE_CORE, targetType))
 	{
-		targets=g_slist_append(targets, g_object_ref(xfdashboard_application_get_default()));
+		targets=g_slist_append(targets, g_object_ref(xfdashboard_core_get_default()));
 	}
 
 	/* Iterate through list of registered actors and add each one
@@ -1012,7 +984,7 @@ gboolean xfdashboard_focus_manager_get_event_targets_and_action(XfdashboardFocus
 																const gchar **outAction)
 {
 	XfdashboardFocusManagerPrivate	*priv;
-	XfdashboardBindingsPool			*bindings;
+	XfdashboardBindingsPool			*bindingsPool;
 	const XfdashboardBinding		*binding;
 	const gchar						*action;
 	GSList							*targetFocusables;
@@ -1048,8 +1020,8 @@ gboolean xfdashboard_focus_manager_get_event_targets_and_action(XfdashboardFocus
 	/* Lookup action for event and emit action if a binding was found
 	 * for this event.
 	 */
-	bindings=xfdashboard_bindings_pool_get_default();
-	binding=xfdashboard_bindings_pool_find_for_event(bindings, CLUTTER_ACTOR(inFocusable), inEvent);
+	bindingsPool=xfdashboard_core_get_bindings_pool(NULL);
+	binding=xfdashboard_bindings_pool_find_for_event(bindingsPool, CLUTTER_ACTOR(inFocusable), inEvent);
 	if(binding)
 	{
 		const gchar					*target;
@@ -1095,7 +1067,7 @@ gboolean xfdashboard_focus_manager_get_event_targets_and_action(XfdashboardFocus
 				}
 			}
 	}
-	g_object_unref(bindings);
+	g_object_unref(bindingsPool);
 
 	/* Release reference on ourselve and the focusable actor to took to keep them alive  */
 	g_object_unref(inFocusable);
@@ -1120,7 +1092,7 @@ gboolean xfdashboard_focus_manager_handle_key_event(XfdashboardFocusManager *sel
 {
 	XfdashboardFocusManagerPrivate	*priv;
 	GSList							*targetFocusables;
-	const gchar						*action;
+	const gchar						*actionFullName;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_FOCUS_MANAGER(self), CLUTTER_EVENT_PROPAGATE);
 	g_return_val_if_fail(inEvent, CLUTTER_EVENT_PROPAGATE);
@@ -1144,14 +1116,34 @@ gboolean xfdashboard_focus_manager_handle_key_event(XfdashboardFocusManager *sel
 	 * focusable actor
 	 */
 	targetFocusables=NULL;
-	action=NULL;
-	if(xfdashboard_focus_manager_get_event_targets_and_action(self, inEvent, inFocusable, &targetFocusables, &action))
+	actionFullName=NULL;
+	if(xfdashboard_focus_manager_get_event_targets_and_action(self, inEvent, inFocusable, &targetFocusables, &actionFullName))
 	{
 		gboolean				eventStatus;
 		GSList					*iter;
 		GSignalQuery			signalData={ 0, };
+		gchar					**splitAction;
+		const gchar				*action;
+		const gchar				*detail;
 
 		eventStatus=CLUTTER_EVENT_PROPAGATE;
+		action=NULL;
+		detail=NULL;
+
+		/* Split action into action name and detail */
+		splitAction=g_strsplit(actionFullName, "::", 2);
+		if(!splitAction || !splitAction[0])
+		{
+			g_warning("Failed to split action '%s' into name and detail", actionFullName);
+
+			/* Release list of targets to pervent emitting action of binding as
+			 * splitting action into name and (maybe) detail failed.
+			 */
+			g_slist_free_full(targetFocusables, g_object_unref);
+			targetFocusables=NULL;
+		}
+		action=splitAction[0];
+		detail=splitAction[1];
 
 		/* Emit action of binding to each actor in target list just build up */
 		XFDASHBOARD_DEBUG(self, MISC,
@@ -1189,14 +1181,28 @@ gboolean xfdashboard_focus_manager_handle_key_event(XfdashboardFocusManager *sel
 				continue;
 			}
 
-#if DEBUG
+			/* If detail was provided in action then check if signal supports
+			 * details.
+			 */
+			if(detail &&
+				!(signalData.signal_flags & G_SIGNAL_DETAILED))
+			{
+				g_warning("Action '%s' at object type %s does not support detail '%s' in action name.",
+							action,
+							detail,
+							G_OBJECT_TYPE_NAME(targetObject));
+				continue;
+			}
+
+#ifdef DEBUG
 			/* In debug mode also check if signal has right signature
 			 * to be able to handle this action properly.
 			 */
 			if(signalID)
 			{
 				GType				returnValueType=G_TYPE_BOOLEAN;
-				GType				parameterTypes[]={ XFDASHBOARD_TYPE_FOCUSABLE, G_TYPE_STRING, CLUTTER_TYPE_EVENT };
+				GType				parameterTypesSimple[]={ XFDASHBOARD_TYPE_FOCUSABLE, G_TYPE_STRING, CLUTTER_TYPE_EVENT };
+				GType				parameterTypesDetail[]={ XFDASHBOARD_TYPE_FOCUSABLE, G_TYPE_STRING, G_TYPE_STRING, CLUTTER_TYPE_EVENT };
 				guint				parameterCount;
 				guint				i;
 
@@ -1211,7 +1217,8 @@ gboolean xfdashboard_focus_manager_handle_key_event(XfdashboardFocusManager *sel
 				}
 
 				/* Check if signals wants the right number and types of parameters */
-				parameterCount=sizeof(parameterTypes)/sizeof(GType);
+				if(detail) parameterCount=sizeof(parameterTypesDetail)/sizeof(GType);
+					else parameterCount=sizeof(parameterTypesSimple)/sizeof(GType);
 				if(signalData.n_params!=parameterCount)
 				{
 					g_critical("Action '%s' at object type %s wants %u parameters but expected are %u.",
@@ -1223,33 +1230,57 @@ gboolean xfdashboard_focus_manager_handle_key_event(XfdashboardFocusManager *sel
 
 				for(i=0; i<(parameterCount<signalData.n_params ? parameterCount : signalData.n_params); i++)
 				{
-					if(signalData.param_types[i]!=parameterTypes[i])
+					if((detail && signalData.param_types[i]!=parameterTypesDetail[i]) ||
+						(!detail && signalData.param_types[i]!=parameterTypesSimple[i]))
 					{
 						g_critical("Action '%s' at object type %s wants type %s at parameter %u but type %s is expected.",
 									action,
 									G_OBJECT_TYPE_NAME(targetObject),
 									g_type_name(signalData.param_types[i]),
 									i+1,
-									g_type_name(parameterTypes[i]));
+									(detail ? g_type_name(parameterTypesDetail[i]) : g_type_name(parameterTypesSimple[i])));
 					}
 				}
 			}
 #endif
 
 			/* Emit action signal at target */
-			XFDASHBOARD_DEBUG(self, ACTOR,
-								"Emitting action signal '%s' at focusable actor %s",
-								action,
-								G_OBJECT_TYPE_NAME(targetObject));
-			g_signal_emit_by_name(targetObject, action, inFocusable, action, inEvent, &eventStatus);
-			XFDASHBOARD_DEBUG(self, ACTOR,
-								"Action signal '%s' was %s by focusable actor %s",
-								action,
-								eventStatus==CLUTTER_EVENT_STOP ? "handled" : "not handled",
-								G_OBJECT_TYPE_NAME(targetObject));
+			if(detail)
+			{
+				XFDASHBOARD_DEBUG(self, ACTOR,
+									"Emitting action signal '%s' with detail '%s' at focusable actor %s",
+									action,
+									detail,
+									G_OBJECT_TYPE_NAME(targetObject));
+
+				g_signal_emit_by_name(targetObject, action, inFocusable, action, detail, inEvent, &eventStatus);
+
+				XFDASHBOARD_DEBUG(self, ACTOR,
+									"Action signal '%s' with detail '%s' was %s by focusable actor %s",
+									action,
+									detail,
+									eventStatus==CLUTTER_EVENT_STOP ? "handled" : "not handled",
+									G_OBJECT_TYPE_NAME(targetObject));
+			}
+				else
+				{
+					XFDASHBOARD_DEBUG(self, ACTOR,
+										"Emitting action signal '%s' at focusable actor %s",
+										action,
+										G_OBJECT_TYPE_NAME(targetObject));
+
+					g_signal_emit_by_name(targetObject, action, inFocusable, action, inEvent, &eventStatus);
+
+					XFDASHBOARD_DEBUG(self, ACTOR,
+										"Action signal '%s' was %s by focusable actor %s",
+										action,
+										eventStatus==CLUTTER_EVENT_STOP ? "handled" : "not handled",
+										G_OBJECT_TYPE_NAME(targetObject));
+				}
 		}
 
 		/* Release allocated resources */
+		g_strfreev(splitAction);
 		g_slist_free_full(targetFocusables, g_object_unref);
 
 		if(eventStatus==CLUTTER_EVENT_STOP) return(CLUTTER_EVENT_STOP);

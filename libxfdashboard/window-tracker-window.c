@@ -1,7 +1,7 @@
 /*
  * window-tracker-window: A window tracked by window tracker.
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include <glib/gi18n-lib.h>
 
 #include <libxfdashboard/window-tracker-backend.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/enums.h>
 #include <libxfdashboard/marshal.h>
 #include <libxfdashboard/compat.h>
@@ -91,7 +92,7 @@ static XfdashboardWindowTrackerMonitor* _xfdashboard_window_tracker_window_real_
 	g_return_val_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(self), NULL);
 
 	/* Get window tracker to retrieve list of monitors */
-	windowTracker=xfdashboard_window_tracker_get_default();
+	windowTracker=xfdashboard_core_get_window_tracker(NULL);
 
 	/* Get list of monitors */
 	monitors=xfdashboard_window_tracker_get_monitors(windowTracker);
@@ -142,7 +143,7 @@ static gboolean _xfdashboard_window_tracker_window_real_is_on_monitor(Xfdashboar
 													&monitorHeight);
 
 	/* Get screen size */
-	windowTracker=xfdashboard_window_tracker_get_default();
+	windowTracker=xfdashboard_core_get_window_tracker(NULL);
 	xfdashboard_window_tracker_get_screen_size(windowTracker, &screenWidth, &screenHeight);
 	g_object_unref(windowTracker);
 
@@ -446,6 +447,26 @@ XfdashboardWindowTrackerWindowState xfdashboard_window_tracker_window_get_state(
 	/* If we get here the virtual function was not overridden */
 	XFDASHBOARD_WINDOWS_TRACKER_WINDOW_WARN_NOT_IMPLEMENTED(self, "get_state");
 	return(0);
+}
+
+/* Set state of window */
+void xfdashboard_window_tracker_window_set_state(XfdashboardWindowTrackerWindow *self, XfdashboardWindowTrackerWindowState inState)
+{
+	XfdashboardWindowTrackerWindowInterface		*iface;
+
+	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(self));
+
+	iface=XFDASHBOARD_WINDOW_TRACKER_WINDOW_GET_IFACE(self);
+
+	/* Call virtual function */
+	if(iface->set_state)
+	{
+		return(iface->set_state(self, inState));
+	}
+
+	/* If we get here the virtual function was not overridden */
+	XFDASHBOARD_WINDOWS_TRACKER_WINDOW_WARN_NOT_IMPLEMENTED(self, "set_state");
+	return;
 }
 
 /* Get possible actions for requested window */
@@ -752,7 +773,6 @@ gboolean xfdashboard_window_tracker_window_is_stage(XfdashboardWindowTrackerWind
 	return(xfdashboard_window_tracker_window_get_stage(self)!=NULL);
 }
 
-/* Get stage for requested window */
 /**
  * xfdashboard_window_tracker_window_get_stage:
  * @self: A #XfdashboardWindowTrackerWindow
@@ -781,7 +801,7 @@ ClutterStage* xfdashboard_window_tracker_window_get_stage(XfdashboardWindowTrack
 	g_return_val_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(self), NULL);
 
 	/* Get default window tracker backend */
-	backend=xfdashboard_window_tracker_backend_get_default();
+	backend=xfdashboard_core_get_window_tracker_backend(NULL);
 	if(!backend)
 	{
 		g_critical("Could not get default window tracker backend");
@@ -822,7 +842,7 @@ void xfdashboard_window_tracker_window_show_stage(XfdashboardWindowTrackerWindow
 	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(self));
 
 	/* Get default window tracker backend */
-	backend=xfdashboard_window_tracker_backend_get_default();
+	backend=xfdashboard_core_get_window_tracker_backend(NULL);
 	if(!backend)
 	{
 		g_critical("Could not get default window tracker backend");
@@ -858,7 +878,7 @@ void xfdashboard_window_tracker_window_hide_stage(XfdashboardWindowTrackerWindow
 	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(self));
 
 	/* Get default window tracker backend */
-	backend=xfdashboard_window_tracker_backend_get_default();
+	backend=xfdashboard_core_get_window_tracker_backend(NULL);
 	if(!backend)
 	{
 		g_critical("Could not get default window tracker backend");
@@ -892,10 +912,8 @@ gint xfdashboard_window_tracker_window_get_pid(XfdashboardWindowTrackerWindow *s
 	return(-1);
 }
 
-/* Get all possible instance name for window, e.g. class name, instance name.
- * Caller is responsible to free result with g_strfreev() if not NULL.
- */
-gchar** xfdashboard_window_tracker_window_get_instance_names(XfdashboardWindowTrackerWindow *self)
+/* Try to determine AppInfo for window */
+GAppInfo* xfdashboard_window_tracker_window_get_appinfo(XfdashboardWindowTrackerWindow *self)
 {
 	XfdashboardWindowTrackerWindowInterface		*iface;
 
@@ -904,13 +922,13 @@ gchar** xfdashboard_window_tracker_window_get_instance_names(XfdashboardWindowTr
 	iface=XFDASHBOARD_WINDOW_TRACKER_WINDOW_GET_IFACE(self);
 
 	/* Call virtual function */
-	if(iface->get_instance_names)
+	if(iface->get_appinfo)
 	{
-		return(iface->get_instance_names(self));
+		return(iface->get_appinfo(self));
 	}
 
 	/* If we get here the virtual function was not overridden */
-	XFDASHBOARD_WINDOWS_TRACKER_WINDOW_WARN_NOT_IMPLEMENTED(self, "get_instance_names");
+	XFDASHBOARD_WINDOWS_TRACKER_WINDOW_WARN_NOT_IMPLEMENTED(self, "get_appinfo");
 	return(NULL);
 }
 

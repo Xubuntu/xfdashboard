@@ -12,10 +12,10 @@ dnl
 dnl ***************************
 dnl *** Version information ***
 dnl ***************************
-m4_define([xfdashboard_version_major], [0])
-m4_define([xfdashboard_version_minor], [8])
-m4_define([xfdashboard_version_micro], [1])
-m4_define([xfdashboard_version_build], [9bb4a9a])
+m4_define([xfdashboard_version_major], [1])
+m4_define([xfdashboard_version_minor], [0])
+m4_define([xfdashboard_version_micro], [0])
+m4_define([xfdashboard_version_build], [82c5cc8])
 m4_define([xfdashboard_version_tag],   [])
 m4_define([xfdashboard_version], [xfdashboard_version_major().xfdashboard_version_minor().xfdashboard_version_micro()ifelse(xfdashboard_version_tag(), [git], [xfdashboard_version_tag().xfdashboard_version_build()], [xfdashboard_version_tag()])])
 
@@ -27,9 +27,7 @@ m4_define([clutter_minimum_version], [1.12.0])
 m4_define([glib_minimum_version], [2.38])
 m4_define([gio_minimum_version], [2.38])
 m4_define([garcon_minimum_version], [0.2.0])
-m4_define([xfconf_minimum_version], [4.13.0])
-m4_define([xfconf_legacy_minimum_version], [4.10.0])
-m4_define([dbus_glib_minimum_version], [0.98])
+m4_define([xfconf_minimum_version], [4.14.0])
 m4_define([xcomposite_minimum_version], [0.2])
 m4_define([intltool_minimum_version], [0.35])
 m4_define([gtk_minimum_version], [3.2])
@@ -44,7 +42,7 @@ m4_define([xfdashboard_debug_default], [ifelse(xfdashboard_version_tag(), [git],
 dnl ***************************
 dnl *** Initialize autoconf ***
 dnl ***************************
-AC_COPYRIGHT([Copyright (c) 2012-2020 Stephan Haller <nomad@froevel.de>])
+AC_COPYRIGHT([Copyright (c) 2012-2022 Stephan Haller <nomad@froevel.de>])
 AC_INIT([xfdashboard], [xfdashboard_version], [http://docs.xfce.org/apps/xfdashboard/start], [xfdashboard])
 AC_PREREQ([2.50])
 AC_REVISION([xfdashboard_version_build])
@@ -52,7 +50,7 @@ AC_REVISION([xfdashboard_version_build])
 dnl ***************************
 dnl *** Initialize automake ***
 dnl ***************************
-AM_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([1.8 no-dist-gzip dist-bzip2 tar-ustar foreign])
 AM_MAINTAINER_MODE()
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -61,8 +59,8 @@ AC_CONFIG_MACRO_DIR([m4])
 dnl *******************************
 dnl *** Check for UNIX variants ***
 dnl *******************************
-AC_AIX()
-AC_ISC_POSIX()
+AC_USE_SYSTEM_EXTENSIONS
+AC_SEARCH_LIBS([strerror],[cposix])
 
 dnl ********************************
 dnl *** Check for basic programs ***
@@ -112,7 +110,6 @@ AC_SUBST([LIBXFDASHBOARD_VERINFO])
 dnl **********************************
 dnl *** Check for standard headers ***
 dnl **********************************
-AC_HEADER_STDC()
 AC_CHECK_HEADERS([stdlib.h unistd.h locale.h stdio.h errno.h time.h string.h \
                   math.h sys/types.h sys/wait.h memory.h signal.h sys/prctl.h \
                   libintl.h])
@@ -223,19 +220,9 @@ XDT_CHECK_PACKAGE([GLIB], [glib-2.0], [glib_minimum_version], [
 XDT_CHECK_PACKAGE([GIO], [gio-2.0], [gio_minimum_version], [XFDASHBOARD_REQUIRES="$XFDASHBOARD_REQUIRES gio-2.0"])
 XDT_CHECK_PACKAGE([GIO_UNIX], [gio-unix-2.0], [gio_minimum_version], [XFDASHBOARD_REQUIRES="$XFDASHBOARD_REQUIRES gio-unix-2.0"])
 XDT_CHECK_PACKAGE([GARCON], [garcon-1], [garcon_minimum_version], [XFDASHBOARD_REQUIRES="$XFDASHBOARD_REQUIRES garcon-1"])
-XDT_CHECK_PACKAGE([LIBXFCONF], [libxfconf-0], [xfconf_minimum_version], [XFDASHBOARD_REQUIRES="$XFDASHBOARD_REQUIRES libxfconf-0"], [
-	XDT_CHECK_PACKAGE([LIBXFCONF], [libxfconf-0], [xfconf_legacy_minimum_version], [
-		XFDASHBOARD_REQUIRES="$XFDASHBOARD_REQUIRES libxfconf-0"
-
-		XDT_CHECK_PACKAGE([DBUS_GLIB], [dbus-glib-1], [dbus_glib_minimum_version], [
-			ac_dbus_glib=yes
-			XFDASHBOARD_REQUIRES="$XFDASHBOARD_REQUIRES dbus-glib-1"],
-			[ac_dbus_glib=no])
-		AC_DEFINE([XFCONF_LEGACY], [], [Use xfconf < 4.13 to obtain array type])])
-	])
+XDT_CHECK_PACKAGE([LIBXFCONF], [libxfconf-0], [xfconf_minimum_version], [XFDASHBOARD_REQUIRES="$XFDASHBOARD_REQUIRES libxfconf-0"])
 XDT_CHECK_PACKAGE([LIBXFCE4UTIL], [libxfce4util-1.0],[libxfce4util_minimum_version], [XFDASHBOARD_REQUIRES="$XFDASHBOARD_REQUIRES libxfce4util-1.0"])
 XDT_CHECK_PACKAGE([LIBXFCE4UI], [libxfce4ui-2],[libxfce4ui_minimum_version], [XFDASHBOARD_REQUIRES="$XFDASHBOARD_REQUIRES libxfce4ui-2"])
-AM_CONDITIONAL([DBUS_GLIB], [test x"$ac_dbus_glib" = x"yes"])
 
 dnl **********************************************
 dnl *** Check for Clutter and its backend: GDK ***
@@ -307,8 +294,9 @@ dnl *** Substitue package requirements ***
 dnl **************************************
 AC_SUBST(XFDASHBOARD_REQUIRES)
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
 Makefile
+common/Makefile
 data/Makefile
 data/metainfo/Makefile
 data/data/Makefile
@@ -330,15 +318,18 @@ data/themes/xfdashboard-wine/Makefile
 libxfdashboard/libxfdashboard.pc
 libxfdashboard/Makefile
 plugins/Makefile
+plugins/autopin-windows/Makefile
 plugins/clock-view/Makefile
 plugins/example-search-provider/Makefile
 plugins/gnome-shell-search-provider/Makefile
 plugins/hot-corner/Makefile
 plugins/middle-click-window-close/Makefile
+plugins/recently-used-search-provider/Makefile
 po/Makefile.in
 settings/Makefile
 xfdashboard/Makefile
 ])
+AC_OUTPUT
 
 dnl ***************************
 dnl *** Print configuration ***
@@ -365,12 +356,7 @@ echo "  gio-unix:         $GIO_UNIX_VERSION"
 echo "  garcon:           $GARCON_VERSION"
 echo "  libxfce4ui:       $LIBXFCE4UI_VERSION"
 echo "  libxfce4util:     $LIBXFCE4UTIL_VERSION"
-if test "x$ac_dbus_glib" = "xyes" ; then
-echo "  libxconf:         $LIBXFCONF_VERSION (legacy)"
-echo "  dbus-glib:        $DBUS_GLIB_VERSION"
-else
 echo "  libxconf:         $LIBXFCONF_VERSION"
-fi
 echo
 echo "Tools used:"
 echo "  glib-genmarshal:  $GLIB_GENMARSHAL"

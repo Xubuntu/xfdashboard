@@ -1,7 +1,7 @@
 /*
  * application-tracker: A singleton managing states of applications
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 
 #include <libxfdashboard/application-tracker.h>
 
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/application-database.h>
 #include <libxfdashboard/window-tracker.h>
 #include <libxfdashboard/marshal.h>
@@ -62,9 +63,6 @@ enum
 static guint XfdashboardApplicationTrackerSignals[SIGNAL_LAST]={ 0, };
 
 /* IMPLEMENTATION: Private variables and methods */
-
-/* Single instance of application database */
-static XfdashboardApplicationTracker*		_xfdashboard_application_tracker=NULL;
 
 typedef struct _XfdashboardApplicationTrackerItem	XfdashboardApplicationTrackerItem;
 struct _XfdashboardApplicationTrackerItem
@@ -261,15 +259,16 @@ static XfdashboardApplicationTrackerItem* _xfdashboard_application_tracker_find_
 /* Get process' environment set from requested PID when running at Linux
  * by reading in file in proc filesystem.
  */
-static GHashTable* _xfdashboard_application_tracker_get_environment_from_pid(gint inPID)
+static GHashTable* _xfdashboard_application_tracker_get_environment_from_pid(XfdashboardApplicationTracker *self, gint inPID)
 {
-	GHashTable		*environments;
-	gchar			*procEnvFile;
-	gchar			*envContent;
-	gsize			envLength;
-	GError			*error;
-	gchar			*iter;
+	GHashTable							*environments;
+	gchar								*procEnvFile;
+	gchar								*envContent;
+	gsize								envLength;
+	GError								*error;
+	gchar								*iter;
 
+	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATION_TRACKER(self), NULL);
 	g_return_val_if_fail(inPID>0, NULL);
 
 	error=NULL;
@@ -279,6 +278,7 @@ static GHashTable* _xfdashboard_application_tracker_get_environment_from_pid(gin
 	if(!environments)
 	{
 		g_warning("Could not create environment lookup table for PID %d", inPID);
+
 		return(NULL);
 	}
 
@@ -293,7 +293,7 @@ static GHashTable* _xfdashboard_application_tracker_get_environment_from_pid(gin
 	procEnvFile=g_strdup_printf("/proc/%d/environ", inPID);
 	if(!g_file_get_contents(procEnvFile, &envContent, &envLength, &error))
 	{
-		XFDASHBOARD_DEBUG(_xfdashboard_application_tracker, APPLICATIONS,
+		XFDASHBOARD_DEBUG(self, APPLICATIONS,
 							"Could not read environment varibles for PID %d at %s: %s",
 							inPID,
 							procEnvFile,
@@ -309,7 +309,7 @@ static GHashTable* _xfdashboard_application_tracker_get_environment_from_pid(gin
 		return(NULL);
 	}
 
-	XFDASHBOARD_DEBUG(_xfdashboard_application_tracker, APPLICATIONS,
+	XFDASHBOARD_DEBUG(self, APPLICATIONS,
 						"environment set for PID %d at %s is %lu bytes long",
 						inPID,
 						procEnvFile,
@@ -411,7 +411,7 @@ static GHashTable* _xfdashboard_application_tracker_get_environment_from_pid(gin
 /* Fallback funtion to get process' environment set from requested PID
  * when running at an unsupported system. It just simply returns NULL.
  */
-static GHashTable* _xfdashboard_application_tracker_get_environment_from_pid(gint inPID)
+static GHashTable* _xfdashboard_application_tracker_get_environment_from_pid(XfdashboardApplicationTracker *self, gint inPID)
 {
 	static gboolean		wasWarningPrinted=FALSE;
 
@@ -458,7 +458,7 @@ static GAppInfo* _xfdashboard_application_tracker_get_desktop_id_from_environmen
 	}
 
 	/* Get hash-table with environment variables found for window's PID */
-	environments=_xfdashboard_application_tracker_get_environment_from_pid(windowPID);
+	environments=_xfdashboard_application_tracker_get_environment_from_pid(self, windowPID);
 	if(!environments)
 	{
 		XFDASHBOARD_DEBUG(self, APPLICATIONS,
@@ -548,177 +548,6 @@ static GAppInfo* _xfdashboard_application_tracker_get_desktop_id_from_environmen
 	return(foundAppInfo);
 }
 
-/* Get desktop ID from window names.
- * Callee is responsible to free result with g_object_unref().
- */
-static GAppInfo* _xfdashboard_application_tracker_get_desktop_id_from_window_names(XfdashboardApplicationTracker *self,
-																					XfdashboardWindowTrackerWindow *inWindow)
-{
-	XfdashboardApplicationTrackerPrivate	*priv;
-	GAppInfo								*foundAppInfo;
-	gchar									**names;
-	gchar									**iter;
-	GList									*apps;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATION_TRACKER(self), NULL);
-	g_return_val_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inWindow), NULL);
-
-	priv=self->priv;
-	foundAppInfo=NULL;
-
-	/* Get list of applications */
-	apps=xfdashboard_application_database_get_all_applications(priv->appDatabase);
-
-	/* Get window's names */
-	names=xfdashboard_window_tracker_window_get_instance_names(inWindow);
-
-	/* Iterate through window's names to try to find matching desktop file */
-	iter=names;
-	while(iter && *iter)
-	{
-		GAppInfo							*appInfo;
-		gchar								*iterName;
-		gchar								*iterNameLowerCase;
-
-		/* Build desktop ID from iterated name */
-		if(!g_str_has_suffix(*iter, ".desktop")) iterName=g_strconcat(*iter, ".desktop", NULL);
-			else iterName=g_strdup(*iter);
-
-		iterNameLowerCase=g_utf8_strdown(iterName, -1);
-
-		/* Lookup application from unmodified name */
-		appInfo=xfdashboard_application_database_lookup_desktop_id(priv->appDatabase, iterName);
-
-		/* Lookup application from to-lower-case converted name if previous
-		 * lookup with unmodified name failed.
-		 */
-		if(!appInfo)
-		{
-			/* Lookup application from lower-case name */
-			appInfo=xfdashboard_application_database_lookup_desktop_id(priv->appDatabase, iterNameLowerCase);
-		}
-
-		/* If no application was found for the name it may be an application
-		 * located in a subdirectory. Then the desktop ID is prefixed with
-		 * the subdirectory's name followed by a dash. So iterate through all
-		 * applications and lookup with glob pattern '*-' followed by name
-		 * and suffix '.desktop'.
-		 */
-		if(!appInfo)
-		{
-			GList							*iterApps;
-			GList							*foundSubdirApps;
-			gchar							*globName;
-			GPatternSpec					*globPattern;
-			GAppInfo						*globAppInfo;
-
-			/* Build glob pattern */
-			globAppInfo=NULL;
-			globName=g_strconcat("*-", iterNameLowerCase, NULL);
-			globPattern=g_pattern_spec_new(globName);
-
-			/* Iterate through application and collect applications matching
-			 * glob pattern.
-			 */
-			foundSubdirApps=NULL;
-			for(iterApps=apps; iterApps; iterApps=g_list_next(iterApps))
-			{
-				if(!G_IS_APP_INFO(iterApps->data)) continue;
-				globAppInfo=G_APP_INFO(iterApps->data);
-
-				if(g_pattern_match_string(globPattern, g_app_info_get_id(globAppInfo)))
-				{
-					foundSubdirApps=g_list_prepend(foundSubdirApps, globAppInfo);
-					XFDASHBOARD_DEBUG(self, APPLICATIONS,
-										"Found possible application '%s' for window '%s' using pattern '%s'",
-										g_app_info_get_id(globAppInfo),
-										xfdashboard_window_tracker_window_get_name(inWindow),
-										globName);
-				}
-			}
-
-			/* If exactly one application was collected because it matched
-			 * the glob pattern then we found the application.
-			 */
-			if(g_list_length(foundSubdirApps)==1)
-			{
-				appInfo=G_APP_INFO(g_object_ref(G_OBJECT(foundSubdirApps->data)));
-
-				XFDASHBOARD_DEBUG(self, APPLICATIONS,
-									"Found exactly one application named '%s' for window '%s' using pattern '%s'",
-									g_app_info_get_id(appInfo),
-									xfdashboard_window_tracker_window_get_name(inWindow),
-									globName);
-			}
-
-			/* Release allocated resources */
-			if(foundSubdirApps) g_list_free(foundSubdirApps);
-			if(globPattern) g_pattern_spec_free(globPattern);
-			if(globName) g_free(globName);
-		}
-
-		/* If we still did not find an application continue with next
-		 * name in list.
-		 */
-		if(!appInfo)
-		{
-			/* Release allocated resources */
-			if(iterName) g_free(iterName);
-			if(iterNameLowerCase) g_free(iterNameLowerCase);
-
-			/* Continue with next name in list */
-			iter++;
-			continue;
-		}
-
-		/* Check if found application info matches previous one. If it does not match
-		 * the desktop IDs found previously are ambigous, so return NULL result.
-		 */
-		if(foundAppInfo &&
-			!g_app_info_equal(foundAppInfo, appInfo))
-		{
-			XFDASHBOARD_DEBUG(self, APPLICATIONS,
-								"Resolved window names of '%s' are ambiguous - discarding desktop IDs '%s' and '%s'",
-								xfdashboard_window_tracker_window_get_name(inWindow),
-								g_app_info_get_id(foundAppInfo),
-								g_app_info_get_id(appInfo));
-
-			/* Release allocated resources */
-			if(iterName) g_free(iterName);
-			if(iterNameLowerCase) g_free(iterNameLowerCase);
-			if(foundAppInfo) g_object_unref(foundAppInfo);
-			if(appInfo) g_object_unref(appInfo);
-			if(names) g_strfreev(names);
-			if(apps) g_list_free_full(apps, g_object_unref);
-
-			return(NULL);
-		}
-
-		/* If it is the first application info found, remember it */
-		if(!foundAppInfo) foundAppInfo=g_object_ref(appInfo);
-
-		/* Release allocated resources */
-		if(iterName) g_free(iterName);
-		if(iterNameLowerCase) g_free(iterNameLowerCase);
-		if(appInfo) g_object_unref(appInfo);
-
-		/* Continue with next name in list */
-		iter++;
-	}
-
-	/* Release allocated resources */
-	if(names) g_strfreev(names);
-	if(apps) g_list_free_full(apps, g_object_unref);
-
-	/* Return found application info */
-	XFDASHBOARD_DEBUG(self, APPLICATIONS,
-						"Resolved window names of '%s' to desktop ID '%s'",
-						xfdashboard_window_tracker_window_get_name(inWindow),
-						foundAppInfo ? g_app_info_get_id(foundAppInfo) : "<nil>");
-
-	return(foundAppInfo);
-}
-
 /* A window was created */
 static void _xfdashboard_application_tracker_on_window_opened(XfdashboardApplicationTracker *self,
 																XfdashboardWindowTrackerWindow *inWindow,
@@ -763,7 +592,7 @@ static void _xfdashboard_application_tracker_on_window_opened(XfdashboardApplica
 
 	/* Try to find application for window */
 	appInfo=_xfdashboard_application_tracker_get_desktop_id_from_environment(self, inWindow);
-	if(!appInfo) appInfo=_xfdashboard_application_tracker_get_desktop_id_from_window_names(self, inWindow);
+	if(!appInfo) appInfo=xfdashboard_window_tracker_window_get_appinfo(inWindow);
 
 	/* If we could not resolve window to a desktop application info, then stop here */
 	if(!appInfo)
@@ -780,7 +609,7 @@ static void _xfdashboard_application_tracker_on_window_opened(XfdashboardApplica
 						xfdashboard_window_tracker_window_get_name(inWindow),
 						g_app_info_get_id(appInfo));
 
-	/* Create application tracker if no one exists for application and window ... */
+	/* Create application tracker item if no one exists for application and window ... */
 	item= _xfdashboard_application_tracker_find_item_by_app_info(self, appInfo);
 	if(!item)
 	{
@@ -927,26 +756,6 @@ static void _xfdashboard_application_tracker_on_active_window_changed(Xfdashboar
 
 /* IMPLEMENTATION: GObject */
 
-/* Construct this object */
-static GObject* _xfdashboard_application_tracker_constructor(GType inType,
-																guint inNumberConstructParams,
-																GObjectConstructParam *inConstructParams)
-{
-	GObject									*object;
-
-	if(!_xfdashboard_application_tracker)
-	{
-		object=G_OBJECT_CLASS(xfdashboard_application_tracker_parent_class)->constructor(inType, inNumberConstructParams, inConstructParams);
-		_xfdashboard_application_tracker=XFDASHBOARD_APPLICATION_TRACKER(object);
-	}
-		else
-		{
-			object=g_object_ref(G_OBJECT(_xfdashboard_application_tracker));
-		}
-
-	return(object);
-}
-
 /* Dispose this object */
 static void _xfdashboard_application_tracker_dispose(GObject *inObject)
 {
@@ -977,19 +786,6 @@ static void _xfdashboard_application_tracker_dispose(GObject *inObject)
 	G_OBJECT_CLASS(xfdashboard_application_tracker_parent_class)->dispose(inObject);
 }
 
-/* Finalize this object */
-static void _xfdashboard_application_tracker_finalize(GObject *inObject)
-{
-	/* Release allocated resources finally, e.g. unset singleton */
-	if(G_LIKELY(G_OBJECT(_xfdashboard_application_tracker)==inObject))
-	{
-		_xfdashboard_application_tracker=NULL;
-	}
-
-	/* Call parent's class dispose method */
-	G_OBJECT_CLASS(xfdashboard_application_tracker_parent_class)->finalize(inObject);
-}
-
 /* Class initialization
  * Override functions in parent classes and define properties
  * and signals
@@ -999,9 +795,7 @@ static void xfdashboard_application_tracker_class_init(XfdashboardApplicationTra
 	GObjectClass		*gobjectClass=G_OBJECT_CLASS(klass);
 
 	/* Override functions */
-	gobjectClass->constructor=_xfdashboard_application_tracker_constructor;
 	gobjectClass->dispose=_xfdashboard_application_tracker_dispose;
-	gobjectClass->finalize=_xfdashboard_application_tracker_finalize;
 
 	/* Define signals */
 	XfdashboardApplicationTrackerSignals[SIGNAL_STATE_CHANGED]=
@@ -1029,8 +823,8 @@ static void xfdashboard_application_tracker_init(XfdashboardApplicationTracker *
 
 	/* Set default values */
 	priv->runningApps=NULL;
-	priv->appDatabase=xfdashboard_application_database_get_default();
-	priv->windowTracker=xfdashboard_window_tracker_get_default();
+	priv->appDatabase=xfdashboard_core_get_application_database(NULL);
+	priv->windowTracker=xfdashboard_core_get_window_tracker(NULL);
 
 	/* Load application database if not done already */
 	if(!xfdashboard_application_database_is_loaded(priv->appDatabase))
@@ -1054,15 +848,6 @@ static void xfdashboard_application_tracker_init(XfdashboardApplicationTracker *
 }
 
 /* IMPLEMENTATION: Public API */
-
-/* Get single instance of application */
-XfdashboardApplicationTracker* xfdashboard_application_tracker_get_default(void)
-{
-	GObject									*singleton;
-
-	singleton=g_object_new(XFDASHBOARD_TYPE_APPLICATION_TRACKER, NULL);
-	return(XFDASHBOARD_APPLICATION_TRACKER(singleton));
-}
 
 /* Get running state of application */
 gboolean xfdashboard_application_tracker_is_running_by_desktop_id(XfdashboardApplicationTracker *self,

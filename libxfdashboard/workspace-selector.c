@@ -1,7 +1,7 @@
 /*
  * workspace-selector: Workspace selector box
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
 #include <libxfdashboard/enums.h>
 #include <libxfdashboard/window-tracker.h>
 #include <libxfdashboard/live-workspace.h>
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/drop-action.h>
 #include <libxfdashboard/windows-view.h>
 #include <libxfdashboard/live-window.h>
@@ -393,8 +393,8 @@ static void _xfdashboard_workspace_selector_on_workspace_clicked(XfdashboardWork
 	/* Active workspace */
 	xfdashboard_window_tracker_workspace_activate(xfdashboard_live_workspace_get_workspace(liveWorkspace));
 
-	/* Quit application */
-	xfdashboard_application_suspend_or_quit(NULL);
+	/* Request core to quit */
+	xfdashboard_core_quit(NULL);
 }
 
 /* A workspace was destroyed */
@@ -1099,8 +1099,8 @@ static gboolean _xfdashboard_workspace_selector_focusable_activate_selection(Xfd
 		/* Activate workspace */
 		xfdashboard_window_tracker_workspace_activate(workspace);
 
-		/* Quit application */
-		xfdashboard_application_suspend_or_quit(NULL);
+		/* Request core to quit */
+		xfdashboard_core_quit(NULL);
 
 		/* Activation was successful */
 		return(TRUE);
@@ -1315,7 +1315,7 @@ static void xfdashboard_workspace_selector_init(XfdashboardWorkspaceSelector *se
 	priv=self->priv=xfdashboard_workspace_selector_get_instance_private(self);
 
 	/* Set up default values */
-	priv->windowTracker=xfdashboard_window_tracker_get_default();
+	priv->windowTracker=xfdashboard_core_get_window_tracker(NULL);
 	priv->activeWorkspace=NULL;
 	priv->spacing=0.0f;
 	priv->orientation=DEFAULT_ORIENTATION;

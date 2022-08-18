@@ -1,7 +1,7 @@
 /*
  * plugin: Plugin functions for 'gnome-shell-search-provider'
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,7 +102,7 @@ static void _xfdashboard_gnome_shell_search_provider_plugin_on_file_monitor_chan
 	error=NULL;
 
 	/* Get search manager where search providers were registered at */
-	searchManager=xfdashboard_search_manager_get_default();
+	searchManager=xfdashboard_core_get_search_manager(NULL);
 
 	/* Get file path */
 	filePath=g_file_get_path(inFile);
@@ -120,11 +120,17 @@ static void _xfdashboard_gnome_shell_search_provider_plugin_on_file_monitor_chan
 			if(success)
 			{
 				priv->providers=g_list_prepend(priv->providers, g_strdup(providerName));
-				g_debug("Successfully registered Gnome-Shell search provider at file '%s' with ID '%s'", filePath, providerName);
+				XFDASHBOARD_DEBUG(self, PLUGINS,
+									"Successfully registered Gnome-Shell search provider at file '%s' with ID '%s'",
+									filePath,
+									providerName);
 			}
 				else
 				{
-					g_debug("Failed to register Gnome-Shell search provider at file '%s' with ID '%s'", filePath, providerName);
+					XFDASHBOARD_DEBUG(self, PLUGINS,
+										"Failed to register Gnome-Shell search provider at file '%s' with ID '%s'",
+										filePath,
+										providerName);
 				}
 		}
 			else
@@ -170,11 +176,17 @@ static void _xfdashboard_gnome_shell_search_provider_plugin_on_file_monitor_chan
 					}
 				}
 
-				g_debug("Successfully unregistered Gnome-Shell search provider at file '%s' with ID '%s'", filePath, providerName);
+				XFDASHBOARD_DEBUG(self, PLUGINS,
+									"Successfully unregistered Gnome-Shell search provider at file '%s' with ID '%s'",
+									filePath,
+									providerName);
 			}
 				else
 				{
-					g_debug("Failed to unregister Gnome-Shell search provider at file '%s' with ID '%s'", filePath, providerName);
+					XFDASHBOARD_DEBUG(self, PLUGINS,
+										"Failed to unregister Gnome-Shell search provider at file '%s' with ID '%s'",
+										filePath,
+										providerName);
 				}
 		}
 
@@ -205,15 +217,18 @@ static void plugin_enable(XfdashboardPlugin *self, gpointer inUserData)
 
 	/* Get plugin's ID */
 	g_object_get(G_OBJECT(self), "id", &pluginID, NULL);
-	g_debug("Enabling plugin '%s'", pluginID);
+	XFDASHBOARD_DEBUG(self, PLUGINS,
+						"Enabling plugin '%s'",
+						pluginID);
 
 	/* Get path where Gnome-Shell search providers are stored at */
 	gnomeShellSearchProvidersPath=g_file_new_for_path(GNOME_SHELL_PROVIDERS_PATH);
-	g_debug("Scanning directory '%s' for Gnome-Shell search providers",
-				GNOME_SHELL_PROVIDERS_PATH);
+	XFDASHBOARD_DEBUG(self, PLUGINS,
+						"Scanning directory '%s' for Gnome-Shell search providers",
+						GNOME_SHELL_PROVIDERS_PATH);
 
 	/* Get search manager where to register search providers at */
-	searchManager=xfdashboard_search_manager_get_default();
+	searchManager=xfdashboard_core_get_search_manager(NULL);
 
 	/* Create enumerator for search providers path to iterate through path and
 	 * register search providers found.
@@ -272,11 +287,17 @@ static void plugin_enable(XfdashboardPlugin *self, gpointer inUserData)
 				if(success)
 				{
 					priv->providers=g_list_prepend(priv->providers, g_strdup(providerName));
-					g_debug("Successfully registered Gnome-Shell search provider at file '%s' with ID '%s'", infoFilename, providerName);
+					XFDASHBOARD_DEBUG(self, PLUGINS,
+										"Successfully registered Gnome-Shell search provider at file '%s' with ID '%s'",
+										infoFilename,
+										providerName);
 				}
 					else
 					{
-						g_debug("Failed to register Gnome-Shell search provider at file '%s' with ID '%s'", infoFilename, providerName);
+						XFDASHBOARD_DEBUG(self, PLUGINS,
+											"Failed to register Gnome-Shell search provider at file '%s' with ID '%s'",
+											infoFilename,
+											providerName);
 					}
 			}
 				else
@@ -318,8 +339,9 @@ static void plugin_enable(XfdashboardPlugin *self, gpointer inUserData)
 	priv->fileMonitor=g_file_monitor_directory(gnomeShellSearchProvidersPath, G_FILE_MONITOR_NONE, NULL, &error);
 	if(priv->fileMonitor)
 	{
-		g_debug("Created file monitor to watch for changed Gnome-Shell search providers at %s",
-					GNOME_SHELL_PROVIDERS_PATH);
+		XFDASHBOARD_DEBUG(self, PLUGINS,
+							"Created file monitor to watch for changed Gnome-Shell search providers at %s",
+						GNOME_SHELL_PROVIDERS_PATH);
 
 		g_signal_connect(priv->fileMonitor,
 							"changed",
@@ -344,9 +366,10 @@ static void plugin_enable(XfdashboardPlugin *self, gpointer inUserData)
 		}
 
 	/* Release allocated resources */
-	g_debug("Enabled plugin '%s' with %d search providers",
-				pluginID,
-				g_list_length(priv->providers));
+	XFDASHBOARD_DEBUG(self, PLUGINS,
+						"Enabled plugin '%s' with %d search providers",
+						pluginID,
+						g_list_length(priv->providers));
 
 	if(pluginID) g_free(pluginID);
 	if(enumerator) g_object_unref(enumerator);
@@ -370,9 +393,10 @@ static void plugin_disable(XfdashboardPlugin *self, gpointer inUserData)
 
 	/* Get plugin's ID */
 	g_object_get(G_OBJECT(self), "id", &pluginID, NULL);
-	g_debug("Disabling plugin '%s' with %d search providers",
-				pluginID,
-				g_list_length(priv->providers));
+	XFDASHBOARD_DEBUG(self, PLUGINS,
+						"Disabling plugin '%s' with %d search providers",
+						pluginID,
+						g_list_length(priv->providers));
 
 	/* At first remove file monitor for path where search providers are stored */
 	if(priv->fileMonitor)
@@ -380,12 +404,13 @@ static void plugin_disable(XfdashboardPlugin *self, gpointer inUserData)
 		g_object_unref(priv->fileMonitor);
 		priv->fileMonitor=NULL;
 
-		g_debug("Removed file monitor to watch for changed Gnome-Shell search providers at %s",
-					GNOME_SHELL_PROVIDERS_PATH);
+		XFDASHBOARD_DEBUG(self, PLUGINS,
+							"Removed file monitor to watch for changed Gnome-Shell search providers at %s",
+							GNOME_SHELL_PROVIDERS_PATH);
 	}
 
 	/* Get search manager where search providers were registered at */
-	searchManager=xfdashboard_search_manager_get_default();
+	searchManager=xfdashboard_core_get_search_manager(NULL);
 
 	/* Unregister registered search providers */
 	for(iter=priv->providers; iter; iter=g_list_next(iter))
@@ -397,11 +422,15 @@ static void plugin_disable(XfdashboardPlugin *self, gpointer inUserData)
 			success=xfdashboard_search_manager_unregister(searchManager, providerName);
 			if(success)
 			{
-				g_debug("Successfully unregistered Gnome-Shell search provider with ID '%s'", providerName);
+				XFDASHBOARD_DEBUG(self, PLUGINS,
+									"Successfully unregistered Gnome-Shell search provider with ID '%s'",
+									providerName);
 			}
 				else
 				{
-					g_debug("Failed to unregister Gnome-Shell search provider with ID '%s'", providerName);
+					XFDASHBOARD_DEBUG(self, PLUGINS,
+										"Failed to unregister Gnome-Shell search provider with ID '%s'",
+										providerName);
 				}
 		}
 	}
@@ -409,7 +438,9 @@ static void plugin_disable(XfdashboardPlugin *self, gpointer inUserData)
 	g_object_unref(searchManager);
 
 	/* Release allocated resources */
-	g_debug("Disabled plugin '%s'", pluginID);
+	XFDASHBOARD_DEBUG(self, PLUGINS,
+						"Disabled plugin '%s'",
+						pluginID);
 
 	if(pluginID) g_free(pluginID);
 	if(priv->providers)

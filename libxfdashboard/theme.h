@@ -2,7 +2,7 @@
  * theme: Top-level theme object (parses key file and manages loading
  *        resources like css style files, xml layout files etc.)
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,12 @@ typedef struct _XfdashboardTheme				XfdashboardTheme;
 typedef struct _XfdashboardThemeClass			XfdashboardThemeClass;
 typedef struct _XfdashboardThemePrivate			XfdashboardThemePrivate;
 
+/**
+ * XfdashboardTheme:
+ *
+ * The #XfdashboardTheme structure contains only private data and
+ * should be accessed using the provided API
+ */
 struct _XfdashboardTheme
 {
 	/*< private >*/
@@ -59,6 +65,11 @@ struct _XfdashboardTheme
 	XfdashboardThemePrivate		*priv;
 };
 
+/**
+ * XfdashboardThemeClass:
+ *
+ * The #XfdashboardThemeClass structure contains only private data
+ */
 struct _XfdashboardThemeClass
 {
 	/*< private >*/
@@ -70,15 +81,30 @@ struct _XfdashboardThemeClass
 };
 
 /* Errors */
+/**
+ * XFDASHBOARD_THEME_ERROR:
+ *
+ * Error domain for theme errors.
+ * Errors in this domain will be from the #XfdashboardThemeError enumeration.
+ */
 #define XFDASHBOARD_THEME_ERROR					(xfdashboard_theme_error_quark())
 
 GQuark xfdashboard_theme_error_quark(void);
 
+/**
+ * XfdashboardThemeError:
+ * @XFDASHBOARD_THEME_ERROR_THEME_NOT_FOUND: The theme with requested name was
+ *   not found
+ * @XFDASHBOARD_THEME_ERROR_ALREADY_LOADED: The theme was already loaded
+ *
+ * Error codes returned by loading theme.
+ */
 typedef enum /*< prefix=XFDASHBOARD_THEME_ERROR >*/
 {
 	XFDASHBOARD_THEME_ERROR_THEME_NOT_FOUND,
 	XFDASHBOARD_THEME_ERROR_ALREADY_LOADED
-} XfdashboardThemeErrorEnum;
+} XfdashboardThemeError;
+
 
 /* Public API */
 GType xfdashboard_theme_get_type(void) G_GNUC_CONST;

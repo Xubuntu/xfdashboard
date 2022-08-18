@@ -2,7 +2,7 @@
  * collapse-box: A collapsable container for one actor
  *               with capability to expand
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #include <glib/gi18n-lib.h>
 
 #include <libxfdashboard/enums.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/focus-manager.h>
 #include <libxfdashboard/animation.h>
 #include <libxfdashboard/utils.h>
@@ -160,18 +161,14 @@ static void _xfdashboard_collapse_box_on_child_actor_request_mode_changed(Xfdash
 																			GParamSpec *inSpec,
 																			gpointer inUserData)
 {
-	XfdashboardCollapseBoxPrivate	*priv;
-	ClutterActor					*child;
+	XfdashboardCollapseBoxPrivate	*priv=self->priv;
 	ClutterRequestMode				requestMode;
 
 	g_return_if_fail(XFDASHBOARD_IS_COLLAPSE_BOX(self));
 	g_return_if_fail(CLUTTER_IS_ACTOR(inUserData));
 
-	priv=self->priv;
-	child=CLUTTER_ACTOR(inUserData);
-
 	/* Check if property changed happened at child we remembered */
-	g_return_if_fail(child==priv->child);
+	g_return_if_fail(CLUTTER_ACTOR(inUserData)==priv->child);
 
 	/* Apply actor's request mode to us */
 	requestMode=clutter_actor_get_request_mode(priv->child);
@@ -677,7 +674,7 @@ static void xfdashboard_collapse_box_init(XfdashboardCollapseBox *self)
 	priv->collapseProgress=0.0f;
 	priv->child=NULL;
 	priv->requestModeSignalID=0;
-	priv->focusManager=xfdashboard_focus_manager_get_default();
+	priv->focusManager=xfdashboard_core_get_focus_manager(NULL);
 	priv->focusChangedSignalID=0;
 	priv->expandedByPointer=FALSE;
 	priv->expandedByFocus=FALSE;
@@ -741,6 +738,7 @@ void xfdashboard_collapse_box_set_collapsed(XfdashboardCollapseBox *self, gboole
 		finals=xfdashboard_animation_defaults_new(1, "collapse-progress", G_TYPE_FLOAT, inCollapsed ? 0.0 : 1.0);
 		animation=xfdashboard_animation_new_with_values(XFDASHBOARD_ACTOR(self),
 														inCollapsed ? "collapse" : "expand",
+														XFDASHBOARD_ANIMATION_CREATE_FLAG_ALLOW_EMPTY,
 														initials,
 														finals);
 

@@ -29,7 +29,6 @@ libxfdashboard_la_headers = \
 	action-button.h \
 	actor.h \
 	animation.h \
-	application.h \
 	application-button.h \
 	application-database.h \
 	application-tracker.h \
@@ -44,6 +43,7 @@ libxfdashboard_la_headers = \
 	click-action.h \
 	collapse-box.h \
 	compat.h \
+	core.h \
 	css-selector.h \
 	debug.h \
 	desktop-app-info.h \
@@ -55,6 +55,7 @@ libxfdashboard_la_headers = \
 	fill-box-layout.h \
 	focusable.h \
 	focus-manager.h \
+	gradient-color.h \
 	image-content.h \
 	label.h \
 	live-window.h \
@@ -63,6 +64,7 @@ libxfdashboard_la_headers = \
 	model.h \
 	outline-effect.h \
 	plugin.h \
+	plugin-settings.h \
 	plugins-manager.h \
 	popup-menu.h \
 	popup-menu-item.h \
@@ -76,6 +78,7 @@ libxfdashboard_la_headers = \
 	search-result-container.h \
 	search-result-set.h \
 	search-view.h \
+	settings.h \
 	stage.h \
 	stage-interface.h \
 	stylable.h \
@@ -109,7 +112,6 @@ libxfdashboard_la_SOURCES = \
 	action-button.c \
 	actor.c \
 	animation.c \
-	application.c \
 	application-button.c \
 	application-database.c \
 	application-tracker.c \
@@ -123,6 +125,7 @@ libxfdashboard_la_SOURCES = \
 	button.c \
 	click-action.c \
 	collapse-box.c \
+	core.c \
 	css-selector.c \
 	debug.c \
 	desktop-app-info.c \
@@ -134,6 +137,7 @@ libxfdashboard_la_SOURCES = \
 	fill-box-layout.c \
 	focusable.c \
 	focus-manager.c \
+	gradient-color.c \
 	image-content.c \
 	label.c \
 	live-window.c \
@@ -142,6 +146,7 @@ libxfdashboard_la_SOURCES = \
 	model.c \
 	outline-effect.c \
 	plugin.c \
+	plugin-settings.c \
 	plugins-manager.c \
 	popup-menu.c \
 	popup-menu-item.c \
@@ -155,6 +160,7 @@ libxfdashboard_la_SOURCES = \
 	search-result-container.c \
 	search-result-set.c \
 	search-view.c \
+	settings.c \
 	stage.c \
 	stage-interface.c \
 	stylable.c \
@@ -189,7 +195,6 @@ libxfdashboard_la_CFLAGS = \
 	$(GIO_CFLAGS) \
 	$(GIO_UNIX_CFLAGS) \
 	$(GARCON_CFLAGS) \
-	$(LIBXFCONF_CFLAGS) \
 	$(LIBXFCE4UTIL_CFLAGS) \
 	$(LIBXFCE4UI_CFLAGS) \
 	$(PLATFORM_CFLAGS)
@@ -202,18 +207,9 @@ libxfdashboard_la_LIBADD = \
 	$(GIO_LIBS) \
 	$(GIO_UNIX_LIBS) \
 	$(GARCON_LIBS) \
-	$(LIBXFCONF_LIBS) \
 	$(LIBXFCE4UTIL_LIBS) \
 	$(LIBXFCE4UI_LIBS) \
 	$(LIBM)
-
-if DBUS_GLIB
-libxfdashboard_la_CFLAGS += \
-	$(DBUS_GLIB_CFLAGS)
-
-libxfdashboard_la_LIBADD += \
-	$(DBUS_GLIB_LIBS)
-endif
 
 libxfdashboard_la_LDFLAGS = \
 	-export-dynamic \

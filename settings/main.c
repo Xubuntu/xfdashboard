@@ -1,7 +1,7 @@
 /*
  * main: Common functions, shared data and main entry point of application
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,20 +38,33 @@
 /* Main entry point */
 int main(int argc, char **argv)
 {
-	XfdashboardSettings		*settings=NULL;
-	GError					*error=NULL;
-	gboolean				optionsVersion=FALSE;
-	Window					optionsSocketID=0;
-	GOptionEntry			options[]=	{
-											{ "socket-id", 's', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_INT, &optionsSocketID, N_("Settings manager socket"), N_("SOCKET ID") },
-											{ "version", 'V', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_NONE, &optionsVersion, N_("Version information"), NULL },
-											{ NULL }
-										};
+	XfdashboardSettingsApp		*settings=NULL;
+	GError						*error=NULL;
+	gboolean					optionsVersion=FALSE;
+	Window						optionsSocketID=0;
+	GOptionEntry				options[]=	{
+												{ "socket-id", 's', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_INT, &optionsSocketID, N_("Settings manager socket"), N_("SOCKET ID") },
+												{ "version", 'V', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_NONE, &optionsVersion, N_("Version information"), NULL },
+												{ NULL }
+											};
 
 #ifdef ENABLE_NLS
 	/* Set up localization */
 	xfce_textdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR, "UTF-8");
 #endif
+
+	/* Initialize Xfconf */
+	if(G_UNLIKELY(!xfconf_init(&error)))
+	{
+		if(G_LIKELY(error))
+		{
+			g_error("Failed to initialize xfconf: %s",
+						error ? error->message : "Unknown error");
+			if(error) g_error_free(error);
+		}
+
+		return(1);
+	}
 
 	/* Initialize GTK+ */
 	if(G_UNLIKELY(!gtk_init_with_args(&argc, &argv, _("."), options, PACKAGE, &error)))
@@ -76,33 +89,14 @@ int main(int argc, char **argv)
 		return(0);
 	}
 
-	/* Initialize Xfconf */
-	if(G_UNLIKELY(!xfconf_init(&error)))
-	{
-		if(G_LIKELY(error))
-		{
-			g_error("Failed to initialize xfconf: %s",
-					error ? error->message : "Unknown error");
-			if(error) g_error_free(error);
-		}
-
-		return(1);
-	}
-
 	/* Create settings instance */
-	settings=xfdashboard_settings_new();
+	settings=xfdashboard_settings_app_new();
 	if(G_UNLIKELY(!settings))
 	{
 		g_error("Could not create the settings dialog.");
 
-		/* Shutdown xfconf */
-		xfconf_shutdown();
-
 		return(1);
 	}
-
-	/* Register GValue transformation functions */
-	xfdashboard_register_gvalue_transformation_funcs();
 
 	/* Create and show settings dialog as normal application window
 	 * if no socket ID for xfce settings manager is given ...
@@ -112,7 +106,7 @@ int main(int argc, char **argv)
 		GtkWidget			*dialog;
 
 		/* Create and show dialog */
-		dialog=xfdashboard_settings_create_dialog(settings);
+		dialog=xfdashboard_settings_app_create_dialog(settings);
 		gtk_widget_show(dialog);
 
 		/* Connect signals */
@@ -135,7 +129,7 @@ int main(int argc, char **argv)
 			GtkWidget		*plug;
 
 			/* Create "pluggable" dialog for xfce settings manager */
-			plug=xfdashboard_settings_create_plug(settings, optionsSocketID);
+			plug=xfdashboard_settings_app_create_plug(settings, optionsSocketID);
 			gtk_widget_show(plug);
 
 			/* Connect signals */
@@ -153,9 +147,6 @@ int main(int argc, char **argv)
 
 	/* Release allocated resources */
 	g_object_unref(settings);
-
-	/* Shutdown xfconf */
-	xfconf_shutdown();
 
 	/* Return from application */
 	return(0);
