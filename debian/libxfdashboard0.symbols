@@ -23,6 +23,7 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_actor_get_stylable_properties@Base 0.6.0
  xfdashboard_actor_get_stylable_properties_full@Base 0.6.0
  xfdashboard_actor_get_type@Base 0.6.0
+ xfdashboard_actor_get_visibility@Base 1.0.0
  xfdashboard_actor_init@Base 0.6.0
  xfdashboard_actor_install_stylable_property@Base 0.6.0
  xfdashboard_actor_install_stylable_property_by_name@Base 0.6.0
@@ -31,7 +32,9 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_actor_new@Base 0.6.0
  xfdashboard_actor_set_can_focus@Base 0.6.0
  xfdashboard_actor_set_effects@Base 0.6.0
+ xfdashboard_actor_set_visibility@Base 1.0.0
  xfdashboard_anchor_point_get_type@Base 0.6.0
+ xfdashboard_animation_create_flags_get_type@Base 1.0.0
  xfdashboard_animation_defaults_free@Base 0.7.8
  xfdashboard_animation_defaults_new@Base 0.7.8
  xfdashboard_animation_dump@Base 0.7.8
@@ -64,7 +67,6 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_application_database_get_all_applications@Base 0.6.0
  xfdashboard_application_database_get_application_menu@Base 0.6.0
  xfdashboard_application_database_get_application_search_paths@Base 0.6.0
- xfdashboard_application_database_get_default@Base 0.6.0
  xfdashboard_application_database_get_desktop_id_from_file@Base 0.6.0
  xfdashboard_application_database_get_desktop_id_from_path@Base 0.6.0
  xfdashboard_application_database_get_file_from_desktop_id@Base 0.6.0
@@ -72,19 +74,6 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_application_database_is_loaded@Base 0.6.0
  xfdashboard_application_database_load@Base 0.6.0
  xfdashboard_application_database_lookup_desktop_id@Base 0.6.0
- xfdashboard_application_get_default@Base 0.6.0
- xfdashboard_application_get_stage@Base 0.7.4
- xfdashboard_application_get_theme@Base 0.6.0
- xfdashboard_application_get_type@Base 0.6.0
- xfdashboard_application_get_xfconf_channel@Base 0.6.0
- xfdashboard_application_has_default@Base 0.7.4
- xfdashboard_application_is_daemonized@Base 0.6.0
- xfdashboard_application_is_quitting@Base 0.6.0
- xfdashboard_application_is_suspended@Base 0.6.0
- xfdashboard_application_quit_forced@Base 0.6.0
- xfdashboard_application_resume@Base 0.6.0
- xfdashboard_application_suspend_or_quit@Base 0.6.0
- xfdashboard_application_tracker_get_default@Base 0.6.0
  xfdashboard_application_tracker_get_type@Base 0.6.0
  xfdashboard_application_tracker_get_window_list_by_app_info@Base 0.6.0
  xfdashboard_application_tracker_get_window_list_by_desktop_id@Base 0.6.0
@@ -160,7 +149,6 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_bindings_pool_error_enum_get_type@Base 0.6.0
  xfdashboard_bindings_pool_error_quark@Base 0.6.0
  xfdashboard_bindings_pool_find_for_event@Base 0.6.0
- xfdashboard_bindings_pool_get_default@Base 0.6.0
  xfdashboard_bindings_pool_get_type@Base 0.6.0
  xfdashboard_bindings_pool_load@Base 0.6.0
  xfdashboard_borders_get_type@Base 0.6.0
@@ -190,6 +178,30 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_collapse_box_set_collapse_progress@Base 0.7.8
  xfdashboard_collapse_box_set_collapsed@Base 0.6.0
  xfdashboard_collapse_box_set_collapsed_size@Base 0.6.0
+ xfdashboard_core_can_suspend@Base 1.0.0
+ xfdashboard_core_error_get_type@Base 1.0.0
+ xfdashboard_core_error_quark@Base 1.0.0
+ xfdashboard_core_get_application_database@Base 1.0.0
+ xfdashboard_core_get_application_tracker@Base 1.0.0
+ xfdashboard_core_get_bindings_pool@Base 1.0.0
+ xfdashboard_core_get_default@Base 1.0.0
+ xfdashboard_core_get_focus_manager@Base 1.0.0
+ xfdashboard_core_get_plugins_manager@Base 1.0.0
+ xfdashboard_core_get_search_manager@Base 1.0.0
+ xfdashboard_core_get_settings@Base 1.0.0
+ xfdashboard_core_get_stage@Base 1.0.0
+ xfdashboard_core_get_theme@Base 1.0.0
+ xfdashboard_core_get_type@Base 1.0.0
+ xfdashboard_core_get_view_manager@Base 1.0.0
+ xfdashboard_core_get_window_tracker@Base 1.0.0
+ xfdashboard_core_get_window_tracker_backend@Base 1.0.0
+ xfdashboard_core_has_default@Base 1.0.0
+ xfdashboard_core_initialize@Base 1.0.0
+ xfdashboard_core_is_quitting@Base 1.0.0
+ xfdashboard_core_is_suspended@Base 1.0.0
+ xfdashboard_core_quit@Base 1.0.0
+ xfdashboard_core_resume@Base 1.0.0
+ xfdashboard_core_suspend@Base 1.0.0
  xfdashboard_corners_get_type@Base 0.6.0
  xfdashboard_create_app_context@Base 0.6.0
  xfdashboard_css_selector_adjust_to_offset@Base 0.6.0
@@ -223,9 +235,15 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_desktop_app_info_action_set_icon_name@Base 0.7.5
  xfdashboard_desktop_app_info_action_set_name@Base 0.7.5
  xfdashboard_desktop_app_info_get_actions@Base 0.7.5
+ xfdashboard_desktop_app_info_get_bool@Base 1.0.0
  xfdashboard_desktop_app_info_get_file@Base 0.6.0
  xfdashboard_desktop_app_info_get_keywords@Base 0.7.5
+ xfdashboard_desktop_app_info_get_locale_string@Base 1.0.0
+ xfdashboard_desktop_app_info_get_locale_string_list@Base 1.0.0
+ xfdashboard_desktop_app_info_get_string@Base 1.0.0
+ xfdashboard_desktop_app_info_get_string_list@Base 1.0.0
  xfdashboard_desktop_app_info_get_type@Base 0.6.0
+ xfdashboard_desktop_app_info_has_key@Base 1.0.0
  xfdashboard_desktop_app_info_is_valid@Base 0.6.0
  xfdashboard_desktop_app_info_launch_action@Base 0.7.5
  xfdashboard_desktop_app_info_launch_action_by_name@Base 0.7.5
@@ -282,7 +300,6 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_fill_box_layout_set_orientation@Base 0.6.0
  xfdashboard_fill_box_layout_set_spacing@Base 0.6.0
  xfdashboard_find_actor_by_name@Base 0.6.0
- xfdashboard_focus_manager_get_default@Base 0.6.0
  xfdashboard_focus_manager_get_event_targets_and_action@Base 0.7.4
  xfdashboard_focus_manager_get_focus@Base 0.6.0
  xfdashboard_focus_manager_get_next_focusable@Base 0.6.0
@@ -310,6 +327,29 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_get_enum_value_from_nickname@Base 0.7.7
  xfdashboard_get_enum_value_name@Base 0.6.0
  xfdashboard_get_stage_of_actor@Base 0.6.0
+ xfdashboard_gradient_color_add_stop@Base 1.0.0
+ xfdashboard_gradient_color_compare@Base 1.0.0
+ xfdashboard_gradient_color_copy@Base 1.0.0
+ xfdashboard_gradient_color_equal@Base 1.0.0
+ xfdashboard_gradient_color_free@Base 1.0.0
+ xfdashboard_gradient_color_from_string@Base 1.0.0
+ xfdashboard_gradient_color_get_angle@Base 1.0.0
+ xfdashboard_gradient_color_get_gradient_type@Base 1.0.0
+ xfdashboard_gradient_color_get_length@Base 1.0.0
+ xfdashboard_gradient_color_get_number_stops@Base 1.0.0
+ xfdashboard_gradient_color_get_repeat@Base 1.0.0
+ xfdashboard_gradient_color_get_solid_color@Base 1.0.0
+ xfdashboard_gradient_color_get_stop@Base 1.0.0
+ xfdashboard_gradient_color_get_type@Base 1.0.0
+ xfdashboard_gradient_color_interpolate@Base 1.0.0
+ xfdashboard_gradient_color_new_linear_gradient@Base 1.0.0
+ xfdashboard_gradient_color_new_path_gradient@Base 1.0.0
+ xfdashboard_gradient_color_new_solid@Base 1.0.0
+ xfdashboard_gradient_color_set_angle@Base 1.0.0
+ xfdashboard_gradient_color_set_repeat@Base 1.0.0
+ xfdashboard_gradient_color_set_solid_color@Base 1.0.0
+ xfdashboard_gradient_color_to_string@Base 1.0.0
+ xfdashboard_gradient_type_get_type@Base 1.0.0
  xfdashboard_image_content_force_load@Base 0.6.0
  xfdashboard_image_content_get_missing_icon_name@Base 0.6.0
  xfdashboard_image_content_get_state@Base 0.6.0
@@ -436,24 +476,28 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_outline_effect_set_corner_radius@Base 0.6.0
  xfdashboard_outline_effect_set_corners@Base 0.6.0
  xfdashboard_outline_effect_set_width@Base 0.6.0
+ xfdashboard_param_spec_gradient_color@Base 1.0.0
+ xfdashboard_param_spec_gradient_color_get_type@Base 1.0.0
  xfdashboard_plugin_disable@Base 0.6.0
  xfdashboard_plugin_enable@Base 0.6.0
  xfdashboard_plugin_error_enum_get_type@Base 0.6.0
  xfdashboard_plugin_error_quark@Base 0.6.0
  xfdashboard_plugin_flag_get_type@Base 0.7.4
- xfdashboard_plugin_get_cache_path@Base 0.6.0
  xfdashboard_plugin_get_config_path@Base 0.6.0
  xfdashboard_plugin_get_data_path@Base 0.6.0
  xfdashboard_plugin_get_flags@Base 0.7.4
  xfdashboard_plugin_get_id@Base 0.6.0
+ xfdashboard_plugin_get_settings@Base 1.0.0
  xfdashboard_plugin_get_type@Base 0.6.0
+ xfdashboard_plugin_get_user_data@Base 1.0.0
  xfdashboard_plugin_is_enabled@Base 0.6.0
  xfdashboard_plugin_new@Base 0.6.0
  xfdashboard_plugin_set_info@Base 0.6.0
- xfdashboard_plugins_manager_get_default@Base 0.6.0
+ xfdashboard_plugin_set_user_data@Base 1.0.0
+ xfdashboard_plugin_set_user_data_full@Base 1.0.0
+ xfdashboard_plugin_settings_get_type@Base 1.0.0
  xfdashboard_plugins_manager_get_type@Base 0.6.0
  xfdashboard_plugins_manager_setup@Base 0.6.0
- xfdashboard_pointer_array_get_type@Base 0.6.0
  xfdashboard_popup_menu_activate@Base 0.7.4
  xfdashboard_popup_menu_add_item@Base 0.7.4
  xfdashboard_popup_menu_cancel@Base 0.7.4
@@ -510,7 +554,6 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_quicklaunch_set_normal_icon_size@Base 0.6.0
  xfdashboard_quicklaunch_set_orientation@Base 0.6.0
  xfdashboard_quicklaunch_set_spacing@Base 0.6.0
- xfdashboard_register_gvalue_transformation_funcs@Base 0.6.0
  xfdashboard_scaled_table_layout_get_column_spacing@Base 0.6.0
  xfdashboard_scaled_table_layout_get_columns@Base 0.6.0
  xfdashboard_scaled_table_layout_get_number_children@Base 0.6.0
@@ -545,7 +588,6 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_scrollbar_set_spacing@Base 0.6.0
  xfdashboard_scrollbar_set_value@Base 0.6.0
  xfdashboard_search_manager_create_provider@Base 0.6.0
- xfdashboard_search_manager_get_default@Base 0.6.0
  xfdashboard_search_manager_get_registered@Base 0.6.0
  xfdashboard_search_manager_get_search_terms_from_string@Base 0.6.0
  xfdashboard_search_manager_get_type@Base 0.6.0
@@ -599,6 +641,47 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_search_view_reset_search@Base 0.6.0
  xfdashboard_search_view_update_search@Base 0.6.0
  xfdashboard_selection_target_get_type@Base 0.6.0
+ xfdashboard_settings_add_plugin@Base 1.0.0
+ xfdashboard_settings_get_allow_subwindows@Base 1.0.0
+ xfdashboard_settings_get_always_launch_new_instance@Base 1.0.0
+ xfdashboard_settings_get_applications_search_sort_mode@Base 1.0.0
+ xfdashboard_settings_get_binding_files@Base 1.0.0
+ xfdashboard_settings_get_config_path@Base 1.0.0
+ xfdashboard_settings_get_data_path@Base 1.0.0
+ xfdashboard_settings_get_delay_search_timeout@Base 1.0.0
+ xfdashboard_settings_get_enable_animations@Base 1.0.0
+ xfdashboard_settings_get_enable_workaround_unmapped_window@Base 1.0.0
+ xfdashboard_settings_get_enabled_plugins@Base 1.0.0
+ xfdashboard_settings_get_favourites@Base 1.0.0
+ xfdashboard_settings_get_notification_timeout@Base 1.0.0
+ xfdashboard_settings_get_plugin_search_paths@Base 1.0.0
+ xfdashboard_settings_get_reselect_theme_focus_on_resume@Base 1.0.0
+ xfdashboard_settings_get_reset_search_on_resume@Base 1.0.0
+ xfdashboard_settings_get_scroll_event_changes_workspace@Base 1.0.0
+ xfdashboard_settings_get_show_all_applications@Base 1.0.0
+ xfdashboard_settings_get_switch_to_view_on_resume@Base 1.0.0
+ xfdashboard_settings_get_theme@Base 1.0.0
+ xfdashboard_settings_get_theme_search_paths@Base 1.0.0
+ xfdashboard_settings_get_type@Base 1.0.0
+ xfdashboard_settings_get_window_content_creation_priority@Base 1.0.0
+ xfdashboard_settings_lookup_plugin_by_id@Base 1.0.0
+ xfdashboard_settings_remove_plugin@Base 1.0.0
+ xfdashboard_settings_set_allow_subwindows@Base 1.0.0
+ xfdashboard_settings_set_always_launch_new_instance@Base 1.0.0
+ xfdashboard_settings_set_applications_search_sort_mode@Base 1.0.0
+ xfdashboard_settings_set_delay_search_timeout@Base 1.0.0
+ xfdashboard_settings_set_enable_animations@Base 1.0.0
+ xfdashboard_settings_set_enable_workaround_unmapped_window@Base 1.0.0
+ xfdashboard_settings_set_enabled_plugins@Base 1.0.0
+ xfdashboard_settings_set_favourites@Base 1.0.0
+ xfdashboard_settings_set_notification_timeout@Base 1.0.0
+ xfdashboard_settings_set_reselect_theme_focus_on_resume@Base 1.0.0
+ xfdashboard_settings_set_reset_search_on_resume@Base 1.0.0
+ xfdashboard_settings_set_scroll_event_changes_workspace@Base 1.0.0
+ xfdashboard_settings_set_show_all_applications@Base 1.0.0
+ xfdashboard_settings_set_switch_to_view_on_resume@Base 1.0.0
+ xfdashboard_settings_set_theme@Base 1.0.0
+ xfdashboard_settings_set_window_content_creation_priority@Base 1.0.0
  xfdashboard_split_string@Base 0.6.0
  xfdashboard_stage_background_image_type_get_type@Base 0.6.0
  xfdashboard_stage_get_background_color@Base 0.6.0
@@ -618,6 +701,7 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_stage_set_background_image_type@Base 0.6.0
  xfdashboard_stage_set_switch_to_view@Base 0.6.0
  xfdashboard_stage_show_notification@Base 0.6.0
+ xfdashboard_strv_equal@Base 1.0.0
  xfdashboard_stylable_add_class@Base 0.6.0
  xfdashboard_stylable_add_pseudo_class@Base 0.6.0
  xfdashboard_stylable_add_stylable_property@Base 0.6.0
@@ -669,25 +753,24 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_text_box_set_text_va@Base 0.6.0
  xfdashboard_theme_animation_add_file@Base 0.7.7
  xfdashboard_theme_animation_create@Base 0.7.7
- xfdashboard_theme_animation_create_by_id@Base 0.7.8
- xfdashboard_theme_animation_error_enum_get_type@Base 0.7.7
+ xfdashboard_theme_animation_error_get_type@Base 1.0.0
  xfdashboard_theme_animation_error_quark@Base 0.7.7
  xfdashboard_theme_animation_get_type@Base 0.7.7
  xfdashboard_theme_animation_lookup_id@Base 0.7.8
  xfdashboard_theme_animation_new@Base 0.7.7
  xfdashboard_theme_css_add_file@Base 0.6.0
- xfdashboard_theme_css_error_enum_get_type@Base 0.6.0
+ xfdashboard_theme_css_error_get_type@Base 1.0.0
  xfdashboard_theme_css_error_quark@Base 0.6.0
  xfdashboard_theme_css_get_properties@Base 0.6.0
  xfdashboard_theme_css_get_type@Base 0.6.0
  xfdashboard_theme_css_new@Base 0.6.0
  xfdashboard_theme_effects_add_file@Base 0.6.0
  xfdashboard_theme_effects_create_effect@Base 0.6.0
- xfdashboard_theme_effects_error_enum_get_type@Base 0.6.0
+ xfdashboard_theme_effects_error_get_type@Base 1.0.0
  xfdashboard_theme_effects_error_quark@Base 0.6.0
  xfdashboard_theme_effects_get_type@Base 0.6.0
  xfdashboard_theme_effects_new@Base 0.6.0
- xfdashboard_theme_error_enum_get_type@Base 0.6.0
+ xfdashboard_theme_error_get_type@Base 1.0.0
  xfdashboard_theme_error_quark@Base 0.6.0
  xfdashboard_theme_get_animation@Base 0.7.7
  xfdashboard_theme_get_comment@Base 0.6.0
@@ -701,7 +784,7 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_theme_layout_add_file@Base 0.6.0
  xfdashboard_theme_layout_build_get_get_type@Base 0.7.4
  xfdashboard_theme_layout_build_interface@Base 0.6.0
- xfdashboard_theme_layout_error_enum_get_type@Base 0.6.0
+ xfdashboard_theme_layout_error_get_type@Base 1.0.0
  xfdashboard_theme_layout_error_quark@Base 0.6.0
  xfdashboard_theme_layout_get_type@Base 0.6.0
  xfdashboard_theme_layout_new@Base 0.6.0
@@ -731,6 +814,8 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_transition_group_remove_all@Base 0.7.7
  xfdashboard_transition_group_remove_transition@Base 0.7.7
  xfdashboard_traverse_actor@Base 0.7.4
+ xfdashboard_value_get_gradient_color@Base 1.0.0
+ xfdashboard_value_set_gradient_color@Base 1.0.0
  xfdashboard_view_child_ensure_visible@Base 0.6.0
  xfdashboard_view_child_needs_scroll@Base 0.6.0
  xfdashboard_view_fit_mode_get_type@Base 0.6.0
@@ -743,7 +828,6 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_view_has_focus@Base 0.6.0
  xfdashboard_view_has_id@Base 0.6.0
  xfdashboard_view_manager_create_view@Base 0.6.0
- xfdashboard_view_manager_get_default@Base 0.6.0
  xfdashboard_view_manager_get_registered@Base 0.6.0
  xfdashboard_view_manager_get_type@Base 0.6.0
  xfdashboard_view_manager_has_registered_id@Base 0.6.0
@@ -806,9 +890,9 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_window_content_x11_set_unmapped_window_icon_y_align@Base 0.7.4
  xfdashboard_window_content_x11_set_unmapped_window_icon_y_fill@Base 0.7.4
  xfdashboard_window_content_x11_set_unmapped_window_icon_y_scale@Base 0.7.4
+ xfdashboard_window_tracker_backend_create@Base 1.0.0
  xfdashboard_window_tracker_backend_gdk_get_type@Base 0.7.4
  xfdashboard_window_tracker_backend_gdk_new@Base 0.7.4
- xfdashboard_window_tracker_backend_get_default@Base 0.7.4
  xfdashboard_window_tracker_backend_get_name@Base 0.7.4
  xfdashboard_window_tracker_backend_get_stage_from_window@Base 0.7.4
  xfdashboard_window_tracker_backend_get_type@Base 0.7.4
@@ -821,7 +905,6 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_window_tracker_backend_x11_new@Base 0.7.4
  xfdashboard_window_tracker_get_active_window@Base 0.6.0
  xfdashboard_window_tracker_get_active_workspace@Base 0.6.0
- xfdashboard_window_tracker_get_default@Base 0.6.0
  xfdashboard_window_tracker_get_monitor_by_number@Base 0.6.0
  xfdashboard_window_tracker_get_monitor_by_position@Base 0.7.4
  xfdashboard_window_tracker_get_monitors@Base 0.6.0
@@ -849,11 +932,11 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_window_tracker_window_activate@Base 0.6.0
  xfdashboard_window_tracker_window_close@Base 0.6.0
  xfdashboard_window_tracker_window_get_actions@Base 0.7.4
+ xfdashboard_window_tracker_window_get_appinfo@Base 1.0.0
  xfdashboard_window_tracker_window_get_content@Base 0.7.4
  xfdashboard_window_tracker_window_get_geometry@Base 0.7.4
  xfdashboard_window_tracker_window_get_icon@Base 0.6.0
  xfdashboard_window_tracker_window_get_icon_name@Base 0.6.0
- xfdashboard_window_tracker_window_get_instance_names@Base 0.6.0
  xfdashboard_window_tracker_window_get_monitor@Base 0.6.0
  xfdashboard_window_tracker_window_get_name@Base 0.7.4
  xfdashboard_window_tracker_window_get_parent@Base 0.7.4
@@ -875,6 +958,7 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_window_tracker_window_move_to_workspace@Base 0.6.0
  xfdashboard_window_tracker_window_resize@Base 0.6.0
  xfdashboard_window_tracker_window_set_geometry@Base 0.7.4
+ xfdashboard_window_tracker_window_set_state@Base 1.0.0
  xfdashboard_window_tracker_window_show@Base 0.6.0
  xfdashboard_window_tracker_window_show_stage@Base 0.7.4
  xfdashboard_window_tracker_window_state_get_type@Base 0.7.4
@@ -890,6 +974,7 @@ libxfdashboard.so.0 libxfdashboard0 #MINVER#
  xfdashboard_window_tracker_workspace_is_equal@Base 0.6.0
  xfdashboard_window_tracker_workspace_x11_get_type@Base 0.7.4
  xfdashboard_window_tracker_workspace_x11_get_workspace@Base 0.7.4
+ xfdashboard_window_tracker_x11_get_display@Base 1.0.0
  xfdashboard_window_tracker_x11_get_time@Base 0.7.4
  xfdashboard_window_tracker_x11_get_type@Base 0.7.4
  xfdashboard_window_tracker_x11_get_window_for_wnck@Base 0.7.4
