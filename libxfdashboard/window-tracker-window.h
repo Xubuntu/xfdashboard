@@ -1,7 +1,7 @@
 /*
  * window-tracker-window: A window tracked by window tracker.
  * 
- * Copyright 2012-2016 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,6 +103,7 @@ struct _XfdashboardWindowTrackerWindowInterface
 	XfdashboardWindowTrackerWindow* (*get_parent)(XfdashboardWindowTrackerWindow *self);
 
 	XfdashboardWindowTrackerWindowState (*get_state)(XfdashboardWindowTrackerWindow *self);
+	void (*set_state)(XfdashboardWindowTrackerWindow *self, XfdashboardWindowTrackerWindowState inState);
 	XfdashboardWindowTrackerWindowAction (*get_actions)(XfdashboardWindowTrackerWindow *self);
 
 	const gchar* (*get_name)(XfdashboardWindowTrackerWindow *self);
@@ -125,7 +126,7 @@ struct _XfdashboardWindowTrackerWindowInterface
 	void (*close)(XfdashboardWindowTrackerWindow *self);
 
 	gint (*get_pid)(XfdashboardWindowTrackerWindow *self);
-	gchar** (*get_instance_names)(XfdashboardWindowTrackerWindow *self);
+	GAppInfo* (*get_appinfo)(XfdashboardWindowTrackerWindow *self);
 
 	ClutterContent* (*get_content)(XfdashboardWindowTrackerWindow *self);
 
@@ -161,6 +162,8 @@ void xfdashboard_window_tracker_window_hide(XfdashboardWindowTrackerWindow *self
 XfdashboardWindowTrackerWindow* xfdashboard_window_tracker_window_get_parent(XfdashboardWindowTrackerWindow *self);
 
 XfdashboardWindowTrackerWindowState xfdashboard_window_tracker_window_get_state(XfdashboardWindowTrackerWindow *self);
+void xfdashboard_window_tracker_window_set_state(XfdashboardWindowTrackerWindow *self, XfdashboardWindowTrackerWindowState inState);
+
 XfdashboardWindowTrackerWindowAction xfdashboard_window_tracker_window_get_actions(XfdashboardWindowTrackerWindow *self);
 
 const gchar* xfdashboard_window_tracker_window_get_name(XfdashboardWindowTrackerWindow *self);
@@ -204,7 +207,7 @@ void xfdashboard_window_tracker_window_show_stage(XfdashboardWindowTrackerWindow
 void xfdashboard_window_tracker_window_hide_stage(XfdashboardWindowTrackerWindow *self);
 
 gint xfdashboard_window_tracker_window_get_pid(XfdashboardWindowTrackerWindow *self);
-gchar** xfdashboard_window_tracker_window_get_instance_names(XfdashboardWindowTrackerWindow *self);
+GAppInfo* xfdashboard_window_tracker_window_get_appinfo(XfdashboardWindowTrackerWindow *self);
 
 ClutterContent* xfdashboard_window_tracker_window_get_content(XfdashboardWindowTrackerWindow *self);
 

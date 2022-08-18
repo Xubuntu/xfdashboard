@@ -1,7 +1,7 @@
 /*
  * utils: Common functions, helpers and definitions
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,16 +79,12 @@ G_BEGIN_DECLS
 #define GPOINTER_TO_GTYPE(pointer) \
 	((GType)GPOINTER_TO_SIZE(pointer))
 
-GType xfdashboard_pointer_array_get_type(void);
-
 void xfdashboard_notify(ClutterActor *inSender,
 							const gchar *inIconName,
 							const gchar *inFormat, ...)
 							G_GNUC_PRINTF(3, 4);
 
 GAppLaunchContext* xfdashboard_create_app_context(XfdashboardWindowTrackerWorkspace *inWorkspace);
-
-void xfdashboard_register_gvalue_transformation_funcs(void);
 
 ClutterActor* xfdashboard_find_actor_by_name(ClutterActor *inActor, const gchar *inName);
 
@@ -136,6 +132,8 @@ gchar* xfdashboard_get_enum_value_name(GType inEnumClass, gint inValue);
 gint xfdashboard_get_enum_value_from_nickname(GType inEnumClass, const gchar *inNickname);
 
 void xfdashboard_dump_actor(ClutterActor *inActor);
+
+gboolean xfdashboard_strv_equal(const gchar **inLeft, const gchar **inRight);
 
 G_END_DECLS
 

@@ -2,7 +2,7 @@
  * plugin: A plugin class managing loading the shared object as well as
  *         initializing and setting up extensions to this application
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,8 @@
 
 #include <glib-object.h>
 #include <gmodule.h>
+
+#include "plugin-settings.h"
 
 G_BEGIN_DECLS
 
@@ -76,6 +78,12 @@ typedef struct _XfdashboardPlugin			XfdashboardPlugin;
 typedef struct _XfdashboardPluginClass		XfdashboardPluginClass;
 typedef struct _XfdashboardPluginPrivate	XfdashboardPluginPrivate;
 
+/**
+ * XfdashboardPlugin:
+ *
+ * The #XfdashboardPlugin structure contains only private data and
+ * should be accessed using the provided API
+ */
 struct _XfdashboardPlugin
 {
 	/*< private >*/
@@ -86,6 +94,14 @@ struct _XfdashboardPlugin
 	XfdashboardPluginPrivate		*priv;
 };
 
+/**
+ * XfdashboardPluginClass:
+ * @enable: The class closure for enable action signal
+ * @disable: The class closure for disable action signal
+ * @configure: The class closure for configure action signal
+ *
+ * The #XfdashboardPluginClass class structure
+ */
 struct _XfdashboardPluginClass
 {
 	/*< private >*/
@@ -105,6 +121,13 @@ struct _XfdashboardPluginClass
 
 GQuark xfdashboard_plugin_error_quark(void);
 
+/**
+ * XfdashboardPluginErrorEnum:
+ * @XFDASHBOARD_PLUGIN_ERROR_NONE: No error at plugin
+ * @XFDASHBOARD_PLUGIN_ERROR_ERROR: Generic error code for errors at plugin
+ *
+ * Error codes returned by handling #XfdashboardPlugin.
+ */
 typedef enum /*< prefix=XFDASHBOARD_PLUGIN_ERROR >*/
 {
 	XFDASHBOARD_PLUGIN_ERROR_NONE,
@@ -127,8 +150,13 @@ gboolean xfdashboard_plugin_is_enabled(XfdashboardPlugin *self);
 void xfdashboard_plugin_enable(XfdashboardPlugin *self);
 void xfdashboard_plugin_disable(XfdashboardPlugin *self);
 
+gpointer xfdashboard_plugin_get_user_data(XfdashboardPlugin *self);
+void xfdashboard_plugin_set_user_data(XfdashboardPlugin *self, gpointer inUserData);
+void xfdashboard_plugin_set_user_data_full(XfdashboardPlugin *self, gpointer inUserData, GDestroyNotify inDestroyCallback);
+
+XfdashboardPluginSettings* xfdashboard_plugin_get_settings(XfdashboardPlugin *self);
+
 const gchar* xfdashboard_plugin_get_config_path(XfdashboardPlugin *self);
-const gchar* xfdashboard_plugin_get_cache_path(XfdashboardPlugin *self);
 const gchar* xfdashboard_plugin_get_data_path(XfdashboardPlugin *self);
 
 G_END_DECLS

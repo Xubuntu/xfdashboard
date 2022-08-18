@@ -1,7 +1,7 @@
 /*
  * hot-corner: Activates application when pointer is move to a corner
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@
 struct _XfdashboardHotCornerPrivate
 {
 	/* Instance related */
-	XfdashboardApplication					*application;
+	XfdashboardCore							*core;
 	XfdashboardWindowTracker				*windowTracker;
 	GdkWindow								*rootWindow;
 #if GTK_CHECK_VERSION(3, 20, 0)
@@ -68,9 +68,9 @@ XFDASHBOARD_DEFINE_PLUGIN_TYPE(xfdashboard_hot_corner);
 
 GType xfdashboard_hot_corner_activation_corner_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -82,10 +82,10 @@ GType xfdashboard_hot_corner_activation_corner_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardHotCornerActivationCorner"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 
@@ -263,16 +263,16 @@ static gboolean _xfdashboard_hot_corner_check_hot_corner(gpointer inUserData)
 
 	if(timeDiff<(activationDuration*G_TIME_SPAN_MILLISECOND)) return(G_SOURCE_CONTINUE);
 
-	/* Activation duration reached so activate application if suspended or suspend it
+	/* Activation duration reached so resume core if suspended or suspend it
 	 * if active currently.
 	 */
-	if(!xfdashboard_application_is_suspended(priv->application))
+	if(!xfdashboard_core_is_suspended(priv->core))
 	{
-		xfdashboard_application_suspend_or_quit(priv->application);
+		xfdashboard_core_suspend(priv->core);
 	}
 		else
 		{
-			g_application_activate(G_APPLICATION(priv->application));
+			xfdashboard_core_resume(priv->core);
 		}
 
 	/* Set flag that activation was handled recently */
@@ -314,9 +314,9 @@ static void _xfdashboard_hot_corner_dispose(GObject *inObject)
 		priv->settings=NULL;
 	}
 
-	if(priv->application)
+	if(priv->core)
 	{
-		priv->application=NULL;
+		priv->core=NULL;
 	}
 
 	/* Call parent's class dispose method */
@@ -352,8 +352,8 @@ void xfdashboard_hot_corner_init(XfdashboardHotCorner *self)
 	self->priv=priv=xfdashboard_hot_corner_get_instance_private(self);
 
 	/* Set up default values */
-	priv->application=xfdashboard_application_get_default();
-	priv->windowTracker=xfdashboard_window_tracker_get_default();
+	priv->core=xfdashboard_core_get_default();
+	priv->windowTracker=xfdashboard_core_get_window_tracker(priv->core);
 	priv->rootWindow=NULL;
 #if GTK_CHECK_VERSION(3, 20, 0)
 	priv->seat=NULL;
@@ -369,7 +369,7 @@ void xfdashboard_hot_corner_init(XfdashboardHotCorner *self)
 	priv->settings=xfdashboard_hot_corner_settings_new();
 
 	/* Get device manager for polling pointer position */
-	if(xfdashboard_application_is_daemonized(priv->application))
+	if(xfdashboard_core_can_suspend(priv->core))
 	{
 		screen=gdk_screen_get_default();
 		priv->rootWindow=gdk_screen_get_root_window(screen);
@@ -405,7 +405,7 @@ void xfdashboard_hot_corner_init(XfdashboardHotCorner *self)
 	}
 		else
 		{
-			g_warning("Disabling hot-corner plugin because application is not running as daemon.");
+			g_warning("Disabling hot-corner plugin because core cannot suspend.");
 		}
 }
 

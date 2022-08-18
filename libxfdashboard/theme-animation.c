@@ -1,7 +1,7 @@
 /*
  * theme-animation: A theme used for building animations by XML files
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,179 @@
  * 
  */
 
+/**
+ * SECTION:theme-animation
+ * @short_description: A theme animation resource manager
+ * @include: libxfdashboard/theme-animation.h
+ *
+ * #XfdashboardThemeAnimation is used to load animation XML files into a theme,
+ * to parse the XML file and to set up a definition how to create animations
+ * for use at actors.
+ *
+ * Animation resources are loaded from a list provided by a theme index file
+ * as describe at <link linkend="XfdashboardTheme.File-location-and-structure">
+ * File location and structure</link>. But additional resources can be
+ * loaded with xfdashboard_theme_animation_add_file().
+ *
+ * To create an animation call xfdashboard_theme_animation_create() with the
+ * requesting actor as sender and the emitting signal or
+ * xfdashboard_theme_animation_create_by_id() with the requesting actor as
+ * sender and the animation's ID of the animation.
+ *
+ * To check if an animation for a sending actor and its emitted signal exists
+ * call xfdashboard_theme_animation_lookup_id() and use the returned ID to
+ * create the animation with xfdashboard_theme_animation_create_by_id().
+ *
+ * ## Note about resources parser
+ *
+ * Because all resources for CSS and XML are texts, the parser does convert texts
+ * to their needed and native type like booleans, integers etc. The parser can
+ * convert textual representation for most common property types. Boolean textual
+ * representations for FALSE are "FALSE, "f", "no", "n", "0" and for TRUE they are
+ * "TRUE", "t", "yes", "y", "1". Enumeration and flags can be specified either by
+ * their names, their nicks or integer values. Flags can be combined with "|"
+ * additionally.
+ *
+ * # Animations {#XfdashboardThemeAnimation.Animations}
+ *
+ * Animations are described in a XML document.
+ *
+ * The location of the XML file is specified in theme's index file at the key
+ * `Animation` and should be a relative path to theme's path. See
+ * <link linkend="XfdashboardTheme.File-location-and-structure">File location
+ * and structure</link> for further documentation of files and folders.
+ *
+ * The XML document must begin with the top-level element `<animations>` which
+ * is a grouping element for all animations defined. The top-level element does
+ * not expect any attributes set.
+ *
+ * Animations are defined by triggers which specify the event when to play a
+ * animation. Triggers are objects and each object is defined in a `<trigger>`
+ * element under the top-level element and takes three attributes. The first one
+ * is `<id>` specifying a unique name which is used as reference and to look up
+ * an animation directly. The second attribute is `<sender>` attribute defining
+ * the actor emitting the expected signal which is described in the third
+ * attribute `<signal>`. All attributes are required. The application will look
+ * up animations by the actor emitting the signal. Although the application can
+ * look up animations by the ID directly, it is not used but the ID must be set
+ * anyway to prevent the same animation to be applied to an actor multiple times.
+ *
+ * <warning>
+ *   <para>
+ *     If not otherwise stated, each ID must fulfill the following conditions:
+ *
+ *     <itemizedlist>
+ *       <listitem>
+ *         <para>
+ *           Each ID must be unique among all files
+ *         </para>
+ *       </listitem>
+ *       <listitem>
+ *         <para>
+ *           Each ID must begin with any number of underscores followed by a
+ *           character or it must begin with a character
+ *         </para>
+ *       </listitem>
+ *       <listitem>
+ *         <para>
+ *           Each ID can contain and mix digits, characters and the symbols:
+ *           _ (underscore), - (minus)
+ *         </para>
+ *       </listitem>
+ *       <listitem>
+ *         <para>
+ *           All characters can be upper or lower case but must be from ASCII
+ *           character set
+ *         </para>
+ *       </listitem>
+ *       <listitem>
+ *         <para>
+ *           The matching regular expression is: (_*[a-zA-Z]+[0-9a-zA-Z_-]*)
+ *         </para>
+ *       </listitem>
+ *     </itemizedlist>
+ *   </para>
+ * </warning>
+ *
+ * Each trigger defines one or more timelines which specify the start of the
+ * animation after it was applied to an actor as well as the duraction and a
+ * progress mode of the animation within the timeline. Timelines are objects
+ * and each object is defined in a `<timeline>` element unter the `<trigger>`
+ * element and takes up to four attributes. The first attribute `<delay>` is
+ * optional and defines how long to wait in milliseconds before the animation
+ * in this timeline is started after it was applied to the actor. It defaults
+ * to zero (no delay) if not set. The second attribute `<duration>` is required
+ * and defines how long the animation in this timeline will run in milliseconds.
+ * The third attribute `<mode>` is optional and defines how the progress will
+ * happen, e.g. linear or qubic etc. It must be a text value of type
+ * #ClutterAnimationMode and defaults to `linear` if not set. The fourth
+ * attribute `<repeat>` is optional and defines how often this timeline is
+ * repeated with the same delay, duration and mode. If repeat is set to zero
+ * the timeline will not be repeated at all and it is the default if this
+ * attribute is not set. If repeat is -1 the timeline will be repeated as long
+ * as is not stopped explicitly.
+ *
+ * Each timeline needs to know to which actor the animation in this timeline
+ * sholud be applied to. Therefore an `<apply>` element must be defined under
+ * the `<timeline>` element which takes up to two attributes. The first
+ * attribute `<to>` is optional and needs a CSS selector to find the matching
+ * actors by traversing from the specified origin in the second attribute
+ * `<origin>` which is also optional. The origin can either be `sender` to
+ * start the traversion from the signal emitting actor (sender) or `stage` to
+ * start it from top-level element (#XfdashboardStageInterface). The attribute
+ * `<origin>` defaults to `sender` and the attributes `<to>` defaults to an
+ * empty string to disable traversion and selected the signal emitting actor
+ * as target to apply the animation to. Most the time the signal emitting
+ * actor is also the target for the animation, so it will mostly just a
+ * `<apply>`.
+ *
+ * Last but not least each selected actor in `<apply>` needs to know what
+ * should be animated. The animation is defined by listing all properties of
+ * the actors, optionally with a defined start and end value. As the animation
+ * is applied to all matching actors in `<apply>` they should all share the same
+ * properties to modify while animation is running. Properties are easy to set.
+ * For each property to set just add a `<property>` element as a child of the
+ * `<apply>` element. The `<name>` attribute must be specified and set to the
+ * name of the property to set. Optionally the start value can be set explicitly
+ * at attribute `<from>` and the end value at attribute `<to>`. If one or both
+ * are not set the current value is used as start value and the expected final
+ * value is used as end value. Most the time it is only neccessary to set up
+ * the `<property>` element with the property name at `<name>`.
+ *
+ * The parser can convert textual representation for most common property types.
+ * Boolean textual representations for FALSE are "FALSE, "f", "no", "n", "0"
+ * and for TRUE they are "TRUE", "t", "yes", "y", "1". Enumeration and flags can
+ * be specified either by their names, their nicks or integer value. Flags can be
+ * combined with "|" additionally.
+ *
+ * The format for the XML file can be described with the following simple but not
+ * fully accurate DTD:
+ *
+ * |[<!-- language="xml" -->
+ *   <!ELEMENT animations (trigger*)>
+ *
+ *   <!ELEMENT trigger    (timeline*)>
+ *   <!ATTLIST trigger    id             ID           #IMPLIED
+ *                        sender         CDATA        #REQUIRED
+ *                        signal         CDATA        #REQUIRED>
+ *
+ *   <!ELEMENT timeline   (apply*)>
+ *   <!ATTLIST timeline   delay          CDATA
+ *                        duration       CDATA        #REQUIRED
+ *                        mode           CDATA
+ *                        repeat         CDATA>
+ *
+ *   <!ELEMENT apply      (property*)>
+ *   <!ATTLIST apply      to             CDATA
+ *                        origin         (sender|stage)>
+ *
+ *   <!ELEMENT property   (#CDATA)>
+ *   <!ATTLIST property   name           CDATA        #REQUIRED
+ *                        from           CDATA
+ *                        to             CDATA>
+ * ]|
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -34,7 +207,8 @@
 
 #include <libxfdashboard/transition-group.h>
 #include <libxfdashboard/stylable.h>
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
+#include <libxfdashboard/settings.h>
 #include <libxfdashboard/enums.h>
 #include <libxfdashboard/utils.h>
 #include <libxfdashboard/compat.h>
@@ -45,7 +219,8 @@
 struct _XfdashboardThemeAnimationPrivate
 {
 	/* Instance related */
-	GSList			*specs;
+	GSList					*specs;
+	XfdashboardSettings		*settings;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(XfdashboardThemeAnimation,
@@ -54,8 +229,6 @@ G_DEFINE_TYPE_WITH_PRIVATE(XfdashboardThemeAnimation,
 
 
 /* IMPLEMENTATION: Private variables and methods */
-#define ENABLE_ANIMATIONS_XFCONF_PROP		"/enable-animations"
-#define DEFAULT_ENABLE_ANIMATIONS			TRUE
 
 enum
 {
@@ -349,7 +522,7 @@ static void _xfdashboard_theme_animation_spec_add_targets(XfdashboardThemeAnimat
 }
 
 /* Find best matching animation specification for sender and signal */
-static XfdashboardThemeAnimationSpec* _xfdashboard_theme_animation_find_matching_animation_spec(XfdashboardThemeAnimation *self,
+static XfdashboardThemeAnimationSpec* _xfdashboard_theme_animation_find_animation_spec_by_sender_signal(XfdashboardThemeAnimation *self,
 																										XfdashboardStylable *inSender,
 																										const gchar *inSignal)
 {
@@ -369,9 +542,9 @@ static XfdashboardThemeAnimationSpec* _xfdashboard_theme_animation_find_matching
 	bestAnimation=NULL;
 
 	/* Iterate through all animation specification and get its score against sender.
-	 * If the iterated specification gets a higher score than the previous one,
-	 * remember this specification for return value.
-	 */
+	* If the iterated specification gets a higher score than the previous one,
+	* remember this specification for return value.
+	*/
 	for(iter=priv->specs; iter; iter=g_slist_next(iter))
 	{
 		/* Get currently iterated specification */
@@ -379,19 +552,19 @@ static XfdashboardThemeAnimationSpec* _xfdashboard_theme_animation_find_matching
 		if(!spec) continue;
 
 		/* Skip animation specification if its signal definition does not match
-		 * the emitted signal.
-		 */
+		* the emitted signal.
+		*/
 		if(g_strcmp0(spec->signal, inSignal)!=0) continue;
 
 		/* Get score of currently iterated specification against sender.
-		 * Skip this iterated specification if score is zero or lower.
-		 */
+		* Skip this iterated specification if score is zero or lower.
+		*/
 		score=xfdashboard_css_selector_score(spec->senderSelector, inSender);
 		if(score<=0) continue;
 
 		/* If score is higher than the previous best matching one, then release
-		 * old specificationr remembered and ref new one.
-		 */
+		* old specificationr remembered and ref new one.
+		*/
 		if(score>bestScore)
 		{
 			/* Release old remembered specification */
@@ -409,7 +582,7 @@ static XfdashboardThemeAnimationSpec* _xfdashboard_theme_animation_find_matching
 
 /* Lookup animation specification for requested ID */
 static XfdashboardThemeAnimationSpec* _xfdashboard_theme_animation_find_animation_spec_by_id(XfdashboardThemeAnimation *self,
-																									const gchar *inID)
+																								const gchar *inID)
 {
 	XfdashboardThemeAnimationPrivate			*priv;
 	GSList										*iter;
@@ -625,7 +798,7 @@ static gboolean _xfdashboard_theme_animation_string_to_gint(const gchar *inNumbe
 static void _xfdashboard_theme_animation_parse_set_error(XfdashboardThemeAnimationParserData *inParserData,
 															GMarkupParseContext *inContext,
 															GError **outError,
-															XfdashboardThemeAnimationErrorEnum inCode,
+															XfdashboardThemeAnimationError inCode,
 															const gchar *inFormat,
 															...)
 {
@@ -1126,13 +1299,13 @@ static void _xfdashboard_theme_animation_parse_trigger_start(GMarkupParseContext
 											inAttributeNames,
 											inAttributeValues,
 											&error,
-											G_MARKUP_COLLECT_STRING,
+											G_MARKUP_COLLECT_STRING | G_MARKUP_COLLECT_OPTIONAL,
 											"delay",
 											&timelineDelayText,
 											G_MARKUP_COLLECT_STRING,
 											"duration",
 											&timelineDurationText,
-											G_MARKUP_COLLECT_STRING,
+											G_MARKUP_COLLECT_STRING | G_MARKUP_COLLECT_OPTIONAL,
 											"mode",
 											&timelineModeText,
 											G_MARKUP_COLLECT_STRING | G_MARKUP_COLLECT_OPTIONAL,
@@ -1145,13 +1318,13 @@ static void _xfdashboard_theme_animation_parse_trigger_start(GMarkupParseContext
 		}
 
 		/* Check tag's attributes */
-		if(!timelineDelayText || strlen(timelineDelayText)==0)
+		if(timelineDelayText && strlen(timelineDelayText)==0)
 		{
 			_xfdashboard_theme_animation_parse_set_error(data,
 															inContext,
 															outError,
 															XFDASHBOARD_THEME_ANIMATION_ERROR_MALFORMED,
-															"Missing or empty delay at tag '%s'",
+															"Empty delay at tag '%s'",
 															inElementName);
 			return;
 		}
@@ -1167,7 +1340,7 @@ static void _xfdashboard_theme_animation_parse_trigger_start(GMarkupParseContext
 			return;
 		}
 
-		if(!timelineModeText || strlen(timelineModeText)==0)
+		if(timelineModeText && strlen(timelineModeText)==0)
 		{
 			_xfdashboard_theme_animation_parse_set_error(data,
 															inContext,
@@ -1190,7 +1363,9 @@ static void _xfdashboard_theme_animation_parse_trigger_start(GMarkupParseContext
 		}
 
 		/* Convert tag's attributes' value to usable values */
-		if(!_xfdashboard_theme_animation_string_to_gint(timelineDelayText, &timelineDelay, &error))
+		timelineDelay=0;
+		if(timelineDelayText &&
+			!_xfdashboard_theme_animation_string_to_gint(timelineDelayText, &timelineDelay, &error))
 		{
 			g_propagate_error(outError, error);
 			return;
@@ -1202,16 +1377,20 @@ static void _xfdashboard_theme_animation_parse_trigger_start(GMarkupParseContext
 			return;
 		}
 
-		timelineMode=xfdashboard_get_enum_value_from_nickname(CLUTTER_TYPE_ANIMATION_MODE, timelineModeText);
-		if(timelineMode==G_MININT)
+		timelineMode=CLUTTER_LINEAR;
+		if(timelineModeText)
 		{
-			/* Set error */
-			g_set_error(outError,
-						XFDASHBOARD_THEME_ANIMATION_ERROR,
-						XFDASHBOARD_THEME_ANIMATION_ERROR_ERROR,
-						"Invalid mode '%s'",
-						timelineModeText);
-			return;
+			timelineMode=xfdashboard_get_enum_value_from_nickname(CLUTTER_TYPE_ANIMATION_MODE, timelineModeText);
+			if(timelineMode==G_MININT)
+			{
+				/* Set error */
+				g_set_error(outError,
+							XFDASHBOARD_THEME_ANIMATION_ERROR,
+							XFDASHBOARD_THEME_ANIMATION_ERROR_ERROR,
+							"Invalid mode '%s'",
+							timelineModeText);
+				return;
+			}
 		}
 
 		timelineRepeat=0;
@@ -2196,6 +2375,12 @@ static void _xfdashboard_theme_animation_dispose(GObject *inObject)
 		priv->specs=NULL;
 	}
 
+	if(priv->settings)
+	{
+		g_object_unref(priv->settings);
+		priv->settings=NULL;
+	}
+
 	/* Call parent's class dispose method */
 	G_OBJECT_CLASS(xfdashboard_theme_animation_parent_class)->dispose(inObject);
 }
@@ -2223,24 +2408,47 @@ void xfdashboard_theme_animation_init(XfdashboardThemeAnimation *self)
 
 	/* Set default values */
 	priv->specs=NULL;
+	priv->settings=g_object_ref(xfdashboard_core_get_settings(NULL));
 }
+
 
 /* IMPLEMENTATION: Errors */
 
-GQuark xfdashboard_theme_animation_error_quark(void)
-{
-	return(g_quark_from_static_string("xfdashboard-theme-animation-error-quark"));
-}
+G_DEFINE_QUARK(xfdashboard-theme-animation-error-quark, xfdashboard_theme_animation_error);
+
 
 /* IMPLEMENTATION: Public API */
 
-/* Create new instance */
+/**
+ * xfdashboard_theme_animation_new:
+ *
+ * Creates a new #XfdashboardThemeAnimation object. It is neccessary to call
+ * xfdashboard_theme_animation_add_file() for each animation resource to load
+ * before any animation can be build from animation definition with
+ * xfdashboard_theme_animation_create() for use at an actor.
+ *
+ * Return value: An initialized and empty #XfdashboardThemeAnimation
+ */
 XfdashboardThemeAnimation* xfdashboard_theme_animation_new(void)
 {
 	return(XFDASHBOARD_THEME_ANIMATION(g_object_new(XFDASHBOARD_TYPE_THEME_ANIMATION, NULL)));
 }
 
-/* Load a XML file into theme */
+/**
+ * xfdashboard_theme_animation_add_file:
+ * @self: A #XfdashboardThemeAnimation
+ * @inPath: The path to animation XML file to load
+ * @outError: A return location for a #GError or %NULL
+ *
+ * Loads the animation XML resource from @inPath into theme layout object at
+ * @self.
+ *
+ * If loading animation layout resource fails, the error message will be placed
+ * inside error at @outError (if not %NULL).
+ *
+ * Return value: %TRUE if animation XML file could be loaded or %FALSE if not
+ *   and error is stored at @outError.
+ */
 gboolean xfdashboard_theme_animation_add_file(XfdashboardThemeAnimation *self,
 												const gchar *inPath,
 												GError **outError)
@@ -2279,78 +2487,51 @@ gboolean xfdashboard_theme_animation_add_file(XfdashboardThemeAnimation *self,
 	return(TRUE);
 }
 
-/* Build requested animation for sender and its signal */
+/**
+ * xfdashboard_theme_animation_create:
+ * @self: A #XfdashboardThemeAnimation
+ * @inSender: The #XfdashboardActor requesting the animation
+ * @inID: A string containing the ID of animation to create for sender
+ * @inDefaultInitialValues: A %NULL-terminated list of default initial values
+ * @inDefaultFinalValues: A %NULL-terminated list of default final values
+ *
+ * Creates a new animation of type #XfdashboardAnimation for the sending actor
+ * at @inSender with ID requested at @inID as described at theme's animation
+ * resource manager at @self.
+ *
+ * A list of default values to set the initial values of the properties can be
+ * provided at @inDefaultInitialValues. If it is set to %NULL then the current
+ * property's value is used as initial value. This list must be %NULL-terminated.
+ *
+ * A list of default values to set the final values of the properties can be
+ * provided at @inDefaultFinalValues. If it is set to %NULL then the current
+ * property's value when the animation is started will be used as final value.
+ * This list must be %NULL-terminated. For convenience the utility function
+ * xfdashboard_animation_defaults_new() can be use to create this list for
+ * initiral and final values.
+ *
+ * <note>
+ *   <para>
+ *     The theme can provide initial and final values and have higher precedence
+ *     as the default initial and final values passed to this function.
+ *   </para>
+ * </note>
+ *
+ * The caller is responsible to free and/or unref the values in the lists
+ * provided at @inDefaultInitialValues and @inDefaultFinalValues. If this list
+ * was built with xfdashboard_animation_defaults_new() use the function
+ * xfdashboard_animation_defaults_free() to free this list accordingly.
+ *
+ * Return value: (transfer full): The instance of #XfdashboardAnimation or %NULL
+ *   in case of errors or if ID was not found.
+ */
 XfdashboardAnimation* xfdashboard_theme_animation_create(XfdashboardThemeAnimation *self,
 															XfdashboardActor *inSender,
-															const gchar *inSignal,
+															const gchar *inID,
 															XfdashboardAnimationValue **inDefaultInitialValues,
 															XfdashboardAnimationValue **inDefaultFinalValues)
 {
-	XfdashboardThemeAnimationSpec							*spec;
-	XfdashboardAnimation									*animation;
-	gboolean												animationEnabled;
-
-	g_return_val_if_fail(XFDASHBOARD_IS_THEME_ANIMATION(self), NULL);
-	g_return_val_if_fail(XFDASHBOARD_IS_ACTOR(inSender), NULL);
-	g_return_val_if_fail(inSignal && *inSignal, NULL);
-
-	animation=NULL;
-
-	/* Check if user wants animation at all. If user does not want any animation,
-	 * return NULL.
-	 */
-	animationEnabled=xfconf_channel_get_bool(xfdashboard_application_get_xfconf_channel(NULL),
-												ENABLE_ANIMATIONS_XFCONF_PROP,
-												DEFAULT_ENABLE_ANIMATIONS);
-	if(!animationEnabled)
-	{
-		XFDASHBOARD_DEBUG(self, ANIMATION,
-							"User disabled animations so do not lookup animation for sender '%s' and signal '%s'",
-							G_OBJECT_TYPE_NAME(inSender),
-							inSignal);
-
-		/* Return NULL as user does not want any animation */
-		return(NULL);
-	}
-
-	/* Get best matching animation specification for sender and signal.
-	 * If no matching animation specification is found, return the empty one.
-	 */
-	spec=_xfdashboard_theme_animation_find_matching_animation_spec(self, XFDASHBOARD_STYLABLE(inSender), inSignal);
-	if(!spec)
-	{
-		XFDASHBOARD_DEBUG(self, ANIMATION,
-							"Could not find an animation specification for sender '%s' and signal '%s'",
-							G_OBJECT_TYPE_NAME(inSender),
-							inSignal);
-
-		/* Return NULL as no matching animation specification was found */
-		return(NULL);
-	}
-
-	XFDASHBOARD_DEBUG(self, ANIMATION,
-						"Found animation specification '%s' for sender '%s' and signal '%s' with %d targets",
-						spec->id,
-						G_OBJECT_TYPE_NAME(inSender),
-						inSignal,
-						g_slist_length(spec->targets));
-
-	/* Create animation for found animation specification */
-	animation=_xfdashboard_theme_animation_create_by_spec(self, spec, inSender, inDefaultInitialValues, inDefaultFinalValues);
-
-	/* Release allocated resources */
-	if(spec) _xfdashboard_theme_animation_spec_unref(spec);
-
-	return(animation);
-}
-
-/* Build requested animation by animation ID */
-XfdashboardAnimation* xfdashboard_theme_animation_create_by_id(XfdashboardThemeAnimation *self,
-																XfdashboardActor *inSender,
-																const gchar *inID,
-																XfdashboardAnimationValue **inDefaultInitialValues,
-																XfdashboardAnimationValue **inDefaultFinalValues)
-{
+	XfdashboardThemeAnimationPrivate						*priv;
 	XfdashboardThemeAnimationSpec							*spec;
 	XfdashboardAnimation									*animation;
 	gboolean												animationEnabled;
@@ -2359,14 +2540,13 @@ XfdashboardAnimation* xfdashboard_theme_animation_create_by_id(XfdashboardThemeA
 	g_return_val_if_fail(XFDASHBOARD_IS_ACTOR(inSender), NULL);
 	g_return_val_if_fail(inID && *inID, NULL);
 
+	priv=self->priv;
 	animation=NULL;
 
 	/* Check if user wants animation at all. If user does not want any animation,
 	 * return NULL.
 	 */
-	animationEnabled=xfconf_channel_get_bool(xfdashboard_application_get_xfconf_channel(NULL),
-												ENABLE_ANIMATIONS_XFCONF_PROP,
-												DEFAULT_ENABLE_ANIMATIONS);
+	animationEnabled=xfdashboard_settings_get_enable_animations(priv->settings);
 	if(!animationEnabled)
 	{
 		XFDASHBOARD_DEBUG(self, ANIMATION,
@@ -2405,7 +2585,20 @@ XfdashboardAnimation* xfdashboard_theme_animation_create_by_id(XfdashboardThemeA
 	return(animation);
 }
 
-/* Look up ID of animation specification for sender and its signal*/
+/**
+ * xfdashboard_theme_animation_lookup_id:
+ * @self: A #XfdashboardThemeAnimation
+ * @inSender: The #XfdashboardActor requesting the animation
+ * @inSignal: A string containing the signal emitted at sending actor
+ *
+ * Looks up the ID for an animation matching the sending actor at @inSender and
+ * the emitted signal at @inSignal as described at theme's animation resource
+ * manager at @self.
+ *
+ * Return value: A string containing the ID of matching animation or %NULL
+ *   in case of error or no match was found. The returned string must be
+ *   freed with g_free().
+ */
 gchar* xfdashboard_theme_animation_lookup_id(XfdashboardThemeAnimation *self,
 												XfdashboardActor *inSender,
 												const gchar *inSignal)
@@ -2422,7 +2615,7 @@ gchar* xfdashboard_theme_animation_lookup_id(XfdashboardThemeAnimation *self,
 	/* Get best matching animation specification for sender and signal.
 	 * If no matching animation specification is found, return the empty one.
 	 */
-	spec=_xfdashboard_theme_animation_find_matching_animation_spec(self, XFDASHBOARD_STYLABLE(inSender), inSignal);
+	spec=_xfdashboard_theme_animation_find_animation_spec_by_sender_signal(self, XFDASHBOARD_STYLABLE(inSender), inSignal);
 	if(spec)
 	{
 		/* Get ID of animation specification to return */

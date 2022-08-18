@@ -1,7 +1,7 @@
 /*
  * themes: Theme settings of application
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@
 #define __XFDASHBOARD_SETTINGS_THEMES__
 
 #include <gtk/gtkx.h>
+
+#include "settings.h"
 
 G_BEGIN_DECLS
 
@@ -61,7 +63,7 @@ struct _XfdashboardSettingsThemesClass
 /* Public API */
 GType xfdashboard_settings_themes_get_type(void) G_GNUC_CONST;
 
-XfdashboardSettingsThemes* xfdashboard_settings_themes_new(GtkBuilder *inBuilder);
+XfdashboardSettingsThemes* xfdashboard_settings_themes_new(XfdashboardSettingsApp *inApp);
 
 G_END_DECLS
 

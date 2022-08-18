@@ -1,7 +1,7 @@
 /*
  * utils: Common functions, helpers and definitions
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,37 +39,15 @@
 #include <glib/gi18n-lib.h>
 #include <clutter/clutter.h>
 #include <gtk/gtk.h>
-#ifdef XFCONF_LEGACY
-#include <dbus/dbus-glib.h>
-#endif
 #include <gio/gdesktopappinfo.h>
 
 #include <libxfdashboard/stage.h>
 #include <libxfdashboard/stage-interface.h>
 #include <libxfdashboard/window-tracker.h>
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/compat.h>
 #include <libxfdashboard/debug.h>
 
-
-/* Gobject type for pointer arrays (GPtrArray) */
-GType xfdashboard_pointer_array_get_type(void)
-{
-	static volatile gsize	type__volatile=0;
-	GType					type;
-
-	if(g_once_init_enter(&type__volatile))
-	{
-#ifdef XFCONF_LEGACY
-		type=dbus_g_type_get_collection("GPtrArray", G_TYPE_VALUE);
-#else
-		type=G_TYPE_PTR_ARRAY;
-#endif
-		g_once_init_leave(&type__volatile, type);
-	}
-
-	return(type__volatile);
-}
 
 /* Callback function for xfdashboard_traverse_actor() to find stage interface
  * used in xfdashboard_notify().
@@ -195,7 +173,7 @@ GAppLaunchContext* xfdashboard_create_app_context(XfdashboardWindowTrackerWorksp
 	/* Get active workspace if not specified */
 	if(!inWorkspace)
 	{
-		tracker=xfdashboard_window_tracker_get_default();
+		tracker=xfdashboard_core_get_window_tracker(NULL);
 		inWorkspace=xfdashboard_window_tracker_get_active_workspace(tracker);
 		g_object_unref(tracker);
 	}
@@ -211,167 +189,6 @@ GAppLaunchContext* xfdashboard_create_app_context(XfdashboardWindowTrackerWorksp
 
 	/* Return application context */
 	return(G_APP_LAUNCH_CONTEXT(context));
-}
-
-/* GValue transformation function for G_TYPE_STRING to various other types */
-static void _xfdashboard_gvalue_transform_string_int(const GValue *inSourceValue, GValue *ioDestValue)
-{
-	ioDestValue->data[0].v_int=g_ascii_strtoll(inSourceValue->data[0].v_pointer, NULL, 10);
-}
-
-static void _xfdashboard_gvalue_transform_string_uint(const GValue *inSourceValue, GValue *ioDestValue)
-{
-	ioDestValue->data[0].v_uint=g_ascii_strtoull(inSourceValue->data[0].v_pointer, NULL, 10);
-}
-
-static void _xfdashboard_gvalue_transform_string_long(const GValue *inSourceValue, GValue *ioDestValue)
-{
-	ioDestValue->data[0].v_long=g_ascii_strtoll(inSourceValue->data[0].v_pointer, NULL, 10);
-}
-
-static void _xfdashboard_gvalue_transform_string_ulong(const GValue *inSourceValue, GValue *ioDestValue)
-{
-	ioDestValue->data[0].v_ulong=g_ascii_strtoull(inSourceValue->data[0].v_pointer, NULL, 10);
-}
-
-static void _xfdashboard_gvalue_transform_string_int64(const GValue *inSourceValue, GValue *ioDestValue)
-{
-	ioDestValue->data[0].v_int64=g_ascii_strtoll(inSourceValue->data[0].v_pointer, NULL, 10);
-}
-
-static void _xfdashboard_gvalue_transform_string_uint64(const GValue *inSourceValue, GValue *ioDestValue)
-{
-	ioDestValue->data[0].v_uint64=g_ascii_strtoull(inSourceValue->data[0].v_pointer, NULL, 10);
-}
-
-static void _xfdashboard_gvalue_transform_string_float(const GValue *inSourceValue, GValue *ioDestValue)
-{
-	ioDestValue->data[0].v_float=g_ascii_strtod(inSourceValue->data[0].v_pointer, NULL);
-}
-
-static void _xfdashboard_gvalue_transform_string_double(const GValue *inSourceValue, GValue *ioDestValue)
-{
-	ioDestValue->data[0].v_double=g_ascii_strtod(inSourceValue->data[0].v_pointer, NULL);
-}
-
-static void _xfdashboard_gvalue_transform_string_boolean(const GValue *inSourceValue, GValue *ioDestValue)
-{
-	/* Convert case-insentive "true" to TRUE */
-	if(!g_ascii_strncasecmp(inSourceValue->data[0].v_pointer, "true", 4))
-	{
-		ioDestValue->data[0].v_int=TRUE;
-	}
-		/* Convert case-insentive "false" to FALSE */
-		else if(!g_ascii_strncasecmp(inSourceValue->data[0].v_pointer, "false", 5))
-		{
-			ioDestValue->data[0].v_int=FALSE;
-		}
-		/* Convert to unsigned integer if set destination to TRUE if non-zero
-		 * otherweise set destination to FALSE
-		 */
-		else
-		{
-			ioDestValue->data[0].v_int=(g_ascii_strtoull(inSourceValue->data[0].v_pointer, NULL, 10)!=0 ? TRUE : FALSE);
-		}
-}
-
-static void _xfdashboard_gvalue_transform_string_enum(const GValue *inSourceValue, GValue *ioDestValue)
-{
-	GEnumClass		*enumClass;
-	GEnumValue		*enumValue;
-	const gchar		*value;
-
-	/* Reference enum class to keep it alive for transformation */
-	enumClass=g_type_class_ref(G_VALUE_TYPE(ioDestValue));
-
-	/* Get value to convert */
-	value=(const gchar*)inSourceValue->data[0].v_pointer;
-
-	/* Get enum value either by name or by nickname (whatever matches first) */
-	enumValue=g_enum_get_value_by_name(enumClass, value);
-	if(!enumValue) enumValue=g_enum_get_value_by_nick(enumClass, value);
-
-	/* Set value if enum could be found otherwise set 0 */
-	if(enumValue) ioDestValue->data[0].v_int=enumValue->value;
-		else
-		{
-			ioDestValue->data[0].v_int=0;
-			XFDASHBOARD_DEBUG(NULL, MISC,
-								"Cannot get value for unknown enum '%s' for type %s",
-								value,
-								g_type_name(G_VALUE_TYPE(ioDestValue)));
-		}
-
-	/* Release allocated resources */
-	g_type_class_unref(enumClass);
-}
-
-static void _xfdashboard_gvalue_transform_string_flags(const GValue *inSourceValue, GValue *ioDestValue)
-{
-	GFlagsClass		*flagsClass;
-	GFlagsValue		*flagsValue;
-	guint			finalValue;
-	gchar			**values, **entry;
-
-	/* Reference flags class to keep it alive for transformation */
-	flagsClass=g_type_class_ref(G_VALUE_TYPE(ioDestValue));
-
-	/* Split string into space-separated needles and lookup each needle
-	 * for a match and add found values OR'ed to final value
-	 */
-	finalValue=0;
-	entry=values=g_strsplit(inSourceValue->data[0].v_pointer, " ", 0);
-	while(*entry)
-	{
-		/* Do not look-up empty values */
-		if(!entry[0]) continue;
-
-		/* Get flags value either by name or by nickname (whatever matches first) */
-		flagsValue=g_flags_get_value_by_name(flagsClass, *entry);
-		if(!flagsValue) flagsValue=g_flags_get_value_by_nick(flagsClass, *entry);
-
-		/* Add value OR'ed if flags could be found */
-		if(flagsValue) finalValue|=flagsValue->value;
-			else
-			{
-				XFDASHBOARD_DEBUG(NULL, MISC,
-									"Cannot get value for unknown flag '%s' for type %s",
-									*entry,
-									g_type_name(G_VALUE_TYPE(ioDestValue)));
-			}
-
-		/* Continue with next entry */
-		entry++;
-	}
-	g_strfreev(values);
-
-	/* Set value */
-	ioDestValue->data[0].v_uint=finalValue;
-
-	/* Release allocated resources */
-	g_type_class_unref(flagsClass);
-}
-
-/**
- * xfdashboard_register_gvalue_transformation_funcs:
- *
- * Registers additional transformation functions used in #GValue to convert
- * values between types.
- */
-void xfdashboard_register_gvalue_transformation_funcs(void)
-{
-	/* Register GValue transformation functions not provided by Glib */
-	g_value_register_transform_func(G_TYPE_STRING, G_TYPE_INT, _xfdashboard_gvalue_transform_string_int);
-	g_value_register_transform_func(G_TYPE_STRING, G_TYPE_UINT, _xfdashboard_gvalue_transform_string_uint);
-	g_value_register_transform_func(G_TYPE_STRING, G_TYPE_LONG, _xfdashboard_gvalue_transform_string_long);
-	g_value_register_transform_func(G_TYPE_STRING, G_TYPE_ULONG, _xfdashboard_gvalue_transform_string_ulong);
-	g_value_register_transform_func(G_TYPE_STRING, G_TYPE_INT64, _xfdashboard_gvalue_transform_string_int64);
-	g_value_register_transform_func(G_TYPE_STRING, G_TYPE_UINT64, _xfdashboard_gvalue_transform_string_uint64);
-	g_value_register_transform_func(G_TYPE_STRING, G_TYPE_FLOAT, _xfdashboard_gvalue_transform_string_float);
-	g_value_register_transform_func(G_TYPE_STRING, G_TYPE_DOUBLE, _xfdashboard_gvalue_transform_string_double);
-	g_value_register_transform_func(G_TYPE_STRING, G_TYPE_BOOLEAN, _xfdashboard_gvalue_transform_string_boolean);
-	g_value_register_transform_func(G_TYPE_STRING, G_TYPE_FLAGS, _xfdashboard_gvalue_transform_string_flags);
-	g_value_register_transform_func(G_TYPE_STRING, G_TYPE_ENUM, _xfdashboard_gvalue_transform_string_enum);
 }
 
 /**
@@ -479,7 +296,7 @@ void xfdashboard_traverse_actor(ClutterActor *inRootActor,
 	/* If root actor where begin traversal is NULL then begin at stage */
 	if(!inRootActor)
 	{
-		inRootActor=CLUTTER_ACTOR(xfdashboard_application_get_stage(NULL));
+		inRootActor=CLUTTER_ACTOR(xfdashboard_core_get_stage(NULL));
 
 		/* If root actor is still NULL then no stage was found and we cannot
 		 * start the traversal.
@@ -871,4 +688,28 @@ void xfdashboard_dump_actor(ClutterActor *inActor)
 	 * if any child has children.
 	 */
 	_xfdashboard_dump_actor_internal(inActor, 1);
+}
+
+/**
+ * xfdashboard_strv_equal:
+ * @inLeft: a %NULL-terminated array of strings
+ * @inRight: another %NULL-terminated array of strings
+ *
+ * Checks if @inLeft and @inRight contain exactly the same elements in exactly 
+ * the same order. Two empty arrays are considered equal. If @inLeft and/or
+ * @inRight are %NULL they are considered empty which is the difference to
+ * @g_strv_equal().
+ *
+ * Returns: %TRUE if @inLeft and @inRight are equal, otherwise %FALSE
+ */
+gboolean xfdashboard_strv_equal(const gchar **inLeft, const gchar **inRight)
+{
+	static const gchar		*empty[]={ NULL };
+
+	/* If any array pointer is NULL, consider them empty */
+	if(!inLeft) inLeft=empty;
+	if(!inRight) inRight=empty;
+
+	/* Now compare them */
+	return(g_strv_equal(inLeft, inRight));
 }

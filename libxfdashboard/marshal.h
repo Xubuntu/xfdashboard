@@ -78,7 +78,25 @@ void _xfdashboard_marshal_VOID__STRING_BOOLEAN (GClosure     *closure,
                                                 gpointer      invocation_hint,
                                                 gpointer      marshal_data);
 
-/* BOOLEAN:OBJECT (marshal.list:9) */
+/* VOID:STRING,PARAM (marshal.list:9) */
+extern
+void _xfdashboard_marshal_VOID__STRING_PARAM (GClosure     *closure,
+                                              GValue       *return_value,
+                                              guint         n_param_values,
+                                              const GValue *param_values,
+                                              gpointer      invocation_hint,
+                                              gpointer      marshal_data);
+
+/* BOOLEAN:VOID (marshal.list:10) */
+extern
+void _xfdashboard_marshal_BOOLEAN__VOID (GClosure     *closure,
+                                         GValue       *return_value,
+                                         guint         n_param_values,
+                                         const GValue *param_values,
+                                         gpointer      invocation_hint,
+                                         gpointer      marshal_data);
+
+/* BOOLEAN:OBJECT (marshal.list:11) */
 extern
 void _xfdashboard_marshal_BOOLEAN__OBJECT (GClosure     *closure,
                                            GValue       *return_value,
@@ -87,7 +105,7 @@ void _xfdashboard_marshal_BOOLEAN__OBJECT (GClosure     *closure,
                                            gpointer      invocation_hint,
                                            gpointer      marshal_data);
 
-/* BOOLEAN:OBJECT,ENUM (marshal.list:10) */
+/* BOOLEAN:OBJECT,ENUM (marshal.list:12) */
 extern
 void _xfdashboard_marshal_BOOLEAN__OBJECT_ENUM (GClosure     *closure,
                                                 GValue       *return_value,
@@ -96,7 +114,7 @@ void _xfdashboard_marshal_BOOLEAN__OBJECT_ENUM (GClosure     *closure,
                                                 gpointer      invocation_hint,
                                                 gpointer      marshal_data);
 
-/* BOOLEAN:OBJECT,FLOAT,FLOAT (marshal.list:11) */
+/* BOOLEAN:OBJECT,FLOAT,FLOAT (marshal.list:13) */
 extern
 void _xfdashboard_marshal_BOOLEAN__OBJECT_FLOAT_FLOAT (GClosure     *closure,
                                                        GValue       *return_value,
@@ -105,7 +123,7 @@ void _xfdashboard_marshal_BOOLEAN__OBJECT_FLOAT_FLOAT (GClosure     *closure,
                                                        gpointer      invocation_hint,
                                                        gpointer      marshal_data);
 
-/* BOOLEAN:OBJECT,STRING,BOXED (marshal.list:12) */
+/* BOOLEAN:OBJECT,STRING,BOXED (marshal.list:14) */
 extern
 void _xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED (GClosure     *closure,
                                                         GValue       *return_value,
@@ -114,7 +132,16 @@ void _xfdashboard_marshal_BOOLEAN__OBJECT_STRING_BOXED (GClosure     *closure,
                                                         gpointer      invocation_hint,
                                                         gpointer      marshal_data);
 
-/* OBJECT:VOID (marshal.list:13) */
+/* BOOLEAN:OBJECT,STRING,STRING,BOXED (marshal.list:15) */
+extern
+void _xfdashboard_marshal_BOOLEAN__OBJECT_STRING_STRING_BOXED (GClosure     *closure,
+                                                               GValue       *return_value,
+                                                               guint         n_param_values,
+                                                               const GValue *param_values,
+                                                               gpointer      invocation_hint,
+                                                               gpointer      marshal_data);
+
+/* OBJECT:VOID (marshal.list:16) */
 extern
 void _xfdashboard_marshal_OBJECT__VOID (GClosure     *closure,
                                         GValue       *return_value,

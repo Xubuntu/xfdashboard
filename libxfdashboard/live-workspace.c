@@ -2,7 +2,7 @@
  * live-workspace: An actor showing the content of a workspace which will
  *                 be updated if changed.
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@
 #include <libxfdashboard/image-content.h>
 #include <libxfdashboard/enums.h>
 #include <libxfdashboard/stylable.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/compat.h>
 #include <libxfdashboard/debug.h>
 
@@ -1061,7 +1062,7 @@ static void xfdashboard_live_workspace_init(XfdashboardLiveWorkspace *self)
 	priv=self->priv=xfdashboard_live_workspace_get_instance_private(self);
 
 	/* Set default values */
-	priv->windowTracker=xfdashboard_window_tracker_get_default();
+	priv->windowTracker=xfdashboard_core_get_window_tracker(NULL);
 	priv->workspace=NULL;
 	priv->backgroundType=XFDASHBOARD_STAGE_BACKGROUND_IMAGE_TYPE_NONE;
 	priv->monitor=NULL;

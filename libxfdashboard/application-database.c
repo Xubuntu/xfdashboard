@@ -2,7 +2,7 @@
  * application-database: A singelton managing desktop files and menus
  *                       for installed applications
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 
 #include <glib/gi18n-lib.h>
 
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/application-database.h>
 #include <libxfdashboard/desktop-app-info.h>
 #include <libxfdashboard/compat.h>
@@ -79,10 +80,8 @@ enum
 
 static guint XfdashboardApplicationDatabaseSignals[SIGNAL_LAST]={ 0, };
 
-/* IMPLEMENTATION: Private variables and methods */
 
-/* Single instance of application database */
-static XfdashboardApplicationDatabase*		_xfdashboard_application_database=NULL;
+/* IMPLEMENTATION: Private variables and methods */
 
 typedef struct _XfdashboardApplicationDatabaseFileMonitorData	XfdashboardApplicationDatabaseFileMonitorData;
 struct _XfdashboardApplicationDatabaseFileMonitorData
@@ -114,19 +113,15 @@ static void _xfdashboard_application_database_add_hashtable_item_to_list(gpointe
 static void _xfdashboard_application_database_on_application_menu_reload_required(XfdashboardApplicationDatabase *self,
 																					gpointer inUserData)
 {
-	GarconMenu		*menu;
-	GError			*error;
+	GError	*error=NULL;
 
 	g_return_if_fail(XFDASHBOARD_IS_APPLICATION_DATABASE(self));
 	g_return_if_fail(GARCON_IS_MENU(inUserData));
 
-	menu=GARCON_MENU(inUserData);
-	error=NULL;
-
 	/* Reload application menu. This also emits all necessary signals. */
 	XFDASHBOARD_DEBUG(self, APPLICATIONS,
 						"Menu '%s' changed and requires a reload of application menu",
-						garcon_menu_element_get_name(GARCON_MENU_ELEMENT(menu)));
+						garcon_menu_element_get_name(GARCON_MENU_ELEMENT(inUserData)));
 	if(!_xfdashboard_application_database_load_application_menu(self, &error))
 	{
 		g_critical("Could not reload application menu: %s",
@@ -1266,26 +1261,6 @@ static void _xfdashboard_application_database_check_search_path_duplicate(gpoint
 
 /* IMPLEMENTATION: GObject */
 
-/* Construct this object */
-static GObject* _xfdashboard_application_database_constructor(GType inType,
-																guint inNumberConstructParams,
-																GObjectConstructParam *inConstructParams)
-{
-	GObject									*object;
-
-	if(!_xfdashboard_application_database)
-	{
-		object=G_OBJECT_CLASS(xfdashboard_application_database_parent_class)->constructor(inType, inNumberConstructParams, inConstructParams);
-		_xfdashboard_application_database=XFDASHBOARD_APPLICATION_DATABASE(object);
-	}
-		else
-		{
-			object=g_object_ref(G_OBJECT(_xfdashboard_application_database));
-		}
-
-	return(object);
-}
-
 /* Dispose this object */
 static void _xfdashboard_application_database_dispose(GObject *inObject)
 {
@@ -1303,19 +1278,6 @@ static void _xfdashboard_application_database_dispose(GObject *inObject)
 
 	/* Call parent's class dispose method */
 	G_OBJECT_CLASS(xfdashboard_application_database_parent_class)->dispose(inObject);
-}
-
-/* Finalize this object */
-static void _xfdashboard_application_database_finalize(GObject *inObject)
-{
-	/* Release allocated resources finally, e.g. unset singleton */
-	if(G_LIKELY(G_OBJECT(_xfdashboard_application_database)==inObject))
-	{
-		_xfdashboard_application_database=NULL;
-	}
-
-	/* Call parent's class dispose method */
-	G_OBJECT_CLASS(xfdashboard_application_database_parent_class)->finalize(inObject);
 }
 
 /* Set/get properties */
@@ -1348,9 +1310,7 @@ static void xfdashboard_application_database_class_init(XfdashboardApplicationDa
 	GObjectClass		*gobjectClass=G_OBJECT_CLASS(klass);
 
 	/* Override functions */
-	gobjectClass->constructor=_xfdashboard_application_database_constructor;
 	gobjectClass->dispose=_xfdashboard_application_database_dispose;
-	gobjectClass->finalize=_xfdashboard_application_database_finalize;
 	gobjectClass->get_property=_xfdashboard_application_database_get_property;
 
 	/* Define properties */
@@ -1457,15 +1417,6 @@ static void xfdashboard_application_database_init(XfdashboardApplicationDatabase
 }
 
 /* IMPLEMENTATION: Public API */
-
-/* Get single instance of application */
-XfdashboardApplicationDatabase* xfdashboard_application_database_get_default(void)
-{
-	GObject									*singleton;
-
-	singleton=g_object_new(XFDASHBOARD_TYPE_APPLICATION_DATABASE, NULL);
-	return(XFDASHBOARD_APPLICATION_DATABASE(singleton));
-}
 
 /* Determine if menu and applications has been loaded successfully */
 gboolean xfdashboard_application_database_is_loaded(const XfdashboardApplicationDatabase *self)
@@ -1611,7 +1562,7 @@ gchar* xfdashboard_application_database_get_file_from_desktop_id(const gchar *in
 	g_return_val_if_fail(inDesktopID && *inDesktopID, NULL);
 
 	/* Get singleton of application database */
-	appDB=xfdashboard_application_database_get_default();
+	appDB=xfdashboard_core_get_application_database(NULL);
 
 	/* Requested desktop ID must have ".desktop" suffix */
 	if(!g_str_has_suffix(inDesktopID, ".desktop"))
@@ -1786,7 +1737,7 @@ gchar* xfdashboard_application_database_get_desktop_id_from_path(const gchar *in
 	foundDesktopID=NULL;
 
 	/* Get singleton of application database */
-	appDB=xfdashboard_application_database_get_default();
+	appDB=xfdashboard_core_get_application_database(NULL);
 
 	/* Get search paths */
 	searchPaths=xfdashboard_application_database_get_application_search_paths(appDB);

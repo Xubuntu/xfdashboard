@@ -4,7 +4,7 @@
  *                         size of monitor within screen and also a flag
  *                         if this monitor is the primary one.
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -198,7 +198,7 @@ static void _xfdashboard_window_tracker_monitor_x11_set_index(XfdashboardWindowT
 																gint inIndex)
 {
 	XfdashboardWindowTrackerMonitorX11Private		*priv;
-	gint											numberMonitors;
+	G_GNUC_UNUSED gint											numberMonitors;
 
 	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_MONITOR_X11(self));
 	g_return_if_fail(inIndex>=0);

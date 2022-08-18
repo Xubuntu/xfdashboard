@@ -2,7 +2,7 @@
  * stylable: An interface which can be inherited by actor and objects
  *           to get styled by a theme
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,8 @@
 #endif
 
 #include <glib-object.h>
+
+#include <libxfdashboard/focusable.h>
 
 G_BEGIN_DECLS
 
@@ -66,6 +68,28 @@ struct _XfdashboardStylableInterface
 	void (*pseudo_class_removed)(XfdashboardStylable *self, const gchar *inClass);
 
 	void (*invalidate)(XfdashboardStylable *self);
+
+	/* Binding actions */
+	gboolean (*add_classes)(XfdashboardStylable *self,
+							XfdashboardFocusable *inSource,
+							const gchar *inAction,
+							const gchar *inDetail,
+							ClutterEvent *inEvent);
+	gboolean (*remove_classes)(XfdashboardStylable *self,
+								XfdashboardFocusable *inSource,
+								const gchar *inAction,
+								const gchar *inDetail,
+								ClutterEvent *inEvent);
+	gboolean (*toggle_classes)(XfdashboardStylable *self,
+								XfdashboardFocusable *inSource,
+								const gchar *inAction,
+								const gchar *inDetail,
+								ClutterEvent *inEvent);
+	gboolean (*apply_classes)(XfdashboardStylable *self,
+								XfdashboardFocusable *inSource,
+								const gchar *inAction,
+								const gchar *inDetail,
+								ClutterEvent *inEvent);
 };
 
 /* Public API */

@@ -2,7 +2,7 @@
  * application-button: A button representing an application
  *                     (either by menu item or desktop file)
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 #include <libxfdashboard/utils.h>
 #include <libxfdashboard/application-tracker.h>
 #include <libxfdashboard/stylable.h>
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/window-tracker.h>
 #include <libxfdashboard/popup-menu-item-button.h>
 #include <libxfdashboard/popup-menu-item-separator.h>
@@ -208,17 +208,22 @@ static void _xfdashboard_application_button_on_popup_menu_item_activate_window(X
 																				gpointer inUserData)
 {
 	XfdashboardWindowTrackerWindow		*window;
+	XfdashboardWindowTrackerWorkspace	*workspace;
 
 	g_return_if_fail(XFDASHBOARD_IS_POPUP_MENU_ITEM(inMenuItem));
 	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW(inUserData));
 
 	window=XFDASHBOARD_WINDOW_TRACKER_WINDOW(inUserData);
 
+	/* Switch to workspace of window to activate if neccessary */
+	workspace=xfdashboard_window_tracker_window_get_workspace(window);
+	if(workspace) xfdashboard_window_tracker_workspace_activate(workspace);
+
 	/* Activate window */
 	xfdashboard_window_tracker_window_activate(window);
 
 	/* Quit application */
-	xfdashboard_application_suspend_or_quit(NULL);
+	xfdashboard_core_quit(NULL);
 }
 
 /* User selected to execute an application action */
@@ -284,7 +289,7 @@ static void _xfdashboard_application_button_on_popup_menu_item_application_actio
 								g_app_info_get_display_name(priv->appInfo));
 
 			/* Quit application */
-			xfdashboard_application_suspend_or_quit(NULL);
+			xfdashboard_core_quit(NULL);
 
 			/* Release allocated resources */
 			g_object_unref(gicon);
@@ -473,7 +478,7 @@ static void xfdashboard_application_button_init(XfdashboardApplicationButton *se
 	priv->showDescription=FALSE;
 	priv->formatTitleOnly=NULL;
 	priv->formatTitleDescription=NULL;
-	priv->appTracker=xfdashboard_application_tracker_get_default();
+	priv->appTracker=xfdashboard_core_get_application_tracker(NULL);
 	priv->runningStateChangedID=0;
 
 	/* Connect signals */
@@ -665,7 +670,7 @@ void xfdashboard_application_button_set_format_title_description(XfdashboardAppl
 	if(g_strcmp0(priv->formatTitleDescription, inFormat)!=0)
 	{
 		/* Set value */
-		if(priv->formatTitleOnly) g_free(priv->formatTitleDescription);
+		if(priv->formatTitleDescription) g_free(priv->formatTitleDescription);
 		priv->formatTitleDescription=g_strdup(inFormat);
 
 		/* Update actor */
@@ -775,7 +780,7 @@ gboolean xfdashboard_application_button_execute(XfdashboardApplicationButton *se
 								xfdashboard_application_button_get_display_name(self));
 
 			/* Emit signal for successful application launch */
-			g_signal_emit_by_name(xfdashboard_application_get_default(), "application-launched", priv->appInfo);
+			g_signal_emit_by_name(xfdashboard_core_get_default(), "application-launched", priv->appInfo);
 
 			/* Set status that application has been started successfully */
 			started=TRUE;
@@ -820,7 +825,7 @@ guint xfdashboard_application_button_add_popup_menu_items_for_windows(Xfdashboar
 		 * of list if it is on active workspace and to end of list if it
 		 * is on any other workspace.
 		 */
-		windowTracker=xfdashboard_window_tracker_get_default();
+		windowTracker=xfdashboard_core_get_window_tracker(NULL);
 		activeWorkspace=xfdashboard_window_tracker_get_active_workspace(windowTracker);
 
 		sortedList=NULL;
@@ -905,7 +910,7 @@ guint xfdashboard_application_button_add_popup_menu_items_for_actions(Xfdashboar
 {
 	XfdashboardApplicationButtonPrivate			*priv;
 	guint										numberItems;
-	GList										*actions;
+	const GList									*actions;
 	const GList									*iter;
 
 	g_return_val_if_fail(XFDASHBOARD_IS_APPLICATION_BUTTON(self), 0);

@@ -1,7 +1,7 @@
 /*
  * stage: Global stage of application
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
 #include <gdk/gdk.h>
 #include <math.h>
 
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/viewpad.h>
 #include <libxfdashboard/view-selector.h>
 #include <libxfdashboard/text-box.h>
@@ -52,6 +52,7 @@
 #include <libxfdashboard/window-tracker.h>
 #include <libxfdashboard/window-content.h>
 #include <libxfdashboard/stage-interface.h>
+#include <libxfdashboard/settings.h>
 #include <libxfdashboard/compat.h>
 #include <libxfdashboard/debug.h>
 
@@ -90,6 +91,8 @@ struct _XfdashboardStagePrivate
 	guint									notificationTimeoutID;
 
 	XfdashboardFocusManager					*focusManager;
+
+	XfdashboardSettings						*settings;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(XfdashboardStage,
@@ -136,14 +139,7 @@ static void _xfdashboard_stage_on_window_opened(XfdashboardStage *self,
 
 
 /* IMPLEMENTATION: Private variables and methods */
-#define NOTIFICATION_TIMEOUT_XFCONF_PROP				"/min-notification-timeout"
-#define DEFAULT_NOTIFICATION_TIMEOUT					3000
-#define RESET_SEARCH_ON_RESUME_XFCONF_PROP				"/reset-search-on-resume"
-#define DEFAULT_RESET_SEARCH_ON_RESUME					TRUE
-#define SWITCH_VIEW_ON_RESUME_XFCONF_PROP				"/switch-to-view-on-resume"
-#define DEFAULT_SWITCH_VIEW_ON_RESUME					NULL
-#define RESELECT_THEME_FOCUS_ON_RESUME_XFCONF_PROP		"/reselect-theme-focus-on-resume"
-#define DEFAULT_RESELECT_THEME_FOCUS_ON_RESUME			FALSE
+
 #define XFDASHBOARD_THEME_LAYOUT_PRIMARY				"primary"
 #define XFDASHBOARD_THEME_LAYOUT_SECONDARY				"secondary"
 
@@ -193,10 +189,10 @@ static gboolean _xfdashboard_stage_event(ClutterActor *inActor, ClutterEvent *in
 					xfdashboard_text_box_set_text(XFDASHBOARD_TEXT_BOX(priv->searchbox), NULL);
 					return(CLUTTER_EVENT_STOP);
 				}
-					/* ... otherwise quit application */
+					/* ... otherwise request core to quit */
 					else
 					{
-						xfdashboard_application_suspend_or_quit(NULL);
+						xfdashboard_core_quit(NULL);
 						return(CLUTTER_EVENT_STOP);
 					}
 			}
@@ -270,20 +266,15 @@ static XfdashboardView* _xfdashboard_stage_get_view_to_switch_to(XfdashboardStag
 	 */
 	if(!view)
 	{
-		gchar							*resumeViewID;
+		const gchar						*resumeViewID;
 
 		/* Get view ID from settings and look up view */
-		resumeViewID=xfconf_channel_get_string(xfdashboard_application_get_xfconf_channel(NULL),
-												SWITCH_VIEW_ON_RESUME_XFCONF_PROP,
-												DEFAULT_SWITCH_VIEW_ON_RESUME);
+		resumeViewID=xfdashboard_settings_get_switch_to_view_on_resume(priv->settings);
 		if(resumeViewID)
 		{
 			/* Lookup view by its ID set configured settings */
 			view=xfdashboard_viewpad_find_view_by_id(XFDASHBOARD_VIEWPAD(priv->viewpad), resumeViewID);
 			if(!view) g_warning("Cannot switch to unknown view '%s'", resumeViewID);
-
-			/* Release allocated resources */
-			g_free(resumeViewID);
 		}
 	}
 
@@ -732,7 +723,7 @@ static void _xfdashboard_stage_on_application_suspend(XfdashboardStage *self, gp
 	XfdashboardStagePrivate				*priv;
 
 	g_return_if_fail(XFDASHBOARD_IS_STAGE(self));
-	g_return_if_fail(XFDASHBOARD_IS_APPLICATION(inUserData));
+	g_return_if_fail(XFDASHBOARD_IS_CORE(inUserData));
 
 	priv=self->priv;
 
@@ -759,7 +750,7 @@ static void _xfdashboard_stage_on_application_resume(XfdashboardStage *self, gpo
 	XfdashboardStagePrivate				*priv;
 
 	g_return_if_fail(XFDASHBOARD_IS_STAGE(self));
-	g_return_if_fail(XFDASHBOARD_IS_APPLICATION(inUserData));
+	g_return_if_fail(XFDASHBOARD_IS_CORE(inUserData));
 
 	priv=self->priv;
 
@@ -771,9 +762,7 @@ static void _xfdashboard_stage_on_application_resume(XfdashboardStage *self, gpo
 		XfdashboardView					*resumeView;
 
 		/* Get configured options */
-		doResetSearch=xfconf_channel_get_bool(xfdashboard_application_get_xfconf_channel(NULL),
-												RESET_SEARCH_ON_RESUME_XFCONF_PROP,
-												DEFAULT_RESET_SEARCH_ON_RESUME);
+		doResetSearch=xfdashboard_settings_get_reset_search_on_resume(priv->settings);
 
 		/* Find search view */
 		searchView=xfdashboard_viewpad_find_view_by_type(XFDASHBOARD_VIEWPAD(priv->viewpad), XFDASHBOARD_TYPE_SEARCH_VIEW);
@@ -831,9 +820,7 @@ static void _xfdashboard_stage_on_application_resume(XfdashboardStage *self, gpo
 			gboolean				reselectFocusOnResume;
 
 			/* Determine if user (also) requests to reselect focus on resume */
-			reselectFocusOnResume=xfconf_channel_get_bool(xfdashboard_application_get_xfconf_channel(NULL),
-															RESELECT_THEME_FOCUS_ON_RESUME_XFCONF_PROP,
-															DEFAULT_RESELECT_THEME_FOCUS_ON_RESUME);
+			reselectFocusOnResume=xfdashboard_settings_get_reselect_theme_focus_on_resume(priv->settings);
 			if(reselectFocusOnResume)
 			{
 				/* Move focus to actor */
@@ -916,7 +903,7 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 
 	g_return_if_fail(XFDASHBOARD_IS_STAGE(self));
 	g_return_if_fail(XFDASHBOARD_IS_THEME(inTheme));
-	g_return_if_fail(XFDASHBOARD_IS_APPLICATION(inUserData));
+	g_return_if_fail(XFDASHBOARD_IS_CORE(inUserData));
 
 	priv=self->priv;
 
@@ -1245,97 +1232,95 @@ static void _xfdashboard_stage_on_application_theme_changed(XfdashboardStage *se
 				clutter_actor_hide(priv->tooltip);
 				clutter_actor_set_reactive(priv->tooltip, FALSE);
 			}
+		}
 
-			/* Register focusable actors at focus manager */
-			if(interface->focusables)
+		/* Register focusable actors at focus manager */
+		if(interface->focusables)
+		{
+			for(i=0; i<interface->focusables->len; i++)
 			{
-				for(i=0; i<interface->focusables->len; i++)
+				/* Get actor to register at focus manager */
+				focusObject=G_OBJECT(g_ptr_array_index(interface->focusables, i));
+				if(!focusObject) continue;
+
+				/* Check that actor is focusable */
+				if(!XFDASHBOARD_IS_FOCUSABLE(focusObject))
 				{
-					/* Get actor to register at focus manager */
-					focusObject=G_OBJECT(g_ptr_array_index(interface->focusables, i));
-					if(!focusObject) continue;
-
-					/* Check that actor is focusable */
-					if(!XFDASHBOARD_IS_FOCUSABLE(focusObject))
-					{
-						g_warning("Object %s is not focusable and cannot be registered.",
-									G_OBJECT_TYPE_NAME(focusObject));
-						continue;
-					}
-
-					/* Register actor at focus manager */
-					xfdashboard_focus_manager_register(priv->focusManager,
-														XFDASHBOARD_FOCUSABLE(focusObject));
-					XFDASHBOARD_DEBUG(self, ACTOR,
-										"Registering actor %s of interface with ID '%s' at focus manager",
-										G_OBJECT_TYPE_NAME(focusObject),
-										clutter_actor_get_name(interface->actor));
+					g_warning("Object %s is not focusable and cannot be registered.",
+								G_OBJECT_TYPE_NAME(focusObject));
+					continue;
 				}
-			}
 
-			/* Move focus to selected actor or remember actor focus to set it later
-			 * but only if selected actor is a focusable actor and is registered
-			 * to focus manager.
-			 */
-			if(interface->focus &&
-				XFDASHBOARD_IS_FOCUSABLE(interface->focus) &&
-				xfdashboard_focus_manager_is_registered(priv->focusManager, XFDASHBOARD_FOCUSABLE(interface->focus)))
+				/* Register actor at focus manager */
+				xfdashboard_focus_manager_register(priv->focusManager,
+													XFDASHBOARD_FOCUSABLE(focusObject));
+				XFDASHBOARD_DEBUG(self, ACTOR,
+									"Registering actor %s of interface with ID '%s' at focus manager",
+									G_OBJECT_TYPE_NAME(focusObject),
+									clutter_actor_get_name(interface->actor));
+			}
+		}
+
+		/* Move focus to selected actor or remember actor focus to set it later
+		 * but only if selected actor is a focusable actor and is registered
+		 * to focus manager.
+		 */
+		if(interface->focus &&
+			XFDASHBOARD_IS_FOCUSABLE(interface->focus) &&
+			xfdashboard_focus_manager_is_registered(priv->focusManager, XFDASHBOARD_FOCUSABLE(interface->focus)))
+		{
+			/* If actor can be focused then move focus to actor ... */
+			if(xfdashboard_focusable_can_focus(XFDASHBOARD_FOCUSABLE(interface->focus)))
 			{
-				/* If actor can be focused then move focus to actor ... */
-				if(xfdashboard_focusable_can_focus(XFDASHBOARD_FOCUSABLE(interface->focus)))
+				xfdashboard_focus_manager_set_focus(priv->focusManager, XFDASHBOARD_FOCUSABLE(interface->focus));
+				XFDASHBOARD_DEBUG(self, ACTOR,
+									"Moved focus to actor %s of interface with ID '%s'",
+									G_OBJECT_TYPE_NAME(interface->focus),
+									clutter_actor_get_name(interface->actor));
+
+				/* Determine if user (also) requests to reselect focus on resume
+				 * because then remember the actor to focus, to move the focus
+				 * each time the stage window gets shown after it was hidden.
+				 */
+				reselectFocusOnResume=xfdashboard_settings_get_reselect_theme_focus_on_resume(priv->settings);
+				if(reselectFocusOnResume)
 				{
-					xfdashboard_focus_manager_set_focus(priv->focusManager, XFDASHBOARD_FOCUSABLE(interface->focus));
+					priv->focusActorOnShow=XFDASHBOARD_FOCUSABLE(interface->focus);
+					g_object_add_weak_pointer(G_OBJECT(priv->focusActorOnShow), &priv->focusActorOnShow);
+
 					XFDASHBOARD_DEBUG(self, ACTOR,
-										"Moved focus to actor %s of interface with ID '%s'",
+										"Will move focus to actor %s of interface with ID '%s' any time the stage gets visible",
 										G_OBJECT_TYPE_NAME(interface->focus),
 										clutter_actor_get_name(interface->actor));
-
-					/* Determine if user (also) requests to reselect focus on resume
-					 * because then remember the actor to focus to move the focus
-					 * each time the stage window gets shown after it was hidden.
-					 */
-					reselectFocusOnResume=xfconf_channel_get_bool(xfdashboard_application_get_xfconf_channel(NULL),
-																	RESELECT_THEME_FOCUS_ON_RESUME_XFCONF_PROP,
-																	DEFAULT_RESELECT_THEME_FOCUS_ON_RESUME);
-					if(reselectFocusOnResume)
-					{
-						priv->focusActorOnShow=XFDASHBOARD_FOCUSABLE(interface->focus);
-						g_object_add_weak_pointer(G_OBJECT(priv->focusActorOnShow), &priv->focusActorOnShow);
-
-						XFDASHBOARD_DEBUG(self, ACTOR,
-											"Will move focus to actor %s of interface with ID '%s' any time the stage gets visible",
-											G_OBJECT_TYPE_NAME(interface->focus),
-											clutter_actor_get_name(interface->actor));
-					}
 				}
-					/* ... otherwise if stage is not visible, remember the actor
-					 * to focus to move the focus to it as soon as stage is
-					 * visible ...
-					 */
-					else if(!clutter_actor_is_visible(CLUTTER_ACTOR(self)))
-					{
-						priv->focusActorOnShow=XFDASHBOARD_FOCUSABLE(interface->focus);
-						g_object_add_weak_pointer(G_OBJECT(priv->focusActorOnShow), &priv->focusActorOnShow);
-
-						XFDASHBOARD_DEBUG(self, ACTOR,
-											"Cannot move focus to actor %s of interface with ID '%s' but will try again when stage is visible",
-											G_OBJECT_TYPE_NAME(interface->focus),
-											clutter_actor_get_name(interface->actor));
-					}
-					/* ... otherwise just show a debug message */
-					else
-					{
-						XFDASHBOARD_DEBUG(self, ACTOR,
-											"Cannot move focus to actor %s of interface with ID '%s' because actor cannot be focused",
-											G_OBJECT_TYPE_NAME(interface->focus),
-											clutter_actor_get_name(interface->actor));
-					}
 			}
+				/* ... otherwise if stage is not visible, remember the actor
+				 * to focus to move the focus to it as soon as stage is
+				 * visible ...
+				 */
+				else if(!clutter_actor_is_visible(CLUTTER_ACTOR(self)))
+				{
+					priv->focusActorOnShow=XFDASHBOARD_FOCUSABLE(interface->focus);
+					g_object_add_weak_pointer(G_OBJECT(priv->focusActorOnShow), &priv->focusActorOnShow);
+
+					XFDASHBOARD_DEBUG(self, ACTOR,
+										"Cannot move focus to actor %s of interface with ID '%s' but will try again when stage is visible",
+										G_OBJECT_TYPE_NAME(interface->focus),
+										clutter_actor_get_name(interface->actor));
+				}
+				/* ... otherwise just show a debug message */
 				else
 				{
-					XFDASHBOARD_DEBUG(self, ACTOR, "Cannot move focus to any actor because no one was selected in theme");
+					XFDASHBOARD_DEBUG(self, ACTOR,
+										"Cannot move focus to actor %s of interface with ID '%s' because actor cannot be focused",
+										G_OBJECT_TYPE_NAME(interface->focus),
+										clutter_actor_get_name(interface->actor));
 				}
 		}
+			else
+			{
+				XFDASHBOARD_DEBUG(self, ACTOR, "Cannot move focus to any actor because no one was selected in theme");
+			}
 	}
 
 	/* Release allocated resources */
@@ -1421,7 +1406,7 @@ static void _xfdashboard_stage_on_monitor_added(XfdashboardStage *self,
 	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER(inUserData));
 
 	/* Get theme and theme layout */
-	theme=xfdashboard_application_get_theme(NULL);
+	theme=xfdashboard_core_get_theme(NULL);
 	themeLayout=xfdashboard_theme_get_layout(theme);
 
 	/* Create interface for non-primary monitors. If no interface is defined in theme
@@ -1588,9 +1573,7 @@ static void _xfdashboard_stage_show(ClutterActor *inActor)
 		gboolean				reselectFocusOnResume;
 
 		/* Determine if user (also) requests to reselect focus on resume */
-		reselectFocusOnResume=xfconf_channel_get_bool(xfdashboard_application_get_xfconf_channel(NULL),
-														RESELECT_THEME_FOCUS_ON_RESUME_XFCONF_PROP,
-														DEFAULT_RESELECT_THEME_FOCUS_ON_RESUME);
+		reselectFocusOnResume=xfdashboard_settings_get_reselect_theme_focus_on_resume(priv->settings);
 
 		/* Move focus to actor */
 		xfdashboard_focus_manager_set_focus(priv->focusManager, XFDASHBOARD_FOCUSABLE(priv->focusActorOnShow));
@@ -1722,6 +1705,12 @@ static void _xfdashboard_stage_dispose(GObject *inObject)
 	{
 		g_free(priv->switchToView);
 		priv->switchToView=NULL;
+	}
+
+	if(priv->settings)
+	{
+		g_object_unref(priv->settings);
+		priv->settings=NULL;
 	}
 
 	/* Call parent's class dispose method */
@@ -1907,7 +1896,7 @@ static void xfdashboard_stage_class_init(XfdashboardStageClass *klass)
 static void xfdashboard_stage_init(XfdashboardStage *self)
 {
 	XfdashboardStagePrivate		*priv;
-	XfdashboardApplication		*application;
+	XfdashboardCore				*core;
 	ClutterConstraint			*widthConstraint;
 	ClutterConstraint			*heightConstraint;
 	ClutterColor				transparent;
@@ -1915,8 +1904,8 @@ static void xfdashboard_stage_init(XfdashboardStage *self)
 	priv=self->priv=xfdashboard_stage_get_instance_private(self);
 
 	/* Set default values */
-	priv->focusManager=xfdashboard_focus_manager_get_default();
-	priv->windowTracker=xfdashboard_window_tracker_get_default();
+	priv->focusManager=xfdashboard_core_get_focus_manager(NULL);
+	priv->windowTracker=xfdashboard_core_get_window_tracker(NULL);
 	priv->stageWindow=NULL;
 	priv->primaryInterface=NULL;
 	priv->quicklaunch=NULL;
@@ -1936,6 +1925,7 @@ static void xfdashboard_stage_init(XfdashboardStage *self)
 	priv->backgroundImageLayer=NULL;
 	priv->switchToView=NULL;
 	priv->focusActorOnShow=NULL;
+	priv->settings=g_object_ref(xfdashboard_core_get_settings(NULL));
 
 	/* Create background actors but order of adding background children is important */
 	widthConstraint=clutter_bind_constraint_new(CLUTTER_ACTOR(self), CLUTTER_BIND_WIDTH, 0.0f);
@@ -1976,19 +1966,19 @@ static void xfdashboard_stage_init(XfdashboardStage *self)
 								G_CALLBACK(_xfdashboard_stage_on_primary_monitor_changed),
 								self);
 
-	/* Connect signal to application */
-	application=xfdashboard_application_get_default();
-	g_signal_connect_swapped(application,
+	/* Connect signal to core */
+	core=xfdashboard_core_get_default();
+	g_signal_connect_swapped(core,
 								"suspend",
 								G_CALLBACK(_xfdashboard_stage_on_application_suspend),
 								self);
 
-	g_signal_connect_swapped(application,
+	g_signal_connect_swapped(core,
 								"resume",
 								G_CALLBACK(_xfdashboard_stage_on_application_resume),
 								self);
 
-	g_signal_connect_swapped(application,
+	g_signal_connect_swapped(core,
 								"theme-changed",
 								G_CALLBACK(_xfdashboard_stage_on_application_theme_changed),
 								self);
@@ -2207,9 +2197,7 @@ void xfdashboard_stage_show_notification(XfdashboardStage *self, const gchar *in
 	 * of the notification text to show but never drops below the minimum timeout configured.
 	 * The interval is calculated by one second for 30 characters.
 	 */
-	interval=xfconf_channel_get_uint(xfdashboard_application_get_xfconf_channel(NULL),
-										NOTIFICATION_TIMEOUT_XFCONF_PROP,
-										DEFAULT_NOTIFICATION_TIMEOUT);
+	interval=xfdashboard_settings_get_notification_timeout(priv->settings);
 	interval=MAX((gint)((strlen(inText)/30.0f)*1000.0f), interval);
 
 	priv->notificationTimeoutID=clutter_threads_add_timeout_full(G_PRIORITY_DEFAULT,

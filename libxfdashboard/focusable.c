@@ -3,7 +3,7 @@
  *            managed by focus manager for keyboard navigation and
  *            selection handling
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 #include <libxfdashboard/stylable.h>
 #include <libxfdashboard/marshal.h>
 #include <libxfdashboard/focus-manager.h>
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/compat.h>
 #include <libxfdashboard/debug.h>
 
@@ -123,7 +123,7 @@ static gboolean _xfdashboard_focusable_has_focus(XfdashboardFocusable *self)
 	/* Ask focus manager which actor has the current focus and
 	 * check if it is this focusable actor.
 	 */
-	focusManager=xfdashboard_focus_manager_get_default();
+	focusManager=xfdashboard_core_get_focus_manager(NULL);
 	hasFocus=xfdashboard_focus_manager_has_focus(focusManager, self);
 	g_object_unref(focusManager);
 
@@ -153,7 +153,7 @@ static void _xfdashboard_focusable_on_selection_unavailable(XfdashboardFocusable
 	ClutterActor						*oldSelection;
 	ClutterActor						*newSelection;
 	gboolean							success;
-	XfdashboardApplication				*application;
+	XfdashboardCore						*core;
 
 	g_return_if_fail(XFDASHBOARD_IS_FOCUSABLE(self));
 	g_return_if_fail(CLUTTER_IS_ACTOR(inUserData));
@@ -169,8 +169,8 @@ static void _xfdashboard_focusable_on_selection_unavailable(XfdashboardFocusable
 	 * and successfully called.
 	 * If setting new selection was unsuccessful we set selection to nothing (NULL);
 	 */
-	application=xfdashboard_application_get_default();
-	if(!xfdashboard_application_is_quitting(application))
+	core=xfdashboard_core_get_default();
+	if(!xfdashboard_core_is_quitting(core))
 	{
 		/* Get next selection */
 		newSelection=xfdashboard_focusable_find_selection(self, oldSelection, XFDASHBOARD_SELECTION_TARGET_NEXT);
@@ -1044,7 +1044,7 @@ gboolean xfdashboard_focusable_move_focus_to(XfdashboardFocusable *self)
 	if(!xfdashboard_focusable_can_focus(self)) return(FALSE);
 
 	/* Get focus manager to change focus */
-	focusManager=xfdashboard_focus_manager_get_default();
+	focusManager=xfdashboard_core_get_focus_manager(NULL);;
 
 	/* Try to move focus to this focusable actor and check success */
 	xfdashboard_focus_manager_set_focus(focusManager, self);

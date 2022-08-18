@@ -4,7 +4,7 @@
 /*
  * enums: Definitions of enumerations and flags used in GObject objects
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,13 +30,34 @@
 
 #include "enums.h"
 
+/* enumerations from "animation.h" */
+#include "animation.h"
+GType xfdashboard_animation_create_flags_get_type(void)
+{
+	static gsize	static_g_define_type_id=0;
+
+	if(g_once_init_enter(&static_g_define_type_id))
+	{
+		static const GFlagsValue values[]=
+		{
+			{ XFDASHBOARD_ANIMATION_CREATE_FLAG_ALLOW_EMPTY, "XFDASHBOARD_ANIMATION_CREATE_FLAG_ALLOW_EMPTY", "allow-empty" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardAnimationCreateFlags"), values);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
+	}
+
+	return(static_g_define_type_id);
+}
+
 /* enumerations from "applications-search-provider.h" */
 #include "applications-search-provider.h"
 GType xfdashboard_applications_search_provider_sort_mode_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GFlagsValue values[]=
 		{
@@ -47,19 +68,19 @@ GType xfdashboard_applications_search_provider_sort_mode_get_type(void)
 		};
 
 		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardApplicationsSearchProviderSortMode"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "background.h" */
 #include "background.h"
 GType xfdashboard_background_type_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GFlagsValue values[]=
 		{
@@ -71,19 +92,19 @@ GType xfdashboard_background_type_get_type(void)
 		};
 
 		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardBackgroundType"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "binding.h" */
 #include "binding.h"
 GType xfdashboard_binding_flags_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GFlagsValue values[]=
 		{
@@ -93,19 +114,19 @@ GType xfdashboard_binding_flags_get_type(void)
 		};
 
 		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardBindingFlags"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "bindings-pool.h" */
 #include "bindings-pool.h"
 GType xfdashboard_bindings_pool_error_enum_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -117,19 +138,64 @@ GType xfdashboard_bindings_pool_error_enum_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardBindingsPoolErrorEnum"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
+}
+
+/* enumerations from "core.h" */
+#include "core.h"
+GType xfdashboard_core_error_get_type(void)
+{
+	static gsize	static_g_define_type_id=0;
+
+	if(g_once_init_enter(&static_g_define_type_id))
+	{
+		static const GEnumValue values[]=
+		{
+			{ XFDASHBOARD_CORE_ERROR_INITIALIZATION_FAILED, "XFDASHBOARD_CORE_ERROR_INITIALIZATION_FAILED", "initialization-failed" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardCoreError"), values);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
+	}
+
+	return(static_g_define_type_id);
+}
+
+/* enumerations from "gradient-color.h" */
+#include "gradient-color.h"
+GType xfdashboard_gradient_type_get_type(void)
+{
+	static gsize	static_g_define_type_id=0;
+
+	if(g_once_init_enter(&static_g_define_type_id))
+	{
+		static const GEnumValue values[]=
+		{
+			{ XFDASHBOARD_GRADIENT_TYPE_NONE, "XFDASHBOARD_GRADIENT_TYPE_NONE", "none" },
+			{ XFDASHBOARD_GRADIENT_TYPE_SOLID, "XFDASHBOARD_GRADIENT_TYPE_SOLID", "solid" },
+			{ XFDASHBOARD_GRADIENT_TYPE_LINEAR_GRADIENT, "XFDASHBOARD_GRADIENT_TYPE_LINEAR_GRADIENT", "linear-gradient" },
+			{ XFDASHBOARD_GRADIENT_TYPE_PATH_GRADIENT, "XFDASHBOARD_GRADIENT_TYPE_PATH_GRADIENT", "path-gradient" },
+			{ 0, NULL, NULL }
+		};
+
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardGradientType"), values);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
+	}
+
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "image-content.h" */
 #include "image-content.h"
 GType xfdashboard_image_content_loading_state_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -141,19 +207,19 @@ GType xfdashboard_image_content_loading_state_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardImageContentLoadingState"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "label.h" */
 #include "label.h"
 GType xfdashboard_label_style_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -164,19 +230,19 @@ GType xfdashboard_label_style_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardLabelStyle"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "live-window-simple.h" */
 #include "live-window-simple.h"
 GType xfdashboard_live_window_simple_display_type_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -186,19 +252,19 @@ GType xfdashboard_live_window_simple_display_type_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardLiveWindowSimpleDisplayType"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "plugin.h" */
 #include "plugin.h"
 GType xfdashboard_plugin_flag_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GFlagsValue values[]=
 		{
@@ -208,16 +274,16 @@ GType xfdashboard_plugin_flag_get_type(void)
 		};
 
 		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardPluginFlag"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 GType xfdashboard_plugin_error_enum_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -227,19 +293,19 @@ GType xfdashboard_plugin_error_enum_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardPluginErrorEnum"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "theme-animation.h" */
 #include "theme-animation.h"
-GType xfdashboard_theme_animation_error_enum_get_type(void)
+GType xfdashboard_theme_animation_error_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -248,20 +314,20 @@ GType xfdashboard_theme_animation_error_enum_get_type(void)
 			{ 0, NULL, NULL }
 		};
 
-		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeAnimationErrorEnum"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeAnimationError"), values);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "theme-css.h" */
 #include "theme-css.h"
-GType xfdashboard_theme_css_error_enum_get_type(void)
+GType xfdashboard_theme_css_error_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -272,20 +338,20 @@ GType xfdashboard_theme_css_error_enum_get_type(void)
 			{ 0, NULL, NULL }
 		};
 
-		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeCSSErrorEnum"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeCSSError"), values);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "theme-effects.h" */
 #include "theme-effects.h"
-GType xfdashboard_theme_effects_error_enum_get_type(void)
+GType xfdashboard_theme_effects_error_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -294,20 +360,20 @@ GType xfdashboard_theme_effects_error_enum_get_type(void)
 			{ 0, NULL, NULL }
 		};
 
-		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeEffectsErrorEnum"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeEffectsError"), values);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "theme-layout.h" */
 #include "theme-layout.h"
 GType xfdashboard_theme_layout_build_get_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -317,16 +383,16 @@ GType xfdashboard_theme_layout_build_get_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeLayoutBuildGet"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
-GType xfdashboard_theme_layout_error_enum_get_type(void)
+GType xfdashboard_theme_layout_error_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -335,20 +401,20 @@ GType xfdashboard_theme_layout_error_enum_get_type(void)
 			{ 0, NULL, NULL }
 		};
 
-		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeLayoutErrorEnum"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeLayoutError"), values);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "theme.h" */
 #include "theme.h"
-GType xfdashboard_theme_error_enum_get_type(void)
+GType xfdashboard_theme_error_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -357,20 +423,20 @@ GType xfdashboard_theme_error_enum_get_type(void)
 			{ 0, NULL, NULL }
 		};
 
-		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeErrorEnum"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardThemeError"), values);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "types.h" */
 #include "types.h"
 GType xfdashboard_view_mode_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -380,16 +446,16 @@ GType xfdashboard_view_mode_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardViewMode"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 GType xfdashboard_visibility_policy_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -400,16 +466,16 @@ GType xfdashboard_visibility_policy_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardVisibilityPolicy"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 GType xfdashboard_orientation_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -421,16 +487,16 @@ GType xfdashboard_orientation_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardOrientation"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 GType xfdashboard_corners_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GFlagsValue values[]=
 		{
@@ -448,16 +514,16 @@ GType xfdashboard_corners_get_type(void)
 		};
 
 		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardCorners"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 GType xfdashboard_borders_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GFlagsValue values[]=
 		{
@@ -471,16 +537,16 @@ GType xfdashboard_borders_get_type(void)
 		};
 
 		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardBorders"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 GType xfdashboard_stage_background_image_type_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -490,16 +556,16 @@ GType xfdashboard_stage_background_image_type_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardStageBackgroundImageType"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 GType xfdashboard_selection_target_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -518,16 +584,16 @@ GType xfdashboard_selection_target_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardSelectionTarget"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 GType xfdashboard_anchor_point_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -545,19 +611,19 @@ GType xfdashboard_anchor_point_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardAnchorPoint"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "view.h" */
 #include "view.h"
 GType xfdashboard_view_fit_mode_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GEnumValue values[]=
 		{
@@ -569,19 +635,19 @@ GType xfdashboard_view_fit_mode_get_type(void)
 		};
 
 		GType	g_define_type_id=g_enum_register_static(g_intern_static_string("XfdashboardViewFitMode"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* enumerations from "window-tracker-window.h" */
 #include "window-tracker-window.h"
 GType xfdashboard_window_tracker_window_state_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GFlagsValue values[]=
 		{
@@ -597,16 +663,16 @@ GType xfdashboard_window_tracker_window_state_get_type(void)
 		};
 
 		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardWindowTrackerWindowState"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 GType xfdashboard_window_tracker_window_action_get_type(void)
 {
-	static volatile gsize	g_define_type_id__volatile=0;
+	static gsize	static_g_define_type_id=0;
 
-	if(g_once_init_enter(&g_define_type_id__volatile))
+	if(g_once_init_enter(&static_g_define_type_id))
 	{
 		static const GFlagsValue values[]=
 		{
@@ -615,10 +681,10 @@ GType xfdashboard_window_tracker_window_action_get_type(void)
 		};
 
 		GType	g_define_type_id=g_flags_register_static(g_intern_static_string("XfdashboardWindowTrackerWindowAction"), values);
-		g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);
+		g_once_init_leave(&static_g_define_type_id, g_define_type_id);
 	}
 
-	return(g_define_type_id__volatile);
+	return(static_g_define_type_id);
 }
 
 /* Generated data ends here */

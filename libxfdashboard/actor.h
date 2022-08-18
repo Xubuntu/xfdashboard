@@ -1,7 +1,7 @@
 /*
  * actor: Abstract base actor
  *
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,6 +73,9 @@ void xfdashboard_actor_set_can_focus(XfdashboardActor *self, gboolean inCanFous)
 
 const gchar* xfdashboard_actor_get_effects(XfdashboardActor *self);
 void xfdashboard_actor_set_effects(XfdashboardActor *self, const gchar *inEffects);
+
+gboolean xfdashboard_actor_get_visibility(XfdashboardActor *self);
+void xfdashboard_actor_set_visibility(XfdashboardActor *self, gboolean inVisibility);
 
 void xfdashboard_actor_install_stylable_property(XfdashboardActorClass *klass, GParamSpec *inParamSpec);
 void xfdashboard_actor_install_stylable_property_by_name(XfdashboardActorClass *klass, const gchar *inParamName);

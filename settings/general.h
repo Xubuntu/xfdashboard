@@ -1,7 +1,7 @@
 /*
  * general: General settings of application
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@
 #define __XFDASHBOARD_SETTINGS_GENERAL__
 
 #include <gtk/gtkx.h>
+
+#include "settings.h"
 
 G_BEGIN_DECLS
 
@@ -61,7 +63,7 @@ struct _XfdashboardSettingsGeneralClass
 /* Public API */
 GType xfdashboard_settings_general_get_type(void) G_GNUC_CONST;
 
-XfdashboardSettingsGeneral* xfdashboard_settings_general_new(GtkBuilder *inBuilder);
+XfdashboardSettingsGeneral* xfdashboard_settings_general_new(XfdashboardSettingsApp *inApp);
 
 G_END_DECLS
 

@@ -1,7 +1,7 @@
 /*
  * actor: Abstract base actor
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 
 #include <glib/gi18n-lib.h>
 
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/stylable.h>
 #include <libxfdashboard/focusable.h>
 #include <libxfdashboard/animation.h>
@@ -53,6 +53,7 @@ struct _XfdashboardActorPrivate
 	/* Properties related */
 	gboolean						canFocus;
 	gchar							*effects;
+	gboolean						visibility;
 
 	gchar							*styleClasses;
 	gchar							*stylePseudoClasses;
@@ -77,6 +78,8 @@ struct _XfdashboardActorPrivate
 	XfdashboardAnimation			*allocationAnimation;
 	ClutterActorBox					*allocationInitialBox;
 	ClutterActorBox					*allocationFinalBox;
+
+	gboolean						shouldVisible;
 };
 
 /* Properties */
@@ -86,6 +89,7 @@ enum
 
 	PROP_CAN_FOCUS,
 	PROP_EFFECTS,
+	PROP_VISIBILITY,
 
 	/* Overriden properties of interface: XfdashboardStylable */
 	PROP_STYLE_CLASSES,
@@ -137,6 +141,12 @@ static void _xfdashboard_actor_animation_entry_free(XfdashboardActorAnimationEnt
 	if(inData->animation) g_object_unref(inData->animation);
 	if(inData->signal) g_free(inData->signal);
 	g_free(inData);
+}
+
+/* Free an animation entry called by dispose function */
+static void _xfdashboard_actor_animation_entry_free_dispose_callback(gpointer inData, gpointer inUserData)
+{
+	_xfdashboard_actor_animation_entry_free(inData);
 }
 
 /* Invalidate all stylable children recursively beginning at given actor */
@@ -281,7 +291,7 @@ static void _xfdashboard_actor_on_mapped_changed(GObject *inObject,
 															"height", G_TYPE_FLOAT, clutter_actor_box_get_height(&finalBox));
 
 				/* Lookup animation for create signal and set up values for allocation */
-				priv->firstTimeMappedAnimation=xfdashboard_animation_new_with_values(self, "created", initials, finals);
+				priv->firstTimeMappedAnimation=xfdashboard_animation_new_with_values(self, "created", 0, initials, finals);
 
 				/* Free default initial and final values */
 				xfdashboard_animation_defaults_free(initials);
@@ -379,7 +389,7 @@ static void _xfdashboard_actor_update_effects(XfdashboardActor *self, const gcha
 	 * Also take a reference on theme effect instance as it needs to be alive
 	 * while iterating through list of effect IDs and creating these effects.
 	 */
-	theme=xfdashboard_application_get_theme(NULL);
+	theme=xfdashboard_core_get_theme(NULL);
 
 	themeEffects=xfdashboard_theme_get_effects(theme);
 	g_object_ref(themeEffects);
@@ -430,6 +440,23 @@ static void _xfdashboard_actor_update_effects(XfdashboardActor *self, const gcha
 	if(effectsList) g_free(effectsList);
 	if(effectIDs) g_strfreev(effectIDs);
 	g_object_unref(themeEffects);
+}
+
+/* Check if actor should be visible */
+static gboolean _xfdashboard_actor_can_be_visible(XfdashboardActor *self)
+{
+	XfdashboardActorPrivate		*priv;
+
+	g_return_val_if_fail(XFDASHBOARD_IS_ACTOR(self), FALSE);
+
+	priv=self->priv;
+
+	/* If actor has requested to be visible and visibility is allowed,
+	 * then return TRUE for actor being visible. Otherwise it should
+	 * not visible but hidden, so return FALSE.
+	 */
+	if(priv->shouldVisible==TRUE && priv->visibility==TRUE) return(TRUE);
+	return(FALSE);
 }
 
 /* IMPLEMENTATION: Interface XfdashboardFocusable */
@@ -627,7 +654,7 @@ static void _xfdashboard_actor_stylable_invalidate(XfdashboardStylable *inStylab
 	if(!priv->forceStyleRevalidation && !clutter_actor_is_mapped(CLUTTER_ACTOR(self))) return;
 
 	/* Get theme */
-	theme=xfdashboard_application_get_theme(NULL);
+	theme=xfdashboard_core_get_theme(NULL);
 
 	/* Get theme CSS */
 	themeCSS=xfdashboard_theme_get_css(theme);
@@ -700,7 +727,7 @@ static void _xfdashboard_actor_stylable_invalidate(XfdashboardStylable *inStylab
 								++i,
 								styleValue->source,
 								(gchar*)styleName,
-								styleValue->string);
+								styleValue->value);
 		}
 
 		XFDASHBOARD_DEBUG(self, STYLE, "End of styles from theme");
@@ -736,7 +763,7 @@ static void _xfdashboard_actor_stylable_invalidate(XfdashboardStylable *inStylab
 		 * if conversion was successful. Otherwise do nothing.
 		 */
 		g_value_init(&cssValue, G_TYPE_STRING);
-		g_value_set_string(&cssValue, styleValue->string);
+		g_value_set_string(&cssValue, styleValue->value);
 
 		g_value_init(&propertyValue, G_PARAM_SPEC_VALUE_TYPE(realParamSpec));
 
@@ -866,10 +893,18 @@ static void _xfdashboard_actor_animation_done(XfdashboardAnimation *inAnimation,
 	priv=self->priv;
 
 	/* Lookup animation done in list of animation and remove animation entry */
-	for(iter=priv->animations; iter; iter=g_slist_next(iter))
+	for(iter=priv->animations; iter; )
 	{
+		GSList						*currentIter;
+
+		/* As we might remove an entry from list, remember current iterator
+		 * and move real iterator to next entry now.
+		 */
+		currentIter=iter;
+		iter=g_slist_next(iter);
+
 		/* Get animation entry at iterator */
-		data=(XfdashboardActorAnimationEntry*)iter->data;
+		data=(XfdashboardActorAnimationEntry*)currentIter->data;
 		if(!data) continue;
 
 		/* Check if animation entry matches the animation done */
@@ -883,11 +918,11 @@ static void _xfdashboard_actor_animation_done(XfdashboardAnimation *inAnimation,
 			 * to NULL to avoid unreffing an already disposed or finalized
 			 * object instance.
 			 */
-			priv->animations=g_slist_remove_link(priv->animations, iter);
+			priv->animations=g_slist_remove_link(priv->animations, currentIter);
 
-			data->animation=NULL;
+			if(!data->inDestruction) data->animation=NULL;
 			_xfdashboard_actor_animation_entry_free(data);
-			g_slist_free_1(iter);
+			g_slist_free_1(currentIter);
 		}
 	}
 }
@@ -950,7 +985,7 @@ static XfdashboardAnimation* _xfdashboard_actor_add_animation(XfdashboardActor *
 	/* Lookup animation for signal-(pseudo-)class combination and if any found
 	 * (i.e. has an ID) add it to list of animations of actor and run it.
 	 */
-	animation=xfdashboard_animation_new(XFDASHBOARD_ACTOR(self), inAnimationSignal);
+	animation=xfdashboard_animation_new(XFDASHBOARD_ACTOR(self), inAnimationSignal, 0);
 	if(!animation ||
 		xfdashboard_animation_is_empty(animation))
 	{
@@ -1171,6 +1206,7 @@ static void _xfdashboard_actor_on_allocation_changed(ClutterActor *inActor,
 		/* Create and start animation */
 		animation=xfdashboard_animation_new_with_values(self,
 														ALLOCATION_ANIMATION_SIGNAL,
+														0,
 														initials,
 														finals);
 		if(animation)
@@ -1308,7 +1344,7 @@ static void _xfdashboard_actor_parent_set(ClutterActor *inActor, ClutterActor *i
 	_xfdashboard_actor_invalidate_recursive(CLUTTER_ACTOR(self));
 }
 
-/* Actor will be shown */
+/* Replace a running animation for old signal with the one for new signal */
 static XfdashboardAnimation* _xfdashboard_actor_replace_animation(XfdashboardActor *self,
 																	const gchar *inOldSignal,
 																	const gchar *inNewSignal)
@@ -1366,14 +1402,23 @@ static XfdashboardAnimation* _xfdashboard_actor_replace_animation(XfdashboardAct
 	return(newAnimation);
 }
 
+/* Actor will be shown */
 static void _xfdashboard_actor_show(ClutterActor *inActor)
 {
-	XfdashboardActor		*self;
-	ClutterActorClass		*parentClass;
+	XfdashboardActor			*self;
+	XfdashboardActorPrivate		*priv;
+	ClutterActorClass			*parentClass;
 
 	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inActor));
 
 	self=XFDASHBOARD_ACTOR(inActor);
+	priv=self->priv;
+
+	/* Set flag that actor requests to be shown */
+	priv->shouldVisible=TRUE;
+
+	/* Check if actor should be hidden forcibly */
+	if(!_xfdashboard_actor_can_be_visible(self)) return;
 
 	/* Call parent's virtual function */
 	parentClass=CLUTTER_ACTOR_CLASS(xfdashboard_actor_parent_class);
@@ -1412,12 +1457,17 @@ static void _xfdashboard_actor_hide_on_animation_done(XfdashboardActor *inActor,
 
 static void _xfdashboard_actor_hide(ClutterActor *inActor)
 {
-	XfdashboardActor		*self;
-	XfdashboardAnimation	*animation;
+	XfdashboardActor			*self;
+	XfdashboardActorPrivate		*priv;
+	XfdashboardAnimation		*animation;
 
 	g_return_if_fail(XFDASHBOARD_IS_ACTOR(inActor));
 
 	self=XFDASHBOARD_ACTOR(inActor);
+	priv=self->priv;
+
+	/* Set flag that actor requests to be hidden */
+	priv->shouldVisible=FALSE;
 
 	/* Actor is hidden now so remove pseudo-class ":hover" because pointer cannot
 	 * be in an actor hidden.
@@ -1477,7 +1527,14 @@ static void _xfdashboard_actor_dispose(GObject *inObject)
 
 	if(priv->animations)
 	{
-		g_slist_free_full(priv->animations, (GDestroyNotify)_xfdashboard_actor_animation_entry_free);
+		/* Iterate through list of animation and call destruction function
+		 * _xfdashboard_actor_animation_entry_free() for each entry in list but
+		 * do not free the list itself with g_slist_free* function familiy as the
+		 * connected signal handler _xfdashboard_actor_animation_done() for
+		 * 'animation-done' will actually remove the this entry from list resulting
+		 * in an empty list with pointer NULL.
+		 */
+		g_slist_foreach(priv->animations, _xfdashboard_actor_animation_entry_free_dispose_callback, NULL);
 		priv->animations=NULL;
 	}
 
@@ -1523,6 +1580,10 @@ static void _xfdashboard_actor_set_property(GObject *inObject,
 			xfdashboard_actor_set_effects(self, g_value_get_string(inValue));
 			break;
 
+		case PROP_VISIBILITY:
+			xfdashboard_actor_set_visibility(self, g_value_get_boolean(inValue));
+			break;
+
 		case PROP_STYLE_CLASSES:
 			_xfdashboard_actor_stylable_set_classes(XFDASHBOARD_STYLABLE(self),
 													g_value_get_string(inValue));
@@ -1555,6 +1616,10 @@ static void _xfdashboard_actor_get_property(GObject *inObject,
 
 		case PROP_EFFECTS:
 			g_value_set_string(outValue, priv->effects);
+			break;
+
+		case PROP_VISIBILITY:
+			g_value_set_boolean(outValue, priv->visibility);
 			break;
 
 		case PROP_STYLE_CLASSES:
@@ -1627,10 +1692,19 @@ void xfdashboard_actor_class_init(XfdashboardActorClass *klass)
 								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 	g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_EFFECTS, XfdashboardActorProperties[PROP_EFFECTS]);
 
+	XfdashboardActorProperties[PROP_VISIBILITY]=
+		g_param_spec_boolean("visibility",
+								"Visibility",
+								"This flag determines if this actor can be visible or should be forcibly hidden",
+								TRUE,
+								G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+	g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_VISIBILITY, XfdashboardActorProperties[PROP_VISIBILITY]);
+
 	g_object_class_override_property(gobjectClass, PROP_STYLE_CLASSES, "style-classes");
 	g_object_class_override_property(gobjectClass, PROP_STYLE_PSEUDO_CLASSES, "style-pseudo-classes");
 
 	/* Define stylable properties */
+	xfdashboard_actor_install_stylable_property_by_name(klass, "visibility");
 	xfdashboard_actor_install_stylable_property_by_name(klass, "effects");
 	xfdashboard_actor_install_stylable_property_by_name(klass, "x-expand");
 	xfdashboard_actor_install_stylable_property_by_name(klass, "y-expand");
@@ -1667,6 +1741,8 @@ void xfdashboard_actor_init(XfdashboardActor *self)
 	priv->allocationAnimation=NULL;
 	priv->allocationInitialBox=NULL;
 	priv->allocationTrackBox=NULL;
+	priv->shouldVisible=TRUE;
+	priv->visibility=TRUE;
 
 	/* Connect signals */
 	g_signal_connect(self, "notify::mapped", G_CALLBACK(_xfdashboard_actor_on_mapped_changed), NULL);
@@ -1821,6 +1897,45 @@ void xfdashboard_actor_set_effects(XfdashboardActor *self, const gchar *inEffect
 
 		/* Notify about property change */
 		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardActorProperties[PROP_EFFECTS]);
+	}
+}
+
+/* Get/set "visibility" flag of actor to determine
+ * if this actor can be shown or should be hidden forcibly.
+ */
+gboolean xfdashboard_actor_get_visibility(XfdashboardActor *self)
+{
+	g_return_val_if_fail(XFDASHBOARD_IS_ACTOR(self), FALSE);
+
+	return(self->priv->visibility);
+}
+
+void xfdashboard_actor_set_visibility(XfdashboardActor *self, gboolean inVisibility)
+{
+	XfdashboardActorPrivate		*priv;
+
+	g_return_if_fail(XFDASHBOARD_IS_ACTOR(self));
+
+	priv=self->priv;
+
+	/* Set value if changed */
+	if(priv->visibility!=inVisibility)
+	{
+		/* Set value */
+		priv->visibility=inVisibility;
+
+		/* Notify about property change */
+		g_object_notify_by_pspec(G_OBJECT(self), XfdashboardActorProperties[PROP_VISIBILITY]);
+
+		/* Update actors visibility */
+		if(!_xfdashboard_actor_can_be_visible(self))
+		{
+			clutter_actor_hide(CLUTTER_ACTOR(self));
+		}
+			else
+			{
+				clutter_actor_show(CLUTTER_ACTOR(self));
+			}
 	}
 }
 
@@ -2018,7 +2133,7 @@ gboolean xfdashboard_actor_destroy(ClutterActor *self)
 	/* Check if an animation exists but only for actors derived from XfdashboardActor */
 	if(XFDASHBOARD_IS_ACTOR(self))
 	{
-		animation=xfdashboard_animation_new(XFDASHBOARD_ACTOR(self), "destroy");
+		animation=xfdashboard_animation_new(XFDASHBOARD_ACTOR(self), "destroy", 0);
 	}
 
 	if(animation &&

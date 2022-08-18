@@ -1,7 +1,7 @@
 /*
  * view-manager: Single-instance managing views
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,8 +67,6 @@ struct _XfdashboardViewManagerClass
 
 /* Public API */
 GType xfdashboard_view_manager_get_type(void) G_GNUC_CONST;
-
-XfdashboardViewManager* xfdashboard_view_manager_get_default(void);
 
 gboolean xfdashboard_view_manager_register(XfdashboardViewManager *self, const gchar *inID, GType inViewType);
 gboolean xfdashboard_view_manager_unregister(XfdashboardViewManager *self, const gchar *inID);

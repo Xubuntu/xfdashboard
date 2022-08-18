@@ -1,7 +1,7 @@
 /*
  * scrollbar: A scroll bar
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -904,7 +904,7 @@ void xfdashboard_scrollbar_set_value(XfdashboardScrollbar *self, gfloat inValue)
 	enforceNewValue=FALSE;
 	if(inValue+priv->valueRange>priv->range)
 	{
-		gfloat						oldValue;
+		G_GNUC_UNUSED gfloat	oldValue;
 
 		oldValue=inValue;
 		inValue=MAX(0.0f, priv->range-priv->valueRange);
@@ -971,7 +971,7 @@ void xfdashboard_scrollbar_set_range(XfdashboardScrollbar *self, gfloat inRange)
 	/* Check if value is still within new range otherwise adjust value */
 	if(priv->value>priv->range)
 	{
-		gfloat						oldValue;
+		G_GNUC_UNUSED gfloat	oldValue;
 
 		XFDASHBOARD_DEBUG(self, ACTOR,
 							"Adjusting value %.2f in scrollbar to fit into new range %.2f",

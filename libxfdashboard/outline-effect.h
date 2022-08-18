@@ -1,7 +1,7 @@
 /*
  * outline-effect: Draws an outline on top of actor
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 
 #include <clutter/clutter.h>
 
+#include <libxfdashboard/gradient-color.h>
 #include <libxfdashboard/types.h>
 
 G_BEGIN_DECLS
@@ -67,17 +68,17 @@ GType xfdashboard_outline_effect_get_type(void) G_GNUC_CONST;
 
 ClutterEffect* xfdashboard_outline_effect_new(void);
 
-const ClutterColor* xfdashboard_outline_effect_get_color(XfdashboardOutlineEffect *self);
-void xfdashboard_outline_effect_set_color(XfdashboardOutlineEffect *self, const ClutterColor *inColor);
+const XfdashboardGradientColor* xfdashboard_outline_effect_get_color(XfdashboardOutlineEffect *self);
+void xfdashboard_outline_effect_set_color(XfdashboardOutlineEffect *self, const XfdashboardGradientColor *inColor);
 
 gfloat xfdashboard_outline_effect_get_width(XfdashboardOutlineEffect *self);
 void xfdashboard_outline_effect_set_width(XfdashboardOutlineEffect *self, const gfloat inWidth);
 
 XfdashboardBorders xfdashboard_outline_effect_get_borders(XfdashboardOutlineEffect *self);
-void xfdashboard_outline_effect_set_borders(XfdashboardOutlineEffect *self, XfdashboardBorders inBorders);
+void xfdashboard_outline_effect_set_borders(XfdashboardOutlineEffect *self, const XfdashboardBorders inBorders);
 
 XfdashboardCorners xfdashboard_outline_effect_get_corners(XfdashboardOutlineEffect *self);
-void xfdashboard_outline_effect_set_corners(XfdashboardOutlineEffect *self, XfdashboardCorners inCorners);
+void xfdashboard_outline_effect_set_corners(XfdashboardOutlineEffect *self, const XfdashboardCorners inCorners);
 
 gfloat xfdashboard_outline_effect_get_corner_radius(XfdashboardOutlineEffect *self);
 void xfdashboard_outline_effect_set_corner_radius(XfdashboardOutlineEffect *self, const gfloat inRadius);

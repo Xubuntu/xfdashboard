@@ -1,7 +1,7 @@
 /*
  * application-tracker: A singleton managing states of applications
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,8 +67,6 @@ struct _XfdashboardApplicationTrackerClass
 
 /* Public API */
 GType xfdashboard_application_tracker_get_type(void) G_GNUC_CONST;
-
-XfdashboardApplicationTracker* xfdashboard_application_tracker_get_default(void);
 
 gboolean xfdashboard_application_tracker_is_running_by_desktop_id(XfdashboardApplicationTracker *self,
 																	const gchar *inDesktopID);

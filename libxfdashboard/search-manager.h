@@ -2,7 +2,7 @@
  * search-manager: Single-instance managing search providers and
  *                 handles search requests
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,8 +71,6 @@ struct _XfdashboardSearchManagerClass
 
 /* Public API */
 GType xfdashboard_search_manager_get_type(void) G_GNUC_CONST;
-
-XfdashboardSearchManager* xfdashboard_search_manager_get_default(void);
 
 gboolean xfdashboard_search_manager_register(XfdashboardSearchManager *self, const gchar *inID, GType inProviderType);
 gboolean xfdashboard_search_manager_unregister(XfdashboardSearchManager *self, const gchar *inID);

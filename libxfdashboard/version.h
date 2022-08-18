@@ -1,7 +1,7 @@
 /*
  * version: variables and functions to check the version
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@
  * linked against at application run time.
  * (e.g. in libxfdashboard version 0.7.1 this is 0.)
  */
-#define LIBXFDASHBOARD_MAJOR_VERSION (0)
+#define LIBXFDASHBOARD_MAJOR_VERSION (1)
 
 /**
  * LIBXFDASHBOARD_MINOR_VERSION:
@@ -55,7 +55,7 @@
  * linked against at application run time.
  * (e.g. in libxfdashboard version 0.7.1 this is 7.)
  */
-#define LIBXFDASHBOARD_MINOR_VERSION (8)
+#define LIBXFDASHBOARD_MINOR_VERSION (0)
 
 /**
  * LIBXFDASHBOARD_MICRO_VERSION:
@@ -65,7 +65,7 @@
  * linked against at application run time.
  * (e.g. in libxfdashboard version 0.7.1 this is 1.)
  */
-#define LIBXFDASHBOARD_MICRO_VERSION (1)
+#define LIBXFDASHBOARD_MICRO_VERSION (0)
 
 /**
  * LIBXFDASHBOARD_CHECK_VERSION:

@@ -1,7 +1,7 @@
 /*
  * libxfdashboard: Maybe a Gnome shell like dashboard for Xfce
  *
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,13 +28,13 @@
 
 #include <libxfdashboard/action-button.h>
 #include <libxfdashboard/actor.h>
+#include <libxfdashboard/animation.h>
 #include <libxfdashboard/application-button.h>
 #include <libxfdashboard/application-database.h>
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/application-tracker.h>
 #include <libxfdashboard/applications-menu-model.h>
 #include <libxfdashboard/applications-search-provider.h>
 #include <libxfdashboard/applications-view.h>
-#include <libxfdashboard/application-tracker.h>
 #include <libxfdashboard/background.h>
 #include <libxfdashboard/binding.h>
 #include <libxfdashboard/bindings-pool.h>
@@ -42,8 +42,12 @@
 #include <libxfdashboard/button.h>
 #include <libxfdashboard/click-action.h>
 #include <libxfdashboard/collapse-box.h>
+#include <libxfdashboard/compat.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/css-selector.h>
+#include <libxfdashboard/debug.h>
 #include <libxfdashboard/desktop-app-info.h>
+#include <libxfdashboard/desktop-app-info-action.h>
 #include <libxfdashboard/drag-action.h>
 #include <libxfdashboard/drop-action.h>
 #include <libxfdashboard/dynamic-table-layout.h>
@@ -51,6 +55,7 @@
 #include <libxfdashboard/fill-box-layout.h>
 #include <libxfdashboard/focusable.h>
 #include <libxfdashboard/focus-manager.h>
+#include <libxfdashboard/gradient-color.h>
 #include <libxfdashboard/image-content.h>
 #include <libxfdashboard/label.h>
 #include <libxfdashboard/live-window.h>
@@ -59,10 +64,11 @@
 #include <libxfdashboard/model.h>
 #include <libxfdashboard/outline-effect.h>
 #include <libxfdashboard/plugin.h>
+#include <libxfdashboard/plugin-settings.h>
 #include <libxfdashboard/plugins-manager.h>
 #include <libxfdashboard/popup-menu.h>
-#include <libxfdashboard/popup-menu-item-button.h>
 #include <libxfdashboard/popup-menu-item.h>
+#include <libxfdashboard/popup-menu-item-button.h>
 #include <libxfdashboard/popup-menu-item-separator.h>
 #include <libxfdashboard/quicklaunch.h>
 #include <libxfdashboard/scaled-table-layout.h>
@@ -72,16 +78,19 @@
 #include <libxfdashboard/search-result-container.h>
 #include <libxfdashboard/search-result-set.h>
 #include <libxfdashboard/search-view.h>
+#include <libxfdashboard/settings.h>
 #include <libxfdashboard/stage.h>
 #include <libxfdashboard/stage-interface.h>
 #include <libxfdashboard/stylable.h>
 #include <libxfdashboard/text-box.h>
+#include <libxfdashboard/theme.h>
+#include <libxfdashboard/theme-animation.h>
 #include <libxfdashboard/theme-css.h>
 #include <libxfdashboard/theme-effects.h>
-#include <libxfdashboard/theme.h>
 #include <libxfdashboard/theme-layout.h>
 #include <libxfdashboard/toggle-button.h>
 #include <libxfdashboard/tooltip-action.h>
+#include <libxfdashboard/transition-group.h>
 #include <libxfdashboard/types.h>
 #include <libxfdashboard/utils.h>
 #include <libxfdashboard/version.h>
@@ -91,8 +100,8 @@
 #include <libxfdashboard/view-selector.h>
 #include <libxfdashboard/window-content.h>
 #include <libxfdashboard/windows-view.h>
-#include <libxfdashboard/window-tracker-backend.h>
 #include <libxfdashboard/window-tracker.h>
+#include <libxfdashboard/window-tracker-backend.h>
 #include <libxfdashboard/window-tracker-monitor.h>
 #include <libxfdashboard/window-tracker-window.h>
 #include <libxfdashboard/window-tracker-workspace.h>

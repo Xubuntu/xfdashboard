@@ -7,7 +7,7 @@
  *                 We only need to use #ifdefs in window tracker object
  *                 and nowhere else in the code.
  * 
- * Copyright 2012-2020 Stephan Haller <nomad@froevel.de>
+ * Copyright 2012-2021 Stephan Haller <nomad@froevel.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@
 #include <libxfdashboard/x11/window-tracker-window-x11.h>
 #include <libxfdashboard/x11/window-tracker-workspace-x11.h>
 #include <libxfdashboard/marshal.h>
-#include <libxfdashboard/application.h>
+#include <libxfdashboard/core.h>
 #include <libxfdashboard/compat.h>
 #include <libxfdashboard/debug.h>
 
@@ -73,8 +73,8 @@ struct _XfdashboardWindowTrackerX11Private
 	GList									*workspaces;
 	GList									*monitors;
 
-	XfdashboardApplication					*application;
-	gboolean								isAppSuspended;
+	XfdashboardCore							*core;
+	gboolean								isCoreSuspended;
 	guint									suspendSignalID;
 
 	WnckScreen								*screen;
@@ -124,7 +124,7 @@ static void _xfdashboard_window_tracker_x11_free_workspace(XfdashboardWindowTrac
 
 	priv=self->priv;
 
-#if DEBUG
+#ifdef DEBUG
 	/* There must be only one reference on that workspace object */
 	XFDASHBOARD_DEBUG(self, WINDOWS,
 						"Freeing workspace %s@%p named '%s' with ref-count=%d",
@@ -244,7 +244,7 @@ static void _xfdashboard_window_tracker_x11_free_window(XfdashboardWindowTracker
 
 	priv=self->priv;
 
-#if DEBUG
+#ifdef DEBUG
 	/* There must be only one reference on that window object */
 	XFDASHBOARD_DEBUG(self, WINDOWS,
 						"Freeing window %s@%p named '%s' with ref-count=%d",
@@ -430,7 +430,7 @@ static void _xfdashboard_window_tracker_x11_on_window_actions_changed(Xfdashboar
 {
 	XfdashboardWindowTrackerWindowX11		*window;
 	XfdashboardWindowTrackerWindowAction	newActions;
-	XfdashboardWindowTrackerWindowAction	changedActions;
+	G_GNUC_UNUSED XfdashboardWindowTrackerWindowAction	changedActions;
 
 	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER(self));
 	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW_X11(inUserData));
@@ -438,7 +438,7 @@ static void _xfdashboard_window_tracker_x11_on_window_actions_changed(Xfdashboar
 	window=XFDASHBOARD_WINDOW_TRACKER_WINDOW_X11(inUserData);
 
 	/* Debugging information */
-	newActions=xfdashboard_window_tracker_window_get_state(XFDASHBOARD_WINDOW_TRACKER_WINDOW(window));
+	newActions=xfdashboard_window_tracker_window_get_actions(XFDASHBOARD_WINDOW_TRACKER_WINDOW(window));
 	changedActions=inOldActions ^ newActions;
 	XFDASHBOARD_DEBUG(self, WINDOWS,
 						"Window '%s' changed actions from %u to %u with mask %u",
@@ -456,7 +456,7 @@ static void _xfdashboard_window_tracker_x11_on_window_state_changed(XfdashboardW
 {
 	XfdashboardWindowTrackerWindowX11		*window;
 	XfdashboardWindowTrackerWindowState		newState;
-	XfdashboardWindowTrackerWindowState		changedStates;
+	G_GNUC_UNUSED XfdashboardWindowTrackerWindowState		changedStates;
 
 	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER(self));
 	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER_WINDOW_X11(inUserData));
@@ -687,7 +687,7 @@ static void _xfdashboard_window_tracker_x11_on_window_opened(XfdashboardWindowTr
 	g_signal_connect_swapped(window, "geometry-changed", G_CALLBACK(_xfdashboard_window_tracker_x11_on_window_geometry_changed), self);
 
 	/* Block signal handler for 'geometry-changed' at window if application is suspended */
-	if(priv->isAppSuspended)
+	if(priv->isCoreSuspended)
 	{
 		g_signal_handlers_block_by_func(window, _xfdashboard_window_tracker_x11_on_window_geometry_changed, self);
 	}
@@ -1106,37 +1106,33 @@ static void _xfdashboard_window_tracker_x11_on_screen_size_changed(XfdashboardWi
 static void _xfdashboard_window_tracker_x11_on_window_manager_changed(XfdashboardWindowTrackerX11 *self,
 																		gpointer inUserData)
 {
-	XfdashboardWindowTrackerX11Private		*priv;
-
 	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER(self));
-
-	priv=self->priv;
 
 	/* Emit signal to tell that window manager has changed */
 	XFDASHBOARD_DEBUG(self, WINDOWS,
 						"Window manager changed to %s",
-						wnck_screen_get_window_manager_name(priv->screen));
+						wnck_screen_get_window_manager_name(self->priv->screen));
 	g_signal_emit_by_name(self, "window-manager-changed");
 }
 
 /* Suspension state of application changed */
-static void _xfdashboard_window_tracker_x11_on_application_suspended_changed(XfdashboardWindowTrackerX11 *self,
-																				GParamSpec *inSpec,
-																				gpointer inUserData)
+static void _xfdashboard_window_tracker_x11_on_core_suspended_changed(XfdashboardWindowTrackerX11 *self,
+																		GParamSpec *inSpec,
+																		gpointer inUserData)
 {
 	XfdashboardWindowTrackerX11Private		*priv;
-	XfdashboardApplication					*app;
+	XfdashboardCore							*core;
 	GList									*iter;
 	XfdashboardWindowTrackerWindow			*window;
 
 	g_return_if_fail(XFDASHBOARD_IS_WINDOW_TRACKER(self));
-	g_return_if_fail(XFDASHBOARD_IS_APPLICATION(inUserData));
+	g_return_if_fail(XFDASHBOARD_IS_CORE(inUserData));
 
 	priv=self->priv;
-	app=XFDASHBOARD_APPLICATION(inUserData);
+	core=XFDASHBOARD_CORE(inUserData);
 
 	/* Get application suspend state */
-	priv->isAppSuspended=xfdashboard_application_is_suspended(app);
+	priv->isCoreSuspended=xfdashboard_core_is_suspended(core);
 
 	/* Iterate through all windows and connect handler to signal 'geometry-changed'
 	 * if application was resumed or disconnect signal handler if it was suspended.
@@ -1148,7 +1144,7 @@ static void _xfdashboard_window_tracker_x11_on_application_suspended_changed(Xfd
 		if(!window) continue;
 
 		/* If application was suspended disconnect signal handlers ... */
-		if(priv->isAppSuspended)
+		if(priv->isCoreSuspended)
 		{
 			g_signal_handlers_block_by_func(window, _xfdashboard_window_tracker_x11_on_window_geometry_changed, self);
 		}
@@ -1673,10 +1669,10 @@ static void _xfdashboard_window_tracker_x11_dispose(GObject *inObject)
 	/* Dispose allocated resources */
 	if(priv->suspendSignalID)
 	{
-		if(priv->application)
+		if(priv->core)
 		{
-			g_signal_handler_disconnect(priv->application, priv->suspendSignalID);
-			priv->application=NULL;
+			g_signal_handler_disconnect(priv->core, priv->suspendSignalID);
+			priv->core=NULL;
 		}
 
 		priv->suspendSignalID=0;
@@ -1945,13 +1941,13 @@ void xfdashboard_window_tracker_x11_init(XfdashboardWindowTrackerX11 *self)
 	}
 #endif
 
-	/* Handle suspension signals from application */
-	priv->application=xfdashboard_application_get_default();
-	priv->suspendSignalID=g_signal_connect_swapped(priv->application,
+	/* Handle suspension signals from core */
+	priv->core=xfdashboard_core_get_default();
+	priv->suspendSignalID=g_signal_connect_swapped(priv->core,
 													"notify::is-suspended",
-													G_CALLBACK(_xfdashboard_window_tracker_x11_on_application_suspended_changed),
+													G_CALLBACK(_xfdashboard_window_tracker_x11_on_core_suspended_changed),
 													self);
-	priv->isAppSuspended=xfdashboard_application_is_suspended(priv->application);
+	priv->isCoreSuspended=xfdashboard_core_is_suspended(priv->core);
 }
 
 
@@ -2138,4 +2134,28 @@ XfdashboardWindowTrackerWorkspace* xfdashboard_window_tracker_x11_get_workspace_
 	/* Lookup workspace object for requested wnck workspace and return it */
 	workspace=_xfdashboard_window_tracker_x11_get_workspace_for_wnck(self, inWorkspace);
 	return(XFDASHBOARD_WINDOW_TRACKER_WORKSPACE(workspace));
+}
+
+/* Get X server display but returns None if not determinable */
+Display* xfdashboard_window_tracker_x11_get_display(void)
+{
+	Display			*display;
+
+	display=None;
+
+#ifdef CLUTTER_WINDOWING_X11
+	if(clutter_check_windowing_backend(CLUTTER_WINDOWING_X11))
+	{
+		display=clutter_x11_get_default_display();
+	}
+#endif
+
+#ifdef CLUTTER_WINDOWING_GDK
+	if(clutter_check_windowing_backend(CLUTTER_WINDOWING_GDK))
+	{
+		display=gdk_x11_display_get_xdisplay(clutter_gdk_get_default_display());
+	}
+#endif
+
+	return(display);
 }
