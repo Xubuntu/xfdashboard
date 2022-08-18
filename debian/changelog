@@ -1,3 +1,14 @@
+xfdashboard (1.0.0-0ubuntu1) devel; urgency=medium
+
+  * New upstream version 1.0.0.
+  * d/libxfdashboard0.symbols: Update symbols for new release.
+  * d/rules: Bump DH compat to 13.
+  * d/copyright: Update years.
+  * d/rules: Drop _dhautoreconf, dh_installchangelogs and dh_missing overrides.
+  * Update Standards-Version to 4.6.1.
+
+ -- Unit 193 <unit193@ubuntu.com>  Thu, 18 Aug 2022 18:19:58 -0400
+
 xfdashboard (0.8.1-0ubuntu1) devel; urgency=medium
 
   * d/watch: Only track stable releases.
