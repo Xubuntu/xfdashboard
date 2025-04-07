@@ -1,3 +1,13 @@
+xfdashboard (1.0.0-0ubuntu4) plucky; urgency=medium
+
+  * d/control:
+    - Correct B-D, libgarcon-1-0-dev → libgarcon-1-dev. (LP: #2106235)
+    - Update B-D, pkg-config → pkgconf.
+  * d/copyright: Bump years.
+  * Update Standards-Version to 4.7.2.
+
+ -- Unit 193 <unit193@ubuntu.com>  Mon, 07 Apr 2025 02:41:53 -0400
+
 xfdashboard (1.0.0-0ubuntu3) noble; urgency=medium
 
   * No-change rebuild for CVE-2024-3094
